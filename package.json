@@ -1,0 +1,19 @@
+{
+    "name": "warzone-ticketing-system",
+    "version": "1.0.0",
+    "description": "Warzone Ticketing System - A professional ticketing system built with Laravel",
+    "private": true,
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview"
+    },
+    "devDependencies": {
+        "axios": "^1.1.2",
+        "laravel-vite-plugin": "^2.0.1",
+        "vite": "^7.1.9"
+    },
+    "dependencies": {
+        "jquery": "^3.7.1"
+    }
+}

@@ -12,6 +12,11 @@ class DashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
+        
+        // Redirect administrators to admin dashboard
+        if ($user->role === 'Administrator') {
+            return redirect()->route('admin.dashboard');
+        }
 
         return view('dashboard', compact('user'));
     }

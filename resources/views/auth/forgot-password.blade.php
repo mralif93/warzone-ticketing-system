@@ -1,89 +1,118 @@
-@extends('layouts.app')
+@extends('layouts.public')
+
+@section('title', 'Forgot Password')
+@section('description', 'Reset your Warzone World Championship account password to regain access to your account.')
 
 @section('content')
-<div class="min-h-screen flex items-center justify-center gradient-bg py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
-        <div>
-            <div class="mx-auto h-20 w-20 flex items-center justify-center rounded-full bg-white shadow-lg">
-                <svg class="h-10 w-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
-                </svg>
-            </div>
-            <h2 class="mt-6 text-center text-3xl font-extrabold text-white">
+<!-- Hero Section -->
+<div class="bg-gradient-to-r from-wwc-primary to-wwc-primary-dark">
+    <div class="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+            <h1 class="text-4xl md:text-5xl font-bold text-white font-display mb-6">
                 Forgot Password?
-            </h2>
-            <p class="mt-2 text-center text-sm text-indigo-100">
-                No worries! Enter your email and we'll send you a reset link.
+            </h1>
+            <p class="text-xl text-wwc-primary-light max-w-3xl mx-auto">
+                No worries! Enter your email address and we'll send you a secure reset link.
             </p>
         </div>
-        
-        <form class="mt-8 space-y-6" method="POST" action="{{ route('forgot-password') }}">
-            @csrf
-            <div class="bg-white rounded-xl card-shadow p-8">
-                <div class="space-y-6">
-                    @if (session('status'))
-                        <div class="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg">
-                            {{ session('status') }}
-                        </div>
-                    @endif
+    </div>
+</div>
 
-                    @if ($errors->any())
-                        <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
-                            <ul class="list-disc list-inside">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
+<!-- Forgot Password Form Section -->
+<div class="py-16 bg-white">
+    <div class="max-w-md mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-2xl shadow-lg border border-wwc-neutral-200 p-8">
+            <form method="POST" action="{{ route('forgot-password') }}" class="space-y-6">
+                @csrf
+                
+                @if (session('status'))
+                    <div class="bg-wwc-success-light border border-wwc-success text-wwc-success px-4 py-3 rounded-lg">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-wwc-success" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium">{{ session('status') }}</p>
+                            </div>
                         </div>
-                    @endif
-
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-                            Email Address
-                        </label>
-                        <input id="email" name="email" type="email" autocomplete="email" required 
-                               value="{{ old('email') }}"
-                               class="form-input appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm @error('email') border-red-500 @enderror" 
-                               placeholder="Enter your email address">
-                        @error('email')
-                            <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
-                        @enderror
                     </div>
+                @endif
+
+                @if ($errors->any())
+                    <div class="bg-wwc-error-light border border-wwc-error text-wwc-error px-4 py-3 rounded-lg">
+                        <ul class="list-disc list-inside text-sm">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <div>
+                    <label for="email" class="block text-sm font-medium text-wwc-neutral-700 mb-2">
+                        Email Address
+                    </label>
+                    <input type="email" 
+                           id="email" 
+                           name="email" 
+                           value="{{ old('email') }}"
+                           class="w-full px-4 py-3 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-transparent @error('email') border-wwc-error @enderror"
+                           placeholder="Enter your email address"
+                           required 
+                           autofocus>
+                    @error('email')
+                        <p class="mt-1 text-sm text-wwc-error">{{ $message }}</p>
+                    @enderror
                 </div>
 
-                <div class="mt-6">
-                    <button type="submit" 
-                            class="btn-primary group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-                            <svg class="h-5 w-5 text-indigo-500 group-hover:text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
-                                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+                <div class="bg-wwc-neutral-50 rounded-lg p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-wwc-primary" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
                             </svg>
-                        </span>
-                        Send Reset Link
-                    </button>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-wwc-neutral-800">
+                                What happens next?
+                            </h3>
+                            <div class="mt-2 text-sm text-wwc-neutral-600">
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>We'll send a secure reset link to your email</li>
+                                    <li>Click the link to create a new password</li>
+                                    <li>Sign in with your new password</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" 
+                        class="w-full bg-wwc-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-wwc-primary-dark transition-colors duration-200 focus:ring-2 focus:ring-wwc-primary focus:ring-offset-2">
+                    Send Reset Link
+                </button>
+            </form>
+
+            <div class="mt-6">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-wwc-neutral-300"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-white text-wwc-neutral-500">Remember your password?</span>
+                    </div>
                 </div>
 
                 <div class="mt-6">
-                    <div class="relative">
-                        <div class="absolute inset-0 flex items-center">
-                            <div class="w-full border-t border-gray-300"></div>
-                        </div>
-                        <div class="relative flex justify-center text-sm">
-                            <span class="px-2 bg-white text-gray-500">Remember your password?</span>
-                        </div>
-                    </div>
-
-                    <div class="mt-6">
-                        <a href="{{ route('login') }}" 
-                           class="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
-                            Back to Sign In
-                        </a>
-                    </div>
+                    <a href="{{ route('login') }}" 
+                       class="w-full flex justify-center py-3 px-4 border border-wwc-neutral-300 rounded-lg shadow-sm bg-white text-sm font-medium text-wwc-neutral-700 hover:bg-wwc-neutral-50 transition-colors duration-200">
+                        Back to Sign In
+                    </a>
                 </div>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 @endsection
-

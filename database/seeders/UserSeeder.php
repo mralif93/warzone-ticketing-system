@@ -19,14 +19,58 @@ class UserSeeder extends Seeder
             'email' => 'admin@warzone.com',
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
+            'role' => 'Administrator',
+            'address_line_1' => '123 Admin Street',
+            'city' => 'Admin City',
+            'state' => 'AC',
+            'postcode' => '12345',
+            'country' => 'USA',
+            'phone_number' => '555-0001',
         ]);
 
-        // Create support agent
+        // Create gate staff
         User::create([
-            'name' => 'Support Agent',
+            'name' => 'Gate Staff',
+            'email' => 'gate@warzone.com',
+            'password' => Hash::make('password123'),
+            'email_verified_at' => now(),
+            'role' => 'Gate Staff',
+            'address_line_1' => '456 Gate Avenue',
+            'city' => 'Staff City',
+            'state' => 'SC',
+            'postcode' => '54321',
+            'country' => 'USA',
+            'phone_number' => '555-0002',
+        ]);
+
+        // Create counter staff
+        User::create([
+            'name' => 'Counter Staff',
+            'email' => 'counter@warzone.com',
+            'password' => Hash::make('password123'),
+            'email_verified_at' => now(),
+            'role' => 'Counter Staff',
+            'address_line_1' => '789 Counter Blvd',
+            'city' => 'Staff City',
+            'state' => 'SC',
+            'postcode' => '54321',
+            'country' => 'USA',
+            'phone_number' => '555-0003',
+        ]);
+
+        // Create support staff
+        User::create([
+            'name' => 'Support Staff',
             'email' => 'support@warzone.com',
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
+            'role' => 'Support Staff',
+            'address_line_1' => '321 Support Lane',
+            'city' => 'Staff City',
+            'state' => 'SC',
+            'postcode' => '54321',
+            'country' => 'USA',
+            'phone_number' => '555-0004',
         ]);
 
         // Create regular users
@@ -35,6 +79,13 @@ class UserSeeder extends Seeder
             'email' => 'john.doe@example.com',
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
+            'role' => 'Customer',
+            'address_line_1' => '100 Customer Street',
+            'city' => 'Customer City',
+            'state' => 'CC',
+            'postcode' => '11111',
+            'country' => 'USA',
+            'phone_number' => '555-1001',
         ]);
 
         User::create([
@@ -42,6 +93,7 @@ class UserSeeder extends Seeder
             'email' => 'jane.smith@example.com',
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
+            'role' => 'Customer',
         ]);
 
         User::create([
@@ -49,6 +101,7 @@ class UserSeeder extends Seeder
             'email' => 'mike.johnson@example.com',
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
+            'role' => 'Customer',
         ]);
 
         User::create([
@@ -56,6 +109,7 @@ class UserSeeder extends Seeder
             'email' => 'sarah.wilson@example.com',
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
+            'role' => 'Customer',
         ]);
 
         User::create([
@@ -63,6 +117,7 @@ class UserSeeder extends Seeder
             'email' => 'david.brown@example.com',
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
+            'role' => 'Customer',
         ]);
 
         User::create([
@@ -70,6 +125,7 @@ class UserSeeder extends Seeder
             'email' => 'lisa.davis@example.com',
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
+            'role' => 'Customer',
         ]);
 
         User::create([
@@ -77,6 +133,7 @@ class UserSeeder extends Seeder
             'email' => 'tom.miller@example.com',
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
+            'role' => 'Customer',
         ]);
 
         User::create([
@@ -84,6 +141,7 @@ class UserSeeder extends Seeder
             'email' => 'emma.garcia@example.com',
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
+            'role' => 'Customer',
         ]);
 
         // Create unverified user for testing
@@ -92,6 +150,7 @@ class UserSeeder extends Seeder
             'email' => 'unverified@example.com',
             'password' => Hash::make('password123'),
             'email_verified_at' => null,
+            'role' => 'Customer',
         ]);
     }
 }

@@ -1,0 +1,661 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use App\Models\Event;
+use App\Models\Order;
+use App\Models\Ticket;
+use App\Models\Payment;
+use App\Models\AuditLog;
+use App\Models\Seat;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+
+class AdminController extends Controller
+{
+    /**
+     * Get database-agnostic date format for grouping
+     */
+    private function getDateGroupFormat($column = 'created_at', $format = 'Y-m')
+    {
+        $driver = config('database.default');
+        
+        if ($driver === 'sqlite') {
+            return DB::raw("strftime('%Y-%m', {$column}) as date_group");
+        } else {
+            return DB::raw("DATE_FORMAT({$column}, '%Y-%m') as date_group");
+        }
+    }
+
+    /**
+     * Get database-agnostic date format for daily grouping
+     */
+    private function getDailyDateGroupFormat($column = 'created_at')
+    {
+        $driver = config('database.default');
+        
+        if ($driver === 'sqlite') {
+            return DB::raw("date({$column}) as date_group");
+        } else {
+            return DB::raw("DATE({$column}) as date_group");
+        }
+    }
+
+    /**
+     * Get revenue data using Laravel's collection methods (database agnostic)
+     */
+    private function getRevenueData($dateFrom, $dateTo)
+    {
+        return Payment::where('status', 'Completed')
+            ->whereBetween('created_at', [$dateFrom, $dateTo])
+            ->get()
+            ->groupBy(function($payment) {
+                return $payment->created_at->format('Y-m-d');
+            })
+            ->map(function($payments, $date) {
+                return [
+                    'date' => $date,
+                    'total' => $payments->sum('amount')
+                ];
+            })
+            ->values();
+    }
+
+    /**
+     * Get user registration data using Laravel's collection methods (database agnostic)
+     */
+    private function getUserRegistrationData($dateFrom, $dateTo)
+    {
+        return User::whereBetween('created_at', [$dateFrom, $dateTo])
+            ->get()
+            ->groupBy(function($user) {
+                return $user->created_at->format('Y-m-d');
+            })
+            ->map(function($users, $date) {
+                return [
+                    'date' => $date,
+                    'count' => $users->count()
+                ];
+            })
+            ->values();
+    }
+    /**
+     * Show admin dashboard with comprehensive statistics
+     */
+    public function dashboard()
+    {
+        // Get comprehensive statistics
+        $stats = [
+            'total_users' => User::count(),
+            'total_events' => Event::count(),
+            'events_on_sale' => Event::where('status', 'On Sale')->count(),
+            'events_draft' => Event::where('status', 'Draft')->count(),
+            'events_sold_out' => Event::where('status', 'Sold Out')->count(),
+            'total_orders' => Order::count(),
+            'total_tickets_sold' => Ticket::where('status', 'Sold')->count(),
+            'total_tickets_held' => Ticket::where('status', 'Held')->count(),
+            'total_revenue' => Payment::where('status', 'Completed')->sum('amount'),
+            'pending_orders' => Order::where('status', 'Pending')->count(),
+            'completed_orders' => Order::where('status', 'Paid')->count(),
+            'total_seats' => Seat::count(),
+            'available_seats' => Seat::where('status', 'Available')->count(),
+        ];
+
+        // Get recent activity
+        $recentOrders = Order::with(['user', 'tickets'])
+            ->latest()
+            ->limit(5)
+            ->get();
+
+        $recentTickets = Ticket::with(['order.user', 'event', 'seat'])
+            ->latest()
+            ->limit(10)
+            ->get();
+
+        $recentAuditLogs = AuditLog::with('user')
+            ->latest()
+            ->limit(10)
+            ->get();
+
+        // Get user role distribution
+        $userRoles = User::select('role', DB::raw('count(*) as count'))
+            ->groupBy('role')
+            ->get();
+
+        // Get event status distribution
+        $eventStatuses = Event::select('status', DB::raw('count(*) as count'))
+            ->groupBy('status')
+            ->get();
+
+        // Get revenue by month (last 6 months) - Database agnostic
+        $revenueByMonth = Payment::select(
+                $this->getDateGroupFormat('created_at'),
+                DB::raw('SUM(amount) as total')
+            )
+            ->where('status', 'Completed')
+            ->where('created_at', '>=', now()->subMonths(6))
+            ->groupBy('date_group')
+            ->orderBy('date_group')
+            ->get();
+
+        $user = Auth::user();
+
+        return view('admin.dashboard', compact(
+            'stats',
+            'recentOrders',
+            'recentTickets',
+            'recentAuditLogs',
+            'userRoles',
+            'eventStatuses',
+            'revenueByMonth',
+            'user'
+        ));
+    }
+
+    /**
+     * Show user management page
+     */
+    public function users(Request $request)
+    {
+        $query = User::query();
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('role', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by role
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+
+        $users = $query->withCount(['orders', 'tickets'])
+            ->paginate(15);
+
+        $roles = User::select('role')->distinct()->pluck('role');
+
+        return view('admin.users.index', compact('users', 'roles'));
+    }
+
+    /**
+     * Show user details
+     */
+    public function showUser(User $user)
+    {
+        $user->loadCount(['orders', 'tickets']);
+        $user->load(['orders.tickets', 'auditLogs']);
+
+        return view('admin.users.show', compact('user'));
+    }
+
+    /**
+     * Show create user form
+     */
+    public function createUser()
+    {
+        return view('admin.users.create');
+    }
+
+    /**
+     * Store new user
+     */
+    public function storeUser(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
+            'role' => 'required|in:Administrator,Gate Staff,Counter Staff,Support Staff,Customer',
+            'phone_number' => 'nullable|string|max:20',
+            'address_line_1' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'postcode' => 'nullable|string|max:20',
+            'country' => 'nullable|string|max:100',
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => $request->role,
+            'phone_number' => $request->phone_number,
+            'address_line_1' => $request->address_line_1,
+            'city' => $request->city,
+            'state' => $request->state,
+            'postcode' => $request->postcode,
+            'country' => $request->country,
+            'email_verified_at' => now(),
+        ]);
+
+        // Log the user creation
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'CREATE',
+            'table_name' => 'users',
+            'record_id' => $user->id,
+            'old_values' => null,
+            'new_values' => $user->toArray(),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return redirect()->route('admin.users.show', $user)
+            ->with('success', 'User created successfully!');
+    }
+
+    /**
+     * Show edit user form
+     */
+    public function editUser(User $user)
+    {
+        return view('admin.users.edit', compact('user'));
+    }
+
+    /**
+     * Update user
+     */
+    public function updateUser(Request $request, User $user)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'role' => 'required|in:Administrator,Gate Staff,Counter Staff,Support Staff,Customer',
+            'phone_number' => 'nullable|string|max:20',
+            'address_line_1' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'postcode' => 'nullable|string|max:20',
+            'country' => 'nullable|string|max:100',
+        ]);
+
+        $oldValues = $user->toArray();
+
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'role' => $request->role,
+            'phone_number' => $request->phone_number,
+            'address_line_1' => $request->address_line_1,
+            'city' => $request->city,
+            'state' => $request->state,
+            'postcode' => $request->postcode,
+            'country' => $request->country,
+        ]);
+
+        // Log the user update
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'UPDATE',
+            'table_name' => 'users',
+            'record_id' => $user->id,
+            'old_values' => $oldValues,
+            'new_values' => $user->toArray(),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return redirect()->route('admin.users.show', $user)
+            ->with('success', 'User updated successfully!');
+    }
+
+    /**
+     * Delete user
+     */
+    public function deleteUser(User $user)
+    {
+        // Prevent deleting the last admin
+        if ($user->role === 'Administrator' && User::where('role', 'Administrator')->count() <= 1) {
+            return back()->withErrors(['error' => 'Cannot delete the last administrator.']);
+        }
+
+        // Check if user has orders
+        if ($user->orders()->count() > 0) {
+            return back()->withErrors(['error' => 'Cannot delete user with existing orders.']);
+        }
+
+        $oldValues = $user->toArray();
+        $userName = $user->name;
+
+        $user->delete();
+
+        // Log the user deletion
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'DELETE',
+            'table_name' => 'users',
+            'record_id' => $user->id,
+            'old_values' => $oldValues,
+            'new_values' => null,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+        ]);
+
+        return redirect()->route('admin.users')
+            ->with('success', "User '{$userName}' deleted successfully!");
+    }
+
+    /**
+     * Show orders management page
+     */
+    public function orders(Request $request)
+    {
+        $query = Order::with(['user', 'tickets']);
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('order_number', 'like', "%{$search}%")
+                  ->orWhere('customer_email', 'like', "%{$search}%")
+                  ->orWhereHas('user', function($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $orders = $query->latest()->paginate(15);
+        $statuses = Order::select('status')->distinct()->pluck('status');
+
+        return view('admin.orders.index', compact('orders', 'statuses'));
+    }
+
+    /**
+     * Show order details
+     */
+    public function showOrder(Order $order)
+    {
+        $order->load(['user', 'tickets.seat', 'tickets.event', 'payments']);
+
+        return view('admin.orders.show', compact('order'));
+    }
+
+    /**
+     * Show tickets management page
+     */
+    public function tickets(Request $request)
+    {
+        $query = Ticket::with(['order.user', 'event', 'seat']);
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('qrcode', 'like', "%{$search}%")
+                  ->orWhereHas('order.user', function($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('event', function($eventQuery) use ($search) {
+                      $eventQuery->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $tickets = $query->latest()->paginate(15);
+        $statuses = Ticket::select('status')->distinct()->pluck('status');
+
+        return view('admin.tickets.index', compact('tickets', 'statuses'));
+    }
+
+    /**
+     * Show ticket details
+     */
+    public function showTicket(Ticket $ticket)
+    {
+        $ticket->load(['order.user', 'event', 'seat', 'admittanceLogs.staffUser']);
+
+        return view('admin.tickets.show', compact('ticket'));
+    }
+
+    /**
+     * Show audit logs
+     */
+    public function auditLogs(Request $request)
+    {
+        $query = AuditLog::with('user');
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('action', 'like', "%{$search}%")
+                  ->orWhere('table_name', 'like', "%{$search}%")
+                  ->orWhereHas('user', function($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Filter by action
+        if ($request->filled('action')) {
+            $query->where('action', $request->action);
+        }
+
+        $auditLogs = $query->latest()->paginate(20);
+        $actions = AuditLog::select('action')->distinct()->pluck('action');
+
+        return view('admin.audit-logs.index', compact('auditLogs', 'actions'));
+    }
+
+    /**
+     * Show reports page
+     */
+    public function reports(Request $request)
+    {
+        $dateFrom = $request->get('date_from', now()->subMonth()->format('Y-m-d'));
+        $dateTo = $request->get('date_to', now()->format('Y-m-d'));
+
+        // Revenue report - Database agnostic using collections
+        $revenueData = $this->getRevenueData($dateFrom, $dateTo);
+        $totalRevenue = $revenueData->sum('total');
+
+        // Ticket sales by event
+        $ticketSalesByEvent = Ticket::where('status', 'Sold')
+            ->whereBetween('created_at', [$dateFrom, $dateTo])
+            ->with('event')
+            ->get()
+            ->groupBy('event.name')
+            ->map(function($tickets, $eventName) {
+                $event = $tickets->first()->event;
+                return (object)[
+                    'title' => $eventName,
+                    'event_date' => $event->date_time,
+                    'count' => $tickets->count(),
+                    'revenue' => $tickets->sum('price_paid')
+                ];
+            })->values();
+
+        // User registration report - Database agnostic using collections
+        $userRegistrations = $this->getUserRegistrationData($dateFrom, $dateTo);
+
+        // User distribution by role
+        $usersByRole = User::selectRaw('role, COUNT(*) as count')
+            ->groupBy('role')
+            ->orderBy('count', 'desc')
+            ->get();
+
+        // Top customers by spending
+        $topCustomers = User::withCount('orders')
+            ->withSum('orders', 'total_amount')
+            ->get()
+            ->filter(function($user) {
+                return $user->orders_sum_total_amount > 0;
+            })
+            ->sortByDesc('orders_sum_total_amount')
+            ->take(10);
+
+        return view('admin.reports.index', compact(
+            'revenueData',
+            'ticketSalesByEvent',
+            'userRegistrations',
+            'topCustomers',
+            'usersByRole',
+            'totalRevenue',
+            'dateFrom',
+            'dateTo'
+        ));
+    }
+
+    // Event Management
+    public function events(Request $request)
+    {
+        $query = Event::query();
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('venue', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Filter by date range
+        if ($request->filled('date_from')) {
+            $query->where('date_time', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->where('date_time', '<=', $request->date_to . ' 23:59:59');
+        }
+
+        $events = $query->withCount('tickets')->latest()->paginate(15);
+        $statuses = Event::select('status')->distinct()->pluck('status');
+
+        return view('admin.events.index', compact('events', 'statuses'));
+    }
+
+    public function createEvent()
+    {
+        return view('admin.events.create');
+    }
+
+    public function storeEvent(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'date_time' => 'required|date|after:now',
+            'venue' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'max_tickets_per_order' => 'required|integer|min:1|max:20',
+        ]);
+
+        Event::create($request->all());
+
+        return redirect()->route('admin.events.index')->with('success', 'Event created successfully.');
+    }
+
+    public function showEvent(Event $event)
+    {
+        $event->loadCount('tickets');
+        $recentTickets = $event->tickets()->with('order.user', 'seat')->latest()->take(10)->get();
+        
+        $ticketStats = [
+            'total_capacity' => 7000,
+            'tickets_sold' => $event->tickets()->where('status', 'Sold')->count(),
+            'tickets_held' => $event->tickets()->where('status', 'Held')->count(),
+            'tickets_available' => 7000 - $event->tickets()->whereIn('status', ['Sold', 'Held'])->count(),
+        ];
+        
+        $ticketStats['sold_percentage'] = $ticketStats['total_capacity'] > 0 
+            ? round(($ticketStats['tickets_sold'] / $ticketStats['total_capacity']) * 100, 2) 
+            : 0;
+
+        return view('admin.events.show', compact('event', 'recentTickets', 'ticketStats'));
+    }
+
+    public function editEvent(Event $event)
+    {
+        return view('admin.events.edit', compact('event'));
+    }
+
+    public function updateEvent(Request $request, Event $event)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'date_time' => 'required|date|after:now',
+            'venue' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'max_tickets_per_order' => 'required|integer|min:1|max:20',
+        ]);
+
+        $event->update($request->all());
+
+        return redirect()->route('admin.events.show', $event)->with('success', 'Event updated successfully.');
+    }
+
+    public function deleteEvent(Event $event)
+    {
+        // Check if event has tickets
+        if ($event->tickets()->count() > 0) {
+            return back()->withErrors(['error' => 'Cannot delete event with existing tickets.']);
+        }
+
+        $eventName = $event->name;
+        $event->delete();
+
+        return redirect()->route('admin.events.index')
+            ->with('success', "Event '{$eventName}' deleted successfully!");
+    }
+
+    public function changeEventStatus(Request $request, Event $event)
+    {
+        $request->validate([
+            'status' => 'required|in:Draft,On Sale,Sold Out,Cancelled'
+        ]);
+
+        $event->update(['status' => $request->status]);
+
+        return back()->with('success', 'Event status updated successfully.');
+    }
+
+    /**
+     * Show system settings
+     */
+    public function settings()
+    {
+        return view('admin.settings.index');
+    }
+
+    /**
+     * Update system settings
+     */
+    public function updateSettings(Request $request)
+    {
+        $request->validate([
+            'site_name' => 'required|string|max:255',
+            'site_email' => 'required|email',
+            'max_tickets_per_order' => 'required|integer|min:1|max:20',
+            'seat_hold_duration' => 'required|integer|min:5|max:30',
+            'service_fee_percentage' => 'required|numeric|min:0|max:100',
+            'tax_percentage' => 'required|numeric|min:0|max:100',
+        ]);
+
+        // Update settings (you would typically store these in a settings table or config)
+        // For now, we'll just show a success message
+        return back()->with('success', 'Settings updated successfully!');
+    }
+}

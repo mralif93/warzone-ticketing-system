@@ -20,7 +20,7 @@
         <!-- Filters -->
         <div class="bg-white shadow rounded-lg mb-6">
             <div class="px-4 py-5 sm:p-6">
-                <form method="GET" action="{{ route('admin.orders') }}" class="grid grid-cols-1 gap-4 sm:grid-cols-4">
+                <form method="GET" action="{{ route('admin.orders.index') }}" class="grid grid-cols-1 gap-4 sm:grid-cols-4">
                     <div>
                         <label for="search" class="block text-sm font-medium text-gray-700">Search</label>
                         <input type="text" name="search" id="search" value="{{ request('search') }}"

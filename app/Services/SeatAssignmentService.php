@@ -403,7 +403,12 @@ class SeatAssignmentService
      */
     public function getPriceZoneAvailability(Event $event): array
     {
-        $priceZones = ['VIP', 'Premium', 'Standard', 'Economy'];
+        // Get all active price zones from the price_zones table, ordered by sort_order and price
+        $priceZones = \App\Models\PriceZone::active()
+            ->ordered()
+            ->pluck('name')
+            ->toArray();
+        
         $availability = [];
 
         foreach ($priceZones as $zone) {

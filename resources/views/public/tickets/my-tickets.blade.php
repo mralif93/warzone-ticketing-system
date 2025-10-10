@@ -32,7 +32,7 @@
                                     <div class="flex items-center space-x-4">
                                         <div class="flex-shrink-0">
                                             <div class="h-16 w-16 bg-indigo-100 rounded-lg flex items-center justify-center">
-                                                <i class='bx bx-ticket text-3xl text-indigo-600'></i>
+                                                <i class='bx bx-receipt text-3xl text-indigo-600'></i>
                                             </div>
                                         </div>
                                         <div class="flex-1">
@@ -41,7 +41,7 @@
                                             <p class="text-sm text-gray-500">Seat: {{ $ticket->seat_identifier }} • {{ $ticket->seat->price_zone }}</p>
                                         </div>
                                         <div class="text-right">
-                                            <div class="text-lg font-bold text-indigo-600">${{ number_format($ticket->price_paid, 2) }}</div>
+                                            <div class="text-lg font-bold text-indigo-600">RM{{ number_format($ticket->price_paid, 0) }}</div>
                                             <div class="text-sm text-gray-500">Ticket #{{ $ticket->id }}</div>
                                             <div class="mt-1">
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
@@ -73,7 +73,7 @@
                 </div>
             @else
                 <div class="text-center py-12">
-                    <i class='bx bx-ticket text-4xl text-gray-400 mx-auto'></i>
+                    <i class='bx bx-receipt text-4xl text-gray-400 mx-auto'></i>
                     <h3 class="mt-2 text-sm font-medium text-gray-900">No tickets found</h3>
                     <p class="mt-1 text-sm text-gray-500">You haven't purchased any tickets yet.</p>
                     <div class="mt-6">

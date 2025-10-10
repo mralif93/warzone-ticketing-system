@@ -112,7 +112,7 @@
                         @if($event->status === 'On Sale')
                             <a href="{{ route('public.events.show', $event) }}" 
                                class="w-full inline-flex justify-center items-center px-4 py-3 border border-transparent shadow-sm text-sm font-semibold rounded-2xl text-white bg-wwc-primary hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
-                                <i class='bx bx-ticket text-sm mr-2'></i>
+                                <i class='bx bx-receipt text-sm mr-2'></i>
                                 Get Tickets
                             </a>
                         @elseif($event->status === 'Sold Out')

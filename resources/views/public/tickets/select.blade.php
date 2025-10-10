@@ -14,18 +14,6 @@
         </div>
     @endif
 
-    <!-- Authentication Required Notice -->
-    @guest
-    <div class="bg-amber-50 border-l-4 border-amber-400 text-amber-800 px-6 py-4 mx-4 mt-4">
-        <div class="flex items-center">
-            <i class='bx bx-info-circle text-xl mr-3'></i>
-            <div>
-                <span class="font-medium">Authentication Required:</span>
-                <span class="ml-2">You need to <a href="{{ route('login') }}" class="underline hover:no-underline font-medium">sign in</a> or <a href="{{ route('register') }}" class="underline hover:no-underline font-medium">create an account</a> to purchase tickets.</span>
-            </div>
-        </div>
-    </div>
-    @endguest
 
     <!-- Simple Header -->
     <div class="bg-white border-b border-gray-200">
@@ -68,31 +56,127 @@
                         <p class="text-sm text-gray-600 mt-1">Select your preferred seating zone. Specific seats will be assigned when you arrive at the venue.</p>
                     </div>
                     <div class="p-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            @foreach($priceZoneAvailability as $zone => $stats)
-                                <div class="price-zone-option group border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-wwc-primary hover:shadow-md transition-all duration-200" 
-                                     data-zone="{{ $zone }}" 
-                                     data-available="{{ $stats['available'] }}"
-                                     data-price="{{ \App\Models\Seat::where('price_zone', $zone)->first()->base_price ?? 0 }}">
-                                    <div class="flex justify-between items-start">
-                                        <div class="flex-1">
-                                            <div class="flex items-center justify-between mb-3">
-                                                <h3 class="text-lg font-semibold text-gray-900 group-hover:text-wwc-primary transition-colors duration-200">{{ $zone }}</h3>
-                                                <span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">{{ number_format($stats['available']) }} available</span>
+                        @php
+                            // Group price zones by category
+                            $premiumZones = [];
+                            $levelZones = [];
+                            $standingZones = [];
+                            
+                            foreach($priceZoneAvailability as $zone => $stats) {
+                                if (str_contains($zone, 'Exclusive') || str_contains($zone, 'VIP') || str_contains($zone, 'Grandstand') || str_contains($zone, 'Premium Ringside')) {
+                                    $premiumZones[$zone] = $stats;
+                                } elseif (str_contains($zone, 'Level')) {
+                                    $levelZones[$zone] = $stats;
+                                } elseif (str_contains($zone, 'Standing')) {
+                                    $standingZones[$zone] = $stats;
+                                }
+                            }
+                        @endphp
+
+                        <!-- Premium Categories -->
+                        @if(!empty($premiumZones))
+                        <div class="mb-8">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <i class='bx bx-crown text-wwc-primary mr-2'></i>
+                                Premium Categories
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                @foreach($premiumZones as $zone => $stats)
+                                    <div class="price-zone-option group border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-wwc-primary hover:shadow-md transition-all duration-200" 
+                                         data-zone="{{ $zone }}" 
+                                         data-available="{{ $stats['available'] }}"
+                                         data-price="{{ \App\Models\Seat::where('price_zone', $zone)->first()->base_price ?? 0 }}">
+                                        <div class="flex justify-between items-start">
+                                            <div class="flex-1">
+                                                <div class="flex items-center justify-between mb-3">
+                                                    <h4 class="text-lg font-semibold text-gray-900 group-hover:text-wwc-primary transition-colors duration-200">{{ $zone }}</h4>
+                                                    <span class="px-2 py-1 bg-amber-100 text-amber-800 text-xs font-medium rounded-full">{{ number_format($stats['available']) }} available</span>
+                                                </div>
+                                                <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                                                    <div class="bg-wwc-primary h-2 rounded-full transition-all duration-300" style="width: {{ 100 - $stats['sold_percentage'] }}%"></div>
+                                                </div>
+                                                <p class="text-xs text-gray-500">{{ $stats['sold_percentage'] }}% sold</p>
                                             </div>
-                                            <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
-                                                <div class="bg-wwc-primary h-2 rounded-full transition-all duration-300" style="width: {{ 100 - $stats['sold_percentage'] }}%"></div>
+                                            <div class="text-right ml-4">
+                                                <div class="text-2xl font-bold text-wwc-primary group-hover:text-wwc-primary-dark transition-colors duration-200">RM{{ number_format(\App\Models\Seat::where('price_zone', $zone)->first()->base_price ?? 0, 0) }}</div>
+                                                <div class="text-xs text-gray-500">per ticket</div>
                                             </div>
-                                            <p class="text-xs text-gray-500">{{ $stats['sold_percentage'] }}% sold</p>
-                                        </div>
-                                        <div class="text-right ml-4">
-                                            <div class="text-2xl font-bold text-wwc-primary group-hover:text-wwc-primary-dark transition-colors duration-200">${{ number_format(\App\Models\Seat::where('price_zone', $zone)->first()->base_price ?? 0, 2) }}</div>
-                                            <div class="text-xs text-gray-500">per ticket</div>
                                         </div>
                                     </div>
-                                </div>
-                            @endforeach
+                                @endforeach
+                            </div>
                         </div>
+                        @endif
+
+                        <!-- Level-based Categories -->
+                        @if(!empty($levelZones))
+                        <div class="mb-8">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <i class='bx bx-layer text-blue-600 mr-2'></i>
+                                Level-based Categories
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                @foreach($levelZones as $zone => $stats)
+                                    <div class="price-zone-option group border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-wwc-primary hover:shadow-md transition-all duration-200" 
+                                         data-zone="{{ $zone }}" 
+                                         data-available="{{ $stats['available'] }}"
+                                         data-price="{{ \App\Models\Seat::where('price_zone', $zone)->first()->base_price ?? 0 }}">
+                                        <div class="flex justify-between items-start">
+                                            <div class="flex-1">
+                                                <div class="flex items-center justify-between mb-3">
+                                                    <h4 class="text-lg font-semibold text-gray-900 group-hover:text-wwc-primary transition-colors duration-200">{{ $zone }}</h4>
+                                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">{{ number_format($stats['available']) }} available</span>
+                                                </div>
+                                                <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                                                    <div class="bg-wwc-primary h-2 rounded-full transition-all duration-300" style="width: {{ 100 - $stats['sold_percentage'] }}%"></div>
+                                                </div>
+                                                <p class="text-xs text-gray-500">{{ $stats['sold_percentage'] }}% sold</p>
+                                            </div>
+                                            <div class="text-right ml-4">
+                                                <div class="text-2xl font-bold text-wwc-primary group-hover:text-wwc-primary-dark transition-colors duration-200">RM{{ number_format(\App\Models\Seat::where('price_zone', $zone)->first()->base_price ?? 0, 0) }}</div>
+                                                <div class="text-xs text-gray-500">per ticket</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
+                        <!-- Standing Areas -->
+                        @if(!empty($standingZones))
+                        <div class="mb-8">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <i class='bx bx-walk text-green-600 mr-2'></i>
+                                Standing Areas
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                @foreach($standingZones as $zone => $stats)
+                                    <div class="price-zone-option group border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-wwc-primary hover:shadow-md transition-all duration-200" 
+                                         data-zone="{{ $zone }}" 
+                                         data-available="{{ $stats['available'] }}"
+                                         data-price="{{ \App\Models\Seat::where('price_zone', $zone)->first()->base_price ?? 0 }}">
+                                        <div class="flex justify-between items-start">
+                                            <div class="flex-1">
+                                                <div class="flex items-center justify-between mb-3">
+                                                    <h4 class="text-lg font-semibold text-gray-900 group-hover:text-wwc-primary transition-colors duration-200">{{ $zone }}</h4>
+                                                    <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">{{ number_format($stats['available']) }} available</span>
+                                                </div>
+                                                <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                                                    <div class="bg-wwc-primary h-2 rounded-full transition-all duration-300" style="width: {{ 100 - $stats['sold_percentage'] }}%"></div>
+                                                </div>
+                                                <p class="text-xs text-gray-500">{{ $stats['sold_percentage'] }}% sold</p>
+                                            </div>
+                                            <div class="text-right ml-4">
+                                                <div class="text-2xl font-bold text-wwc-primary group-hover:text-wwc-primary-dark transition-colors duration-200">RM{{ number_format(\App\Models\Seat::where('price_zone', $zone)->first()->base_price ?? 0, 0) }}</div>
+                                                <div class="text-xs text-gray-500">per ticket</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
                     </div>
                 </div>
 
@@ -156,7 +240,7 @@
                             </div>
                             <div class="flex justify-between items-center">
                                 <span class="font-medium text-gray-900">Total Price:</span>
-                                <span class="font-bold text-wwc-primary text-lg" id="checkout-total-price">$0.00</span>
+                                <span class="font-bold text-wwc-primary text-lg" id="checkout-total-price">RM0</span>
                             </div>
                         </div>
                         <button id="proceed-to-checkout" 
@@ -347,6 +431,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('proceed-to-checkout').addEventListener('click', function() {
         if (!selectedZone || !selectedQuantity) return;
         
+        // Check if user is authenticated
+        @guest
+        showLoginRequiredAlert();
+        return;
+        @endguest
+        
         // Disable button to prevent multiple clicks
         const button = document.getElementById('proceed-to-checkout');
         button.disabled = true;
@@ -376,7 +466,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Redirect to cart page
                 window.location.href = `/events/{{ $event->id }}/cart`;
             } else {
-                alert(data.message || 'Failed to find seats. Please try again.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message || 'Failed to find seats. Please try again.',
+                    confirmButtonColor: '#DC2626'
+                });
                 // Re-enable button
                 button.disabled = false;
                 button.textContent = 'Proceed to Checkout';
@@ -384,7 +479,12 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Error:', error);
-            alert(`Error: ${error.message}. Please check the console for details.`);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: `Error: ${error.message}. Please check the console for details.`,
+                confirmButtonColor: '#DC2626'
+            });
             // Re-enable button
             button.disabled = false;
             button.textContent = 'Proceed to Checkout';
@@ -393,7 +493,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function showSelectedZoneInfo() {
         const zoneName = selectedZone;
-        const zonePrice = `$${parseFloat(selectedPrice).toFixed(2)} per ticket`;
+        const zonePrice = `RM${parseFloat(selectedPrice).toFixed(0)} per ticket`;
         
         document.getElementById('selected-zone-name').textContent = zoneName;
         document.getElementById('selected-zone-price').textContent = zonePrice;
@@ -410,7 +510,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('checkout-quantity').textContent = selectedQuantity;
             
             const totalPrice = parseFloat(selectedPrice) * selectedQuantity;
-            document.getElementById('checkout-total-price').textContent = `$${totalPrice.toFixed(2)}`;
+            document.getElementById('checkout-total-price').textContent = `RM${totalPrice.toFixed(0)}`;
             
             // Enable checkout button
             const button = document.getElementById('proceed-to-checkout');
@@ -441,7 +541,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('selected-zone-price').textContent = 'Please select a price zone above';
         document.getElementById('checkout-zone-name').textContent = 'No zone selected';
         document.getElementById('checkout-quantity').textContent = '1';
-        document.getElementById('checkout-total-price').textContent = '$0.00';
+        document.getElementById('checkout-total-price').textContent = 'RM0';
         
         // Disable checkout button
         const button = document.getElementById('proceed-to-checkout');
@@ -453,6 +553,40 @@ document.addEventListener('DOMContentLoaded', function() {
                 <span>Select a Price Zone First</span>
             </div>
         `;
+    }
+
+    // Function to show login required alert
+    function showLoginRequiredAlert() {
+        Swal.fire({
+            title: 'Authentication Required',
+            html: `
+                <div class="text-center">
+                    <div class="mb-4">
+                        <i class='bx bx-lock-alt text-6xl text-amber-500 mb-4'></i>
+                    </div>
+                    <p class="text-gray-700 mb-6">You need to sign in or create an account to purchase tickets.</p>
+                    <div class="space-y-3">
+                        <a href="{{ route('login') }}" 
+                           class="inline-block w-full bg-wwc-primary hover:bg-wwc-primary-dark text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200">
+                            <i class='bx bx-log-in mr-2'></i>Sign In
+                        </a>
+                        <a href="{{ route('register') }}" 
+                           class="inline-block w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-colors duration-200">
+                            <i class='bx bx-user-plus mr-2'></i>Create Account
+                        </a>
+                    </div>
+                </div>
+            `,
+            showConfirmButton: false,
+            showCancelButton: true,
+            cancelButtonText: 'Maybe Later',
+            cancelButtonColor: '#6B7280',
+            width: '400px',
+            customClass: {
+                popup: 'rounded-2xl',
+                title: 'text-xl font-bold text-gray-900 mb-2'
+            }
+        });
     }
     });
 

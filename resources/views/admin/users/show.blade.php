@@ -9,7 +9,7 @@
         <div class="mb-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center">
-                    <a href="{{ route('admin.users') }}" class="mr-4 text-gray-400 hover:text-gray-600">
+                    <a href="{{ route('admin.users.index') }}" class="mr-4 text-gray-400 hover:text-gray-600">
                         <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                         </svg>
@@ -193,7 +193,7 @@
                             </div>
                             @if($user->orders()->count() > 5)
                                 <div class="mt-4 text-center">
-                                    <a href="{{ route('admin.orders') }}?user={{ $user->id }}" 
+                                    <a href="{{ route('admin.orders.index') }}?user={{ $user->id }}" 
                                        class="text-sm text-indigo-600 hover:text-indigo-900">
                                         View all orders →
                                     </a>

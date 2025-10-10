@@ -4,149 +4,156 @@
 @section('page-title', 'Create Event')
 
 @section('content')
-<div class="flex-1">
-    <!-- Header -->
-    <div class="bg-white shadow-lg border-b border-wwc-neutral-200">
-        <div class="px-8 py-6">
-            <div class="flex items-center">
-                <a href="{{ route('admin.events.index') }}" class="text-wwc-neutral-400 hover:text-wwc-neutral-600 mr-6 transition-colors duration-200">
-                    <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                    </svg>
-                </a>
+<!-- Professional Event Creation with WWC Brand Design -->
+<div class="min-h-screen bg-wwc-neutral-50">
+
+    <!-- Main Content -->
+    <div class="px-6 py-6">
+        <div class="mx-auto">
+            <!-- Header Section -->
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center">
+                    <div class="h-12 w-12 rounded-2xl bg-wwc-primary-light flex items-center justify-center mr-4">
+                        <i class='bx bx-plus text-2xl text-wwc-primary'></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-wwc-neutral-900 font-display">Create New Event</h1>
+                        <p class="mt-1 text-sm text-wwc-neutral-600 font-medium">Set up a new event for ticket sales</p>
+                    </div>
+                </div>
                 <div>
-                    <h1 class="text-3xl font-bold text-wwc-neutral-900 font-display">Create New Event</h1>
-                    <p class="mt-2 text-lg text-wwc-neutral-600 font-medium">Set up a new event for ticket sales</p>
+                    <a href="{{ route('admin.events.index') }}" 
+                       class="inline-flex items-center px-4 py-2 border border-wwc-neutral-300 shadow-sm text-sm font-semibold rounded-lg text-wwc-neutral-700 bg-white hover:bg-wwc-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
+                        <i class='bx bx-arrow-back text-sm mr-2'></i>
+                        Back to Events
+                    </a>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Form -->
-    <div class="px-8 py-8">
-        <div class="max-w-4xl mx-auto">
-            <div class="bg-white shadow-lg rounded-2xl border border-wwc-neutral-200">
-                <div class="px-8 py-6 border-b border-wwc-neutral-200 bg-wwc-neutral-50">
-                    <h2 class="text-xl font-semibold text-wwc-neutral-900 font-display">Event Details</h2>
-                    <p class="text-wwc-neutral-600 mt-1">Fill in the information below to create your event</p>
+
+            <!-- Form Section -->
+            <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
+                <div class="px-6 py-4 border-b border-wwc-neutral-100">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-bold text-wwc-neutral-900">Event Details</h3>
+                        <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
+                            <i class='bx bx-edit text-sm'></i>
+                            <span>Fill in the information below</span>
+                        </div>
+                    </div>
                 </div>
-                
-                <form action="{{ route('admin.events.store') }}" method="POST" class="p-8">
-                    @csrf
-                    
-                    @if ($errors->any())
-                        <div class="bg-wwc-error-light border border-wwc-error text-wwc-error px-6 py-4 rounded-xl mb-8">
-                            <div class="flex items-start">
-                                <svg class="h-5 w-5 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
+                <div class="p-6">
+                    <form action="{{ route('admin.events.store') }}" method="POST">
+                        @csrf
+                        
+                        @if ($errors->any())
+                            <div class="bg-wwc-error-light border border-wwc-error text-wwc-error px-4 py-3 rounded-lg mb-6">
+                                <div class="flex items-start">
+                                    <i class='bx bx-error text-lg mr-3 mt-0.5 flex-shrink-0'></i>
+                                    <div>
+                                        <h3 class="font-semibold mb-2 text-sm">Please correct the following errors:</h3>
+                                        <ul class="list-disc list-inside space-y-1 text-sm">
+                                            @foreach ($errors->all() as $error)
+                                                <li>{{ $error }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        <div class="space-y-6">
+                            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                                <!-- Event Name -->
+                                <div class="sm:col-span-2">
+                                    <label for="name" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                        Event Name <span class="text-wwc-error">*</span>
+                                    </label>
+                                    <input type="text" name="name" id="name" required
+                                           value="{{ old('name') }}"
+                                           class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('name') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror"
+                                           placeholder="Enter event name">
+                                    @error('name')
+                                        <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <!-- Date & Time -->
                                 <div>
-                                    <h3 class="font-semibold mb-2">Please correct the following errors:</h3>
-                                    <ul class="list-disc list-inside space-y-1">
-                                        @foreach ($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
+                                    <label for="date_time" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                        Date & Time <span class="text-wwc-error">*</span>
+                                    </label>
+                                    <input type="datetime-local" name="date_time" id="date_time" required
+                                           value="{{ old('date_time') }}"
+                                           class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('date_time') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
+                                    @error('date_time')
+                                        <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <!-- Max Tickets Per Order -->
+                                <div>
+                                    <label for="max_tickets_per_order" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                        Max Tickets Per Order <span class="text-wwc-error">*</span>
+                                    </label>
+                                    <select name="max_tickets_per_order" id="max_tickets_per_order" required
+                                            class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('max_tickets_per_order') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
+                                        <option value="">Select limit</option>
+                                        @for($i = 1; $i <= 20; $i++)
+                                            <option value="{{ $i }}" {{ old('max_tickets_per_order') == $i ? 'selected' : '' }}>
+                                                {{ $i }} ticket{{ $i > 1 ? 's' : '' }}
+                                            </option>
+                                        @endfor
+                                    </select>
+                                    @error('max_tickets_per_order')
+                                        <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <!-- Venue -->
+                                <div>
+                                    <label for="venue" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                        Venue
+                                    </label>
+                                    <input type="text" name="venue" id="venue"
+                                           value="{{ old('venue', 'Warzone Arena') }}"
+                                           class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('venue') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror"
+                                           placeholder="Enter venue name">
+                                    @error('venue')
+                                        <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <!-- Description -->
+                                <div class="sm:col-span-2">
+                                    <label for="description" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                        Description
+                                    </label>
+                                    <textarea name="description" id="description" rows="4"
+                                              class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('description') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror"
+                                              placeholder="Enter event description">{{ old('description') }}</textarea>
+                                    @error('description')
+                                        <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                         </div>
-                    @endif
 
-                    <div class="space-y-8">
-                        <div class="grid grid-cols-1 gap-8 sm:grid-cols-2">
-                            <!-- Event Name -->
-                            <div class="sm:col-span-2">
-                                <label for="name" class="block text-base font-semibold text-wwc-neutral-900 mb-3">
-                                    Event Name <span class="text-wwc-error">*</span>
-                                </label>
-                                <input type="text" name="name" id="name" required
-                                       value="{{ old('name') }}"
-                                       class="block w-full px-4 py-3 border border-wwc-neutral-300 rounded-xl shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-base @error('name') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror"
-                                       placeholder="Enter event name">
-                                @error('name')
-                                    <div class="text-wwc-error text-sm mt-2 font-medium">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <!-- Date & Time -->
-                            <div>
-                                <label for="date_time" class="block text-base font-semibold text-wwc-neutral-900 mb-3">
-                                    Date & Time <span class="text-wwc-error">*</span>
-                                </label>
-                                <input type="datetime-local" name="date_time" id="date_time" required
-                                       value="{{ old('date_time') }}"
-                                       class="block w-full px-4 py-3 border border-wwc-neutral-300 rounded-xl shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-base @error('date_time') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
-                                @error('date_time')
-                                    <div class="text-wwc-error text-sm mt-2 font-medium">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <!-- Max Tickets Per Order -->
-                            <div>
-                                <label for="max_tickets_per_order" class="block text-base font-semibold text-wwc-neutral-900 mb-3">
-                                    Max Tickets Per Order <span class="text-wwc-error">*</span>
-                                </label>
-                                <select name="max_tickets_per_order" id="max_tickets_per_order" required
-                                        class="block w-full px-4 py-3 border border-wwc-neutral-300 rounded-xl shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-base @error('max_tickets_per_order') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
-                                    <option value="">Select limit</option>
-                                    @for($i = 1; $i <= 20; $i++)
-                                        <option value="{{ $i }}" {{ old('max_tickets_per_order') == $i ? 'selected' : '' }}>
-                                            {{ $i }} ticket{{ $i > 1 ? 's' : '' }}
-                                        </option>
-                                    @endfor
-                                </select>
-                                @error('max_tickets_per_order')
-                                    <div class="text-wwc-error text-sm mt-2 font-medium">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <!-- Venue -->
-                            <div>
-                                <label for="venue" class="block text-base font-semibold text-wwc-neutral-900 mb-3">
-                                    Venue
-                                </label>
-                                <input type="text" name="venue" id="venue"
-                                       value="{{ old('venue', 'Warzone Arena') }}"
-                                       class="block w-full px-4 py-3 border border-wwc-neutral-300 rounded-xl shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-base @error('venue') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror"
-                                       placeholder="Enter venue name">
-                                @error('venue')
-                                    <div class="text-wwc-error text-sm mt-2 font-medium">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <!-- Description -->
-                            <div class="sm:col-span-2">
-                                <label for="description" class="block text-base font-semibold text-wwc-neutral-900 mb-3">
-                                    Description
-                                </label>
-                                <textarea name="description" id="description" rows="5"
-                                          class="block w-full px-4 py-3 border border-wwc-neutral-300 rounded-xl shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-base @error('description') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror"
-                                          placeholder="Enter event description">{{ old('description') }}</textarea>
-                                @error('description')
-                                    <div class="text-wwc-error text-sm mt-2 font-medium">{{ $message }}</div>
-                                @enderror
-                            </div>
+                        <!-- Submit Buttons -->
+                        <div class="flex justify-end space-x-3 pt-6 border-t border-wwc-neutral-200 mt-6">
+                            <a href="{{ route('admin.events.index') }}" 
+                               class="inline-flex items-center px-4 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm text-sm font-semibold text-wwc-neutral-700 bg-white hover:bg-wwc-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
+                                <i class='bx bx-x text-sm mr-2'></i>
+                                Cancel
+                            </a>
+                            <button type="submit" 
+                                    class="inline-flex items-center px-6 py-2 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-wwc-primary hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
+                                <i class='bx bx-plus text-sm mr-2'></i>
+                                Create Event
+                            </button>
                         </div>
-                    </div>
-
-                    <!-- Submit Buttons -->
-                    <div class="flex justify-end space-x-4 pt-8 border-t border-wwc-neutral-200 mt-8">
-                        <a href="{{ route('admin.events.index') }}" 
-                           class="inline-flex items-center px-6 py-3 border border-wwc-neutral-300 rounded-xl shadow-sm text-base font-semibold text-wwc-neutral-700 bg-white hover:bg-wwc-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
-                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                            Cancel
-                        </a>
-                        <button type="submit" 
-                                class="inline-flex items-center px-8 py-3 border border-transparent rounded-xl shadow-sm text-base font-semibold text-white bg-wwc-primary hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
-                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                            </svg>
-                            Create Event
-                        </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

@@ -45,7 +45,7 @@
                             </div>
                         </div>
                         <div class="h-12 w-12 rounded-lg bg-wwc-success-light flex items-center justify-center">
-                            <i class='bx bx-ticket text-2xl text-wwc-success'></i>
+                            <i class='bx bx-receipt text-2xl text-wwc-success'></i>
                         </div>
                     </div>
                 </div>
@@ -73,7 +73,7 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">${{ number_format($stats['total_revenue'], 0) }}</div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">RM{{ number_format($stats['total_revenue'], 0) }}</div>
                             <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Total Revenue</div>
                             <div class="flex items-center">
                                 <div class="flex items-center text-xs text-wwc-success font-semibold">
@@ -131,12 +131,12 @@
                                                     {{ $event->date_time->format('M j, Y') }}
                                                 </span>
                                                 <span class="flex items-center">
-                                                    <i class='bx bx-ticket text-xs mr-1'></i>
+                                                    <i class='bx bx-receipt text-xs mr-1'></i>
                                                     {{ \App\Models\Ticket::where('event_id', $event->id)->where('status', 'Sold')->count() }} sold
                                                 </span>
                                                 <span class="flex items-center">
                                                     <i class='bx bx-dollar text-xs mr-1'></i>
-                                                    ${{ number_format($event->tickets()->where('status', 'Sold')->sum('price_paid'), 0) }} revenue
+                                                    RM{{ number_format($event->tickets()->where('status', 'Sold')->sum('price_paid'), 0) }} revenue
                                                 </span>
                                             </div>
                                         </div>
@@ -182,13 +182,13 @@
                                 </div>
                                 <span class="text-sm">Create New Event</span>
                             </a>
-                            <a href="{{ route('admin.users') }}" class="flex items-center p-3 text-sm font-semibold text-wwc-neutral-700 hover:bg-wwc-success-light hover:text-wwc-success rounded-2xl transition-colors duration-200">
+                            <a href="{{ route('admin.users.index') }}" class="flex items-center p-3 text-sm font-semibold text-wwc-neutral-700 hover:bg-wwc-success-light hover:text-wwc-success rounded-2xl transition-colors duration-200">
                                 <div class="h-8 w-8 rounded-2xl bg-wwc-success-light flex items-center justify-center mr-3">
                                     <i class='bx bx-group text-sm text-wwc-success'></i>
                                 </div>
                                 <span class="text-sm">Manage Users</span>
                             </a>
-                            <a href="{{ route('admin.orders') }}" class="flex items-center p-3 text-sm font-semibold text-wwc-neutral-700 hover:bg-wwc-info-light hover:text-wwc-info rounded-2xl transition-colors duration-200">
+                            <a href="{{ route('admin.orders.index') }}" class="flex items-center p-3 text-sm font-semibold text-wwc-neutral-700 hover:bg-wwc-info-light hover:text-wwc-info rounded-2xl transition-colors duration-200">
                                 <div class="h-8 w-8 rounded-2xl bg-wwc-info-light flex items-center justify-center mr-3">
                                     <i class='bx bx-shopping-bag text-sm text-wwc-info'></i>
                                 </div>
@@ -208,7 +208,7 @@
                         <div class="px-6 py-4 border-b border-wwc-neutral-100">
                             <div class="flex items-center justify-between">
                                 <h3 class="text-lg font-bold text-wwc-neutral-900">Recent Activities</h3>
-                                <a href="{{ route('admin.audit-logs') }}" class="text-xs text-wwc-primary hover:text-wwc-primary-dark font-semibold">View all</a>
+                                <a href="{{ route('admin.audit-logs.index') }}" class="text-xs text-wwc-primary hover:text-wwc-primary-dark font-semibold">View all</a>
                             </div>
                         </div>
                         <div class="p-6">

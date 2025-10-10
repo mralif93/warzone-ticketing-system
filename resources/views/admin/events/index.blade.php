@@ -90,7 +90,7 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">${{ number_format($events->sum(function($event) { return $event->tickets_count * 50; }), 0) }}</div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">RM{{ number_format($events->sum(function($event) { return $event->tickets_count * 50; }), 0) }}</div>
                             <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Est. Revenue</div>
                             <div class="flex items-center">
                                 <div class="flex items-center text-xs text-wwc-accent font-semibold">
@@ -109,10 +109,15 @@
             </div>
 
             <!-- Search and Filters -->
-            <div class="bg-white shadow-sm rounded-2xl border border-wwc-neutral-200 mb-6">
-                <div class="px-6 py-4 border-b border-wwc-neutral-200 bg-wwc-neutral-50">
-                    <h2 class="text-lg font-semibold text-wwc-neutral-900 font-display">Search & Filter Events</h2>
-                    <p class="text-wwc-neutral-600 text-sm">Find specific events using the filters below</p>
+            <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 mb-6">
+                <div class="px-6 py-4 border-b border-wwc-neutral-100">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-bold text-wwc-neutral-900">Search & Filter Events</h3>
+                        <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
+                            <i class='bx bx-search text-sm'></i>
+                            <span>Find specific events</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="p-6">
                     <form method="GET" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -120,7 +125,7 @@
                             <label for="search" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Search Events</label>
                             <input type="text" name="search" id="search" value="{{ request('search') }}"
                                    placeholder="Search by name, venue, or description..."
-                                   class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-2xl focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
+                                   class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
                         </div>
                         <div>
                             <label for="status" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Status</label>
@@ -134,21 +139,21 @@
                         <div>
                             <label for="date_from" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">From Date</label>
                             <input type="date" name="date_from" id="date_from" value="{{ request('date_from') }}"
-                                   class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-2xl focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
+                                   class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
                         </div>
                         <div>
                             <label for="date_to" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">To Date</label>
                             <input type="date" name="date_to" id="date_to" value="{{ request('date_to') }}"
-                                   class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-2xl focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
+                                   class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
                         </div>
                         <div class="sm:col-span-2 lg:col-span-4 flex justify-end gap-3">
                             <button type="submit" 
-                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-semibold rounded-2xl text-white bg-wwc-primary hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
+                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-semibold rounded-lg text-white bg-wwc-primary hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
                                 <i class='bx bx-search text-sm mr-2'></i>
                                 Search Events
                             </button>
                             <a href="{{ route('admin.events.index') }}" 
-                               class="inline-flex items-center px-4 py-2 border border-wwc-neutral-300 shadow-sm text-sm font-semibold rounded-2xl text-wwc-neutral-700 bg-white hover:bg-wwc-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
+                               class="inline-flex items-center px-4 py-2 border border-wwc-neutral-300 shadow-sm text-sm font-semibold rounded-lg text-wwc-neutral-700 bg-white hover:bg-wwc-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
                                 <i class='bx bx-x text-sm mr-2'></i>
                                 Clear Filters
                             </a>
@@ -159,28 +164,18 @@
 
             <!-- Events List -->
             @if($events->count() > 0)
-                <div class="bg-white shadow-sm rounded-2xl border border-wwc-neutral-200 overflow-hidden">
-                    <div class="px-6 py-4 border-b border-wwc-neutral-200 bg-wwc-neutral-50">
+                <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
+                    <div class="px-6 py-4 border-b border-wwc-neutral-100">
                         <div class="flex items-center justify-between">
-                            <div>
-                                <h2 class="text-lg font-semibold text-wwc-neutral-900 font-display">All Events</h2>
-                                <p class="text-wwc-neutral-600 text-sm">Showing {{ $events->count() }} of {{ $events->total() }} events</p>
-                            </div>
-                            <div class="flex items-center space-x-3">
-                                <div class="text-xs text-wwc-neutral-600">
-                                    <span class="font-semibold">{{ $events->where('status', 'On Sale')->count() }}</span> On Sale
-                                </div>
-                                <div class="text-xs text-wwc-neutral-600">
-                                    <span class="font-semibold">{{ $events->where('status', 'Draft')->count() }}</span> Draft
-                                </div>
-                                <div class="text-xs text-wwc-neutral-600">
-                                    <span class="font-semibold">{{ $events->where('status', 'Sold Out')->count() }}</span> Sold Out
-                                </div>
+                            <h3 class="text-lg font-bold text-wwc-neutral-900">All Events</h3>
+                            <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
+                                <i class='bx bx-calendar text-sm'></i>
+                                <span>Showing {{ $events->count() }} of {{ $events->total() }} events</span>
                             </div>
                         </div>
                     </div>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-wwc-neutral-200">
+                        <table class="min-w-full divide-y divide-wwc-neutral-100">
                         <thead class="bg-wwc-neutral-50">
                             <tr>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider">
@@ -192,30 +187,32 @@
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider">
                                     Venue
                                 </th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider">
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider text-center">
                                     Status
                                 </th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider">
-                                    Tickets
+                                        Tickets Sold
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider">
+                                        Revenue
                                 </th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider">
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider text-right">
                                     Actions
                                 </th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-wwc-neutral-200">
+                            <tbody class="bg-white divide-y divide-wwc-neutral-100">
                             @foreach($events as $event)
-                            <tr class="hover:bg-wwc-neutral-50 transition-colors duration-200">
+                                <tr class="hover:bg-wwc-neutral-50 transition-colors duration-150">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
                                         <div class="flex-shrink-0 h-10 w-10">
-                                            <div class="h-10 w-10 rounded-2xl bg-wwc-primary-light flex items-center justify-center shadow-sm">
-                                                <i class='bx bx-calendar text-lg text-wwc-primary'></i>
+                                                <div class="h-10 w-10 rounded-lg bg-wwc-primary-light flex items-center justify-center">
+                                                    <i class='bx bx-calendar text-lg text-wwc-primary'></i>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="ml-4">
-                                            <div class="text-sm font-semibold text-wwc-neutral-900 font-display">{{ $event->name }}</div>
-                                            <div class="text-xs text-wwc-neutral-500">Event ID: {{ $event->id }}</div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-semibold text-wwc-neutral-900">{{ $event->name }}</div>
                                         </div>
                                     </div>
                                 </td>
@@ -226,40 +223,98 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-wwc-neutral-900">{{ $event->venue ?? 'No venue' }}</div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
-                                        @if($event->status === 'On Sale') bg-wwc-success text-white
-                                        @elseif($event->status === 'Sold Out') bg-wwc-error text-white
-                                        @elseif($event->status === 'Cancelled') bg-wwc-neutral-400 text-white
-                                        @else bg-wwc-warning text-white
-                                        @endif">
-                                        {{ $event->status }}
-                                    </span>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-semibold
+                                            @if($event->status === 'On Sale') bg-green-100 text-green-800
+                                            @elseif($event->status === 'Sold Out') bg-orange-100 text-orange-800
+                                            @elseif($event->status === 'Cancelled') bg-red-100 text-red-800
+                                            @elseif($event->status === 'Draft') bg-gray-100 text-gray-800
+                                            @else bg-yellow-100 text-yellow-800
+                                            @endif">
+                                            {{ $event->status }}
+                                        </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-semibold text-wwc-neutral-900">{{ $event->tickets_count ?? 0 }} / 7,000</div>
-                                    <div class="text-xs text-wwc-neutral-500">{{ 7000 - ($event->tickets_count ?? 0) }} available</div>
+                                        <div class="text-sm font-semibold text-wwc-neutral-900">{{ \App\Models\Ticket::where('event_id', $event->id)->where('status', 'Sold')->count() }}</div>
+                                        <div class="text-xs text-wwc-neutral-500">tickets sold</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-semibold text-wwc-neutral-900">RM{{ number_format($event->tickets()->where('status', 'Sold')->sum('price_paid'), 0) }}</div>
+                                        <div class="text-xs text-wwc-neutral-500">total revenue</div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <div class="flex items-center space-x-2">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex items-center justify-end space-x-1">
                                         <a href="{{ route('admin.events.show', $event) }}" 
-                                           class="inline-flex items-center px-2 py-1 text-xs font-semibold text-wwc-primary hover:bg-wwc-primary-light hover:text-wwc-primary-dark rounded-2xl transition-colors duration-200">
-                                            <i class='bx bx-show text-xs mr-1'></i>
+                                               class="inline-flex items-center px-3 py-2 text-xs font-semibold text-white bg-wwc-primary hover:bg-wwc-primary-dark rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+                                               title="View event details">
+                                                <i class='bx bx-show text-xs mr-1.5'></i>
                                             View
                                         </a>
                                         <a href="{{ route('admin.events.edit', $event) }}" 
-                                           class="inline-flex items-center px-2 py-1 text-xs font-semibold text-wwc-neutral-600 hover:bg-wwc-neutral-100 hover:text-wwc-neutral-900 rounded-2xl transition-colors duration-200">
-                                            <i class='bx bx-edit text-xs mr-1'></i>
+                                               class="inline-flex items-center px-3 py-2 text-xs font-semibold text-wwc-neutral-700 bg-white border border-wwc-neutral-300 hover:bg-wwc-neutral-50 hover:border-wwc-neutral-400 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+                                               title="Edit event">
+                                                <i class='bx bx-edit text-xs mr-1.5'></i>
                                             Edit
                                         </a>
-                                        <select onchange="changeEventStatus({{ $event->id }}, this.value)" 
-                                                class="text-xs border border-wwc-neutral-300 rounded-2xl px-2 py-1 focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary bg-white text-wwc-neutral-700 font-medium">
-                                            <option value="">Status</option>
-                                            <option value="Draft" {{ $event->status === 'Draft' ? 'selected' : '' }}>Draft</option>
-                                            <option value="On Sale" {{ $event->status === 'On Sale' ? 'selected' : '' }}>On Sale</option>
-                                            <option value="Sold Out" {{ $event->status === 'Sold Out' ? 'selected' : '' }}>Sold Out</option>
-                                            <option value="Cancelled" {{ $event->status === 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                        </select>
+                                            <div class="relative" x-data="{ open{{ $event->id }}: false }">
+                                                <button @click="open{{ $event->id }} = !open{{ $event->id }}" 
+                                                        class="inline-flex items-center px-3 py-2 text-xs font-semibold text-wwc-neutral-700 bg-white border border-wwc-neutral-300 hover:bg-wwc-neutral-50 hover:border-wwc-neutral-400 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+                                                        title="More actions">
+                                                    <i class='bx bx-dots-vertical text-xs mr-1.5'></i>
+                                                    More
+                                                </button>
+                                                <div x-show="open{{ $event->id }}" 
+                                                     @click.away="open{{ $event->id }} = false"
+                                                     x-transition:enter="transition ease-out duration-100"
+                                                     x-transition:enter-start="transform opacity-0 scale-95"
+                                                     x-transition:enter-end="transform opacity-100 scale-100"
+                                                     x-transition:leave="transition ease-in duration-75"
+                                                     x-transition:leave-start="transform opacity-100 scale-100"
+                                                     x-transition:leave-end="transform opacity-0 scale-95"
+                                                     class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-wwc-neutral-200 z-10"
+                                                     style="display: none;">
+                                                    <div class="py-1">
+                                                        @if($event->status === 'Draft')
+                                                            <form action="{{ route('admin.events.change-status', $event) }}" method="POST" class="block">
+                                                                @csrf
+                                                                <input type="hidden" name="status" value="On Sale">
+                                                                <button type="submit" 
+                                                                        class="flex items-center w-full px-4 py-2 text-xs text-wwc-neutral-700 hover:bg-wwc-success hover:text-white transition-colors duration-200">
+                                                                    <i class='bx bx-play text-xs mr-2'></i>
+                                                                    Go On Sale
+                                                                </button>
+                                                            </form>
+                                                        @elseif($event->status === 'On Sale')
+                                                            <form action="{{ route('admin.events.change-status', $event) }}" method="POST" class="block">
+                                                                @csrf
+                                                                <input type="hidden" name="status" value="Sold Out">
+                                                                <button type="submit" 
+                                                                        class="flex items-center w-full px-4 py-2 text-xs text-wwc-neutral-700 hover:bg-wwc-warning hover:text-white transition-colors duration-200">
+                                                                    <i class='bx bx-pause text-xs mr-2'></i>
+                                                                    Mark Sold Out
+                                                                </button>
+                                                            </form>
+                                                        @endif
+                                                        <a href="{{ route('admin.tickets.index') }}?event={{ $event->id }}" 
+                                                           class="flex items-center px-4 py-2 text-xs text-wwc-neutral-700 hover:bg-wwc-neutral-100 transition-colors duration-200">
+                                                            <i class='bx bx-receipt text-xs mr-2'></i>
+                                                            View Tickets
+                                                        </a>
+                                                        <div class="border-t border-wwc-neutral-100 my-1"></div>
+                                                        <form action="{{ route('admin.events.destroy', $event) }}" method="POST" 
+                                                              onsubmit="return confirm('Are you sure you want to delete this event? This action cannot be undone.')" 
+                                                              class="block">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" 
+                                                                    class="flex items-center w-full px-4 py-2 text-xs text-red-600 hover:bg-red-50 transition-colors duration-200">
+                                                                <i class='bx bx-trash text-xs mr-2'></i>
+                                                                Delete Event
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
                                     </div>
                                 </td>
                             </tr>
@@ -267,14 +322,13 @@
                         </tbody>
                     </table>
                 </div>
-
                 <!-- Pagination -->
-                <div class="px-6 py-4 border-t border-wwc-neutral-200 bg-wwc-neutral-50">
+                    <div class="px-6 py-4 border-t border-wwc-neutral-100 bg-wwc-neutral-50">
                     {{ $events->links() }}
                 </div>
             </div>
             @else
-                <div class="bg-white shadow-sm rounded-2xl border border-wwc-neutral-200">
+                <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
                     <div class="text-center py-12">
                         <div class="mx-auto h-16 w-16 rounded-full bg-wwc-neutral-100 flex items-center justify-center mb-4">
                             <i class='bx bx-calendar text-3xl text-wwc-neutral-400'></i>
@@ -283,7 +337,7 @@
                         <p class="text-sm text-wwc-neutral-600 mb-6">Get started by creating your first event to begin selling tickets.</p>
                         <div>
                             <a href="{{ route('admin.events.create') }}" 
-                               class="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-sm font-semibold rounded-2xl text-white bg-wwc-primary hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
+                               class="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-sm font-semibold rounded-lg text-white bg-wwc-primary hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
                                 <i class='bx bx-plus text-sm mr-2'></i>
                                 Create Your First Event
                             </a>

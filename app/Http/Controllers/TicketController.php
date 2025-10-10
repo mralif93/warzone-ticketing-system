@@ -41,8 +41,11 @@ class TicketController extends Controller
      */
     public function findSeats(Request $request, Event $event)
     {
+        // Get valid price zones from database
+        $validPriceZones = \App\Models\PriceZone::active()->pluck('name')->toArray();
+        
         $request->validate([
-            'price_zone' => 'required|in:VIP,Premium,Standard,Economy',
+            'price_zone' => 'required|in:' . implode(',', $validPriceZones),
             'quantity' => 'required|integer|min:1|max:20',
         ]);
 

@@ -18,6 +18,89 @@
                 </div>
             </div>
 
+            <!-- Statistics Cards -->
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+                <!-- Total Tickets -->
+                <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $tickets->total() }}</div>
+                            <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Total Tickets</div>
+                            <div class="flex items-center">
+                                <div class="flex items-center text-xs text-wwc-success font-semibold">
+                                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                    </svg>
+                                    {{ $tickets->where('status', 'Sold')->count() }} Sold
+                                </div>
+                            </div>
+                        </div>
+                        <div class="h-12 w-12 rounded-lg bg-wwc-primary-light flex items-center justify-center">
+                            <i class='bx bx-receipt text-2xl text-wwc-primary'></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sold Tickets -->
+                <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $tickets->where('status', 'Sold')->count() }}</div>
+                            <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Sold Tickets</div>
+                            <div class="flex items-center">
+                                <div class="flex items-center text-xs text-wwc-success font-semibold">
+                                    <i class='bx bx-check text-xs mr-1'></i>
+                                    {{ $tickets->where('status', 'Held')->count() }} Held
+                                </div>
+                            </div>
+                        </div>
+                        <div class="h-12 w-12 rounded-lg bg-wwc-success-light flex items-center justify-center">
+                            <i class='bx bx-check-circle text-2xl text-wwc-success'></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Used Tickets -->
+                <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $tickets->where('status', 'Used')->count() }}</div>
+                            <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Used Tickets</div>
+                            <div class="flex items-center">
+                                <div class="flex items-center text-xs text-wwc-accent font-semibold">
+                                    <i class='bx bx-qr-scan text-xs mr-1'></i>
+                                    {{ $tickets->where('status', 'Cancelled')->count() }} Cancelled
+                                </div>
+                            </div>
+                        </div>
+                        <div class="h-12 w-12 rounded-lg bg-wwc-accent-light flex items-center justify-center">
+                            <i class='bx bx-qr-scan text-2xl text-wwc-accent'></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Revenue -->
+                <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">RM{{ number_format($tickets->where('status', 'Sold')->sum('price_paid'), 0) }}</div>
+                            <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Total Revenue</div>
+                            <div class="flex items-center">
+                                <div class="flex items-center text-xs text-wwc-accent font-semibold">
+                                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                    </svg>
+                                    +8% this month
+                                </div>
+                            </div>
+                        </div>
+                        <div class="h-12 w-12 rounded-lg bg-wwc-accent-light flex items-center justify-center">
+                            <i class='bx bx-dollar text-2xl text-wwc-accent'></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Search and Filters -->
             <div class="bg-white shadow-sm rounded-2xl border border-wwc-neutral-200 mb-6">
                 <div class="px-6 py-4 border-b border-wwc-neutral-200 bg-wwc-neutral-50">
@@ -25,7 +108,7 @@
                     <p class="text-wwc-neutral-600 text-sm">Find specific tickets using the filters below</p>
                 </div>
                 <div class="p-6">
-                    <form method="GET" action="{{ route('admin.tickets') }}" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                    <form method="GET" action="{{ route('admin.tickets.index') }}" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
                         <div>
                             <label for="search" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Search Tickets</label>
                             <input type="text" name="search" id="search" value="{{ request('search') }}"
@@ -54,9 +137,15 @@
                             </select>
                         </div>
                         <div>
-                            <label for="date_from" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">From Date</label>
-                            <input type="date" name="date_from" id="date_from" value="{{ request('date_from') }}"
-                                   class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-2xl focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
+                            <label for="price_zone" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Price Zone</label>
+                            <select name="price_zone" id="price_zone" class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-2xl focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
+                                <option value="">All Price Zones</option>
+                                @foreach(\App\Models\PriceZone::active()->ordered()->get() as $zone)
+                                    <option value="{{ $zone->name }}" {{ request('price_zone') == $zone->name ? 'selected' : '' }}>
+                                        {{ $zone->name }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="flex items-end">
                             <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-semibold rounded-2xl text-white bg-wwc-primary hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
@@ -75,6 +164,20 @@
                         <div>
                             <h2 class="text-lg font-semibold text-wwc-neutral-900 font-display">All Tickets</h2>
                             <p class="text-wwc-neutral-600 text-sm">Showing {{ $tickets->count() }} of {{ $tickets->total() }} tickets</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="text-xs text-wwc-neutral-600">
+                                <span class="font-semibold">{{ $tickets->where('status', 'Sold')->count() }}</span> Sold
+                            </div>
+                            <div class="text-xs text-wwc-neutral-600">
+                                <span class="font-semibold">{{ $tickets->where('status', 'Held')->count() }}</span> Held
+                            </div>
+                            <div class="text-xs text-wwc-neutral-600">
+                                <span class="font-semibold">{{ $tickets->where('status', 'Used')->count() }}</span> Used
+                            </div>
+                            <div class="text-xs text-wwc-neutral-600">
+                                <span class="font-semibold">{{ $tickets->where('status', 'Cancelled')->count() }}</span> Cancelled
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -113,7 +216,7 @@
                                         <div class="flex items-center">
                                             <div class="flex-shrink-0 h-10 w-10">
                                                 <div class="h-10 w-10 rounded-2xl bg-wwc-primary-light flex items-center justify-center shadow-sm">
-                                                    <i class='bx bx-ticket text-lg text-wwc-primary'></i>
+                                                    <i class='bx bx-receipt text-lg text-wwc-primary'></i>
                                                 </div>
                                             </div>
                                             <div class="ml-4">
@@ -150,7 +253,7 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-semibold text-wwc-neutral-900">${{ number_format($ticket->price_paid, 2) }}</div>
+                                        <div class="text-sm font-semibold text-wwc-neutral-900">RM{{ number_format($ticket->price_paid, 0) }}</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
@@ -182,11 +285,9 @@
                     </div>
                 @else
                     <div class="text-center py-12">
-                        <div class="mx-auto h-16 w-16 rounded-2xl bg-wwc-neutral-100 flex items-center justify-center mb-4">
-                            <i class='bx bx-ticket text-3xl text-wwc-neutral-400'></i>
-                        </div>
-                        <h3 class="text-xl font-semibold text-wwc-neutral-900 font-display mb-2">No tickets found</h3>
-                        <p class="text-sm text-wwc-neutral-600 mb-6">No tickets match your current filters.</p>
+                        <i class='bx bx-receipt text-6xl text-wwc-neutral-300 mb-4'></i>
+                        <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-2">No Tickets Found</h3>
+                        <p class="text-wwc-neutral-600 mb-6">No tickets match your current filters.</p>
                     </div>
                 @endif
             </div>

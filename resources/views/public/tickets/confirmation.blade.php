@@ -46,7 +46,7 @@
                         </div>
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Total Amount</dt>
-                            <dd class="mt-1 text-sm text-gray-900 font-bold">${{ number_format($order->total_amount, 2) }}</dd>
+                            <dd class="mt-1 text-sm text-gray-900 font-bold">RM{{ number_format($order->total_amount, 0) }}</dd>
                         </div>
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Status</dt>
@@ -72,7 +72,7 @@
                                         <div class="flex items-center space-x-4">
                                             <div class="flex-shrink-0">
                                                 <div class="h-16 w-16 bg-gray-100 rounded-lg flex items-center justify-center">
-                                                    <i class='bx bx-ticket text-3xl text-gray-400'></i>
+                                                    <i class='bx bx-receipt text-3xl text-gray-400'></i>
                                                 </div>
                                             </div>
                                             <div class="flex-1">
@@ -81,7 +81,7 @@
                                                 <p class="text-sm text-gray-500">QR Code: {{ $ticket->qrcode }}</p>
                                             </div>
                                             <div class="text-right">
-                                                <div class="text-lg font-bold text-indigo-600">${{ number_format($ticket->price_paid, 2) }}</div>
+                                                <div class="text-lg font-bold text-indigo-600">RM{{ number_format($ticket->price_paid, 0) }}</div>
                                                 <div class="text-sm text-gray-500">Ticket #{{ $ticket->id }}</div>
                                             </div>
                                         </div>

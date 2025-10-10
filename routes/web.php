@@ -72,37 +72,53 @@ Route::middleware(['auth', 'log.activity'])->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
         
         // Event management
-        Route::get('/events', [AdminController::class, 'events'])->name('events.index');
-        Route::get('/events/create', [AdminController::class, 'createEvent'])->name('events.create');
-        Route::post('/events', [AdminController::class, 'storeEvent'])->name('events.store');
-        Route::get('/events/{event}', [AdminController::class, 'showEvent'])->name('events.show');
-        Route::get('/events/{event}/edit', [AdminController::class, 'editEvent'])->name('events.edit');
-        Route::put('/events/{event}', [AdminController::class, 'updateEvent'])->name('events.update');
-        Route::delete('/events/{event}', [AdminController::class, 'deleteEvent'])->name('events.delete');
-        Route::post('/events/{event}/change-status', [AdminController::class, 'changeEventStatus'])->name('events.change-status');
+        Route::resource('events', \App\Http\Controllers\Admin\EventController::class);
+        Route::post('/events/{event}/change-status', [\App\Http\Controllers\Admin\EventController::class, 'changeStatus'])->name('events.change-status');
         
         // User management
-        Route::get('/users', [AdminController::class, 'users'])->name('users');
-        Route::get('/users/create', [AdminController::class, 'createUser'])->name('users.create');
-        Route::post('/users', [AdminController::class, 'storeUser'])->name('users.store');
-        Route::get('/users/{user}', [AdminController::class, 'showUser'])->name('users.show');
-        Route::get('/users/{user}/edit', [AdminController::class, 'editUser'])->name('users.edit');
-        Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
-        Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('users.delete');
+        Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
+        Route::post('/users/{user}/update-password', [\App\Http\Controllers\Admin\UserController::class, 'updatePassword'])->name('users.update-password');
         
         // Order management
-        Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
-        Route::get('/orders/{order}', [AdminController::class, 'showOrder'])->name('orders.show');
+        Route::get('/orders', [\App\Http\Controllers\Admin\OrderController::class, 'index'])->name('orders.index');
+        Route::get('/orders/{order}', [\App\Http\Controllers\Admin\OrderController::class, 'show'])->name('orders.show');
+        Route::post('/orders/{order}/update-status', [\App\Http\Controllers\Admin\OrderController::class, 'updateStatus'])->name('orders.update-status');
+        Route::post('/orders/{order}/cancel', [\App\Http\Controllers\Admin\OrderController::class, 'cancel'])->name('orders.cancel');
+        Route::post('/orders/{order}/refund', [\App\Http\Controllers\Admin\OrderController::class, 'refund'])->name('orders.refund');
         
         // Ticket management
-        Route::get('/tickets', [AdminController::class, 'tickets'])->name('tickets');
-        Route::get('/tickets/{ticket}', [AdminController::class, 'showTicket'])->name('tickets.show');
+        Route::get('/tickets', [\App\Http\Controllers\Admin\TicketController::class, 'index'])->name('tickets.index');
+        Route::get('/tickets/{ticket}', [\App\Http\Controllers\Admin\TicketController::class, 'show'])->name('tickets.show');
+        Route::post('/tickets/{ticket}/update-status', [\App\Http\Controllers\Admin\TicketController::class, 'updateStatus'])->name('tickets.update-status');
+        Route::post('/tickets/{ticket}/cancel', [\App\Http\Controllers\Admin\TicketController::class, 'cancel'])->name('tickets.cancel');
+        Route::post('/tickets/{ticket}/mark-used', [\App\Http\Controllers\Admin\TicketController::class, 'markUsed'])->name('tickets.mark-used');
+        Route::post('/tickets/bulk-update', [\App\Http\Controllers\Admin\TicketController::class, 'bulkUpdate'])->name('tickets.bulk-update');
+        
+        // Payment management
+        Route::get('/payments', [\App\Http\Controllers\Admin\PaymentController::class, 'index'])->name('payments.index');
+        Route::get('/payments/{payment}', [\App\Http\Controllers\Admin\PaymentController::class, 'show'])->name('payments.show');
+        Route::post('/payments/{payment}/update-status', [\App\Http\Controllers\Admin\PaymentController::class, 'updateStatus'])->name('payments.update-status');
+        Route::post('/payments/{payment}/refund', [\App\Http\Controllers\Admin\PaymentController::class, 'refund'])->name('payments.refund');
+        Route::get('/payments/export/csv', [\App\Http\Controllers\Admin\PaymentController::class, 'export'])->name('payments.export');
+        
+        // Seat management
+        Route::resource('seats', \App\Http\Controllers\Admin\SeatController::class);
+        Route::post('/seats/bulk-create', [\App\Http\Controllers\Admin\SeatController::class, 'bulkCreate'])->name('seats.bulk-create');
+        Route::post('/seats/{seat}/update-status', [\App\Http\Controllers\Admin\SeatController::class, 'updateStatus'])->name('seats.update-status');
         
         // Audit logs
-        Route::get('/audit-logs', [AdminController::class, 'auditLogs'])->name('audit-logs');
+        Route::get('/audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
+        Route::get('/audit-logs/{auditLog}', [\App\Http\Controllers\Admin\AuditLogController::class, 'show'])->name('audit-logs.show');
+        Route::get('/audit-logs/export/csv', [\App\Http\Controllers\Admin\AuditLogController::class, 'export'])->name('audit-logs.export');
+        Route::post('/audit-logs/clear', [\App\Http\Controllers\Admin\AuditLogController::class, 'clear'])->name('audit-logs.clear');
         
         // Reports
         Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
+        
+        // Price Zone management
+        Route::resource('price-zones', \App\Http\Controllers\Admin\PriceZoneController::class);
+        Route::post('/price-zones/{priceZone}/toggle-status', [\App\Http\Controllers\Admin\PriceZoneController::class, 'toggleStatus'])->name('price-zones.toggle-status');
+        Route::post('/price-zones/bulk-action', [\App\Http\Controllers\Admin\PriceZoneController::class, 'bulkAction'])->name('price-zones.bulk-action');
         
         // Settings
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');

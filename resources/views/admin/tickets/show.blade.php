@@ -9,7 +9,7 @@
         <div class="mb-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center">
-                    <a href="{{ route('admin.tickets') }}" class="mr-4 text-gray-400 hover:text-gray-600">
+                    <a href="{{ route('admin.tickets.index') }}" class="mr-4 text-gray-400 hover:text-gray-600">
                         <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                         </svg>
@@ -93,7 +93,7 @@
                             </div>
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Price Paid</dt>
-                                <dd class="text-sm text-gray-900 font-medium">${{ number_format($ticket->price_paid, 2) }}</dd>
+                                <dd class="text-sm text-gray-900 font-medium">RM{{ number_format($ticket->price_paid, 0) }}</dd>
                             </div>
                         </div>
                     </div>
@@ -190,7 +190,7 @@
                             </div>
                             <div class="flex justify-between">
                                 <dt class="text-sm text-gray-500">Price Paid</dt>
-                                <dd class="text-sm text-gray-900">${{ number_format($ticket->price_paid, 2) }}</dd>
+                                <dd class="text-sm text-gray-900">RM{{ number_format($ticket->price_paid, 0) }}</dd>
                             </div>
                             <div class="flex justify-between">
                                 <dt class="text-sm text-gray-500">Purchase Date</dt>

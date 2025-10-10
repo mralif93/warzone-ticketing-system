@@ -9,7 +9,7 @@
         <div class="mb-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center">
-                    <a href="{{ route('admin.orders') }}" class="mr-4 text-gray-400 hover:text-gray-600">
+                    <a href="{{ route('admin.orders.index') }}" class="mr-4 text-gray-400 hover:text-gray-600">
                         <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                         </svg>
@@ -84,7 +84,7 @@
                             </div>
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Total Amount</dt>
-                                <dd class="text-sm text-gray-900 font-medium">${{ number_format($order->total_amount, 2) }}</dd>
+                                <dd class="text-sm text-gray-900 font-medium">RM{{ number_format($order->total_amount, 0) }}</dd>
                             </div>
                         </div>
                     </div>
@@ -119,7 +119,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="text-right">
-                                                    <div class="text-sm font-medium text-gray-900">${{ number_format($ticket->price_paid, 2) }}</div>
+                                                    <div class="text-sm font-medium text-gray-900">RM{{ number_format($ticket->price_paid, 0) }}</div>
                                                     <div class="text-sm text-gray-500">
                                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                                             @if($ticket->status === 'Sold') bg-green-100 text-green-800
@@ -161,20 +161,20 @@
                         <dl class="space-y-3">
                             <div class="flex justify-between">
                                 <dt class="text-sm text-gray-500">Subtotal</dt>
-                                <dd class="text-sm text-gray-900">${{ number_format($order->total_amount, 2) }}</dd>
+                                <dd class="text-sm text-gray-900">RM{{ number_format($order->total_amount, 0) }}</dd>
                             </div>
                             <div class="flex justify-between">
                                 <dt class="text-sm text-gray-500">Tax</dt>
-                                <dd class="text-sm text-gray-900">$0.00</dd>
+                                <dd class="text-sm text-gray-900">RM0</dd>
                             </div>
                             <div class="flex justify-between">
                                 <dt class="text-sm text-gray-500">Processing Fee</dt>
-                                <dd class="text-sm text-gray-900">$0.00</dd>
+                                <dd class="text-sm text-gray-900">RM0</dd>
                             </div>
                             <div class="border-t border-gray-200 pt-3">
                                 <div class="flex justify-between">
                                     <dt class="text-base font-medium text-gray-900">Total</dt>
-                                    <dd class="text-base font-medium text-gray-900">${{ number_format($order->total_amount, 2) }}</dd>
+                                    <dd class="text-base font-medium text-gray-900">RM{{ number_format($order->total_amount, 0) }}</dd>
                                 </div>
                             </div>
                         </dl>
@@ -194,7 +194,7 @@
                             </div>
                             <div class="flex justify-between">
                                 <dt class="text-sm text-gray-500">Amount</dt>
-                                <dd class="text-sm text-gray-900">${{ number_format($payment->amount, 2) }}</dd>
+                                <dd class="text-sm text-gray-900">RM{{ number_format($payment->amount, 0) }}</dd>
                             </div>
                             <div class="flex justify-between">
                                 <dt class="text-sm text-gray-500">Status</dt>
@@ -228,7 +228,7 @@
                                class="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                 View Customer
                             </a>
-                            <a href="{{ route('admin.tickets') }}?order={{ $order->id }}" 
+                            <a href="{{ route('admin.tickets.index') }}?order={{ $order->id }}" 
                                class="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                 View All Tickets
                             </a>

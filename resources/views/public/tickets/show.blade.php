@@ -31,7 +31,7 @@
                                     <p class="text-indigo-100">{{ $ticket->event->venue }}</p>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-2xl font-bold text-white">${{ number_format($ticket->price_paid, 2) }}</div>
+                                    <div class="text-2xl font-bold text-white">RM{{ number_format($ticket->price_paid, 0) }}</div>
                                     <div class="text-indigo-100 text-sm">Ticket #{{ $ticket->id }}</div>
                                 </div>
                             </div>
@@ -124,7 +124,7 @@
                                 </div>
                                 <div>
                                     <dt class="text-sm font-medium text-gray-500">Total Paid</dt>
-                                    <dd class="text-sm text-gray-900 font-bold">${{ number_format($ticket->order->total_amount, 2) }}</dd>
+                                    <dd class="text-sm text-gray-900 font-bold">RM{{ number_format($ticket->order->total_amount, 0) }}</dd>
                                 </div>
                             </dl>
                         </div>

@@ -17,6 +17,9 @@
     <!-- Boxicons CDN -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     
+    <!-- Alpine.js CDN -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
     <script>
         tailwind.config = {
             theme: {
@@ -142,11 +145,11 @@
                     </a>
 
                     <!-- Tickets -->
-                    <a href="{{ route('admin.tickets') }}" 
+                    <a href="{{ route('admin.tickets.index') }}" 
                        class="group flex items-center px-4 py-4 text-sm font-semibold rounded-xl transition-all duration-300 {{ request()->routeIs('admin.tickets*') ? 'bg-gradient-to-r from-wwc-primary-light to-red-100 text-wwc-primary shadow-lg border border-red-200' : 'text-wwc-neutral-600 hover:bg-wwc-neutral-50 hover:text-wwc-neutral-900 hover:shadow-md' }}">
                         <div class="flex-shrink-0 mr-4">
                             <div class="h-10 w-10 rounded-xl flex items-center justify-center {{ request()->routeIs('admin.tickets*') ? 'bg-wwc-primary-light' : 'bg-wwc-neutral-100 group-hover:bg-wwc-neutral-200' }} transition-colors duration-300">
-                                <i class='bx bx-ticket text-lg {{ request()->routeIs('admin.tickets*') ? 'text-wwc-primary' : 'text-wwc-neutral-500 group-hover:text-wwc-neutral-700' }}'></i>
+                                <i class='bx bx-receipt text-lg {{ request()->routeIs('admin.tickets*') ? 'text-wwc-primary' : 'text-wwc-neutral-500 group-hover:text-wwc-neutral-700' }}'></i>
                             </div>
                         </div>
                         <div class="flex-1">
@@ -158,8 +161,59 @@
                         @endif
                     </a>
 
+                    <!-- Seats -->
+                    <a href="{{ route('admin.seats.index') }}" 
+                       class="group flex items-center px-4 py-4 text-sm font-semibold rounded-xl transition-all duration-300 {{ request()->routeIs('admin.seats*') ? 'bg-gradient-to-r from-wwc-primary-light to-red-100 text-wwc-primary shadow-lg border border-red-200' : 'text-wwc-neutral-600 hover:bg-wwc-neutral-50 hover:text-wwc-neutral-900 hover:shadow-md' }}">
+                        <div class="flex-shrink-0 mr-4">
+                            <div class="h-10 w-10 rounded-xl flex items-center justify-center {{ request()->routeIs('admin.seats*') ? 'bg-wwc-primary-light' : 'bg-wwc-neutral-100 group-hover:bg-wwc-neutral-200' }} transition-colors duration-300">
+                                <i class='bx bx-chair text-lg {{ request()->routeIs('admin.seats*') ? 'text-wwc-primary' : 'text-wwc-neutral-500 group-hover:text-wwc-neutral-700' }}'></i>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="font-semibold">Seats</div>
+                            <div class="text-xs text-wwc-neutral-500 mt-0.5">Seat Management</div>
+                        </div>
+                        @if(request()->routeIs('admin.seats*'))
+                        <div class="h-2 w-2 bg-wwc-primary rounded-full"></div>
+                        @endif
+                    </a>
+
+                    <!-- Payments -->
+                    <a href="{{ route('admin.payments.index') }}" 
+                       class="group flex items-center px-4 py-4 text-sm font-semibold rounded-xl transition-all duration-300 {{ request()->routeIs('admin.payments*') ? 'bg-gradient-to-r from-wwc-primary-light to-red-100 text-wwc-primary shadow-lg border border-red-200' : 'text-wwc-neutral-600 hover:bg-wwc-neutral-50 hover:text-wwc-neutral-900 hover:shadow-md' }}">
+                        <div class="flex-shrink-0 mr-4">
+                            <div class="h-10 w-10 rounded-xl flex items-center justify-center {{ request()->routeIs('admin.payments*') ? 'bg-wwc-primary-light' : 'bg-wwc-neutral-100 group-hover:bg-wwc-neutral-200' }} transition-colors duration-300">
+                                <i class='bx bx-credit-card text-lg {{ request()->routeIs('admin.payments*') ? 'text-wwc-primary' : 'text-wwc-neutral-500 group-hover:text-wwc-neutral-700' }}'></i>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="font-semibold">Payments</div>
+                            <div class="text-xs text-wwc-neutral-500 mt-0.5">Payment Management</div>
+                        </div>
+                        @if(request()->routeIs('admin.payments*'))
+                        <div class="h-2 w-2 bg-wwc-primary rounded-full"></div>
+                        @endif
+                    </a>
+
+                    <!-- Price Zones -->
+                    <a href="{{ route('admin.price-zones.index') }}" 
+                       class="group flex items-center px-4 py-4 text-sm font-semibold rounded-xl transition-all duration-300 {{ request()->routeIs('admin.price-zones*') ? 'bg-gradient-to-r from-wwc-primary-light to-red-100 text-wwc-primary shadow-lg border border-red-200' : 'text-wwc-neutral-600 hover:bg-wwc-neutral-50 hover:text-wwc-neutral-900 hover:shadow-md' }}">
+                        <div class="flex-shrink-0 mr-4">
+                            <div class="h-10 w-10 rounded-xl flex items-center justify-center {{ request()->routeIs('admin.price-zones*') ? 'bg-wwc-primary-light' : 'bg-wwc-neutral-100 group-hover:bg-wwc-neutral-200' }} transition-colors duration-300">
+                                <i class='bx bx-tag text-lg {{ request()->routeIs('admin.price-zones*') ? 'text-wwc-primary' : 'text-wwc-neutral-500 group-hover:text-wwc-neutral-700' }}'></i>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="font-semibold">Price Zones</div>
+                            <div class="text-xs text-wwc-neutral-500 mt-0.5">Pricing Management</div>
+                        </div>
+                        @if(request()->routeIs('admin.price-zones*'))
+                        <div class="h-2 w-2 bg-wwc-primary rounded-full"></div>
+                        @endif
+                    </a>
+
                     <!-- Orders -->
-                    <a href="{{ route('admin.orders') }}" 
+                    <a href="{{ route('admin.orders.index') }}" 
                        class="group flex items-center px-4 py-4 text-sm font-semibold rounded-xl transition-all duration-300 {{ request()->routeIs('admin.orders*') ? 'bg-gradient-to-r from-wwc-primary-light to-red-100 text-wwc-primary shadow-lg border border-red-200' : 'text-wwc-neutral-600 hover:bg-wwc-neutral-50 hover:text-wwc-neutral-900 hover:shadow-md' }}">
                         <div class="flex-shrink-0 mr-4">
                             <div class="h-10 w-10 rounded-xl flex items-center justify-center {{ request()->routeIs('admin.orders*') ? 'bg-wwc-primary-light' : 'bg-wwc-neutral-100 group-hover:bg-wwc-neutral-200' }} transition-colors duration-300">
@@ -176,7 +230,7 @@
                     </a>
 
                     <!-- Users -->
-                    <a href="{{ route('admin.users') }}" 
+                    <a href="{{ route('admin.users.index') }}" 
                        class="group flex items-center px-4 py-4 text-sm font-semibold rounded-xl transition-all duration-300 {{ request()->routeIs('admin.users*') ? 'bg-gradient-to-r from-wwc-primary-light to-red-100 text-wwc-primary shadow-lg border border-red-200' : 'text-wwc-neutral-600 hover:bg-wwc-neutral-50 hover:text-wwc-neutral-900 hover:shadow-md' }}">
                         <div class="flex-shrink-0 mr-4">
                             <div class="h-10 w-10 rounded-xl flex items-center justify-center {{ request()->routeIs('admin.users*') ? 'bg-wwc-primary-light' : 'bg-wwc-neutral-100 group-hover:bg-wwc-neutral-200' }} transition-colors duration-300">
@@ -342,9 +396,9 @@
                     <div class="px-2 pt-2 pb-3 space-y-1">
                         <a href="{{ route('admin.dashboard') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Dashboard</a>
                         <a href="{{ route('admin.events.index') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Events</a>
-                        <a href="{{ route('admin.tickets') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Tickets</a>
-                        <a href="{{ route('admin.orders') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Orders</a>
-                        <a href="{{ route('admin.users') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Users</a>
+                        <a href="{{ route('admin.tickets.index') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Tickets</a>
+                        <a href="{{ route('admin.orders.index') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Orders</a>
+                        <a href="{{ route('admin.users.index') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Users</a>
                         <a href="{{ route('admin.reports') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Reports</a>
                         <a href="{{ route('admin.settings') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Settings</a>
                     </div>

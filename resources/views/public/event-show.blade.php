@@ -83,7 +83,7 @@
                         <div class="border border-wwc-neutral-200 rounded-xl p-6 hover:border-wwc-primary-light transition-colors duration-200">
                             <div class="flex justify-between items-center mb-2">
                                 <h3 class="text-lg font-semibold text-wwc-neutral-900">{{ $zone['zone'] }}</h3>
-                                <span class="text-2xl font-bold text-wwc-primary font-display">${{ number_format($zone['price'], 2) }}</span>
+                                <span class="text-2xl font-bold text-wwc-primary font-display">RM{{ number_format($zone['price'], 0) }}</span>
                             </div>
                             <div class="text-sm text-wwc-neutral-600 mb-3">
                                 {{ $zone['available'] }} of {{ $zone['total'] }} tickets available
@@ -176,7 +176,7 @@
                     <p class="text-wwc-primary-light text-sm mb-4">Don't miss out on this amazing event!</p>
                     <a href="{{ route('public.tickets.select', $event) }}" 
                        class="w-full inline-flex justify-center items-center px-6 py-3 bg-white text-wwc-primary hover:bg-wwc-neutral-100 rounded-xl text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white transition-colors duration-200">
-                        <i class='bx bx-ticket text-lg mr-2'></i>
+                        <i class='bx bx-receipt text-lg mr-2'></i>
                         Buy Tickets
                     </a>
                 </div>

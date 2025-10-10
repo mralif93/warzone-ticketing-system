@@ -78,7 +78,7 @@
                         </div>
                         <div class="text-right">
                             <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                                <i class="bx bx-ticket text-2xl"></i>
+                                <i class="bx bx-receipt text-2xl"></i>
                             </div>
                         </div>
                     </div>
@@ -100,8 +100,8 @@
                                         </div>
                                     </div>
                                     <div class="text-right">
-                                        <p class="font-bold text-wwc-primary text-2xl">${{ number_format($totalPrice, 2) }}</p>
-                                        <p class="text-xs text-gray-500">${{ number_format($totalPrice / $quantity, 2) }} each</p>
+                                        <p class="font-bold text-wwc-primary text-2xl">RM{{ number_format($totalPrice, 0) }}</p>
+                                        <p class="text-xs text-gray-500">RM{{ number_format($totalPrice / $quantity, 0) }} each</p>
                                     </div>
                                 </div>
 
@@ -143,20 +143,20 @@
                         <div class="space-y-3">
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-600">Subtotal ({{ $quantity ?? count($heldSeats) }} {{ ($quantity ?? count($heldSeats)) == 1 ? 'ticket' : 'tickets' }})</span>
-                                <span class="font-medium">${{ number_format($totalPrice, 2) }}</span>
+                                <span class="font-medium">RM{{ number_format($totalPrice, 0) }}</span>
                             </div>
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-600">Service Fee (5%)</span>
-                                <span class="font-medium">${{ number_format($serviceFee, 2) }}</span>
+                                <span class="font-medium">RM{{ number_format($serviceFee, 0) }}</span>
                             </div>
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-600">Tax (8%)</span>
-                                <span class="font-medium">${{ number_format($taxAmount, 2) }}</span>
+                                <span class="font-medium">RM{{ number_format($taxAmount, 0) }}</span>
                             </div>
                             <div class="border-t border-gray-200 pt-3">
                                 <div class="flex justify-between text-xl font-bold">
                                     <span>Total</span>
-                                    <span class="text-wwc-primary">${{ number_format($grandTotal, 2) }}</span>
+                                    <span class="text-wwc-primary">RM{{ number_format($grandTotal, 0) }}</span>
                                 </div>
                             </div>
                         </div>
@@ -297,7 +297,7 @@
                                         class="w-full bg-wwc-primary hover:bg-wwc-primary-dark text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl">
                                     <div class="flex items-center justify-center">
                                         <i class="bx bx-credit-card text-xl mr-2"></i>
-                                        <span>Complete Purchase - ${{ number_format($grandTotal, 2) }}</span>
+                                        <span>Complete Purchase - RM{{ number_format($grandTotal, 0) }}</span>
                                     </div>
                                 </button>
                             </div>

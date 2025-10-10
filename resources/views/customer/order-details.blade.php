@@ -23,7 +23,7 @@
                 <div class="flex items-center space-x-3">
                     <a href="{{ route('customer.tickets') }}" 
                        class="inline-flex items-center px-4 py-2 bg-wwc-primary text-white rounded-lg text-sm font-semibold hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
-                        <i class='bx bx-ticket text-sm mr-2'></i>
+                        <i class='bx bx-receipt text-sm mr-2'></i>
                         My Tickets
                     </a>
                 </div>
@@ -82,7 +82,7 @@
                                     </div>
                                     <div>
                                         <p class="text-sm font-semibold text-wwc-neutral-600">Total Amount</p>
-                                        <p class="text-2xl font-bold text-wwc-neutral-900 font-display">${{ number_format($order->total_amount, 2) }}</p>
+                                        <p class="text-2xl font-bold text-wwc-neutral-900 font-display">RM{{ number_format($order->total_amount, 0) }}</p>
                                     </div>
                                     <div>
                                         <p class="text-sm font-semibold text-wwc-neutral-600">Number of Tickets</p>
@@ -107,7 +107,7 @@
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center space-x-4">
                                         <div class="h-12 w-12 rounded-lg bg-wwc-primary flex items-center justify-center">
-                                            <i class='bx bx-ticket text-2xl text-white'></i>
+                                            <i class='bx bx-receipt text-2xl text-white'></i>
                                         </div>
                                         <div>
                                             <h3 class="text-lg font-semibold text-wwc-neutral-900">{{ $ticket->event->name }}</h3>
@@ -128,7 +128,7 @@
                                         </div>
                                     </div>
                                     <div class="text-right">
-                                        <div class="text-xl font-bold text-wwc-neutral-900 mb-2">${{ number_format($ticket->price_paid, 2) }}</div>
+                                        <div class="text-xl font-bold text-wwc-neutral-900 mb-2">RM{{ number_format($ticket->price_paid, 0) }}</div>
                                         <div class="text-sm text-wwc-neutral-500 mb-2">Ticket #{{ $ticket->id }}</div>
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
                                             @if($ticket->status === 'Sold') bg-wwc-success text-white
@@ -164,19 +164,19 @@
                         <div class="space-y-3">
                             <div class="flex justify-between text-sm">
                                 <span class="text-wwc-neutral-600">Subtotal ({{ $order->tickets->count() }} tickets)</span>
-                                <span class="font-semibold text-wwc-neutral-900">${{ number_format($order->subtotal, 2) }}</span>
+                                <span class="font-semibold text-wwc-neutral-900">RM{{ number_format($order->subtotal, 0) }}</span>
                             </div>
                             <div class="flex justify-between text-sm">
                                 <span class="text-wwc-neutral-600">Service Fee (5%)</span>
-                                <span class="font-semibold text-wwc-neutral-900">${{ number_format($order->service_fee, 2) }}</span>
+                                <span class="font-semibold text-wwc-neutral-900">RM{{ number_format($order->service_fee, 0) }}</span>
                             </div>
                             <div class="flex justify-between text-sm">
                                 <span class="text-wwc-neutral-600">Tax (8%)</span>
-                                <span class="font-semibold text-wwc-neutral-900">${{ number_format($order->tax_amount, 2) }}</span>
+                                <span class="font-semibold text-wwc-neutral-900">RM{{ number_format($order->tax_amount, 0) }}</span>
                             </div>
                             <div class="flex justify-between text-lg font-bold border-t border-wwc-neutral-200 pt-3">
                                 <span class="text-wwc-neutral-900">Total</span>
-                                <span class="text-wwc-primary font-display">${{ number_format($order->total_amount, 2) }}</span>
+                                <span class="text-wwc-primary font-display">RM{{ number_format($order->total_amount, 0) }}</span>
                             </div>
                         </div>
                     </div>
@@ -194,7 +194,7 @@
                         <div class="space-y-3">
                             <a href="{{ route('customer.tickets') }}" 
                                class="w-full inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-wwc-primary hover:bg-wwc-primary-light hover:text-wwc-primary-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
-                                <i class='bx bx-ticket text-sm mr-2'></i>
+                                <i class='bx bx-receipt text-sm mr-2'></i>
                                 View All Tickets
                             </a>
                             <a href="{{ route('customer.orders') }}" 

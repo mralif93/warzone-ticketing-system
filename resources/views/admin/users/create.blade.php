@@ -8,7 +8,7 @@
         <!-- Header -->
         <div class="mb-8">
             <div class="flex items-center">
-                <a href="{{ route('admin.users') }}" class="mr-4 text-gray-400 hover:text-gray-600">
+                <a href="{{ route('admin.users.index') }}" class="mr-4 text-gray-400 hover:text-gray-600">
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                     </svg>
@@ -149,7 +149,7 @@
                 <!-- Form Actions -->
                 <div class="px-4 py-3 bg-gray-50 text-right sm:px-6 sm:rounded-b-lg">
                     <div class="flex justify-end space-x-3">
-                        <a href="{{ route('admin.users') }}" 
+                        <a href="{{ route('admin.users.index') }}" 
                            class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             Cancel
                         </a>

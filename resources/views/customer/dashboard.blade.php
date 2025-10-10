@@ -70,7 +70,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-wwc-neutral-600">Total Spent</p>
-                        <p class="text-2xl font-bold text-wwc-neutral-900">${{ number_format($orderStats['total_spent'], 2) }}</p>
+                        <p class="text-2xl font-bold text-wwc-neutral-900">RM{{ number_format($orderStats['total_spent'], 0) }}</p>
                     </div>
                 </div>
             </div>
@@ -181,7 +181,7 @@
                                     <p class="text-xs text-wwc-neutral-500">{{ $ticket->event->date_time->format('M j, Y') }} • {{ $ticket->seat_identifier }}</p>
                                 </div>
                                 <div class="flex items-center space-x-2">
-                                    <span class="text-sm font-semibold text-wwc-neutral-900">${{ number_format($ticket->price_paid, 2) }}</span>
+                                    <span class="text-sm font-semibold text-wwc-neutral-900">RM{{ number_format($ticket->price_paid, 0) }}</span>
                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
                                         @if($ticket->status === 'Sold') bg-wwc-success text-white
                                         @elseif($ticket->status === 'Held') bg-wwc-warning text-white

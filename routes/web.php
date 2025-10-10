@@ -41,6 +41,16 @@ Route::middleware(['auth', 'log.activity'])->group(function () {
         }
         return redirect()->route('customer.dashboard');
     })->name('dashboard');
+
+    // Test route for SweetAlert (remove in production)
+    Route::get('/test-alert', function () {
+        return redirect()->route('admin.dashboard')->with('success', 'Test alert message!');
+    })->name('test.alert');
+
+    // Test route for logout alert (remove in production)
+    Route::get('/test-logout-alert', function () {
+        return redirect()->route('login')->with('success', 'Test logout alert message!');
+    })->name('test.logout.alert');
     
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -78,25 +88,23 @@ Route::middleware(['auth', 'log.activity'])->group(function () {
         // User management
         Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
         Route::post('/users/{user}/update-password', [\App\Http\Controllers\Admin\UserController::class, 'updatePassword'])->name('users.update-password');
+        Route::post('/users/{user}/update-status', [\App\Http\Controllers\Admin\UserController::class, 'updateStatus'])->name('users.update-status');
         
         // Order management
-        Route::get('/orders', [\App\Http\Controllers\Admin\OrderController::class, 'index'])->name('orders.index');
-        Route::get('/orders/{order}', [\App\Http\Controllers\Admin\OrderController::class, 'show'])->name('orders.show');
+        Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class);
         Route::post('/orders/{order}/update-status', [\App\Http\Controllers\Admin\OrderController::class, 'updateStatus'])->name('orders.update-status');
         Route::post('/orders/{order}/cancel', [\App\Http\Controllers\Admin\OrderController::class, 'cancel'])->name('orders.cancel');
         Route::post('/orders/{order}/refund', [\App\Http\Controllers\Admin\OrderController::class, 'refund'])->name('orders.refund');
         
         // Ticket management
-        Route::get('/tickets', [\App\Http\Controllers\Admin\TicketController::class, 'index'])->name('tickets.index');
-        Route::get('/tickets/{ticket}', [\App\Http\Controllers\Admin\TicketController::class, 'show'])->name('tickets.show');
+        Route::resource('tickets', \App\Http\Controllers\Admin\TicketController::class);
         Route::post('/tickets/{ticket}/update-status', [\App\Http\Controllers\Admin\TicketController::class, 'updateStatus'])->name('tickets.update-status');
         Route::post('/tickets/{ticket}/cancel', [\App\Http\Controllers\Admin\TicketController::class, 'cancel'])->name('tickets.cancel');
         Route::post('/tickets/{ticket}/mark-used', [\App\Http\Controllers\Admin\TicketController::class, 'markUsed'])->name('tickets.mark-used');
         Route::post('/tickets/bulk-update', [\App\Http\Controllers\Admin\TicketController::class, 'bulkUpdate'])->name('tickets.bulk-update');
         
         // Payment management
-        Route::get('/payments', [\App\Http\Controllers\Admin\PaymentController::class, 'index'])->name('payments.index');
-        Route::get('/payments/{payment}', [\App\Http\Controllers\Admin\PaymentController::class, 'show'])->name('payments.show');
+        Route::resource('payments', \App\Http\Controllers\Admin\PaymentController::class);
         Route::post('/payments/{payment}/update-status', [\App\Http\Controllers\Admin\PaymentController::class, 'updateStatus'])->name('payments.update-status');
         Route::post('/payments/{payment}/refund', [\App\Http\Controllers\Admin\PaymentController::class, 'refund'])->name('payments.refund');
         Route::get('/payments/export/csv', [\App\Http\Controllers\Admin\PaymentController::class, 'export'])->name('payments.export');
@@ -113,7 +121,8 @@ Route::middleware(['auth', 'log.activity'])->group(function () {
         Route::post('/audit-logs/clear', [\App\Http\Controllers\Admin\AuditLogController::class, 'clear'])->name('audit-logs.clear');
         
         // Reports
-        Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
+        Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports');
+        Route::get('/reports/export', [\App\Http\Controllers\Admin\ReportController::class, 'export'])->name('reports.export');
         
         // Price Zone management
         Route::resource('price-zones', \App\Http\Controllers\Admin\PriceZoneController::class);

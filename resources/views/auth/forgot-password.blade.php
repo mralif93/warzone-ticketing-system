@@ -19,66 +19,99 @@
 </div>
 
 <!-- Forgot Password Form Section -->
-<div class="py-16 bg-white">
-    <div class="max-w-md mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="bg-white rounded-2xl shadow-lg border border-wwc-neutral-200 p-8">
-            <form method="POST" action="{{ route('forgot-password') }}" class="space-y-6">
-                @csrf
-                
-                @if (session('status'))
-                    <div class="bg-wwc-success-light border border-wwc-success text-wwc-success px-4 py-3 rounded-lg">
-                        <div class="flex">
-                            <div class="flex-shrink-0">
-                                <svg class="h-5 w-5 text-wwc-success" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                            <div class="ml-3">
-                                <p class="text-sm font-medium">{{ session('status') }}</p>
-                            </div>
-                        </div>
+<div class="py-20 bg-gradient-to-br from-gray-50 to-white">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Professional Forgot Password Card -->
+        <div class="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
+            <!-- Card Header -->
+            <div class="bg-gradient-to-r from-wwc-primary to-wwc-primary-dark px-8 py-6">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                        <i class='bx bx-key text-white text-xl'></i>
                     </div>
-                @endif
-
-                @if ($errors->any())
-                    <div class="bg-wwc-error-light border border-wwc-error text-wwc-error px-4 py-3 rounded-lg">
-                        <ul class="list-disc list-inside text-sm">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
+                    <div>
+                        <h2 class="text-xl font-bold text-white">Reset Password</h2>
+                        <p class="text-wwc-primary-light text-sm">We'll send you a secure reset link</p>
                     </div>
-                @endif
-
-                <div>
-                    <label for="email" class="block text-sm font-medium text-wwc-neutral-700 mb-2">
-                        Email Address
-                    </label>
-                    <input type="email" 
-                           id="email" 
-                           name="email" 
-                           value="{{ old('email') }}"
-                           class="w-full px-4 py-3 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-transparent @error('email') border-wwc-error @enderror"
-                           placeholder="Enter your email address"
-                           required 
-                           autofocus>
-                    @error('email')
-                        <p class="mt-1 text-sm text-wwc-error">{{ $message }}</p>
-                    @enderror
                 </div>
+            </div>
 
-                <div class="bg-wwc-neutral-50 rounded-lg p-4">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-wwc-primary" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                            </svg>
+            <!-- Card Body -->
+            <div class="px-8 py-8">
+                <form method="POST" action="{{ route('forgot-password') }}" class="space-y-6">
+                    @csrf
+                    
+                    @if (session('status'))
+                        <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <i class='bx bx-check-circle text-green-400 text-lg'></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-green-800 mb-1">
+                                        Reset Link Sent!
+                                    </h3>
+                                    <p class="text-sm text-green-700">{{ session('status') }}</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="ml-3">
-                            <h3 class="text-sm font-medium text-wwc-neutral-800">
-                                What happens next?
-                            </h3>
-                            <div class="mt-2 text-sm text-wwc-neutral-600">
+                    @endif
+
+                    @if ($errors->any())
+                        <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <i class='bx bx-error-circle text-red-400 text-lg'></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-red-800 mb-2">
+                                        Please correct the following errors:
+                                    </h3>
+                                    <ul class="text-sm text-red-700 space-y-1">
+                                        @foreach ($errors->all() as $error)
+                                            <li class="flex items-center">
+                                                <i class='bx bx-x text-red-500 mr-2'></i>
+                                                {{ $error }}
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Email Field -->
+                    <div class="space-y-2">
+                        <label for="email" class="block text-sm font-semibold text-gray-800">
+                            Email Address
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class='bx bx-envelope text-gray-400'></i>
+                            </div>
+                            <input type="email" 
+                                   id="email" 
+                                   name="email" 
+                                   value="{{ old('email') }}"
+                                   class="block w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary transition-all duration-200 bg-gray-50 focus:bg-white focus:caret-wwc-primary @error('email') border-red-300 focus:border-red-500 focus:ring-red-500 @enderror"
+                                   placeholder="Enter your email address"
+                                   required 
+                                   autofocus>
+                        </div>
+                        @error('email')
+                            <p class="mt-2 text-sm text-red-600 flex items-center">
+                                <i class='bx bx-error text-red-500 mr-1'></i>
+                                {{ $message }}
+                            </p>
+                        @enderror
+                    </div>
+
+                    <!-- Information Card -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <i class='bx bx-info-circle text-blue-500 text-lg mr-3 mt-0.5'></i>
+                            <div class="text-sm text-blue-700">
+                                <h3 class="font-medium mb-2">What happens next?</h3>
                                 <ul class="list-disc list-inside space-y-1">
                                     <li>We'll send a secure reset link to your email</li>
                                     <li>Click the link to create a new password</li>
@@ -87,29 +120,37 @@
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <button type="submit" 
-                        class="w-full bg-wwc-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-wwc-primary-dark transition-colors duration-200 focus:ring-2 focus:ring-wwc-primary focus:ring-offset-2">
-                    Send Reset Link
-                </button>
-            </form>
-
-            <div class="mt-6">
-                <div class="relative">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-wwc-neutral-300"></div>
+                    <!-- Submit Button -->
+                    <div class="pt-4">
+                        <button type="submit" 
+                                class="w-full bg-gradient-to-r from-wwc-primary to-wwc-primary-dark text-white px-6 py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 focus:ring-4 focus:ring-wwc-primary/30 focus:outline-none">
+                            <div class="flex items-center justify-center space-x-2">
+                                <i class='bx bx-send text-xl'></i>
+                                <span>Send Reset Link</span>
+                            </div>
+                        </button>
                     </div>
-                    <div class="relative flex justify-center text-sm">
-                        <span class="px-2 bg-white text-wwc-neutral-500">Remember your password?</span>
-                    </div>
-                </div>
+                </form>
 
-                <div class="mt-6">
-                    <a href="{{ route('login') }}" 
-                       class="w-full flex justify-center py-3 px-4 border border-wwc-neutral-300 rounded-lg shadow-sm bg-white text-sm font-medium text-wwc-neutral-700 hover:bg-wwc-neutral-50 transition-colors duration-200">
-                        Back to Sign In
-                    </a>
+                <!-- Login Link -->
+                <div class="mt-8">
+                    <div class="relative">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-200"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-4 bg-white text-gray-500 font-medium">Remember your password?</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <a href="{{ route('login') }}" 
+                           class="w-full flex items-center justify-center py-4 px-6 border-2 border-gray-200 rounded-xl shadow-sm bg-white text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 group">
+                            <i class='bx bx-log-in text-lg mr-2 group-hover:text-wwc-primary transition-colors duration-200'></i>
+                            Back to Sign In
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

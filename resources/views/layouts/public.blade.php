@@ -223,6 +223,27 @@
             @yield('content')
         </main>
 
+        <!-- SweetAlert Success Message -->
+        @if(session('success'))
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    console.log('SweetAlert: Success message detected:', '{{ session('success') }}');
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: '{{ session('success') }}',
+                        confirmButtonColor: '#DC2626',
+                        confirmButtonText: 'Continue',
+                        timer: 3000,
+                        timerProgressBar: true,
+                        showConfirmButton: true,
+                        allowOutsideClick: false,
+                        allowEscapeKey: true
+                    });
+                });
+            </script>
+        @endif
+
         <!-- Footer -->
         <footer class="bg-wwc-neutral-900 text-white">
             <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">

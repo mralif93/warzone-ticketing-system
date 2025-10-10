@@ -20,6 +20,9 @@
     <!-- Alpine.js CDN -->
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
+    <!-- SweetAlert2 for beautiful alerts -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <script>
         tailwind.config = {
             theme: {
@@ -127,6 +130,23 @@
                         @endif
                     </a>
 
+                    <!-- Users -->
+                    <a href="{{ route('admin.users.index') }}" 
+                       class="group flex items-center px-4 py-4 text-sm font-semibold rounded-xl transition-all duration-300 {{ request()->routeIs('admin.users*') ? 'bg-gradient-to-r from-wwc-primary-light to-red-100 text-wwc-primary shadow-lg border border-red-200' : 'text-wwc-neutral-600 hover:bg-wwc-neutral-50 hover:text-wwc-neutral-900 hover:shadow-md' }}">
+                        <div class="flex-shrink-0 mr-4">
+                            <div class="h-10 w-10 rounded-xl flex items-center justify-center {{ request()->routeIs('admin.users*') ? 'bg-wwc-primary-light' : 'bg-wwc-neutral-100 group-hover:bg-wwc-neutral-200' }} transition-colors duration-300">
+                                <i class='bx bx-group text-lg {{ request()->routeIs('admin.users*') ? 'text-wwc-primary' : 'text-wwc-neutral-500 group-hover:text-wwc-neutral-700' }}'></i>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="font-semibold">Users</div>
+                            <div class="text-xs text-wwc-neutral-500 mt-0.5">User Management</div>
+                        </div>
+                        @if(request()->routeIs('admin.users*'))
+                        <div class="h-2 w-2 bg-wwc-primary rounded-full"></div>
+                        @endif
+                    </a>
+
                     <!-- Events -->
                     <a href="{{ route('admin.events.index') }}" 
                        class="group flex items-center px-4 py-4 text-sm font-semibold rounded-xl transition-all duration-300 {{ request()->routeIs('admin.events*') ? 'bg-gradient-to-r from-wwc-primary-light to-red-100 text-wwc-primary shadow-lg border border-red-200' : 'text-wwc-neutral-600 hover:bg-wwc-neutral-50 hover:text-wwc-neutral-900 hover:shadow-md' }}">
@@ -229,22 +249,6 @@
                         @endif
                     </a>
 
-                    <!-- Users -->
-                    <a href="{{ route('admin.users.index') }}" 
-                       class="group flex items-center px-4 py-4 text-sm font-semibold rounded-xl transition-all duration-300 {{ request()->routeIs('admin.users*') ? 'bg-gradient-to-r from-wwc-primary-light to-red-100 text-wwc-primary shadow-lg border border-red-200' : 'text-wwc-neutral-600 hover:bg-wwc-neutral-50 hover:text-wwc-neutral-900 hover:shadow-md' }}">
-                        <div class="flex-shrink-0 mr-4">
-                            <div class="h-10 w-10 rounded-xl flex items-center justify-center {{ request()->routeIs('admin.users*') ? 'bg-wwc-primary-light' : 'bg-wwc-neutral-100 group-hover:bg-wwc-neutral-200' }} transition-colors duration-300">
-                                <i class='bx bx-group text-lg {{ request()->routeIs('admin.users*') ? 'text-wwc-primary' : 'text-wwc-neutral-500 group-hover:text-wwc-neutral-700' }}'></i>
-                            </div>
-                        </div>
-                        <div class="flex-1">
-                            <div class="font-semibold">Users</div>
-                            <div class="text-xs text-wwc-neutral-500 mt-0.5">User Management</div>
-                        </div>
-                        @if(request()->routeIs('admin.users*'))
-                        <div class="h-2 w-2 bg-wwc-primary rounded-full"></div>
-                        @endif
-                    </a>
 
                     <!-- Reports -->
                     <a href="{{ route('admin.reports') }}" 
@@ -344,13 +348,44 @@
         <div class="flex-1 flex flex-col min-w-0">
             <!-- Top bar -->
             <header class="bg-white shadow-sm border-b border-wwc-neutral-200">
-                <div class="flex items-center justify-end h-16 px-8 w-full">
+                <div class="flex items-center justify-between h-16 px-8 w-full">
                     <!-- Mobile menu button -->
-                    <div class="lg:hidden absolute left-4">
+                    <div class="lg:hidden">
                         <button type="button" class="p-2 rounded-md text-wwc-neutral-400 hover:text-wwc-neutral-500 hover:bg-wwc-neutral-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-wwc-primary" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
                             <i class='bx bx-menu text-2xl'></i>
                         </button>
                     </div>
+
+                    <!-- Page Title and Subtitle -->
+                    <div class="flex-1 lg:flex-none">
+                        @hasSection('page-header')
+                            <div class="flex items-center">
+                                <div class="h-10 w-10 rounded-lg bg-wwc-primary-light flex items-center justify-center mr-3">
+                                    <i class='bx bx-calendar-event text-xl text-wwc-primary'></i>
+                                </div>
+                                <div class="flex flex-col">
+                                    @yield('page-header')
+                                </div>
+                            </div>
+                        @else
+                            <div class="flex items-center">
+                                <div class="h-10 w-10 rounded-lg bg-wwc-primary-light flex items-center justify-center mr-3">
+                                    <i class='bx bx-calendar-event text-xl text-wwc-primary'></i>
+                                </div>
+                                <div class="flex flex-col">
+                                    <h1 class="text-xl font-bold text-wwc-neutral-900 font-display">@yield('title', 'Admin Dashboard')</h1>
+                                    <p class="text-sm text-wwc-neutral-600 font-medium">@yield('page-subtitle', 'Manage your system')</p>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Page Actions -->
+                    @hasSection('page-actions')
+                        <div class="hidden lg:block mr-4">
+                            @yield('page-actions')
+                        </div>
+                    @endif
 
                     <!-- User Profile Dropdown -->
                     <div class="flex items-center space-x-3">
@@ -393,12 +428,19 @@
 
                 <!-- Mobile menu -->
                 <div id="mobile-menu" class="hidden lg:hidden border-t border-gray-200 bg-white">
+                    <!-- Mobile Page Actions -->
+                    @hasSection('page-actions')
+                        <div class="px-4 py-3 border-b border-gray-200">
+                            @yield('page-actions')
+                        </div>
+                    @endif
+                    
                     <div class="px-2 pt-2 pb-3 space-y-1">
                         <a href="{{ route('admin.dashboard') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Dashboard</a>
+                        <a href="{{ route('admin.users.index') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Users</a>
                         <a href="{{ route('admin.events.index') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Events</a>
                         <a href="{{ route('admin.tickets.index') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Tickets</a>
                         <a href="{{ route('admin.orders.index') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Orders</a>
-                        <a href="{{ route('admin.users.index') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Users</a>
                         <a href="{{ route('admin.reports') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Reports</a>
                         <a href="{{ route('admin.settings') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Settings</a>
                     </div>
@@ -408,39 +450,56 @@
             <!-- Page content -->
             <main class="flex-1 overflow-y-auto bg-gray-50">
                 <!-- Flash messages -->
-                @if(session('success'))
-                    <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-6 rounded-r-lg">
-                        <div class="flex">
-                            <div class="flex-shrink-0">
-                                <i class='bx bx-check-circle text-lg text-green-400'></i>
-                            </div>
-                            <div class="ml-3">
-                                <p class="text-sm text-green-700 font-medium">{{ session('success') }}</p>
-                            </div>
-                        </div>
-                    </div>
-                @endif
 
                 @if(session('error'))
-                    <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded-r-lg">
+                    <div class="bg-red-50 border-l-4 border-red-400 px-6 py-5 mb-6 rounded-r-lg m-6">
                         <div class="flex">
                             <div class="flex-shrink-0">
                                 <i class='bx bx-x-circle text-lg text-red-400'></i>
                             </div>
-                            <div class="ml-3">
+                            <div class="ml-4">
                                 <p class="text-sm text-red-700 font-medium">{{ session('error') }}</p>
                             </div>
                         </div>
                     </div>
                 @endif
 
+                <!-- SweetAlert Success Message -->
+                @if(session('success'))
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            console.log('SweetAlert: Success message detected:', '{{ session('success') }}');
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: '{{ session('success') }}',
+                                confirmButtonColor: '#DC2626',
+                                confirmButtonText: 'Continue',
+                                timer: 3000,
+                                timerProgressBar: true,
+                                showConfirmButton: true,
+                                allowOutsideClick: false,
+                                allowEscapeKey: true
+                            });
+                        });
+                    </script>
+                @endif
+
+                <!-- Debug: Check if session success exists -->
+                @if(config('app.debug'))
+                    <script>
+                        console.log('Debug: Session success =', '{{ session('success') }}');
+                        console.log('Debug: Session data =', @json(session()->all()));
+                    </script>
+                @endif
+
                 @if($errors->any())
-                    <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded-r-lg">
+                    <div class="bg-red-50 border-l-4 border-red-400 px-6 py-5 mb-6 rounded-r-lg m-6">
                         <div class="flex">
                             <div class="flex-shrink-0">
                                 <i class='bx bx-x-circle text-lg text-red-400'></i>
                             </div>
-                            <div class="ml-3">
+                            <div class="ml-4">
                                 <div class="text-sm text-red-700">
                                     <ul class="list-disc list-inside space-y-1">
                                         @foreach($errors->all() as $error)

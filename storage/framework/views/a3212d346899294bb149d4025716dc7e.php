@@ -9,25 +9,13 @@
     <div class="px-6 py-6">
         <div class="mx-auto">
             <!-- Header Section -->
-            <div class="flex justify-between items-center mb-6">
-                <div class="flex items-center">
-                    <div class="h-12 w-12 rounded-2xl bg-wwc-primary-light flex items-center justify-center mr-4">
-                        <i class='bx bx-plus text-2xl text-wwc-primary'></i>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl font-bold text-wwc-neutral-900 font-display">Create New Event</h1>
-                        <p class="mt-1 text-sm text-wwc-neutral-600 font-medium">Set up a new event for ticket sales</p>
-                    </div>
-                </div>
-                <div>
-                    <a href="<?php echo e(route('admin.events.index')); ?>" 
-                       class="inline-flex items-center px-4 py-2 border border-wwc-neutral-300 shadow-sm text-sm font-semibold rounded-lg text-wwc-neutral-700 bg-white hover:bg-wwc-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
-                        <i class='bx bx-arrow-back text-sm mr-2'></i>
-                        Back to Events
-                    </a>
-                </div>
+            <div class="flex justify-end items-center mb-6">
+                <a href="<?php echo e(route('admin.events.index')); ?>" 
+                    class="inline-flex items-center px-4 py-2 border border-wwc-neutral-300 shadow-sm text-sm font-semibold rounded-lg text-wwc-neutral-700 bg-white hover:bg-wwc-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
+                    <i class='bx bx-arrow-back text-sm mr-2'></i>
+                    Back to Events
+                </a>
             </div>
-
 
             <!-- Form Section -->
             <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">

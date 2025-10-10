@@ -34,7 +34,7 @@ class UserController extends Controller
         }
 
         $users = $query->withCount(['orders', 'tickets'])
-            ->paginate(15);
+            ->paginate(10);
 
         $roles = User::select('role')->distinct()->pluck('role');
 
@@ -161,6 +161,35 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.show', $user)
             ->with('success', 'User updated successfully!');
+    }
+
+    /**
+     * Update user status
+     */
+    public function updateStatus(Request $request, User $user)
+    {
+        $request->validate([
+            'is_active' => 'required|boolean',
+        ]);
+
+        $oldValues = $user->toArray();
+        $user->is_active = $request->is_active;
+        $user->save();
+
+        // Log the status update
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'UPDATE',
+            'table_name' => 'users',
+            'record_id' => $user->id,
+            'old_values' => $oldValues,
+            'new_values' => $user->toArray(),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        $status = $user->is_active ? 'activated' : 'deactivated';
+        return back()->with('success', "User '{$user->name}' has been {$status} successfully!");
     }
 
     /**

@@ -9,32 +9,19 @@
     <div class="px-6 py-6">
         <div class="mx-auto">
             <!-- Header Section -->
-            <div class="flex justify-between items-center mb-6">
+            <div class="flex justify-end items-center mb-6">
                 <div class="flex items-center">
-                    <div class="h-12 w-12 rounded-2xl bg-wwc-primary-light flex items-center justify-center mr-4">
-                        <i class='bx bx-calendar text-2xl text-wwc-primary'></i>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl font-bold text-wwc-neutral-900 font-display"><?php echo e($event->name); ?></h1>
-                        <p class="mt-1 text-sm text-wwc-neutral-600 font-medium"><?php echo e($event->date_time->format('M j, Y \a\t g:i A')); ?> • <?php echo e($event->venue); ?></p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <!-- Action Buttons -->
-                    <div class="flex items-center space-x-2">
-                        <a href="<?php echo e(route('admin.events.index')); ?>" 
-                           class="inline-flex items-center px-3 py-2 border border-wwc-neutral-300 shadow-sm text-sm font-medium rounded-lg text-wwc-neutral-700 bg-white hover:bg-wwc-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-all duration-200">
-                            <i class='bx bx-arrow-back text-sm mr-1.5'></i>
-                            Back to Events
-                        </a>
-                    </div>
+                    <a href="<?php echo e(route('admin.events.index')); ?>" 
+                       class="inline-flex items-center px-4 py-2 border border-wwc-neutral-300 shadow-sm text-sm font-semibold rounded-lg text-wwc-neutral-700 bg-white hover:bg-wwc-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
+                        <i class='bx bx-arrow-back text-sm mr-2'></i>
+                        Back to Events
+                    </a>
                 </div>
             </div>
 
-
             <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            <!-- Event Details -->
-            <div class="xl:col-span-2">
+                <!-- Event Details -->
+                <div class="xl:col-span-2">
                     <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
                         <div class="px-6 py-4 border-b border-wwc-neutral-100">
                             <div class="flex items-center justify-between">
@@ -42,7 +29,7 @@
                                 <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
                                     <i class='bx bx-info-circle text-sm'></i>
                                     <span>Event information</span>
-                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="p-6">
@@ -189,26 +176,26 @@
             <!-- Statistics Sidebar -->
             <div class="xl:col-span-1">
                 <!-- Ticket Statistics -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 mb-6">
-                        <div class="px-6 py-4 border-b border-wwc-neutral-100">
-                            <div class="flex items-center justify-between">
-                                <h3 class="text-lg font-bold text-wwc-neutral-900">Ticket Statistics</h3>
-                                <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
-                                    <i class='bx bx-bar-chart text-sm'></i>
-                                    <span>Event metrics</span>
-                                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 mb-6">
+                    <div class="px-6 py-4 border-b border-wwc-neutral-100">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-bold text-wwc-neutral-900">Ticket Statistics</h3>
+                            <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
+                                <i class='bx bx-bar-chart text-sm'></i>
+                                <span>Event metrics</span>
                             </div>
+                        </div>
                     </div>
-                        <div class="p-6">
-                            <div class="space-y-4">
+                    <div class="p-6">
+                        <div class="space-y-4">
                             <div>
                                 <div class="flex justify-between text-sm font-semibold mb-2">
                                     <span class="text-wwc-neutral-600">Total Capacity</span>
                                     <span class="text-wwc-neutral-900"><?php echo e(number_format($ticketStats['total_capacity'])); ?></span>
                                 </div>
-                                    <div class="w-full bg-wwc-neutral-200 rounded-full h-2">
-                                        <div class="bg-wwc-primary h-2 rounded-full" style="width: 100%"></div>
-                                    </div>
+                                <div class="w-full bg-wwc-neutral-200 rounded-full h-2">
+                                    <div class="bg-wwc-primary h-2 rounded-full" style="width: 100%"></div>
+                                </div>
                             </div>
                             
                             <div>
@@ -216,9 +203,9 @@
                                     <span class="text-wwc-neutral-600">Tickets Sold</span>
                                     <span class="text-wwc-neutral-900"><?php echo e(number_format($ticketStats['tickets_sold'])); ?></span>
                                 </div>
-                                    <div class="w-full bg-wwc-neutral-200 rounded-full h-2">
-                                        <div class="bg-wwc-success h-2 rounded-full" style="width: <?php echo e($ticketStats['sold_percentage']); ?>%"></div>
-                                    </div>
+                                <div class="w-full bg-wwc-neutral-200 rounded-full h-2">
+                                    <div class="bg-wwc-success h-2 rounded-full" style="width: <?php echo e($ticketStats['sold_percentage']); ?>%"></div>
+                                </div>
                             </div>
                             
                             <div>
@@ -226,44 +213,44 @@
                                     <span class="text-wwc-neutral-600">Available</span>
                                     <span class="text-wwc-neutral-900"><?php echo e(number_format($ticketStats['tickets_available'])); ?></span>
                                 </div>
-                                    <div class="w-full bg-wwc-neutral-200 rounded-full h-2">
-                                        <div class="bg-wwc-info h-2 rounded-full" style="width: <?php echo e(100 - $ticketStats['sold_percentage']); ?>%"></div>
-                                    </div>
+                                <div class="w-full bg-wwc-neutral-200 rounded-full h-2">
+                                    <div class="bg-wwc-info h-2 rounded-full" style="width: <?php echo e(100 - $ticketStats['sold_percentage']); ?>%"></div>
+                                </div>
                             </div>
                         </div>
-                        
-                            <div class="mt-6 pt-4 border-t border-wwc-neutral-200">
+
+                        <div class="mt-6 pt-4 border-t border-wwc-neutral-200">
                             <div class="text-center">
-                                    <div class="text-3xl font-bold text-wwc-neutral-900 font-display"><?php echo e($ticketStats['sold_percentage']); ?>%</div>
+                                <div class="text-3xl font-bold text-wwc-neutral-900 font-display"><?php echo e($ticketStats['sold_percentage']); ?>%</div>
                                 <div class="text-sm text-wwc-neutral-600 font-medium">Sold</div>
-                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Quick Actions -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
-                        <div class="px-6 py-4 border-b border-wwc-neutral-100">
-                            <div class="flex items-center justify-between">
-                                <h3 class="text-lg font-bold text-wwc-neutral-900">Quick Actions</h3>
-                                <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
-                                    <i class='bx bx-cog text-sm'></i>
-                                    <span>Event actions</span>
-                                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
+                    <div class="px-6 py-4 border-b border-wwc-neutral-100">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-bold text-wwc-neutral-900">Quick Actions</h3>
+                            <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
+                                <i class='bx bx-cog text-sm'></i>
+                                <span>Event actions</span>
                             </div>
+                        </div>
                     </div>
-                        <div class="p-6">
-                            <div class="space-y-3">
+                    <div class="p-6">
+                        <div class="space-y-3">
                             <?php if($event->isOnSale()): ?>
                                 <a href="<?php echo e(route('public.tickets.select', $event)); ?>" 
-                                       class="w-full bg-wwc-success hover:bg-wwc-success-dark text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 text-center block text-sm">
+                                    class="w-full bg-wwc-success hover:bg-wwc-success-dark text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 text-center block text-sm">
                                         <i class='bx bx-receipt text-sm mr-2'></i>
                                     Buy Tickets
                                 </a>
                             <?php endif; ?>
                             
                             <a href="<?php echo e(route('admin.events.edit', $event)); ?>" 
-                                   class="w-full bg-wwc-primary hover:bg-wwc-primary-dark text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 text-center block text-sm">
+                                class="w-full bg-wwc-primary hover:bg-wwc-primary-dark text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 text-center block text-sm">
                                     <i class='bx bx-edit text-sm mr-2'></i>
                                 Edit Event
                             </a>
@@ -291,11 +278,10 @@
                             <?php endif; ?>
                             
                             <a href="<?php echo e(route('admin.events.index')); ?>" 
-                                   class="w-full bg-wwc-neutral-600 hover:bg-wwc-neutral-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 text-center block text-sm">
+                                class="w-full bg-wwc-neutral-600 hover:bg-wwc-neutral-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 text-center block text-sm">
                                     <i class='bx bx-arrow-back text-sm mr-2'></i>
                                 Back to Events
                             </a>
-                            </div>
                         </div>
                     </div>
                 </div>

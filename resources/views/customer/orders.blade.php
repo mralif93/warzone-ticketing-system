@@ -127,7 +127,7 @@
                                         
                                         <!-- Order Total and Status -->
                                         <div class="text-right flex-shrink-0">
-                                            <div class="text-xl font-bold text-wwc-neutral-900 mb-2">${{ number_format($order->total_amount, 2) }}</div>
+                                            <div class="text-xl font-bold text-wwc-neutral-900 mb-2">RM{{ number_format($order->total_amount, 0) }}</div>
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
                                                 @if($order->status === 'Completed') bg-wwc-success text-white
                                                 @elseif($order->status === 'Pending') bg-wwc-warning text-white
@@ -159,7 +159,7 @@
                                                 </div>
                                             </div>
                                             <div class="text-right">
-                                                <p class="text-sm font-semibold text-wwc-neutral-900">${{ number_format($ticket->price_paid, 2) }}</p>
+                                                <p class="text-sm font-semibold text-wwc-neutral-900">RM{{ number_format($ticket->price_paid, 0) }}</p>
                                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold
                                                     @if($ticket->status === 'Sold') bg-wwc-success text-white
                                                     @elseif($ticket->status === 'Held') bg-wwc-warning text-white
@@ -179,9 +179,9 @@
                                 <div class="border-t border-wwc-neutral-200 pt-4 mt-4">
                                     <div class="flex justify-between items-center">
                                         <div class="text-sm text-wwc-neutral-600">
-                                            <p>Subtotal: ${{ number_format($order->subtotal, 2) }}</p>
-                                            <p>Service Fee: ${{ number_format($order->service_fee, 2) }}</p>
-                                            <p>Tax: ${{ number_format($order->tax_amount, 2) }}</p>
+                                            <p>Subtotal: RM{{ number_format($order->subtotal, 0) }}</p>
+                                            <p>Service Fee: RM{{ number_format($order->service_fee, 0) }}</p>
+                                            <p>Tax: RM{{ number_format($order->tax_amount, 0) }}</p>
                                         </div>
                                         <div class="text-right">
                                             <a href="{{ route('customer.orders.show', $order) }}" 

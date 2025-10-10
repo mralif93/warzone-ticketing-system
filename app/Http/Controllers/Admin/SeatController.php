@@ -28,9 +28,9 @@ class SeatController extends Controller
             });
         }
 
-        // Filter by status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
+        // Filter by accessibility
+        if ($request->filled('is_accessible')) {
+            $query->where('is_accessible', $request->is_accessible);
         }
 
         // Filter by price zone
@@ -44,11 +44,11 @@ class SeatController extends Controller
         }
 
         $seats = $query->latest()->paginate(15);
-        $statuses = Seat::select('status')->distinct()->pluck('status');
+        $accessibilityOptions = ['1' => 'Accessible', '0' => 'Standard'];
         $priceZones = PriceZone::active()->ordered()->pluck('name');
         $seatTypes = Seat::select('seat_type')->distinct()->pluck('seat_type');
 
-        return view('admin.seats.index', compact('seats', 'statuses', 'priceZones', 'seatTypes'));
+        return view('admin.seats.index', compact('seats', 'accessibilityOptions', 'priceZones', 'seatTypes'));
     }
 
     /**

@@ -43,7 +43,12 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
-            return redirect()->intended(route('dashboard'))->with('success', 'Login successful!');
+            // Redirect based on user role to preserve session message
+            if (auth()->user()->hasRole('Administrator')) {
+                return redirect()->intended(route('admin.dashboard'))->with('success', 'Login successful!');
+            } else {
+                return redirect()->intended(route('customer.dashboard'))->with('success', 'Login successful!');
+            }
         }
 
         return back()->withErrors([
@@ -69,25 +74,25 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
+            'phone' => 'required|string|max:20',
             'password' => ['required', 'string', 'confirmed', new StrongPassword],
-            'phone' => 'nullable|string|max:20',
-            'department' => 'nullable|string|max:100',
+            'terms' => 'required|accepted',
         ]);
 
         $user = User::create([
-            'name' => $request->name,
+            'name' => $request->first_name . ' ' . $request->last_name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'phone' => $request->phone,
-            'department' => $request->department,
-            'role' => 'customer', // Default role
+            'role' => 'Customer', // Default role
         ]);
 
         Auth::login($user);
 
-        return redirect()->route('dashboard')->with('success', 'Registration successful! Welcome to Warzone Ticketing System.');
+        return redirect()->route('customer.dashboard')->with('success', 'Registration successful! Welcome to Warzone Ticketing System.');
     }
 
     /**
@@ -169,6 +174,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login');
+        return redirect()->route('login')->with('success', 'You have been successfully logged out!');
     }
 }

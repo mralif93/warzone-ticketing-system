@@ -1,30 +1,14 @@
 @extends('layouts.admin')
 
 @section('title', 'Event Management')
-@section('page-title', 'Events')
+@section('page-subtitle', 'Manage all events and ticket sales')
 
 @section('content')
 <!-- Professional Event Management with WWC Brand Design -->
 <div class="min-h-screen bg-wwc-neutral-50">
-
     <!-- Main Content -->
     <div class="px-6 py-6">
         <div class="mx-auto">
-            <!-- Header Section -->
-            <div class="flex justify-between items-center mb-6">
-                <div>
-                    <h1 class="text-2xl font-bold text-wwc-neutral-900 font-display">Event Management</h1>
-                    <p class="mt-1 text-sm text-wwc-neutral-600 font-medium">Manage all events and ticket sales</p>
-                </div>
-                <div>
-                    <a href="{{ route('admin.events.create') }}" 
-                       class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-semibold rounded-lg text-white bg-wwc-primary hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
-                        <i class='bx bx-plus text-sm mr-2'></i>
-                        Create New Event
-                    </a>
-                </div>
-            </div>
-
             <!-- Statistics Cards -->
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
                 <!-- Total Events -->
@@ -42,8 +26,8 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="h-12 w-12 rounded-lg bg-wwc-primary-light flex items-center justify-center">
-                            <i class='bx bx-calendar text-2xl text-wwc-primary'></i>
+                        <div class="h-12 w-12 rounded-lg bg-red-100 flex items-center justify-center">
+                            <i class='bx bx-calendar text-2xl text-red-600'></i>
                         </div>
                     </div>
                 </div>
@@ -61,8 +45,8 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="h-12 w-12 rounded-lg bg-wwc-success-light flex items-center justify-center">
-                            <i class='bx bx-dollar text-2xl text-wwc-success'></i>
+                        <div class="h-12 w-12 rounded-lg bg-green-100 flex items-center justify-center">
+                            <i class='bx bx-dollar text-2xl text-green-600'></i>
                         </div>
                     </div>
                 </div>
@@ -80,8 +64,8 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="h-12 w-12 rounded-lg bg-wwc-error-light flex items-center justify-center">
-                            <i class='bx bx-error text-2xl text-wwc-error'></i>
+                        <div class="h-12 w-12 rounded-lg bg-red-100 flex items-center justify-center">
+                            <i class='bx bx-error text-2xl text-red-600'></i>
                         </div>
                     </div>
                 </div>
@@ -101,8 +85,8 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="h-12 w-12 rounded-lg bg-wwc-accent-light flex items-center justify-center">
-                            <i class='bx bx-dollar text-2xl text-wwc-accent'></i>
+                        <div class="h-12 w-12 rounded-lg bg-orange-100 flex items-center justify-center">
+                            <i class='bx bx-dollar text-2xl text-orange-600'></i>
                         </div>
                     </div>
                 </div>
@@ -162,6 +146,15 @@
                 </div>
             </div>
 
+            <!-- Header Section with Create Button -->
+            <div class="flex justify-end items-center mb-6">
+                <a href="{{ route('admin.events.create') }}" 
+                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-semibold rounded-lg text-white bg-wwc-primary hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
+                    <i class='bx bx-plus text-sm mr-2'></i>
+                    Create New Event
+                </a>
+            </div>
+
             <!-- Events List -->
             @if($events->count() > 0)
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
@@ -209,9 +202,9 @@
                                         <div class="flex-shrink-0 h-10 w-10">
                                                 <div class="h-10 w-10 rounded-lg bg-wwc-primary-light flex items-center justify-center">
                                                     <i class='bx bx-calendar text-lg text-wwc-primary'></i>
-                                                </div>
                                             </div>
-                                            <div class="ml-4">
+                                        </div>
+                                        <div class="ml-4">
                                                 <div class="text-sm font-semibold text-wwc-neutral-900">{{ $event->name }}</div>
                                         </div>
                                     </div>
@@ -230,9 +223,9 @@
                                             @elseif($event->status === 'Cancelled') bg-red-100 text-red-800
                                             @elseif($event->status === 'Draft') bg-gray-100 text-gray-800
                                             @else bg-yellow-100 text-yellow-800
-                                            @endif">
-                                            {{ $event->status }}
-                                        </span>
+                                        @endif">
+                                        {{ $event->status }}
+                                    </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm font-semibold text-wwc-neutral-900">{{ \App\Models\Ticket::where('event_id', $event->id)->where('status', 'Sold')->count() }}</div>
@@ -242,7 +235,7 @@
                                         <div class="text-sm font-semibold text-wwc-neutral-900">RM{{ number_format($event->tickets()->where('status', 'Sold')->sum('price_paid'), 0) }}</div>
                                         <div class="text-xs text-wwc-neutral-500">total revenue</div>
                                 </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div class="flex items-center justify-end space-x-1">
                                         <a href="{{ route('admin.events.show', $event) }}" 
                                                class="inline-flex items-center px-3 py-2 text-xs font-semibold text-white bg-wwc-primary hover:bg-wwc-primary-dark rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
@@ -323,7 +316,7 @@
                     </table>
                 </div>
                 <!-- Pagination -->
-                    <div class="px-6 py-4 border-t border-wwc-neutral-100 bg-wwc-neutral-50">
+                <div class="px-6 py-4 border-t border-wwc-neutral-100">
                     {{ $events->links() }}
                 </div>
             </div>

@@ -1,237 +1,278 @@
 @extends('layouts.admin')
-@section('page-title', 'Order Management')
+
 @section('title', 'Order Details')
+@section('page-title', 'Order Details')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-6">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="mb-8">
-            <div class="flex items-center justify-between">
+<!-- Professional Order Details with WWC Brand Design -->
+<div class="min-h-screen bg-wwc-neutral-50">
+
+    <!-- Main Content -->
+    <div class="px-6 py-6">
+        <div class="mx-auto">
+            <!-- Header Section -->
+            <div class="flex justify-end items-center mb-6">
                 <div class="flex items-center">
-                    <a href="{{ route('admin.orders.index') }}" class="mr-4 text-gray-400 hover:text-gray-600">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                        </svg>
+                    <a href="{{ route('admin.orders.index') }}" 
+                       class="inline-flex items-center px-4 py-2 border border-wwc-neutral-300 shadow-sm text-sm font-semibold rounded-lg text-wwc-neutral-700 bg-white hover:bg-wwc-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
+                        <i class='bx bx-arrow-back text-sm mr-2'></i>
+                        Back to Orders
                     </a>
-                    <div>
-                        <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-                            Order #{{ $order->id }}
-                        </h2>
-                        <p class="mt-1 text-sm text-gray-500">
-                            Order details and ticket information
-                        </p>
-                    </div>
-                </div>
-                <div class="flex space-x-3">
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
-                        @if($order->status === 'Completed') bg-green-100 text-green-800
-                        @elseif($order->status === 'Pending') bg-yellow-100 text-yellow-800
-                        @elseif($order->status === 'Cancelled') bg-red-100 text-red-800
-                        @elseif($order->status === 'Refunded') bg-blue-100 text-blue-800
-                        @else bg-gray-100 text-gray-800
-                        @endif">
-                        {{ $order->status }}
-                    </span>
                 </div>
             </div>
-        </div>
 
-        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <!-- Order Information -->
-            <div class="lg:col-span-2">
-                <!-- Customer Information -->
-                <div class="bg-white shadow rounded-lg mb-6">
-                    <div class="px-4 py-5 sm:p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Customer Information</h3>
-                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Customer Name</dt>
-                                <dd class="text-sm text-gray-900">{{ $order->user->name }}</dd>
-                            </div>
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Email</dt>
-                                <dd class="text-sm text-gray-900">{{ $order->user->email }}</dd>
-                            </div>
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Phone</dt>
-                                <dd class="text-sm text-gray-900">{{ $order->user->phone_number ?: 'Not provided' }}</dd>
-                            </div>
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Role</dt>
-                                <dd class="text-sm text-gray-900">{{ $order->user->role }}</dd>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
                 <!-- Order Details -->
-                <div class="bg-white shadow rounded-lg mb-6">
-                    <div class="px-4 py-5 sm:p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Order Details</h3>
-                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Order ID</dt>
-                                <dd class="text-sm text-gray-900">#{{ $order->id }}</dd>
-                            </div>
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Order Date</dt>
-                                <dd class="text-sm text-gray-900">{{ $order->created_at->format('M d, Y g:i A') }}</dd>
-                            </div>
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Payment Method</dt>
-                                <dd class="text-sm text-gray-900">{{ $order->payment_method }}</dd>
-                            </div>
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Total Amount</dt>
-                                <dd class="text-sm text-gray-900 font-medium">RM{{ number_format($order->total_amount, 0) }}</dd>
+                <div class="xl:col-span-2">
+                    <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
+                        <div class="px-6 py-4 border-b border-wwc-neutral-100">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-bold text-wwc-neutral-900">Order Details</h3>
+                                <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
+                                    <i class='bx bx-info-circle text-sm'></i>
+                                    <span>Order information</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Tickets -->
-                <div class="bg-white shadow rounded-lg">
-                    <div class="px-4 py-5 sm:p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Tickets ({{ $order->tickets->count() }})</h3>
-                        @if($order->tickets->count() > 0)
+                        <div class="p-6">
                             <div class="space-y-4">
-                                @foreach($order->tickets as $ticket)
-                                <div class="border border-gray-200 rounded-lg p-4">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex-1">
-                                            <div class="flex items-center space-x-4">
-                                                <div class="flex-shrink-0">
-                                                    <div class="h-12 w-12 bg-indigo-100 rounded-lg flex items-center justify-center">
-                                                        <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
-                                                        </svg>
-                                                    </div>
-                                                </div>
-                                                <div class="flex-1 min-w-0">
-                                                    <div class="text-sm font-medium text-gray-900">{{ $ticket->event->title }}</div>
-                                                    <div class="text-sm text-gray-500">
-                                                        Seat: {{ $ticket->seat->row }}{{ $ticket->seat->number }} 
-                                                        ({{ $ticket->seat->price_zone }})
-                                                    </div>
-                                                    <div class="text-sm text-gray-500">
-                                                        {{ $ticket->event->event_date->format('M d, Y g:i A') }}
-                                                    </div>
-                                                </div>
-                                                <div class="text-right">
-                                                    <div class="text-sm font-medium text-gray-900">RM{{ number_format($ticket->price_paid, 0) }}</div>
-                                                    <div class="text-sm text-gray-500">
-                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                                            @if($ticket->status === 'Sold') bg-green-100 text-green-800
-                                                            @elseif($ticket->status === 'Held') bg-yellow-100 text-yellow-800
-                                                            @elseif($ticket->status === 'Cancelled') bg-red-100 text-red-800
-                                                            @else bg-gray-100 text-gray-800
-                                                            @endif">
-                                                            {{ $ticket->status }}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="ml-4">
-                                            <a href="{{ route('admin.tickets.show', $ticket) }}" 
-                                               class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
-                                                View Ticket
-                                            </a>
+                                <!-- Order Number -->
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                                            <i class='bx bx-receipt text-sm text-blue-600'></i>
                                         </div>
                                     </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Order Number</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">{{ $order->order_number }}</span>
+                                    </div>
                                 </div>
-                                @endforeach
-                            </div>
-                        @else
-                            <div class="text-center py-4">
-                                <p class="text-sm text-gray-500">No tickets found for this order</p>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
 
-            <!-- Order Summary -->
-            <div class="lg:col-span-1">
-                <!-- Order Summary -->
-                <div class="bg-white shadow rounded-lg mb-6">
-                    <div class="px-4 py-5 sm:p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Order Summary</h3>
-                        <dl class="space-y-3">
-                            <div class="flex justify-between">
-                                <dt class="text-sm text-gray-500">Subtotal</dt>
-                                <dd class="text-sm text-gray-900">RM{{ number_format($order->total_amount, 0) }}</dd>
-                            </div>
-                            <div class="flex justify-between">
-                                <dt class="text-sm text-gray-500">Tax</dt>
-                                <dd class="text-sm text-gray-900">RM0</dd>
-                            </div>
-                            <div class="flex justify-between">
-                                <dt class="text-sm text-gray-500">Processing Fee</dt>
-                                <dd class="text-sm text-gray-900">RM0</dd>
-                            </div>
-                            <div class="border-t border-gray-200 pt-3">
-                                <div class="flex justify-between">
-                                    <dt class="text-base font-medium text-gray-900">Total</dt>
-                                    <dd class="text-base font-medium text-gray-900">RM{{ number_format($order->total_amount, 0) }}</dd>
+                                <!-- Customer Name -->
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-green-100 flex items-center justify-center">
+                                            <i class='bx bx-user text-sm text-green-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Customer Name</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">{{ $order->customer_name }}</span>
+                                    </div>
                                 </div>
-                            </div>
-                        </dl>
-                    </div>
-                </div>
 
-                <!-- Payment Information -->
-                @if($order->payments->count() > 0)
-                <div class="bg-white shadow rounded-lg mb-6">
-                    <div class="px-4 py-5 sm:p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Payment Information</h3>
-                        @foreach($order->payments as $payment)
-                        <div class="space-y-3">
-                            <div class="flex justify-between">
-                                <dt class="text-sm text-gray-500">Payment ID</dt>
-                                <dd class="text-sm text-gray-900">#{{ $payment->id }}</dd>
-                            </div>
-                            <div class="flex justify-between">
-                                <dt class="text-sm text-gray-500">Amount</dt>
-                                <dd class="text-sm text-gray-900">RM{{ number_format($payment->amount, 0) }}</dd>
-                            </div>
-                            <div class="flex justify-between">
-                                <dt class="text-sm text-gray-500">Status</dt>
-                                <dd class="text-sm text-gray-900">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                        @if($payment->status === 'Completed') bg-green-100 text-green-800
-                                        @elseif($payment->status === 'Pending') bg-yellow-100 text-yellow-800
-                                        @elseif($payment->status === 'Failed') bg-red-100 text-red-800
-                                        @else bg-gray-100 text-gray-800
-                                        @endif">
-                                        {{ $payment->status }}
-                                    </span>
-                                </dd>
-                            </div>
-                            <div class="flex justify-between">
-                                <dt class="text-sm text-gray-500">Date</dt>
-                                <dd class="text-sm text-gray-900">{{ $payment->created_at->format('M d, Y g:i A') }}</dd>
+                                <!-- Customer Email -->
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                                            <i class='bx bx-envelope text-sm text-purple-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Customer Email</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">{{ $order->customer_email }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Customer Phone -->
+                                @if($order->customer_phone)
+                                    <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                        <div class="flex-shrink-0 mr-4">
+                                            <div class="h-8 w-8 rounded-lg bg-orange-100 flex items-center justify-center">
+                                                <i class='bx bx-phone text-sm text-orange-600'></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1 flex items-center justify-between">
+                                            <span class="text-sm font-semibold text-wwc-neutral-600">Customer Phone</span>
+                                            <span class="text-base font-medium text-wwc-neutral-900">{{ $order->customer_phone }}</span>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <!-- Subtotal -->
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                            <i class='bx bx-dollar text-sm text-emerald-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Subtotal</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">RM{{ number_format($order->subtotal, 0) }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Service Fee -->
+                                @if($order->service_fee > 0)
+                                    <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                        <div class="flex-shrink-0 mr-4">
+                                            <div class="h-8 w-8 rounded-lg bg-yellow-100 flex items-center justify-center">
+                                                <i class='bx bx-cog text-sm text-yellow-600'></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1 flex items-center justify-between">
+                                            <span class="text-sm font-semibold text-wwc-neutral-600">Service Fee</span>
+                                            <span class="text-base font-medium text-wwc-neutral-900">RM{{ number_format($order->service_fee, 0) }}</span>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <!-- Tax Amount -->
+                                @if($order->tax_amount > 0)
+                                    <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                        <div class="flex-shrink-0 mr-4">
+                                            <div class="h-8 w-8 rounded-lg bg-indigo-100 flex items-center justify-center">
+                                                <i class='bx bx-calculator text-sm text-indigo-600'></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1 flex items-center justify-between">
+                                            <span class="text-sm font-semibold text-wwc-neutral-600">Tax Amount</span>
+                                            <span class="text-base font-medium text-wwc-neutral-900">RM{{ number_format($order->tax_amount, 0) }}</span>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <!-- Total Amount -->
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-teal-100 flex items-center justify-center">
+                                            <i class='bx bx-credit-card text-sm text-teal-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Total Amount</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">RM{{ number_format($order->total_amount, 0) }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Status -->
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-gray-100 flex items-center justify-center">
+                                            <i class='bx bx-check-circle text-sm text-gray-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Status</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">
+                                            @if($order->status === 'Paid')
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                    <i class='bx bx-check text-xs mr-1'></i>
+                                                    Paid
+                                                </span>
+                                            @elseif($order->status === 'Pending')
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                    <i class='bx bx-time text-xs mr-1'></i>
+                                                    Pending
+                                                </span>
+                                            @elseif($order->status === 'Cancelled')
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                    <i class='bx bx-x text-xs mr-1'></i>
+                                                    Cancelled
+                                                </span>
+                                            @elseif($order->status === 'Refunded')
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                                    <i class='bx bx-undo text-xs mr-1'></i>
+                                                    Refunded
+                                                </span>
+                                            @endif
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Notes -->
+                                @if($order->notes)
+                                    <div class="flex items-center py-3">
+                                        <div class="flex-shrink-0 mr-4">
+                                            <div class="h-8 w-8 rounded-lg bg-gray-100 flex items-center justify-center">
+                                                <i class='bx bx-note text-sm text-gray-600'></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1 flex items-center justify-between">
+                                            <span class="text-sm font-semibold text-wwc-neutral-600">Notes</span>
+                                            <span class="text-base font-medium text-wwc-neutral-900">{{ $order->notes }}</span>
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
                         </div>
-                        @endforeach
                     </div>
                 </div>
-                @endif
 
-                <!-- Order Actions -->
-                <div class="bg-white shadow rounded-lg">
-                    <div class="px-4 py-5 sm:p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Actions</h3>
-                        <div class="space-y-3">
-                            <a href="{{ route('admin.users.show', $order->user) }}" 
-                               class="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                View Customer
-                            </a>
-                            <a href="{{ route('admin.tickets.index') }}?order={{ $order->id }}" 
-                               class="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                View All Tickets
-                            </a>
+                <!-- Sidebar -->
+                <div class="space-y-6">
+                    <!-- Order Statistics -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
+                        <div class="px-6 py-4 border-b border-wwc-neutral-100">
+                            <h3 class="text-lg font-bold text-wwc-neutral-900">Order Statistics</h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-4">
+                                <!-- Created Date -->
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-wwc-neutral-900">{{ $order->created_at->format('M d, Y') }}</div>
+                                    <div class="text-sm text-wwc-neutral-500">Created Date</div>
+                                </div>
+                                <!-- Updated Date -->
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-wwc-neutral-900">{{ $order->updated_at->format('M d, Y') }}</div>
+                                    <div class="text-sm text-wwc-neutral-500">Last Updated</div>
+                                </div>
+                                <!-- Tickets Count -->
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-wwc-neutral-900">{{ $order->tickets->count() }}</div>
+                                    <div class="text-sm text-wwc-neutral-500">Tickets</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
+                        <div class="px-6 py-4 border-b border-wwc-neutral-100">
+                            <h3 class="text-lg font-bold text-wwc-neutral-900">Quick Actions</h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-3">
+                                <a href="{{ route('admin.orders.edit', $order) }}" 
+                                   class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-wwc-primary hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
+                                    <i class='bx bx-edit text-sm mr-2'></i>
+                                    Edit Order
+                                </a>
+                                @if($order->status === 'Pending')
+                                    <form action="{{ route('admin.orders.update-status', $order) }}" method="POST" class="block">
+                                        @csrf
+                                        <input type="hidden" name="status" value="Paid">
+                                        <button type="submit" 
+                                                class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
+                                            <i class='bx bx-check text-sm mr-2'></i>
+                                            Mark as Paid
+                                        </button>
+                                    </form>
+                                @endif
+                                @if($order->status === 'Paid')
+                                    <a href="{{ route('admin.orders.refund', $order) }}" 
+                                       class="w-full inline-flex items-center justify-center px-4 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm text-sm font-semibold text-wwc-neutral-700 bg-white hover:bg-wwc-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200"
+                                       onclick="return confirm('Are you sure you want to refund this order?')">
+                                        <i class='bx bx-undo text-sm mr-2'></i>
+                                        Refund Order
+                                    </a>
+                                @endif
+                                @if($order->status !== 'Paid')
+                                    <a href="{{ route('admin.orders.cancel', $order) }}" 
+                                       class="w-full inline-flex items-center justify-center px-4 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm text-sm font-semibold text-wwc-neutral-700 bg-white hover:bg-wwc-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200"
+                                       onclick="return confirm('Are you sure you want to cancel this order?')">
+                                        <i class='bx bx-x text-sm mr-2'></i>
+                                        Cancel Order
+                                    </a>
+                                @endif
+                                <a href="{{ route('admin.orders.index') }}" 
+                                   class="w-full inline-flex items-center justify-center px-4 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm text-sm font-semibold text-wwc-neutral-700 bg-white hover:bg-wwc-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
+                                    <i class='bx bx-list-ul text-sm mr-2'></i>
+                                    View All Orders
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>

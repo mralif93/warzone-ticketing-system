@@ -4,263 +4,247 @@
 @section('page-title', 'Ticket Details')
 
 @section('content')
-<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="mb-8">
-            <div class="flex items-center justify-between">
+<!-- Professional Ticket Details with WWC Brand Design -->
+<div class="min-h-screen bg-wwc-neutral-50">
+
+    <!-- Main Content -->
+    <div class="px-6 py-6">
+        <div class="mx-auto">
+            <!-- Header Section -->
+            <div class="flex justify-end items-center mb-6">
                 <div class="flex items-center">
-                    <a href="{{ route('admin.tickets.index') }}" class="mr-4 text-gray-400 hover:text-gray-600">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                        </svg>
+                    <a href="{{ route('admin.tickets.index') }}" 
+                       class="inline-flex items-center px-4 py-2 border border-wwc-neutral-300 shadow-sm text-sm font-semibold rounded-lg text-wwc-neutral-700 bg-white hover:bg-wwc-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
+                        <i class='bx bx-arrow-back text-sm mr-2'></i>
+                        Back to Tickets
                     </a>
-                    <div>
-                        <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-                            Ticket #{{ $ticket->id }}
-                        </h2>
-                        <p class="mt-1 text-sm text-gray-500">
-                            Ticket details and admittance information
-                        </p>
-                    </div>
-                </div>
-                <div class="flex space-x-3">
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
-                        @if($ticket->status === 'Sold') bg-green-100 text-green-800
-                        @elseif($ticket->status === 'Held') bg-yellow-100 text-yellow-800
-                        @elseif($ticket->status === 'Cancelled') bg-red-100 text-red-800
-                        @elseif($ticket->status === 'Used') bg-blue-100 text-blue-800
-                        @else bg-gray-100 text-gray-800
-                        @endif">
-                        {{ $ticket->status }}
-                    </span>
                 </div>
             </div>
-        </div>
 
-        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <!-- Ticket Information -->
-            <div class="lg:col-span-2">
-                <!-- Event Information -->
-                <div class="bg-white shadow rounded-lg mb-6">
-                    <div class="px-4 py-5 sm:p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Event Information</h3>
-                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Event Title</dt>
-                                <dd class="text-sm text-gray-900">{{ $ticket->event->name }}</dd>
-                            </div>
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Event Date</dt>
-                                <dd class="text-sm text-gray-900">{{ $ticket->event->date_time->format('M d, Y g:i A') }}</dd>
-                            </div>
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Venue</dt>
-                                <dd class="text-sm text-gray-900">{{ $ticket->event->venue }}</dd>
-                            </div>
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Status</dt>
-                                <dd class="text-sm text-gray-900">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                        @if($ticket->event->status === 'On Sale') bg-green-100 text-green-800
-                                        @elseif($ticket->event->status === 'Sold Out') bg-red-100 text-red-800
-                                        @elseif($ticket->event->status === 'Cancelled') bg-gray-100 text-gray-800
-                                        @else bg-yellow-100 text-yellow-800
-                                        @endif">
-                                        {{ $ticket->event->status }}
-                                    </span>
-                                </dd>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Seat Information -->
-                <div class="bg-white shadow rounded-lg mb-6">
-                    <div class="px-4 py-5 sm:p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Seat Information</h3>
-                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Seat Number</dt>
-                                <dd class="text-sm text-gray-900">{{ $ticket->seat->row }}{{ $ticket->seat->number }}</dd>
-                            </div>
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Price Zone</dt>
-                                <dd class="text-sm text-gray-900">{{ $ticket->seat->price_zone }}</dd>
-                            </div>
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Section</dt>
-                                <dd class="text-sm text-gray-900">{{ $ticket->seat->section }}</dd>
-                            </div>
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Price Paid</dt>
-                                <dd class="text-sm text-gray-900 font-medium">RM{{ number_format($ticket->price_paid, 0) }}</dd>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Customer Information -->
-                @if($ticket->order && $ticket->order->user)
-                <div class="bg-white shadow rounded-lg mb-6">
-                    <div class="px-4 py-5 sm:p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Customer Information</h3>
-                        <div class="flex items-center space-x-4">
-                            <div class="flex-shrink-0 h-12 w-12">
-                                <div class="h-12 w-12 rounded-full bg-indigo-500 flex items-center justify-center">
-                                    <span class="text-lg font-medium text-white">
-                                        {{ substr($ticket->order->user->name, 0, 1) }}
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="text-sm font-medium text-gray-900">{{ $ticket->order->user->name }}</div>
-                                <div class="text-sm text-gray-500">{{ $ticket->order->user->email }}</div>
-                                <div class="text-sm text-gray-500">{{ $ticket->order->user->phone_number ?: 'No phone provided' }}</div>
-                            </div>
-                            <div>
-                                <a href="{{ route('admin.users.show', $ticket->order->user) }}" 
-                                   class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
-                                    View Customer
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                @endif
-
-                <!-- Admittance Logs -->
-                @if($ticket->admittanceLogs->count() > 0)
-                <div class="bg-white shadow rounded-lg">
-                    <div class="px-4 py-5 sm:p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Admittance History</h3>
-                        <div class="space-y-3">
-                            @foreach($ticket->admittanceLogs as $log)
-                            <div class="flex items-center justify-between py-2 border-b border-gray-200 last:border-b-0">
-                                <div class="flex items-center space-x-3">
-                                    <div class="flex-shrink-0">
-                                        <div class="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
-                                            <svg class="h-4 w-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900">
-                                            {{ $log->scan_result }} - Gate {{ $log->gate_id }}
-                                        </div>
-                                        <div class="text-sm text-gray-500">{{ $log->scan_time->format('M d, Y g:i A') }}</div>
-                                    </div>
-                                </div>
-                                <div class="text-sm text-gray-500">
-                                    {{ $log->scan_time->diffForHumans() }}
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-                @endif
-            </div>
-
-            <!-- Ticket Summary -->
-            <div class="lg:col-span-1">
-                <!-- QR Code -->
-                <div class="bg-white shadow rounded-lg mb-6">
-                    <div class="px-4 py-5 sm:p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">QR Code</h3>
-                        <div class="text-center">
-                            <div class="inline-block p-4 bg-gray-100 rounded-lg">
-                                <div class="text-xs font-mono text-gray-600 break-all">
-                                    {{ $ticket->qrcode }}
-                                </div>
-                            </div>
-                            <p class="mt-2 text-xs text-gray-500">Scan this code for admittance</p>
-                        </div>
-                    </div>
-                </div>
-
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
                 <!-- Ticket Details -->
-                <div class="bg-white shadow rounded-lg mb-6">
-                    <div class="px-4 py-5 sm:p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Ticket Details</h3>
-                        <dl class="space-y-3">
-                            <div class="flex justify-between">
-                                <dt class="text-sm text-gray-500">Ticket ID</dt>
-                                <dd class="text-sm text-gray-900">#{{ $ticket->id }}</dd>
+                <div class="xl:col-span-2">
+                    <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
+                        <div class="px-6 py-4 border-b border-wwc-neutral-100">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-bold text-wwc-neutral-900">Ticket Details</h3>
+                                <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
+                                    <i class='bx bx-info-circle text-sm'></i>
+                                    <span>Ticket information</span>
+                                </div>
                             </div>
-                            <div class="flex justify-between">
-                                <dt class="text-sm text-gray-500">Price Paid</dt>
-                                <dd class="text-sm text-gray-900">RM{{ number_format($ticket->price_paid, 0) }}</dd>
-                            </div>
-                            <div class="flex justify-between">
-                                <dt class="text-sm text-gray-500">Purchase Date</dt>
-                                <dd class="text-sm text-gray-900">{{ $ticket->created_at->format('M d, Y') }}</dd>
-                            </div>
-                            @if($ticket->hold_until)
-                            <div class="flex justify-between">
-                                <dt class="text-sm text-gray-500">Hold Until</dt>
-                                <dd class="text-sm text-gray-900">{{ $ticket->hold_until->format('M d, Y g:i A') }}</dd>
-                            </div>
-                            @endif
-                        </dl>
-                    </div>
-                </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-4">
+                                <!-- Ticket ID -->
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                                            <i class='bx bx-receipt text-sm text-blue-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Ticket ID</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">#{{ $ticket->id }}</span>
+                                    </div>
+                                </div>
 
-                <!-- Order Information -->
-                @if($ticket->order)
-                <div class="bg-white shadow rounded-lg mb-6">
-                    <div class="px-4 py-5 sm:p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Order Information</h3>
-                        <dl class="space-y-3">
-                            <div class="flex justify-between">
-                                <dt class="text-sm text-gray-500">Order ID</dt>
-                                <dd class="text-sm text-gray-900">#{{ $ticket->order->id }}</dd>
+                                <!-- QR Code -->
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-green-100 flex items-center justify-center">
+                                            <i class='bx bx-qr-scan text-sm text-green-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">QR Code</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900 font-mono">{{ $ticket->qrcode }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Event -->
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-orange-100 flex items-center justify-center">
+                                            <i class='bx bx-calendar text-sm text-orange-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Event</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">{{ $ticket->event->name }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Seat -->
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                                            <i class='bx bx-chair text-sm text-purple-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Seat</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">{{ $ticket->seat->row }}{{ $ticket->seat->number }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Price Zone -->
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-red-100 flex items-center justify-center">
+                                            <i class='bx bx-tag text-sm text-red-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Price Zone</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">{{ $ticket->seat->price_zone }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Price Paid -->
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-gray-100 flex items-center justify-center">
+                                            <i class='bx bx-dollar text-sm text-gray-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Price Paid</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">RM{{ number_format($ticket->price_paid, 0) }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Status -->
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                                            <i class='bx bx-check-circle text-sm text-blue-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Status</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">{{ $ticket->status }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Customer -->
+                                @if($ticket->order && $ticket->order->user)
+                                <div class="flex items-center py-3">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-indigo-100 flex items-center justify-center">
+                                            <i class='bx bx-user text-sm text-indigo-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Customer</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">{{ $ticket->order->user->name }}</span>
+                                    </div>
+                                </div>
+                                @endif
                             </div>
-                            <div class="flex justify-between">
-                                <dt class="text-sm text-gray-500">Order Status</dt>
-                                <dd class="text-sm text-gray-900">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                        @if($ticket->order->status === 'Completed') bg-green-100 text-green-800
-                                        @elseif($ticket->order->status === 'Pending') bg-yellow-100 text-yellow-800
-                                        @elseif($ticket->order->status === 'Cancelled') bg-red-100 text-red-800
-                                        @else bg-gray-100 text-gray-800
-                                        @endif">
-                                        {{ $ticket->order->status }}
-                                    </span>
-                                </dd>
-                            </div>
-                            <div class="flex justify-between">
-                                <dt class="text-sm text-gray-500">Total Amount</dt>
-                                <dd class="text-sm text-gray-900">${{ number_format($ticket->order->total_amount, 2) }}</dd>
-                            </div>
-                        </dl>
-                        <div class="mt-4">
-                            <a href="{{ route('admin.orders.show', $ticket->order) }}" 
-                               class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
-                                View Full Order →
-                            </a>
                         </div>
                     </div>
                 </div>
-                @endif
 
-                <!-- Actions -->
-                <div class="bg-white shadow rounded-lg">
-                    <div class="px-4 py-5 sm:p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Actions</h3>
-                        <div class="space-y-3">
-                            @if($ticket->order)
-                                <a href="{{ route('admin.orders.show', $ticket->order) }}" 
-                                   class="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                    View Order
+                <!-- Ticket Statistics -->
+                <div class="xl:col-span-1">
+                    <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
+                        <div class="px-6 py-4 border-b border-wwc-neutral-100">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-bold text-wwc-neutral-900">Ticket Statistics</h3>
+                                <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
+                                    <i class='bx bx-bar-chart text-sm'></i>
+                                    <span>Ticket overview</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-6">
+                                <!-- Created Date -->
+                                <div class="text-center">
+                                    <div class="text-3xl font-bold text-wwc-neutral-900 font-display">{{ $ticket->created_at->format('M j') }}</div>
+                                    <div class="text-sm text-wwc-neutral-600 font-medium">Created</div>
+                                </div>
+
+                                <!-- Order ID -->
+                                @if($ticket->order)
+                                <div class="text-center">
+                                    <div class="text-3xl font-bold text-wwc-neutral-900 font-display">#{{ $ticket->order->id }}</div>
+                                    <div class="text-sm text-wwc-neutral-600 font-medium">Order ID</div>
+                                </div>
+                                @endif
+
+                                <!-- Event Date -->
+                                <div class="text-center">
+                                    <div class="text-3xl font-bold text-wwc-neutral-900 font-display">{{ $ticket->event->date_time->format('M j') }}</div>
+                                    <div class="text-sm text-wwc-neutral-600 font-medium">Event Date</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="mt-6 bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
+                        <div class="px-6 py-4 border-b border-wwc-neutral-100">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-bold text-wwc-neutral-900">Quick Actions</h3>
+                                <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
+                                    <i class='bx bx-cog text-sm'></i>
+                                    <span>Ticket actions</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-3">
+                                <a href="{{ route('admin.tickets.edit', $ticket) }}" 
+                                   class="w-full bg-wwc-primary hover:bg-wwc-primary-dark text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 text-center block text-sm">
+                                    <i class='bx bx-edit text-sm mr-2'></i>
+                                    Edit Ticket
                                 </a>
-                            @endif
-                            @if($ticket->order && $ticket->order->user)
-                                <a href="{{ route('admin.users.show', $ticket->order->user) }}" 
-                                   class="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                    View Customer
-                                </a>
-                            @endif
+                                
+                                @if($ticket->status === 'Sold')
+                                    <form action="{{ route('admin.tickets.mark-used', $ticket) }}" method="POST" class="block">
+                                        @csrf
+                                        <button type="submit" 
+                                                class="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 text-center block text-sm">
+                                            <i class='bx bx-qr-scan text-sm mr-2'></i>
+                                            Mark as Used
+                                        </button>
+                                    </form>
+                                @elseif($ticket->status === 'Held')
+                                    <form action="{{ route('admin.tickets.update-status', $ticket) }}" method="POST" class="block">
+                                        @csrf
+                                        <input type="hidden" name="status" value="Sold">
+                                        <button type="submit" 
+                                                class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 text-center block text-sm">
+                                            <i class='bx bx-check text-sm mr-2'></i>
+                                            Mark as Sold
+                                        </button>
+                                    </form>
+                                @endif
+
+                                @if($ticket->order)
+                                    <a href="{{ route('admin.orders.show', $ticket->order) }}" 
+                                       class="w-full bg-wwc-neutral-600 hover:bg-wwc-neutral-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 text-center block text-sm">
+                                        <i class='bx bx-receipt text-sm mr-2'></i>
+                                        View Order
+                                    </a>
+                                @endif
+
+                                @if($ticket->status !== 'Used')
+                                    <form action="{{ route('admin.tickets.destroy', $ticket) }}" method="POST" 
+                                          onsubmit="return confirm('Are you sure you want to delete this ticket? This action cannot be undone.')" 
+                                          class="block">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" 
+                                                class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 text-center block text-sm">
+                                            <i class='bx bx-trash text-sm mr-2'></i>
+                                            Delete Ticket
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -63,6 +63,55 @@ class TicketController extends Controller
     }
 
     /**
+     * Show the form for creating a new ticket
+     */
+    public function create()
+    {
+        $events = \App\Models\Event::where('status', 'On Sale')->get();
+        $seats = \App\Models\Seat::all();
+        $orders = \App\Models\Order::with('user')->get();
+
+        return view('admin.tickets.create', compact('events', 'seats', 'orders'));
+    }
+
+    /**
+     * Store a newly created ticket
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'event_id' => 'required|exists:events,id',
+            'seat_id' => 'required|exists:seats,id',
+            'order_id' => 'required|exists:orders,id',
+            'price_paid' => 'required|numeric|min:0',
+            'status' => 'required|in:Sold,Held,Used,Cancelled',
+            'qrcode' => 'nullable|string|max:255|unique:tickets,qrcode'
+        ]);
+
+        // Generate QR code if not provided
+        if (!$request->qrcode) {
+            $request->merge(['qrcode' => 'TKT-' . strtoupper(uniqid())]);
+        }
+
+        $ticket = Ticket::create($request->all());
+
+        // Log the ticket creation
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'CREATE',
+            'table_name' => 'tickets',
+            'record_id' => $ticket->id,
+            'old_values' => null,
+            'new_values' => $ticket->toArray(),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return redirect()->route('admin.tickets.show', $ticket)
+                        ->with('success', 'Ticket created successfully!');
+    }
+
+    /**
      * Display the specified ticket
      */
     public function show(Ticket $ticket)
@@ -70,6 +119,79 @@ class TicketController extends Controller
         $ticket->load(['order.user', 'event', 'seat', 'admittanceLogs.staffUser']);
 
         return view('admin.tickets.show', compact('ticket'));
+    }
+
+    /**
+     * Show the form for editing the specified ticket
+     */
+    public function edit(Ticket $ticket)
+    {
+        $events = \App\Models\Event::where('status', 'On Sale')->get();
+        $seats = \App\Models\Seat::all();
+        $orders = \App\Models\Order::with('user')->get();
+
+        return view('admin.tickets.edit', compact('ticket', 'events', 'seats', 'orders'));
+    }
+
+    /**
+     * Update the specified ticket
+     */
+    public function update(Request $request, Ticket $ticket)
+    {
+        $request->validate([
+            'event_id' => 'required|exists:events,id',
+            'seat_id' => 'required|exists:seats,id',
+            'order_id' => 'required|exists:orders,id',
+            'price_paid' => 'required|numeric|min:0',
+            'status' => 'required|in:Sold,Held,Used,Cancelled',
+            'qrcode' => 'nullable|string|max:255|unique:tickets,qrcode,' . $ticket->id
+        ]);
+
+        $oldValues = $ticket->toArray();
+        $ticket->update($request->all());
+
+        // Log the ticket update
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'UPDATE',
+            'table_name' => 'tickets',
+            'record_id' => $ticket->id,
+            'old_values' => $oldValues,
+            'new_values' => $ticket->toArray(),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return redirect()->route('admin.tickets.show', $ticket)
+                        ->with('success', 'Ticket updated successfully!');
+    }
+
+    /**
+     * Remove the specified ticket
+     */
+    public function destroy(Ticket $ticket)
+    {
+        if ($ticket->status === 'Used') {
+            return back()->withErrors(['error' => 'Cannot delete a used ticket.']);
+        }
+
+        $oldValues = $ticket->toArray();
+        $ticket->delete();
+
+        // Log the ticket deletion
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'DELETE',
+            'table_name' => 'tickets',
+            'record_id' => $ticket->id,
+            'old_values' => $oldValues,
+            'new_values' => null,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+        ]);
+
+        return redirect()->route('admin.tickets.index')
+                        ->with('success', 'Ticket deleted successfully!');
     }
 
     /**

@@ -173,6 +173,26 @@
             @yield('content')
         </main>
 
+        <!-- SweetAlert Success Message -->
+        @if(session('success'))
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: '{{ session('success') }}',
+                        confirmButtonColor: '#DC2626',
+                        confirmButtonText: 'Continue',
+                        timer: 3000,
+                        timerProgressBar: true,
+                        showConfirmButton: true,
+                        allowOutsideClick: false,
+                        allowEscapeKey: true
+                    });
+                });
+            </script>
+        @endif
+
         <!-- Simple Footer -->
         <footer class="bg-white border-t border-wwc-neutral-200 py-4">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -185,5 +205,8 @@
 
     <!-- Alpine.js for interactivity -->
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- SweetAlert2 for beautiful alerts -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>

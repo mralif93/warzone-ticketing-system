@@ -637,7 +637,19 @@ class AdminController extends Controller
      */
     public function settings()
     {
-        return view('admin.settings.index');
+        // Default settings - in a real application, these would come from a database
+        $settings = [
+            'max_tickets_per_order' => 10,
+            'seat_hold_duration_minutes' => 10,
+            'maintenance_mode' => '0',
+            'auto_release_holds' => '1',
+            'email_notifications' => '1',
+            'admin_email' => 'admin@warzone.com',
+            'session_timeout' => 120,
+            'max_login_attempts' => 5,
+        ];
+
+        return view('admin.settings.index', compact('settings'));
     }
 
     /**

@@ -135,7 +135,7 @@
                                         
                                         <!-- Price and Status -->
                                         <div class="text-right flex-shrink-0">
-                                            <div class="text-xl font-bold text-wwc-neutral-900 mb-2">${{ number_format($ticket->price_paid, 2) }}</div>
+                                            <div class="text-xl font-bold text-wwc-neutral-900 mb-2">RM{{ number_format($ticket->price_paid, 0) }}</div>
                                             <div class="text-sm text-wwc-neutral-500 mb-2">Ticket #{{ $ticket->id }}</div>
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
                                                 @if($ticket->status === 'Sold') bg-wwc-success text-white

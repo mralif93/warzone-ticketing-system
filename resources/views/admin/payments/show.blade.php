@@ -1,245 +1,246 @@
 @extends('layouts.admin')
 
 @section('title', 'Payment Details')
+@section('page-title', 'Payment Details')
 
 @section('content')
-<div class="space-y-6">
-    <!-- Header -->
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-3xl font-bold text-wwc-neutral-900 font-display">Payment Details</h1>
-            <p class="text-wwc-neutral-600 mt-1">Transaction ID: {{ $payment->transaction_id }}</p>
-        </div>
-        <div class="flex items-center space-x-3">
-            <a href="{{ route('admin.payments.index') }}" 
-               class="inline-flex items-center px-4 py-2 bg-wwc-neutral-100 text-wwc-neutral-700 rounded-xl text-sm font-semibold hover:bg-wwc-neutral-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-neutral-500 transition-colors duration-200">
-                <i class='bx bx-arrow-back text-lg mr-2'></i>
-                Back to Payments
-            </a>
-        </div>
-    </div>
+<!-- Professional Payment Details with WWC Brand Design -->
+<div class="min-h-screen bg-wwc-neutral-50">
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Payment Information -->
-        <div class="lg:col-span-2 space-y-6">
-            <!-- Payment Details Card -->
-            <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-semibold text-wwc-neutral-900 font-display">Payment Information</h2>
-                    @switch($payment->status)
-                        @case('Completed')
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-wwc-success-light text-wwc-success">
-                                <i class='bx bx-check text-sm mr-1'></i>
-                                Completed
-                            </span>
-                            @break
-                        @case('Pending')
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-wwc-warning-light text-wwc-warning">
-                                <i class='bx bx-time text-sm mr-1'></i>
-                                Pending
-                            </span>
-                            @break
-                        @case('Failed')
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-wwc-error-light text-wwc-error">
-                                <i class='bx bx-x text-sm mr-1'></i>
-                                Failed
-                            </span>
-                            @break
-                        @case('Refunded')
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-wwc-neutral-100 text-wwc-neutral-800">
-                                <i class='bx bx-undo text-sm mr-1'></i>
-                                Refunded
-                            </span>
-                            @break
-                    @endswitch
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Transaction ID</label>
-                        <p class="text-wwc-neutral-700 font-mono text-sm">{{ $payment->transaction_id }}</p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Payment Method</label>
-                        <p class="text-wwc-neutral-700">{{ $payment->payment_method }}</p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Amount</label>
-                        <p class="text-2xl font-bold text-wwc-neutral-900">RM{{ number_format($payment->amount, 0) }}</p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Payment Date</label>
-                        <p class="text-wwc-neutral-700">{{ $payment->created_at->format('M j, Y g:i A') }}</p>
-                    </div>
-                    @if($payment->refund_amount > 0)
-                    <div>
-                        <label class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Refund Amount</label>
-                        <p class="text-lg font-semibold text-wwc-error">RM{{ number_format($payment->refund_amount, 0) }}</p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Refund Date</label>
-                        <p class="text-wwc-neutral-700">{{ $payment->refunded_at ? \Carbon\Carbon::parse($payment->refunded_at)->format('M j, Y g:i A') : 'N/A' }}</p>
-                    </div>
-                    @endif
-                </div>
-
-                @if($payment->refund_reason)
-                <div class="mt-6">
-                    <label class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Refund Reason</label>
-                    <p class="text-wwc-neutral-700 bg-wwc-neutral-50 p-3 rounded-xl">{{ $payment->refund_reason }}</p>
-                </div>
-                @endif
-            </div>
-
-            <!-- Order Information -->
-            @if($payment->order)
-            <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-6">
-                <h2 class="text-xl font-semibold text-wwc-neutral-900 font-display mb-6">Order Information</h2>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Order Number</label>
-                        <p class="text-wwc-neutral-700 font-mono text-sm">{{ $payment->order->order_number }}</p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Order Status</label>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                            @if($payment->order->status === 'Paid') bg-wwc-success-light text-wwc-success
-                            @elseif($payment->order->status === 'Pending') bg-wwc-warning-light text-wwc-warning
-                            @elseif($payment->order->status === 'Cancelled') bg-wwc-error-light text-wwc-error
-                            @else bg-wwc-neutral-100 text-wwc-neutral-800 @endif">
-                            {{ $payment->order->status }}
-                        </span>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Order Date</label>
-                        <p class="text-wwc-neutral-700">{{ $payment->order->created_at->format('M j, Y g:i A') }}</p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Total Amount</label>
-                        <p class="text-lg font-semibold text-wwc-neutral-900">RM{{ number_format($payment->order->total_amount, 0) }}</p>
-                    </div>
-                </div>
-
-                <div class="mt-6">
-                    <a href="{{ route('admin.orders.show', $payment->order) }}" 
-                       class="inline-flex items-center px-4 py-2 bg-wwc-primary text-white rounded-xl text-sm font-semibold hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
-                        <i class='bx bx-receipt text-lg mr-2'></i>
-                        View Order Details
+    <!-- Main Content -->
+    <div class="px-6 py-6">
+        <div class="mx-auto">
+            <!-- Header Section -->
+            <div class="flex justify-end items-center mb-6">
+                <div class="flex items-center">
+                    <a href="{{ route('admin.payments.index') }}" 
+                       class="inline-flex items-center px-4 py-2 border border-wwc-neutral-300 shadow-sm text-sm font-semibold rounded-lg text-wwc-neutral-700 bg-white hover:bg-wwc-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
+                        <i class='bx bx-arrow-back text-sm mr-2'></i>
+                        Back to Payments
                     </a>
                 </div>
             </div>
-            @endif
-        </div>
 
-        <!-- Sidebar -->
-        <div class="space-y-6">
-            <!-- Customer Information -->
-            @if($payment->order && $payment->order->user)
-            <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-6">
-                <h3 class="text-lg font-semibold text-wwc-neutral-900 font-display mb-4">Customer</h3>
-                
-                <div class="space-y-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-wwc-neutral-500 mb-1">Name</label>
-                        <p class="text-wwc-neutral-900">{{ $payment->order->user->name }}</p>
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <!-- Payment Details -->
+                <div class="xl:col-span-2">
+                    <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
+                        <div class="px-6 py-4 border-b border-wwc-neutral-100">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-bold text-wwc-neutral-900">Payment Details</h3>
+                                <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
+                                    <i class='bx bx-info-circle text-sm'></i>
+                                    <span>Payment information</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-4">
+                                <!-- Transaction ID -->
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                                            <i class='bx bx-credit-card text-sm text-blue-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Transaction ID</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">{{ $payment->transaction_id }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Order ID -->
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-green-100 flex items-center justify-center">
+                                            <i class='bx bx-receipt text-sm text-green-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Order ID</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">#{{ $payment->order_id }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Customer -->
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                                            <i class='bx bx-user text-sm text-purple-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Customer</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">{{ $payment->order->user->name ?? 'Guest' }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Amount -->
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                            <i class='bx bx-dollar text-sm text-emerald-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Amount</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">RM{{ number_format($payment->amount, 0) }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Payment Method -->
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-orange-100 flex items-center justify-center">
+                                            <i class='bx bx-credit-card text-sm text-orange-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Payment Method</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">{{ $payment->payment_method }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Status -->
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-yellow-100 flex items-center justify-center">
+                                            <i class='bx bx-check-circle text-sm text-yellow-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Status</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">
+                                            @switch($payment->status)
+                                                @case('Completed')
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                        Completed
+                                                    </span>
+                                                    @break
+                                                @case('Pending')
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                        Pending
+                                                    </span>
+                                                    @break
+                                                @case('Failed')
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                        Failed
+                                                    </span>
+                                                    @break
+                                                @case('Refunded')
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                                        Refunded
+                                                    </span>
+                                                    @break
+                                            @endswitch
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Payment Date -->
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-indigo-100 flex items-center justify-center">
+                                            <i class='bx bx-calendar text-sm text-indigo-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Payment Date</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">
+                                            {{ $payment->payment_date ? $payment->payment_date->format('M d, Y h:i A') : 'Not set' }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Refund Information -->
+                                @if($payment->refund_amount)
+                                    <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                        <div class="flex-shrink-0 mr-4">
+                                            <div class="h-8 w-8 rounded-lg bg-red-100 flex items-center justify-center">
+                                                <i class='bx bx-undo text-sm text-red-600'></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1 flex items-center justify-between">
+                                            <span class="text-sm font-semibold text-wwc-neutral-600">Refund Amount</span>
+                                            <span class="text-base font-medium text-wwc-neutral-900">RM{{ number_format($payment->refund_amount, 0) }}</span>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <!-- Notes -->
+                                @if($payment->notes)
+                                    <div class="flex items-center py-3">
+                                        <div class="flex-shrink-0 mr-4">
+                                            <div class="h-8 w-8 rounded-lg bg-teal-100 flex items-center justify-center">
+                                                <i class='bx bx-note text-sm text-teal-600'></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1 flex items-center justify-between">
+                                            <span class="text-sm font-semibold text-wwc-neutral-600">Notes</span>
+                                            <span class="text-base font-medium text-wwc-neutral-900">{{ $payment->notes }}</span>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-wwc-neutral-500 mb-1">Email</label>
-                        <p class="text-wwc-neutral-700 text-sm">{{ $payment->order->user->email }}</p>
-                    </div>
-                    @if($payment->order->user->phone_number)
-                    <div>
-                        <label class="block text-xs font-semibold text-wwc-neutral-500 mb-1">Phone</label>
-                        <p class="text-wwc-neutral-700 text-sm">{{ $payment->order->user->phone_number }}</p>
-                    </div>
-                    @endif
                 </div>
 
-                <div class="mt-4">
-                    <a href="{{ route('admin.users.show', $payment->order->user) }}" 
-                       class="inline-flex items-center px-3 py-2 bg-wwc-neutral-100 text-wwc-neutral-700 rounded-xl text-sm font-semibold hover:bg-wwc-neutral-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-neutral-500 transition-colors duration-200">
-                        <i class='bx bx-user text-sm mr-2'></i>
-                        View Profile
-                    </a>
-                </div>
-            </div>
-            @endif
+                <!-- Sidebar -->
+                <div class="space-y-6">
+                    <!-- Payment Statistics -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
+                        <div class="px-6 py-4 border-b border-wwc-neutral-100">
+                            <h3 class="text-lg font-bold text-wwc-neutral-900">Payment Statistics</h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-4">
+                                <!-- Created Date -->
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-wwc-neutral-900">{{ $payment->created_at->format('M d, Y') }}</div>
+                                    <div class="text-sm text-wwc-neutral-500">Created Date</div>
+                                </div>
+                                <!-- Updated Date -->
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-wwc-neutral-900">{{ $payment->updated_at->format('M d, Y') }}</div>
+                                    <div class="text-sm text-wwc-neutral-500">Last Updated</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-            <!-- Actions -->
-            <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-6">
-                <h3 class="text-lg font-semibold text-wwc-neutral-900 font-display mb-4">Actions</h3>
-                
-                <div class="space-y-3">
-                    @if($payment->status === 'Completed')
-                        <button onclick="openRefundModal()" 
-                                class="w-full inline-flex items-center justify-center px-4 py-2 bg-wwc-error text-white rounded-xl text-sm font-semibold hover:bg-wwc-error-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-error transition-colors duration-200">
-                            <i class='bx bx-undo text-lg mr-2'></i>
-                            Process Refund
-                        </button>
-                    @endif
-
-                    @if($payment->status === 'Pending')
-                        <form method="POST" action="{{ route('admin.payments.update-status', $payment) }}" class="space-y-2">
-                            @csrf
-                            <select name="status" class="w-full px-3 py-2 border border-wwc-neutral-300 rounded-xl text-sm">
-                                <option value="Completed">Mark as Completed</option>
-                                <option value="Failed">Mark as Failed</option>
-                            </select>
-                            <button type="submit" 
-                                    class="w-full inline-flex items-center justify-center px-4 py-2 bg-wwc-primary text-white rounded-xl text-sm font-semibold hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
-                                <i class='bx bx-check text-lg mr-2'></i>
-                                Update Status
-                            </button>
-                        </form>
-                    @endif
+                    <!-- Quick Actions -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
+                        <div class="px-6 py-4 border-b border-wwc-neutral-100">
+                            <h3 class="text-lg font-bold text-wwc-neutral-900">Quick Actions</h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-3">
+                                <a href="{{ route('admin.payments.edit', $payment) }}" 
+                                   class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-wwc-primary hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
+                                    <i class='bx bx-edit text-sm mr-2'></i>
+                                    Edit Payment
+                                </a>
+                                @if($payment->status === 'Completed')
+                                    <form method="POST" action="{{ route('admin.payments.refund', $payment) }}" class="block">
+                                        @csrf
+                                        <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm text-sm font-semibold text-wwc-neutral-700 bg-white hover:bg-wwc-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
+                                            <i class='bx bx-undo text-sm mr-2'></i>
+                                            Process Refund
+                                        </button>
+                                    </form>
+                                @endif
+                                <a href="{{ route('admin.payments.index') }}" 
+                                   class="w-full inline-flex items-center justify-center px-4 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm text-sm font-semibold text-wwc-neutral-700 bg-white hover:bg-wwc-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
+                                    <i class='bx bx-list-ul text-sm mr-2'></i>
+                                    View All Payments
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<!-- Refund Modal -->
-<div id="refundModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-2xl bg-white">
-        <div class="mt-3">
-            <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-4">Process Refund</h3>
-            <form method="POST" action="{{ route('admin.payments.refund', $payment) }}">
-                @csrf
-                <div class="space-y-4">
-                    <div>
-                        <label for="refund_amount" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Refund Amount (RM)</label>
-                        <input type="number" name="refund_amount" id="refund_amount" step="0.01" min="0.01" max="{{ $payment->amount }}" value="{{ $payment->amount }}" required
-                               class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-2xl focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
-                    </div>
-                    <div>
-                        <label for="refund_reason" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Refund Reason</label>
-                        <textarea name="refund_reason" id="refund_reason" rows="3" required
-                                  class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-2xl focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm"></textarea>
-                    </div>
-                </div>
-                <div class="flex items-center justify-end space-x-3 mt-6">
-                    <button type="button" onclick="closeRefundModal()" 
-                            class="px-4 py-2 bg-wwc-neutral-100 text-wwc-neutral-700 rounded-xl text-sm font-semibold hover:bg-wwc-neutral-200">
-                        Cancel
-                    </button>
-                    <button type="submit" 
-                            class="px-4 py-2 bg-wwc-error text-white rounded-xl text-sm font-semibold hover:bg-wwc-error-dark">
-                        Process Refund
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<script>
-function openRefundModal() {
-    document.getElementById('refundModal').classList.remove('hidden');
-}
-
-function closeRefundModal() {
-    document.getElementById('refundModal').classList.add('hidden');
-}
-</script>
 @endsection

@@ -1,369 +1,405 @@
 @extends('layouts.admin')
 
-@section('title', 'Seats Management')
+@section('title', 'Seat Management')
+@section('page-subtitle', 'Manage all venue seats and pricing')
 
 @section('content')
-<div class="space-y-6">
-    <!-- Header -->
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-3xl font-bold text-wwc-neutral-900 font-display">Seats Management</h1>
-            <p class="text-wwc-neutral-600 mt-1">Manage all venue seats and pricing</p>
-        </div>
-        <div class="flex items-center space-x-3">
-            <button onclick="openBulkCreateModal()" 
-                    class="inline-flex items-center px-4 py-2 bg-wwc-accent text-white rounded-xl text-sm font-semibold hover:bg-wwc-accent-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-accent transition-colors duration-200">
-                <i class='bx bx-plus text-lg mr-2'></i>
-                Bulk Create
-            </a>
-            <a href="{{ route('admin.seats.create') }}" 
-               class="inline-flex items-center px-4 py-2 bg-wwc-primary text-white rounded-xl text-sm font-semibold hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
-                <i class='bx bx-plus text-lg mr-2'></i>
-                Add Seat
-            </a>
-        </div>
-    </div>
-
-    <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <!-- Total Seats -->
-        <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $seats->total() }}</div>
-                    <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Total Seats</div>
-                    <div class="flex items-center">
-                        <div class="flex items-center text-xs text-wwc-success font-semibold">
-                            <i class='bx bx-check text-xs mr-1'></i>
-                            {{ $seats->where('status', 'Available')->count() }} Available
+<!-- Professional Seat Management with WWC Brand Design -->
+<div class="min-h-screen bg-wwc-neutral-50">
+    <!-- Main Content -->
+    <div class="px-6 py-6">
+        <div class="mx-auto">
+            <!-- Statistics Cards -->
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+                <!-- Total Seats -->
+                <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $seats->total() }}</div>
+                            <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Total Seats</div>
+                            <div class="flex items-center">
+                                <div class="flex items-center text-xs text-wwc-success font-semibold">
+                                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                    </svg>
+                                    {{ $seats->where('is_accessible', true)->count() }} Accessible
+                                </div>
+                            </div>
+                        </div>
+                        <div class="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center">
+                            <i class='bx bx-chair text-2xl text-blue-600'></i>
                         </div>
                     </div>
                 </div>
-                <div class="h-12 w-12 rounded-lg bg-wwc-primary-light flex items-center justify-center">
-                    <i class='bx bx-chair text-2xl text-wwc-primary'></i>
-                </div>
-            </div>
-        </div>
 
-        <!-- Available Seats -->
-        <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $seats->where('status', 'Available')->count() }}</div>
-                    <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Available</div>
-                    <div class="flex items-center">
-                        <div class="flex items-center text-xs text-wwc-warning font-semibold">
-                            <i class='bx bx-time text-xs mr-1'></i>
-                            {{ $seats->where('status', 'Occupied')->count() }} Occupied
+                <!-- Available Seats -->
+                <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $seats->where('is_accessible', true)->count() }}</div>
+                            <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Accessible Seats</div>
+                            <div class="flex items-center">
+                                <div class="flex items-center text-xs text-wwc-success font-semibold">
+                                    <i class='bx bx-check text-xs mr-1'></i>
+                                    {{ $seats->where('is_accessible', false)->count() }} Standard
+                                </div>
+                            </div>
+                        </div>
+                        <div class="h-12 w-12 rounded-lg bg-green-100 flex items-center justify-center">
+                            <i class='bx bx-check-circle text-2xl text-green-600'></i>
                         </div>
                     </div>
                 </div>
-                <div class="h-12 w-12 rounded-lg bg-wwc-success-light flex items-center justify-center">
-                    <i class='bx bx-check-circle text-2xl text-wwc-success'></i>
-                </div>
-            </div>
-        </div>
 
-        <!-- Occupied Seats -->
-        <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $seats->where('status', 'Occupied')->count() }}</div>
-                    <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Occupied</div>
-                    <div class="flex items-center">
-                        <div class="flex items-center text-xs text-wwc-error font-semibold">
-                            <i class='bx bx-wrench text-xs mr-1'></i>
-                            {{ $seats->where('status', 'Maintenance')->count() }} Maintenance
+                <!-- Price Zones -->
+                <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $seats->pluck('price_zone')->unique()->count() }}</div>
+                            <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Price Zones</div>
+                            <div class="flex items-center">
+                                <div class="flex items-center text-xs text-wwc-accent font-semibold">
+                                    <i class='bx bx-tag text-xs mr-1'></i>
+                                    {{ $seats->pluck('seat_type')->unique()->count() }} Types
+                                </div>
+                            </div>
+                        </div>
+                        <div class="h-12 w-12 rounded-lg bg-orange-100 flex items-center justify-center">
+                            <i class='bx bx-tag text-2xl text-orange-600'></i>
                         </div>
                     </div>
                 </div>
-                <div class="h-12 w-12 rounded-lg bg-wwc-warning-light flex items-center justify-center">
-                    <i class='bx bx-user text-2xl text-wwc-warning'></i>
-                </div>
-            </div>
-        </div>
 
-        <!-- Price Zones -->
-        <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $priceZones->count() }}</div>
-                    <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Price Zones</div>
-                    <div class="flex items-center">
-                        <div class="flex items-center text-xs text-wwc-accent font-semibold">
-                            <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                            </svg>
-                            Active zones
+                <!-- Total Revenue Potential -->
+                <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">RM{{ number_format($seats->sum('base_price'), 0) }}</div>
+                            <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Revenue Potential</div>
+                            <div class="flex items-center">
+                                <div class="flex items-center text-xs text-wwc-accent font-semibold">
+                                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                    </svg>
+                                    +12% this month
+                                </div>
+                            </div>
+                        </div>
+                        <div class="h-12 w-12 rounded-lg bg-purple-100 flex items-center justify-center">
+                            <i class='bx bx-dollar text-2xl text-purple-600'></i>
                         </div>
                     </div>
                 </div>
-                <div class="h-12 w-12 rounded-lg bg-wwc-accent-light flex items-center justify-center">
-                    <i class='bx bx-tag text-2xl text-wwc-accent'></i>
-                </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Search and Filters -->
-    <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-6">
-        <form method="GET" class="space-y-4">
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                <!-- Search -->
-                <div class="lg:col-span-2">
-                    <label for="search" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Search</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class='bx bx-search text-wwc-neutral-400'></i>
+            <!-- Search and Filters -->
+            <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 mb-6">
+                <div class="px-6 py-4 border-b border-wwc-neutral-100">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-bold text-wwc-neutral-900">Search & Filter Seats</h3>
+                        <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
+                            <i class='bx bx-search text-sm'></i>
+                            <span>Find specific seats</span>
                         </div>
-                        <input type="text" name="search" id="search" value="{{ request('search') }}"
-                               class="block w-full pl-10 pr-3 py-2 border border-wwc-neutral-300 rounded-2xl focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm"
-                               placeholder="Search by seat identifier, price zone...">
                     </div>
                 </div>
-
-                <!-- Status Filter -->
-                <div>
-                    <label for="status" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Status</label>
-                    <select name="status" id="status" class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-2xl focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
-                        <option value="">All Statuses</option>
-                        @foreach($statuses as $status)
-                            <option value="{{ $status }}" {{ request('status') == $status ? 'selected' : '' }}>
-                                {{ $status }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Price Zone Filter -->
-                <div>
-                    <label for="price_zone" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Price Zone</label>
-                    <select name="price_zone" id="price_zone" class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-2xl focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
-                        <option value="">All Price Zones</option>
-                        @foreach($priceZones as $zone)
-                            <option value="{{ $zone }}" {{ request('price_zone') == $zone ? 'selected' : '' }}>
-                                {{ $zone }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Seat Type Filter -->
-                <div>
-                    <label for="seat_type" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Seat Type</label>
-                    <select name="seat_type" id="seat_type" class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-2xl focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
-                        <option value="">All Types</option>
-                        @foreach($seatTypes as $type)
-                            <option value="{{ $type }}" {{ request('seat_type') == $type ? 'selected' : '' }}>
-                                {{ $type }}
-                            </option>
-                        @endforeach
-                    </select>
+                <div class="p-6">
+                    <form method="GET" action="{{ route('admin.seats.index') }}" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        <div>
+                            <label for="search" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Search Seats</label>
+                            <input type="text" name="search" id="search" value="{{ request('search') }}"
+                                   placeholder="Seat number, section, or row..."
+                                   class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
+                        </div>
+                        <div>
+                            <label for="section" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Section</label>
+                            <select name="section" id="section" class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
+                                <option value="">All Sections</option>
+                                @foreach($seats->pluck('section')->unique()->sort() as $section)
+                                    <option value="{{ $section }}" {{ request('section') == $section ? 'selected' : '' }}>{{ $section }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label for="price_zone" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Price Zone</label>
+                            <select name="price_zone" id="price_zone" class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
+                                <option value="">All Price Zones</option>
+                                @foreach($seats->pluck('price_zone')->unique()->sort() as $zone)
+                                    <option value="{{ $zone }}" {{ request('price_zone') == $zone ? 'selected' : '' }}>{{ $zone }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label for="is_accessible" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Accessibility</label>
+                            <select name="is_accessible" id="is_accessible" class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
+                                <option value="">All Types</option>
+                                <option value="1" {{ request('is_accessible') == '1' ? 'selected' : '' }}>Accessible</option>
+                                <option value="0" {{ request('is_accessible') == '0' ? 'selected' : '' }}>Standard</option>
+                            </select>
+                        </div>
+                        <div class="sm:col-span-2 lg:col-span-4 flex justify-end gap-3">
+                            <button type="submit" 
+                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-semibold rounded-lg text-white bg-wwc-primary hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
+                                <i class='bx bx-search text-sm mr-2'></i>
+                                Search Seats
+                            </button>
+                            <a href="{{ route('admin.seats.index') }}" 
+                               class="inline-flex items-center px-4 py-2 border border-wwc-neutral-300 shadow-sm text-sm font-semibold rounded-lg text-wwc-neutral-700 bg-white hover:bg-wwc-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
+                                <i class='bx bx-x text-sm mr-2'></i>
+                                Clear Filters
+                            </a>
+                        </div>
+                    </form>
                 </div>
             </div>
 
-            <div class="flex items-center justify-between">
+            <!-- Header Section with Create Button -->
+            <div class="flex justify-end items-center mb-6">
                 <div class="flex items-center space-x-3">
-                    <button type="submit" 
-                            class="inline-flex items-center px-4 py-2 bg-wwc-primary text-white rounded-xl text-sm font-semibold hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
-                        <i class='bx bx-search text-lg mr-2'></i>
-                        Search
+                    <button onclick="openBulkCreateModal()" 
+                            class="inline-flex items-center px-4 py-2 border border-wwc-neutral-300 shadow-sm text-sm font-semibold rounded-lg text-wwc-neutral-700 bg-white hover:bg-wwc-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
+                        <i class='bx bx-plus text-sm mr-2'></i>
+                        Bulk Create
                     </button>
-                    <a href="{{ route('admin.seats.index') }}" 
-                       class="inline-flex items-center px-4 py-2 bg-wwc-neutral-100 text-wwc-neutral-700 rounded-xl text-sm font-semibold hover:bg-wwc-neutral-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-neutral-500 transition-colors duration-200">
-                        <i class='bx bx-refresh text-lg mr-2'></i>
-                        Reset
+                    <a href="{{ route('admin.seats.create') }}" 
+                       class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-semibold rounded-lg text-white bg-wwc-primary hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
+                        <i class='bx bx-plus text-sm mr-2'></i>
+                        Create New Seat
                     </a>
                 </div>
             </div>
-        </form>
-    </div>
 
-    <!-- Seats Table -->
-    <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 overflow-hidden">
-        @if($seats->count() > 0)
-            <!-- Table Header -->
-            <div class="px-6 py-4 border-b border-wwc-neutral-200 bg-wwc-neutral-50">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h2 class="text-lg font-semibold text-wwc-neutral-900 font-display">All Seats</h2>
-                        <p class="text-wwc-neutral-600 text-sm">Showing {{ $seats->count() }} of {{ $seats->total() }} seats</p>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <div class="text-xs text-wwc-neutral-600">
-                            <span class="font-semibold">{{ $seats->where('status', 'Available')->count() }}</span> Available
-                        </div>
-                        <div class="text-xs text-wwc-neutral-600">
-                            <span class="font-semibold">{{ $seats->where('status', 'Occupied')->count() }}</span> Occupied
-                        </div>
-                        <div class="text-xs text-wwc-neutral-600">
-                            <span class="font-semibold">{{ $seats->where('status', 'Maintenance')->count() }}</span> Maintenance
+            <!-- Seats List -->
+            <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
+                <div class="px-6 py-4 border-b border-wwc-neutral-100">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-bold text-wwc-neutral-900">All Seats</h3>
+                        <div class="flex items-center space-x-4 text-sm font-medium">
+                            <span class="text-wwc-neutral-600">Status:</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                                Available ({{ $seats->where('is_accessible', true)->count() }})
+                            </span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                                Standard ({{ $seats->where('is_accessible', false)->count() }})
+                            </span>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Table Content -->
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-wwc-neutral-200">
-                    <thead class="bg-wwc-neutral-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-wwc-neutral-500 uppercase tracking-wider">Seat</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-wwc-neutral-500 uppercase tracking-wider">Price Zone</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-wwc-neutral-500 uppercase tracking-wider">Type</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-wwc-neutral-500 uppercase tracking-wider">Price</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-wwc-neutral-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-wwc-neutral-500 uppercase tracking-wider">Created</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-wwc-neutral-500 uppercase tracking-wider">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-wwc-neutral-200">
-                        @foreach($seats as $seat)
-                        <tr class="hover:bg-wwc-neutral-50 transition-colors duration-200">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0 h-10 w-10">
-                                        <div class="h-10 w-10 rounded-2xl bg-wwc-primary-light flex items-center justify-center shadow-sm">
-                                            <i class='bx bx-chair text-lg text-wwc-primary'></i>
+                <div class="overflow-hidden">
+                    @if($seats->count() > 0)
+                        <table class="min-w-full divide-y divide-wwc-neutral-100">
+                            <thead class="bg-wwc-neutral-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider">
+                                        Seat
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider">
+                                        Location
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider">
+                                        Price Zone
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider text-right">
+                                        Price
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider">
+                                        Type
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-right text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-wwc-neutral-100">
+                                @foreach($seats as $seat)
+                                <tr class="hover:bg-wwc-neutral-50 transition-colors duration-150">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10">
+                                                <div class="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                                                    <i class='bx bx-chair text-lg text-blue-600'></i>
+                                                </div>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-semibold text-wwc-neutral-900">{{ $seat->row }}{{ $seat->number }}</div>
+                                                <div class="text-xs text-wwc-neutral-500">{{ $seat->section }}</div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="ml-4">
-                                        <div class="text-sm font-semibold text-wwc-neutral-900 font-display">{{ $seat->seat_identifier }}</div>
-                                        <div class="text-xs text-wwc-neutral-500">ID: {{ $seat->id }}</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-wwc-accent-light text-wwc-accent">
-                                    {{ $seat->price_zone }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-wwc-neutral-900">
-                                {{ $seat->seat_type }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-semibold text-wwc-neutral-900">RM{{ number_format($seat->base_price, 0) }}</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                @switch($seat->status)
-                                    @case('Available')
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-wwc-success-light text-wwc-success">
-                                            <i class='bx bx-check text-xs mr-1'></i>
-                                            Available
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-semibold text-wwc-neutral-900">{{ $seat->section }}</div>
+                                        <div class="text-xs text-wwc-neutral-500">Row {{ $seat->row }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-800">
+                                            {{ $seat->price_zone }}
                                         </span>
-                                        @break
-                                    @case('Occupied')
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-wwc-warning-light text-wwc-warning">
-                                            <i class='bx bx-user text-xs mr-1'></i>
-                                            Occupied
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-semibold text-wwc-neutral-900">
+                                        RM{{ number_format($seat->base_price, 0) }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-semibold
+                                            @if($seat->is_accessible) bg-green-100 text-green-800
+                                            @else bg-blue-100 text-blue-800
+                                            @endif">
+                                            {{ $seat->is_accessible ? 'Accessible' : 'Standard' }}
                                         </span>
-                                        @break
-                                    @case('Maintenance')
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-wwc-error-light text-wwc-error">
-                                            <i class='bx bx-wrench text-xs mr-1'></i>
-                                            Maintenance
-                                        </span>
-                                        @break
-                                @endswitch
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-wwc-neutral-500">
-                                {{ $seat->created_at->format('M j, Y') }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex items-center space-x-2">
-                                    <a href="{{ route('admin.seats.show', $seat) }}" 
-                                       class="text-wwc-primary hover:text-wwc-primary-dark">
-                                        <i class='bx bx-show text-lg'></i>
-                                    </a>
-                                    <a href="{{ route('admin.seats.edit', $seat) }}" 
-                                       class="text-wwc-accent hover:text-wwc-accent-dark">
-                                        <i class='bx bx-edit text-lg'></i>
-                                    </a>
-                                    <form method="POST" action="{{ route('admin.seats.destroy', $seat) }}" class="inline" onsubmit="return confirm('Are you sure you want to delete this seat?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-wwc-error hover:text-wwc-error-dark">
-                                            <i class='bx bx-trash text-lg'></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex items-center justify-end space-x-1">
+                                            <a href="{{ route('admin.seats.show', $seat) }}" 
+                                               class="inline-flex items-center px-3 py-2 text-xs font-semibold text-white bg-wwc-primary hover:bg-wwc-primary-dark rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+                                               title="View seat details">
+                                                <i class='bx bx-show text-xs mr-1.5'></i>
+                                                View
+                                            </a>
+                                            <a href="{{ route('admin.seats.edit', $seat) }}" 
+                                               class="inline-flex items-center px-3 py-2 text-xs font-semibold text-wwc-neutral-700 bg-white border border-wwc-neutral-300 hover:bg-wwc-neutral-50 hover:border-wwc-neutral-400 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+                                               title="Edit seat">
+                                                <i class='bx bx-edit text-xs mr-1.5'></i>
+                                                Edit
+                                            </a>
+                                            <div class="relative" x-data="{ open{{ $seat->id }}: false }">
+                                                <button @click="open{{ $seat->id }} = !open{{ $seat->id }}" 
+                                                        class="inline-flex items-center px-3 py-2 text-xs font-semibold text-wwc-neutral-700 bg-white border border-wwc-neutral-300 hover:bg-wwc-neutral-50 hover:border-wwc-neutral-400 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+                                                        title="More actions">
+                                                    <i class='bx bx-dots-vertical text-xs mr-1.5'></i>
+                                                    More
+                                                </button>
+                                                <div x-show="open{{ $seat->id }}" 
+                                                     @click.away="open{{ $seat->id }} = false"
+                                                     x-transition:enter="transition ease-out duration-100"
+                                                     x-transition:enter-start="transform opacity-0 scale-95"
+                                                     x-transition:enter-end="transform opacity-100 scale-100"
+                                                     x-transition:leave="transition ease-in duration-75"
+                                                     x-transition:leave-start="transform opacity-100 scale-100"
+                                                     x-transition:leave-end="transform opacity-0 scale-95"
+                                                     class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-wwc-neutral-200 z-10"
+                                                     style="display: none;">
+                                                    <div class="py-1">
+                                                        <form action="{{ route('admin.seats.update-status', $seat) }}" method="POST" class="block">
+                                                            @csrf
+                                                            <input type="hidden" name="is_accessible" value="{{ $seat->is_accessible ? '0' : '1' }}">
+                                                            <button type="submit" 
+                                                                    class="flex items-center w-full px-4 py-2 text-xs text-wwc-neutral-700 hover:bg-wwc-neutral-100 transition-colors duration-200">
+                                                                <i class='bx bx-{{ $seat->is_accessible ? 'x' : 'check' }} text-xs mr-2'></i>
+                                                                {{ $seat->is_accessible ? 'Mark Standard' : 'Mark Accessible' }}
+                                                            </button>
+                                                        </form>
+                                                        <div class="border-t border-wwc-neutral-100 my-1"></div>
+                                                        <form action="{{ route('admin.seats.destroy', $seat) }}" method="POST" 
+                                                              onsubmit="return confirm('Are you sure you want to delete this seat? This action cannot be undone.')" 
+                                                              class="block">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" 
+                                                                    class="flex items-center w-full px-4 py-2 text-xs text-red-600 hover:bg-red-50 transition-colors duration-200">
+                                                                <i class='bx bx-trash text-xs mr-2'></i>
+                                                                Delete Seat
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
 
-            <!-- Pagination -->
-            <div class="px-6 py-4 border-t border-wwc-neutral-200 bg-wwc-neutral-50">
-                {{ $seats->links() }}
+                    <!-- Pagination -->
+                    <div class="px-6 py-4 border-t border-wwc-neutral-100">
+                        {{ $seats->links() }}
+                    </div>
+                @else
+                    <!-- Empty State -->
+                    <div class="text-center py-12">
+                        <div class="mx-auto h-24 w-24 rounded-full bg-wwc-neutral-100 flex items-center justify-center mb-4">
+                            <i class='bx bx-chair text-6xl text-wwc-neutral-300'></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-2">No seats found.</h3>
+                        <p class="text-wwc-neutral-600 mb-6">Get started by creating your first seat or adjust your search criteria.</p>
+                        <a href="{{ route('admin.seats.create') }}" 
+                           class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-semibold rounded-lg text-white bg-wwc-primary hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
+                            <i class='bx bx-plus text-sm mr-2'></i>
+                            Create New Seat
+                        </a>
+                    </div>
+                @endif
             </div>
-        @else
-            <div class="text-center py-12">
-                <i class='bx bx-chair text-6xl text-wwc-neutral-300 mb-4'></i>
-                <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-2">No Seats Found</h3>
-                <p class="text-wwc-neutral-600 mb-6">No seats match your current filters.</p>
-                <a href="{{ route('admin.seats.create') }}" 
-                   class="inline-flex items-center px-4 py-2 bg-wwc-primary text-white rounded-xl text-sm font-semibold hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
-                    <i class='bx bx-plus text-lg mr-2'></i>
-                    Create First Seat
-                </a>
-            </div>
-        @endif
+        </div>
     </div>
 </div>
 
 <!-- Bulk Create Modal -->
 <div id="bulkCreateModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-2xl bg-white">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
         <div class="mt-3">
-            <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-4">Bulk Create Seats</h3>
-            <form method="POST" action="{{ route('admin.seats.bulk-create') }}">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-gray-900">Bulk Create Seats</h3>
+                <button onclick="closeBulkCreateModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class='bx bx-x text-xl'></i>
+                </button>
+            </div>
+            <form action="{{ route('admin.seats.bulk-create') }}" method="POST">
                 @csrf
                 <div class="space-y-4">
                     <div>
-                        <label for="price_zone" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Price Zone</label>
-                        <select name="price_zone" id="price_zone" required class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-2xl focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
-                            <option value="">Select Price Zone</option>
-                            @foreach($priceZones as $zone)
-                                <option value="{{ $zone }}">{{ $zone }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label for="seat_type" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Seat Type</label>
-                        <input type="text" name="seat_type" id="seat_type" required class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-2xl focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm" placeholder="e.g., Standard, VIP, Premium">
-                    </div>
-                    <div>
-                        <label for="base_price" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Base Price (RM)</label>
-                        <input type="number" name="base_price" id="base_price" step="0.01" min="0" required class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-2xl focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
-                    </div>
-                    <div>
-                        <label for="section" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Section</label>
-                        <input type="text" name="section" id="section" required class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-2xl focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm" placeholder="e.g., A, B, C">
+                        <label for="section" class="block text-sm font-semibold text-gray-900 mb-2">Section</label>
+                        <input type="text" name="section" id="section" required
+                               class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm"
+                               placeholder="e.g., A, B, VIP">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label for="row_start" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Start Row</label>
-                            <input type="number" name="row_start" id="row_start" min="1" required class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-2xl focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
+                            <label for="start_row" class="block text-sm font-semibold text-gray-900 mb-2">Start Row</label>
+                            <input type="text" name="start_row" id="start_row" required
+                                   class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm"
+                                   placeholder="e.g., 1">
                         </div>
                         <div>
-                            <label for="row_end" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">End Row</label>
-                            <input type="number" name="row_end" id="row_end" min="1" required class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-2xl focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
+                            <label for="end_row" class="block text-sm font-semibold text-gray-900 mb-2">End Row</label>
+                            <input type="text" name="end_row" id="end_row" required
+                                   class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm"
+                                   placeholder="e.g., 10">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="seats_per_row" class="block text-sm font-semibold text-gray-900 mb-2">Seats per Row</label>
+                            <input type="number" name="seats_per_row" id="seats_per_row" required min="1"
+                                   class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm"
+                                   placeholder="e.g., 20">
+                        </div>
+                        <div>
+                            <label for="price_zone" class="block text-sm font-semibold text-gray-900 mb-2">Price Zone</label>
+                            <select name="price_zone" id="price_zone" required
+                                    class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
+                                <option value="">Select Price Zone</option>
+                                <option value="VIP">VIP</option>
+                                <option value="Premium">Premium</option>
+                                <option value="Standard">Standard</option>
+                                <option value="Economy">Economy</option>
+                            </select>
                         </div>
                     </div>
                     <div>
-                        <label for="seats_per_row" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Seats per Row</label>
-                        <input type="number" name="seats_per_row" id="seats_per_row" min="1" max="50" required class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-2xl focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
+                        <label for="base_price" class="block text-sm font-semibold text-gray-900 mb-2">Base Price (RM)</label>
+                        <input type="number" name="base_price" id="base_price" required step="0.01" min="0"
+                               class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm"
+                               placeholder="e.g., 50.00">
                     </div>
                 </div>
-                <div class="flex items-center justify-end space-x-3 mt-6">
-                    <button type="button" onclick="closeBulkCreateModal()" 
-                            class="px-4 py-2 bg-wwc-neutral-100 text-wwc-neutral-700 rounded-xl text-sm font-semibold hover:bg-wwc-neutral-200">
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" onclick="closeBulkCreateModal()"
+                            class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50">
                         Cancel
                     </button>
-                    <button type="submit" 
-                            class="px-4 py-2 bg-wwc-primary text-white rounded-xl text-sm font-semibold hover:bg-wwc-primary-dark">
+                    <button type="submit"
+                            class="px-4 py-2 bg-wwc-primary text-white rounded-lg text-sm font-semibold hover:bg-wwc-primary-dark">
                         Create Seats
                     </button>
                 </div>

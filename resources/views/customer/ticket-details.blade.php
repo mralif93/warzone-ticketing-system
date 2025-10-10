@@ -80,7 +80,7 @@
                                     </div>
                                     <div>
                                         <p class="text-sm font-semibold text-wwc-neutral-600">Price Paid</p>
-                                        <p class="text-2xl font-bold text-wwc-neutral-900 font-display">${{ number_format($ticket->price_paid, 2) }}</p>
+                                        <p class="text-2xl font-bold text-wwc-neutral-900 font-display">RM{{ number_format($ticket->price_paid, 0) }}</p>
                                     </div>
                                 </div>
                             </div>

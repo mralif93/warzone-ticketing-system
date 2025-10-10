@@ -228,4 +228,134 @@ class PaymentController extends Controller
 
         return response()->stream($callback, 200, $headers);
     }
+
+    /**
+     * Show the form for creating a new payment
+     */
+    public function create()
+    {
+        $orders = \App\Models\Order::with('user')->get();
+        return view('admin.payments.create', compact('orders'));
+    }
+
+    /**
+     * Store a newly created payment
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'order_id' => 'required|exists:orders,id',
+            'amount' => 'required|numeric|min:0.01',
+            'payment_method' => 'required|string|max:255',
+            'transaction_id' => 'nullable|string|max:255|unique:payments,transaction_id',
+            'status' => 'required|in:Pending,Completed,Failed,Refunded',
+            'payment_date' => 'nullable|date',
+            'notes' => 'nullable|string|max:1000'
+        ]);
+
+        // Generate transaction ID if not provided
+        if (!$request->transaction_id) {
+            $request->merge(['transaction_id' => 'PAY-' . strtoupper(uniqid())]);
+        }
+
+        $payment = Payment::create($request->all());
+
+        // If payment is completed, update order status
+        if ($request->status === 'Completed' && $payment->order) {
+            $payment->order->update(['status' => 'Paid']);
+        }
+
+        // Log the payment creation
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'CREATE',
+            'table_name' => 'payments',
+            'record_id' => $payment->id,
+            'old_values' => null,
+            'new_values' => $payment->toArray(),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return redirect()->route('admin.payments.show', $payment)->with('success', 'Payment created successfully!');
+    }
+
+    /**
+     * Show the form for editing the specified payment
+     */
+    public function edit(Payment $payment)
+    {
+        $orders = \App\Models\Order::with('user')->get();
+        return view('admin.payments.edit', compact('payment', 'orders'));
+    }
+
+    /**
+     * Update the specified payment
+     */
+    public function update(Request $request, Payment $payment)
+    {
+        $request->validate([
+            'order_id' => 'required|exists:orders,id',
+            'amount' => 'required|numeric|min:0.01',
+            'payment_method' => 'required|string|max:255',
+            'transaction_id' => 'nullable|string|max:255|unique:payments,transaction_id,' . $payment->id,
+            'status' => 'required|in:Pending,Completed,Failed,Refunded',
+            'payment_date' => 'nullable|date',
+            'notes' => 'nullable|string|max:1000'
+        ]);
+
+        $oldValues = $payment->toArray();
+        $payment->update($request->all());
+
+        // If payment is completed, update order status
+        if ($request->status === 'Completed' && $payment->order) {
+            $payment->order->update(['status' => 'Paid']);
+        }
+
+        // If payment is refunded, update order status
+        if ($request->status === 'Refunded' && $payment->order) {
+            $payment->order->update(['status' => 'Refunded']);
+        }
+
+        // Log the payment update
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'UPDATE',
+            'table_name' => 'payments',
+            'record_id' => $payment->id,
+            'old_values' => $oldValues,
+            'new_values' => $payment->toArray(),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return redirect()->route('admin.payments.show', $payment)->with('success', 'Payment updated successfully!');
+    }
+
+    /**
+     * Remove the specified payment
+     */
+    public function destroy(Payment $payment)
+    {
+        if ($payment->status === 'Completed') {
+            return back()->withErrors(['error' => 'Cannot delete a completed payment.']);
+        }
+
+        $oldValues = $payment->toArray();
+        $payment->delete();
+
+        // Log the payment deletion
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'DELETE',
+            'table_name' => 'payments',
+            'record_id' => $payment->id,
+            'old_values' => $oldValues,
+            'new_values' => null,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+        ]);
+
+        return redirect()->route('admin.payments.index')->with('success', 'Payment deleted successfully!');
+    }
 }

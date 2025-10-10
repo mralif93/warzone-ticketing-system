@@ -1,209 +1,216 @@
 @extends('layouts.admin')
-@section('page-title', 'User Management')
+
 @section('title', 'User Details')
+@section('page-title', 'User Details')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-6">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="mb-8">
-            <div class="flex items-center justify-between">
+<div class="min-h-screen bg-wwc-neutral-50">
+    <!-- Main Content -->
+    <div class="px-6 py-6">
+        <div class="mx-auto">
+            <!-- Header Section -->
+            <div class="flex justify-end items-center mb-6">
                 <div class="flex items-center">
-                    <a href="{{ route('admin.users.index') }}" class="mr-4 text-gray-400 hover:text-gray-600">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                        </svg>
-                    </a>
-                    <div>
-                        <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-                            User Details
-                        </h2>
-                        <p class="mt-1 text-sm text-gray-500">
-                            View and manage user information
-                        </p>
-                    </div>
-                </div>
-                <div class="flex space-x-3">
-                    <a href="{{ route('admin.users.edit', $user) }}" 
-                       class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                        </svg>
-                        Edit User
+                    <a href="{{ route('admin.users.index') }}" 
+                       class="inline-flex items-center px-4 py-2 border border-wwc-neutral-300 shadow-sm text-sm font-semibold rounded-lg text-wwc-neutral-700 bg-white hover:bg-wwc-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
+                        <i class='bx bx-arrow-back text-sm mr-2'></i>
+                        Back to Users
                     </a>
                 </div>
             </div>
-        </div>
 
-        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <!-- User Profile Card -->
-            <div class="lg:col-span-1">
-                <div class="bg-white shadow rounded-lg">
-                    <div class="px-4 py-5 sm:p-6">
-                        <div class="text-center">
-                            <div class="mx-auto h-24 w-24 rounded-full bg-indigo-500 flex items-center justify-center mb-4">
-                                <span class="text-2xl font-medium text-white">
-                                    {{ substr($user->name, 0, 1) }}
-                                </span>
-                            </div>
-                            <h3 class="text-lg font-medium text-gray-900">{{ $user->name }}</h3>
-                            <p class="text-sm text-gray-500">{{ $user->email }}</p>
-                            
-                            <!-- Role Badge -->
-                            <div class="mt-3">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
-                                    @if($user->role === 'Administrator') bg-red-100 text-red-800
-                                    @elseif($user->role === 'Gate Staff') bg-blue-100 text-blue-800
-                                    @elseif($user->role === 'Counter Staff') bg-green-100 text-green-800
-                                    @elseif($user->role === 'Support Staff') bg-yellow-100 text-yellow-800
-                                    @else bg-gray-100 text-gray-800
-                                    @endif">
-                                    {{ $user->role }}
-                                </span>
-                            </div>
-
-                            <!-- Status -->
-                            <div class="mt-2">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                    @if($user->email_verified_at) bg-green-100 text-green-800
-                                    @else bg-red-100 text-red-800
-                                    @endif">
-                                    @if($user->email_verified_at) 
-                                        <svg class="-ml-0.5 mr-1.5 h-2 w-2 text-green-400" fill="currentColor" viewBox="0 0 8 8">
-                                            <circle cx="4" cy="4" r="3"></circle>
-                                        </svg>
-                                        Active
-                                    @else 
-                                        <svg class="-ml-0.5 mr-1.5 h-2 w-2 text-red-400" fill="currentColor" viewBox="0 0 8 8">
-                                            <circle cx="4" cy="4" r="3"></circle>
-                                        </svg>
-                                        Inactive
-                                    @endif
-                                </span>
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <!-- User Details -->
+                <div class="xl:col-span-2">
+                    <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
+                        <div class="px-6 py-4 border-b border-wwc-neutral-100">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-bold text-wwc-neutral-900">User Details</h3>
+                                <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
+                                    <i class='bx bx-info-circle text-sm'></i>
+                                    <span>User information</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Contact Information -->
-                <div class="mt-6 bg-white shadow rounded-lg">
-                    <div class="px-4 py-5 sm:p-6">
-                        <h4 class="text-lg font-medium text-gray-900 mb-4">Contact Information</h4>
-                        <dl class="space-y-3">
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Phone</dt>
-                                <dd class="text-sm text-gray-900">{{ $user->phone_number ?: 'Not provided' }}</dd>
-                            </div>
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Address</dt>
-                                <dd class="text-sm text-gray-900">
-                                    @if($user->getFullAddressAttribute())
-                                        {{ $user->getFullAddressAttribute() }}
-                                    @else
-                                        Not provided
-                                    @endif
-                                </dd>
-                            </div>
-                        </dl>
-                    </div>
-                </div>
-            </div>
-
-            <!-- User Details -->
-            <div class="lg:col-span-2">
-                <!-- Account Information -->
-                <div class="bg-white shadow rounded-lg mb-6">
-                    <div class="px-4 py-5 sm:p-6">
-                        <h4 class="text-lg font-medium text-gray-900 mb-4">Account Information</h4>
-                        <dl class="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2">
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">User ID</dt>
-                                <dd class="text-sm text-gray-900">#{{ $user->id }}</dd>
-                            </div>
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Email Verified</dt>
-                                <dd class="text-sm text-gray-900">
-                                    @if($user->email_verified_at)
-                                        {{ $user->email_verified_at->format('M d, Y g:i A') }}
-                                    @else
-                                        Not verified
-                                    @endif
-                                </dd>
-                            </div>
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Member Since</dt>
-                                <dd class="text-sm text-gray-900">{{ $user->created_at->format('M d, Y') }}</dd>
-                            </div>
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Last Updated</dt>
-                                <dd class="text-sm text-gray-900">{{ $user->updated_at->format('M d, Y g:i A') }}</dd>
-                            </div>
-                        </dl>
-                    </div>
-                </div>
-
-                <!-- User Activity -->
-                <div class="bg-white shadow rounded-lg mb-6">
-                    <div class="px-4 py-5 sm:p-6">
-                        <h4 class="text-lg font-medium text-gray-900 mb-4">User Activity</h4>
-                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-indigo-600">{{ $user->orders()->count() }}</div>
-                                <div class="text-sm text-gray-500">Total Orders</div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-green-600">{{ $user->tickets()->count() }}</div>
-                                <div class="text-sm text-gray-500">Tickets Purchased</div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-yellow-600">${{ number_format($user->orders()->sum('total_amount'), 2) }}</div>
-                                <div class="text-sm text-gray-500">Total Spent</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Recent Orders -->
-                <div class="bg-white shadow rounded-lg">
-                    <div class="px-4 py-5 sm:p-6">
-                        <h4 class="text-lg font-medium text-gray-900 mb-4">Recent Orders</h4>
-                        @if($user->orders()->count() > 0)
-                            <div class="space-y-3">
-                                @foreach($user->orders()->latest()->take(5)->get() as $order)
-                                <div class="flex items-center justify-between py-2 border-b border-gray-200 last:border-b-0">
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900">Order #{{ $order->id }}</div>
-                                        <div class="text-sm text-gray-500">{{ $order->created_at->format('M d, Y g:i A') }}</div>
-                                    </div>
-                                    <div class="text-right">
-                                        <div class="text-sm font-medium text-gray-900">${{ number_format($order->total_amount, 2) }}</div>
-                                        <div class="text-sm text-gray-500">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                                @if($order->status === 'Completed') bg-green-100 text-green-800
-                                                @elseif($order->status === 'Pending') bg-yellow-100 text-yellow-800
-                                                @elseif($order->status === 'Cancelled') bg-red-100 text-red-800
-                                                @else bg-gray-100 text-gray-800
-                                                @endif">
-                                                {{ $order->status }}
-                                            </span>
+                        <div class="p-6">
+                            <div class="space-y-4">
+                                <!-- Full Name -->
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-red-100 flex items-center justify-center">
+                                            <i class='bx bx-user text-sm text-red-600'></i>
                                         </div>
                                     </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Full Name</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">{{ $user->name }}</span>
+                                    </div>
                                 </div>
-                                @endforeach
-                            </div>
-                            @if($user->orders()->count() > 5)
-                                <div class="mt-4 text-center">
-                                    <a href="{{ route('admin.orders.index') }}?user={{ $user->id }}" 
-                                       class="text-sm text-indigo-600 hover:text-indigo-900">
-                                        View all orders →
-                                    </a>
+
+                                <!-- Email Address -->
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-green-100 flex items-center justify-center">
+                                            <i class='bx bx-envelope text-sm text-green-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Email Address</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">{{ $user->email }}</span>
+                                    </div>
                                 </div>
-                            @endif
-                        @else
-                            <div class="text-center py-4">
-                                <p class="text-sm text-gray-500">No orders found</p>
+
+                                <!-- Role -->
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-orange-100 flex items-center justify-center">
+                                            <i class='bx bx-shield text-sm text-orange-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Role</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">{{ $user->role }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Status -->
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                                            <i class='bx bx-check-circle text-sm text-blue-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Status</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">{{ $user->is_active ? 'Active' : 'Inactive' }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Phone Number -->
+                                @if($user->phone_number)
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                                            <i class='bx bx-phone text-sm text-purple-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Phone Number</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">{{ $user->phone_number }}</span>
+                                    </div>
+                                </div>
+                                @endif
+
+                                <!-- Address -->
+                                @if($user->address_line_1)
+                                <div class="flex items-center py-3">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-gray-100 flex items-center justify-center">
+                                            <i class='bx bx-map text-sm text-gray-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Address</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900 leading-relaxed text-right max-w-md">
+                                            {{ $user->address_line_1 }}
+                                            @if($user->city)
+                                                <br>{{ $user->city }}, {{ $user->state }} {{ $user->postcode }}
+                                            @endif
+                                            @if($user->country)
+                                                <br>{{ $user->country }}
+                                            @endif
+                                        </span>
+                                    </div>
+                                </div>
+                                @endif
                             </div>
-                        @endif
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Statistics -->
+                <div class="xl:col-span-1">
+                    <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
+                        <div class="px-6 py-4 border-b border-wwc-neutral-100">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-bold text-wwc-neutral-900">User Statistics</h3>
+                                <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
+                                    <i class='bx bx-bar-chart text-sm'></i>
+                                    <span>Activity overview</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-6">
+                                <!-- Orders Count -->
+                                <div class="text-center">
+                                    <div class="text-3xl font-bold text-wwc-neutral-900 font-display">{{ $user->orders_count ?? 0 }}</div>
+                                    <div class="text-sm text-wwc-neutral-600 font-medium">Total Orders</div>
+                                </div>
+
+                                <!-- Tickets Count -->
+                                <div class="text-center">
+                                    <div class="text-3xl font-bold text-wwc-neutral-900 font-display">{{ $user->tickets_count ?? 0 }}</div>
+                                    <div class="text-sm text-wwc-neutral-600 font-medium">Tickets Purchased</div>
+                                </div>
+
+                                <!-- Member Since -->
+                                <div class="text-center">
+                                    <div class="text-3xl font-bold text-wwc-neutral-900 font-display">{{ $user->created_at->format('M Y') }}</div>
+                                    <div class="text-sm text-wwc-neutral-600 font-medium">Member Since</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="mt-6 bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
+                        <div class="px-6 py-4 border-b border-wwc-neutral-100">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-bold text-wwc-neutral-900">Quick Actions</h3>
+                                <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
+                                    <i class='bx bx-cog text-sm'></i>
+                                    <span>User actions</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-3">
+                                <a href="{{ route('admin.users.edit', $user) }}" 
+                                   class="w-full bg-wwc-primary hover:bg-wwc-primary-dark text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 text-center block text-sm">
+                                    <i class='bx bx-edit text-sm mr-2'></i>
+                                    Edit User
+                                </a>
+                                
+                                @if($user->is_active)
+                                    <form action="{{ route('admin.users.update-status', $user) }}" method="POST" class="block">
+                                        @csrf
+                                        <input type="hidden" name="is_active" value="0">
+                                        <button type="submit" 
+                                                class="w-full bg-wwc-warning hover:bg-wwc-warning-dark text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 text-center block text-sm">
+                                            <i class='bx bx-user-x text-sm mr-2'></i>
+                                            Deactivate User
+                                        </button>
+                                    </form>
+                                @else
+                                    <form action="{{ route('admin.users.update-status', $user) }}" method="POST" class="block">
+                                        @csrf
+                                        <input type="hidden" name="is_active" value="1">
+                                        <button type="submit" 
+                                                class="w-full bg-wwc-success hover:bg-wwc-success-dark text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 text-center block text-sm">
+                                            <i class='bx bx-user-check text-sm mr-2'></i>
+                                            Activate User
+                                        </button>
+                                    </form>
+                                @endif
+
+                                <a href="{{ route('admin.users.update-password', $user) }}" 
+                                   class="w-full bg-wwc-neutral-600 hover:bg-wwc-neutral-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 text-center block text-sm">
+                                    <i class='bx bx-key text-sm mr-2'></i>
+                                    Reset Password
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

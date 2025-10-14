@@ -92,7 +92,7 @@ class PublicController extends Controller
         $event->loadCount('tickets');
 
         // Get availability stats
-        $totalCapacity = 7000; // Assuming 7000 seat capacity
+        $totalCapacity = 7000; // Assuming 7000 ticket capacity
         $ticketsSold = $event->tickets()->where('status', 'Sold')->count();
         $ticketsHeld = $event->tickets()->where('status', 'Held')->count();
         $ticketsAvailable = $totalCapacity - $ticketsSold - $ticketsHeld;
@@ -106,32 +106,66 @@ class PublicController extends Controller
             'availability_percentage' => $totalCapacity > 0 ? round(($ticketsAvailable / $totalCapacity) * 100, 2) : 0,
         ];
 
-        // Get price zones and their availability
-        $priceZones = \App\Models\Seat::select('price_zone', 'base_price')
-            ->distinct()
-            ->get()
-            ->map(function($seat) use ($event) {
-                $available = \App\Models\Seat::where('price_zone', $seat->price_zone)
-                    ->whereDoesntHave('tickets', function($query) use ($event) {
-                        $query->where('event_id', $event->id)
-                              ->whereIn('status', ['Sold', 'Held']);
-                    })
-                    ->count();
-                
-                $total = \App\Models\Seat::where('price_zone', $seat->price_zone)->count();
-                $sold = $total - $available;
-                
-                return [
-                    'zone' => $seat->price_zone,
-                    'price' => $seat->base_price,
-                    'available' => $available,
-                    'total' => $total,
-                    'sold' => $sold,
-                    'sold_percentage' => $total > 0 ? round(($sold / $total) * 100, 2) : 0,
-                ];
-            });
+        // Get zone pricing information based on Warzone categories
+        // Calculate realistic availability based on total capacity and sold tickets
+        $totalCapacity = 7000;
+        $ticketsSold = $event->tickets()->where('status', 'Sold')->count();
+        $ticketsHeld = $event->tickets()->where('status', 'Held')->count();
+        $totalSold = $ticketsSold + $ticketsHeld;
+        
+        // Define zone capacity distribution (total should equal 7000)
+        $zoneCapacities = [
+            'Warzone Exclusive' => 200,      // 2.9% of total
+            'Warzone VIP' => 128,            // 1.8% of total  
+            'Warzone Grandstand' => 160,     // 2.3% of total
+            'Warzone Premium Ringside' => 1816, // 25.9% of total
+            'Level 1 Zone A/B/C/D' => 2046,  // 29.2% of total
+            'Level 2 Zone A/B/C/D' => 1782,  // 25.5% of total
+            'Standing Zone A/B' => 400,      // 5.7% of total
+        ];
+        
+        // Calculate sold tickets per zone (distribute proportionally)
+        $soldPerZone = [];
+        foreach ($zoneCapacities as $zone => $capacity) {
+            $soldInZone = $totalSold > 0 ? round(($capacity / $totalCapacity) * $totalSold) : 0;
+            $soldPerZone[$zone] = min($soldInZone, $capacity); // Don't exceed capacity
+        }
+        
+        // Build zones array with calculated availability
+        $zones = [];
+        foreach ($zoneCapacities as $zone => $capacity) {
+            $sold = $soldPerZone[$zone];
+            $available = max(0, $capacity - $sold);
+            $availabilityPercentage = $capacity > 0 ? round(($available / $capacity) * 100, 1) : 0;
+            
+            $zones[$zone] = [
+                'price' => $this->getZonePrice($zone),
+                'capacity' => $capacity,
+                'sold' => $sold,
+                'available' => $available,
+                'availability_percentage' => $availabilityPercentage
+            ];
+        }
 
-        return view('public.event-show', compact('event', 'availabilityStats', 'priceZones'));
+        return view('public.event-show', compact('event', 'availabilityStats', 'zones'));
+    }
+
+    /**
+     * Get zone price based on zone name
+     */
+    private function getZonePrice($zone)
+    {
+        $prices = [
+            'Warzone Exclusive' => 350.00,
+            'Warzone VIP' => 250.00,
+            'Warzone Grandstand' => 220.00,
+            'Warzone Premium Ringside' => 199.00,
+            'Level 1 Zone A/B/C/D' => 129.00,
+            'Level 2 Zone A/B/C/D' => 89.00,
+            'Standing Zone A/B' => 49.00,
+        ];
+        
+        return $prices[$zone] ?? 0;
     }
 
     /**

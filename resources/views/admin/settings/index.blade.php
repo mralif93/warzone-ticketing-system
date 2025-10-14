@@ -87,9 +87,9 @@
                         </div>
                     </div>
                 </div>
-            </div>
+        </div>
 
-            <!-- Settings Form -->
+        <!-- Settings Form -->
             <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 mb-6">
                 <div class="px-6 py-4 border-b border-wwc-neutral-100">
                     <div class="flex items-center justify-between">
@@ -101,7 +101,7 @@
                     </div>
                 </div>
                 <form method="POST" action="{{ route('admin.settings.update') }}" class="p-6">
-                    @csrf
+                @csrf
                     <!-- Ticket Settings -->
                     <div class="mb-8">
                         <h3 class="text-lg font-medium text-wwc-neutral-900 mb-4 flex items-center">
@@ -239,11 +239,11 @@
                                 @error('max_login_attempts')
                                     <p class="mt-2 text-sm text-wwc-error">{{ $message }}</p>
                                 @enderror
-                            </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Form Actions -->
+                <!-- Form Actions -->
                     <div class="flex justify-end space-x-3 pt-6 border-t border-wwc-neutral-200">
                         <button type="button" 
                                 class="inline-flex items-center px-4 py-2 border border-wwc-neutral-300 shadow-sm text-sm font-semibold rounded-lg text-wwc-neutral-700 bg-white hover:bg-wwc-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
@@ -255,11 +255,11 @@
                             <i class='bx bx-save text-sm mr-2'></i>
                             Save Settings
                         </button>
-                    </div>
-                </form>
-            </div>
+                </div>
+            </form>
+        </div>
 
-            <!-- System Information -->
+        <!-- System Information -->
             <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
                 <div class="px-6 py-4 border-b border-wwc-neutral-100">
                     <div class="flex items-center justify-between">
@@ -284,8 +284,8 @@
                         <div class="flex items-center space-x-3">
                             <div class="h-8 w-8 rounded-lg bg-wwc-success-light flex items-center justify-center">
                                 <i class='bx bx-code text-sm text-wwc-success'></i>
-                            </div>
-                            <div>
+                    </div>
+                    <div>
                                 <dt class="text-sm font-semibold text-wwc-neutral-900">PHP Version</dt>
                                 <dd class="text-sm text-wwc-neutral-600">{{ PHP_VERSION }}</dd>
                             </div>
@@ -293,8 +293,8 @@
                         <div class="flex items-center space-x-3">
                             <div class="h-8 w-8 rounded-lg bg-wwc-info-light flex items-center justify-center">
                                 <i class='bx bx-data text-sm text-wwc-info'></i>
-                            </div>
-                            <div>
+                    </div>
+                    <div>
                                 <dt class="text-sm font-semibold text-wwc-neutral-900">Database Driver</dt>
                                 <dd class="text-sm text-wwc-neutral-600">{{ config('database.default') }}</dd>
                             </div>
@@ -302,8 +302,8 @@
                         <div class="flex items-center space-x-3">
                             <div class="h-8 w-8 rounded-lg bg-wwc-warning-light flex items-center justify-center">
                                 <i class='bx bx-world text-sm text-wwc-warning'></i>
-                            </div>
-                            <div>
+                    </div>
+                    <div>
                                 <dt class="text-sm font-semibold text-wwc-neutral-900">Environment</dt>
                                 <dd class="text-sm text-wwc-neutral-600">{{ app()->environment() }}</dd>
                             </div>
@@ -311,8 +311,8 @@
                         <div class="flex items-center space-x-3">
                             <div class="h-8 w-8 rounded-lg bg-wwc-accent-light flex items-center justify-center">
                                 <i class='bx bx-link text-sm text-wwc-accent'></i>
-                            </div>
-                            <div>
+                    </div>
+                    <div>
                                 <dt class="text-sm font-semibold text-wwc-neutral-900">Application URL</dt>
                                 <dd class="text-sm text-wwc-neutral-600">{{ config('app.url') }}</dd>
                             </div>
@@ -320,18 +320,18 @@
                         <div class="flex items-center space-x-3">
                             <div class="h-8 w-8 rounded-lg {{ config('app.debug') ? 'bg-wwc-error-light' : 'bg-wwc-success-light' }} flex items-center justify-center">
                                 <i class='bx {{ config('app.debug') ? 'bx-error' : 'bx-check-circle' }} text-sm {{ config('app.debug') ? 'text-wwc-error' : 'text-wwc-success' }}'></i>
-                            </div>
-                            <div>
+                    </div>
+                    <div>
                                 <dt class="text-sm font-semibold text-wwc-neutral-900">Debug Mode</dt>
                                 <dd class="text-sm">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                         {{ config('app.debug') ? 'bg-wwc-error-light text-wwc-error' : 'bg-wwc-success-light text-wwc-success' }}">
-                                        {{ config('app.debug') ? 'Enabled' : 'Disabled' }}
-                                    </span>
-                                </dd>
+                                {{ config('app.debug') ? 'Enabled' : 'Disabled' }}
+                            </span>
+                        </dd>
                             </div>
-                        </div>
-                    </dl>
+                    </div>
+                </dl>
                 </div>
             </div>
         </div>

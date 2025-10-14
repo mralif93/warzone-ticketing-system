@@ -109,11 +109,6 @@ Route::middleware(['auth', 'log.activity'])->group(function () {
         Route::post('/payments/{payment}/refund', [\App\Http\Controllers\Admin\PaymentController::class, 'refund'])->name('payments.refund');
         Route::get('/payments/export/csv', [\App\Http\Controllers\Admin\PaymentController::class, 'export'])->name('payments.export');
         
-        // Seat management
-        Route::resource('seats', \App\Http\Controllers\Admin\SeatController::class);
-        Route::post('/seats/bulk-create', [\App\Http\Controllers\Admin\SeatController::class, 'bulkCreate'])->name('seats.bulk-create');
-        Route::post('/seats/{seat}/update-status', [\App\Http\Controllers\Admin\SeatController::class, 'updateStatus'])->name('seats.update-status');
-        
         // Audit logs
         Route::get('/audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
         Route::get('/audit-logs/{auditLog}', [\App\Http\Controllers\Admin\AuditLogController::class, 'show'])->name('audit-logs.show');
@@ -123,11 +118,6 @@ Route::middleware(['auth', 'log.activity'])->group(function () {
         // Reports
         Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports');
         Route::get('/reports/export', [\App\Http\Controllers\Admin\ReportController::class, 'export'])->name('reports.export');
-        
-        // Price Zone management
-        Route::resource('price-zones', \App\Http\Controllers\Admin\PriceZoneController::class);
-        Route::post('/price-zones/{priceZone}/toggle-status', [\App\Http\Controllers\Admin\PriceZoneController::class, 'toggleStatus'])->name('price-zones.toggle-status');
-        Route::post('/price-zones/bulk-action', [\App\Http\Controllers\Admin\PriceZoneController::class, 'bulkAction'])->name('price-zones.bulk-action');
         
         // Settings
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
@@ -149,8 +139,6 @@ Route::get('/events', [PublicController::class, 'events'])->name('public.events'
 Route::get('/events/{event}', [PublicController::class, 'showEvent'])->name('public.events.show');
 
 // Public ticket management routes
-Route::get('/events/{event}/select-seats', [TicketController::class, 'select'])->name('public.tickets.select');
-Route::post('/events/{event}/find-seats', [TicketController::class, 'findSeats'])->name('public.tickets.find-seats');
 Route::get('/events/{event}/cart', [TicketController::class, 'cart'])->name('public.tickets.cart');
 Route::post('/events/{event}/purchase', [TicketController::class, 'purchase'])->name('public.tickets.purchase');
 Route::get('/tickets/confirmation/{order}', [TicketController::class, 'confirmation'])->name('public.tickets.confirmation');

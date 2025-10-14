@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -65,43 +66,78 @@ class OrderController extends Controller
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'customer_name' => 'required|string|max:255',
+            'event_id' => 'required|exists:events,id',
             'customer_email' => 'required|email|max:255',
-            'customer_phone' => 'nullable|string|max:20',
-            'subtotal' => 'required|numeric|min:0',
-            'service_fee' => 'nullable|numeric|min:0',
-            'tax_amount' => 'nullable|numeric|min:0',
-            'total_amount' => 'required|numeric|min:0',
-            'status' => 'required|in:Pending,Paid,Cancelled,Refunded',
+            'payment_method' => 'required|string|max:255',
+            'zone' => 'required|string|in:Warzone Exclusive,Warzone VIP,Warzone Grandstand,Warzone Premium Ringside,Level 1 Zone A/B/C/D,Level 2 Zone A/B/C/D,Standing Zone A/B',
+            'quantity' => 'required|integer|min:1|max:10',
             'notes' => 'nullable|string|max:1000'
         ]);
 
-        $order = Order::create([
-            'user_id' => $request->user_id,
-            'order_number' => 'ORD-' . strtoupper(uniqid()),
-            'customer_name' => $request->customer_name,
-            'customer_email' => $request->customer_email,
-            'customer_phone' => $request->customer_phone,
-            'subtotal' => $request->subtotal,
-            'service_fee' => $request->service_fee ?? 0,
-            'tax_amount' => $request->tax_amount ?? 0,
-            'total_amount' => $request->total_amount,
-            'status' => $request->status,
-            'notes' => $request->notes,
-        ]);
+        DB::beginTransaction();
+        try {
+            // Get event and user
+            $event = \App\Models\Event::findOrFail($request->event_id);
+            $user = \App\Models\User::findOrFail($request->user_id);
 
-        AuditLog::create([
-            'user_id' => Auth::id(),
-            'action' => 'CREATE',
-            'table_name' => 'orders',
-            'record_id' => $order->id,
-            'old_values' => null,
-            'new_values' => $order->toArray(),
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
+            // Calculate base pricing
+            $basePrice = $this->getZonePrice($request->zone);
+            $quantity = $request->quantity;
+            
+            // Calculate pricing for multiple tickets
+            $subtotal = $basePrice * $quantity;
+            $serviceFee = $this->calculateServiceFee($subtotal);
+            $taxAmount = $this->calculateTax($subtotal + $serviceFee);
+            $totalAmount = $subtotal + $serviceFee + $taxAmount;
+            
+            // Create order with calculated pricing (1 order = multiple tickets)
+            $order = Order::create([
+                'user_id' => $request->user_id,
+                'customer_email' => $request->customer_email,
+                'order_number' => Order::generateOrderNumber(),
+                'qrcode' => Order::generateQRCode(),
+                'subtotal' => $subtotal,
+                'service_fee' => $serviceFee,
+                'tax_amount' => $taxAmount,
+                'total_amount' => $totalAmount,
+                'status' => 'Paid', // Admin-created orders are considered paid
+                'payment_method' => $request->payment_method,
+                'notes' => $request->notes,
+            ]);
 
-        return redirect()->route('admin.orders.show', $order)->with('success', 'Order created successfully!');
+            // Create multiple tickets for this order (same zone)
+            for ($i = 0; $i < $quantity; $i++) {
+                \App\Models\Ticket::create([
+                    'order_id' => $order->id,
+                    'event_id' => $event->id,
+                    'zone' => $request->zone,
+                    'qrcode' => \App\Models\Ticket::generateQRCode(),
+                    'status' => 'Sold',
+                    'price_paid' => $basePrice,
+                ]);
+            }
+
+            AuditLog::create([
+                'user_id' => Auth::id(),
+                'action' => 'CREATE',
+                'table_name' => 'orders',
+                'record_id' => $order->id,
+                'old_values' => null,
+                'new_values' => $order->toArray(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('admin.orders.show', $order)
+                ->with('success', 'Order created successfully with ' . $quantity . ' tickets.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Failed to create order. Please try again.'])
+                ->withInput();
+        }
     }
 
     /**
@@ -109,7 +145,7 @@ class OrderController extends Controller
      */
     public function show(Order $order)
     {
-        $order->load(['user', 'tickets.seat', 'tickets.event', 'payments']);
+        $order->load(['user', 'tickets.event', 'payments']);
 
         return view('admin.orders.show', compact('order'));
     }
@@ -119,9 +155,9 @@ class OrderController extends Controller
      */
     public function edit(Order $order)
     {
+        $order->load(['tickets']);
         $users = \App\Models\User::all();
-        $events = \App\Models\Event::where('status', 'On Sale')->get();
-        return view('admin.orders.edit', compact('order', 'users', 'events'));
+        return view('admin.orders.edit', compact('order', 'users'));
     }
 
     /**
@@ -131,43 +167,86 @@ class OrderController extends Controller
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'customer_name' => 'required|string|max:255',
             'customer_email' => 'required|email|max:255',
-            'customer_phone' => 'nullable|string|max:20',
-            'subtotal' => 'required|numeric|min:0',
-            'service_fee' => 'nullable|numeric|min:0',
-            'tax_amount' => 'nullable|numeric|min:0',
-            'total_amount' => 'required|numeric|min:0',
+            'payment_method' => 'required|string|max:255',
             'status' => 'required|in:Pending,Paid,Cancelled,Refunded',
+            'zone' => 'required|string|in:Warzone Exclusive,Warzone VIP,Warzone Grandstand,Warzone Premium Ringside,Level 1 Zone A/B/C/D,Level 2 Zone A/B/C/D,Standing Zone A/B',
+            'quantity' => 'required|integer|min:1|max:10',
             'notes' => 'nullable|string|max:1000'
         ]);
 
-        $oldValues = $order->toArray();
-        $order->update([
-            'user_id' => $request->user_id,
-            'customer_name' => $request->customer_name,
-            'customer_email' => $request->customer_email,
-            'customer_phone' => $request->customer_phone,
-            'subtotal' => $request->subtotal,
-            'service_fee' => $request->service_fee ?? 0,
-            'tax_amount' => $request->tax_amount ?? 0,
-            'total_amount' => $request->total_amount,
-            'status' => $request->status,
-            'notes' => $request->notes,
-        ]);
+        DB::beginTransaction();
+        try {
+            $oldValues = $order->toArray();
+            
+            // Update order basic information
+            $order->update([
+                'user_id' => $request->user_id,
+                'customer_email' => $request->customer_email,
+                'payment_method' => $request->payment_method,
+                'status' => $request->status,
+                'notes' => $request->notes,
+            ]);
 
-        AuditLog::create([
-            'user_id' => Auth::id(),
-            'action' => 'UPDATE',
-            'table_name' => 'orders',
-            'record_id' => $order->id,
-            'old_values' => $oldValues,
-            'new_values' => $order->toArray(),
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
+            // Handle ticket updates (1 order = multiple tickets)
+            $newZone = $request->zone;
+            $newQuantity = $request->quantity;
+            $basePrice = $this->getZonePrice($newZone);
+            $currentTickets = $order->tickets;
+            $currentQuantity = $currentTickets->count();
+            $currentZone = $currentTickets->first()->zone ?? '';
 
-        return redirect()->route('admin.orders.show', $order)->with('success', 'Order updated successfully!');
+            // Check if zone or quantity changed
+            if ($newZone != $currentZone || $newQuantity != $currentQuantity) {
+                // Delete existing tickets
+                $order->tickets()->delete();
+
+                // Create new tickets with updated zone and quantity
+                for ($i = 0; $i < $newQuantity; $i++) {
+                    \App\Models\Ticket::create([
+                        'order_id' => $order->id,
+                        'event_id' => $currentTickets->first()->event_id,
+                        'zone' => $newZone,
+                        'qrcode' => \App\Models\Ticket::generateQRCode(),
+                        'status' => 'Sold',
+                        'price_paid' => $basePrice,
+                    ]);
+                }
+
+                // Update order pricing
+                $subtotal = $basePrice * $newQuantity;
+                $serviceFee = $this->calculateServiceFee($subtotal);
+                $taxAmount = $this->calculateTax($subtotal + $serviceFee);
+                $totalAmount = $subtotal + $serviceFee + $taxAmount;
+
+                $order->update([
+                    'subtotal' => $subtotal,
+                    'service_fee' => $serviceFee,
+                    'tax_amount' => $taxAmount,
+                    'total_amount' => $totalAmount,
+                ]);
+            }
+
+            AuditLog::create([
+                'user_id' => Auth::id(),
+                'action' => 'UPDATE',
+                'table_name' => 'orders',
+                'record_id' => $order->id,
+                'old_values' => $oldValues,
+                'new_values' => $order->toArray(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('admin.orders.show', $order)->with('success', 'Order updated successfully!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Failed to update order. Please try again.'])
+                ->withInput();
+        }
     }
 
     /**
@@ -281,5 +360,23 @@ class OrderController extends Controller
         ]);
 
         return back()->with('success', 'Order refunded successfully!');
+    }
+
+    /**
+     * Get zone price
+     */
+    private function getZonePrice($zone)
+    {
+        $zonePrices = [
+            'Warzone Exclusive' => 500,
+            'Warzone VIP' => 250,
+            'Warzone Grandstand' => 199,
+            'Warzone Premium Ringside' => 150,
+            'Level 1 Zone A/B/C/D' => 100,
+            'Level 2 Zone A/B/C/D' => 75,
+            'Standing Zone A/B' => 50,
+        ];
+
+        return $zonePrices[$zone] ?? 0;
     }
 }

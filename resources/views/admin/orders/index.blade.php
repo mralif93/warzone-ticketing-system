@@ -10,7 +10,7 @@
     <div class="px-6 py-6">
         <div class="mx-auto">
             <!-- Statistics Cards -->
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5 mb-6">
                 <!-- Total Orders -->
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
                     <div class="flex items-center justify-between">
@@ -90,6 +90,25 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Total Quantity -->
+                <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
+                    <div class="flex items-center justify-between">
+                    <div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $orders->sum(function($order) { return $order->tickets->count(); }) }}</div>
+                            <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Total Quantity</div>
+                            <div class="flex items-center">
+                                <div class="flex items-center text-xs text-wwc-accent font-semibold">
+                                    <i class='bx bx-package text-xs mr-1'></i>
+                                    {{ $orders->where('status', 'Paid')->sum(function($order) { return $order->tickets->count(); }) }} Paid
+                                </div>
+                            </div>
+                        </div>
+                        <div class="h-12 w-12 rounded-lg bg-purple-100 flex items-center justify-center">
+                            <i class='bx bx-package text-2xl text-purple-600'></i>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Search and Filters -->
@@ -135,7 +154,7 @@
                                     class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-semibold rounded-lg text-white bg-wwc-primary hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
                                 <i class='bx bx-search text-sm mr-2'></i>
                                 Search Orders
-                            </button>
+                        </button>
                             <a href="{{ route('admin.orders.index') }}" 
                                class="inline-flex items-center px-4 py-2 border border-wwc-neutral-300 shadow-sm text-sm font-semibold rounded-lg text-wwc-neutral-700 bg-white hover:bg-wwc-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
                                 <i class='bx bx-x text-sm mr-2'></i>
@@ -187,6 +206,7 @@
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider">Order</th>
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider">Customer</th>
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider">Amount</th>
+                                    <th class="px-6 py-3 text-center text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider">Quantity</th>
                                     <th class="px-6 py-3 text-center text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider">Status</th>
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider">Date</th>
                                     <th class="px-6 py-3 text-right text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider">Actions</th>
@@ -203,6 +223,9 @@
                                                 <div>
                                                     <div class="text-sm font-semibold text-wwc-neutral-900">{{ $order->order_number }}</div>
                                                     <div class="text-xs text-wwc-neutral-500">{{ $order->tickets->count() }} tickets</div>
+                                                    @if($order->qrcode)
+                                                    <div class="text-xs text-wwc-neutral-400 font-mono">QR: {{ $order->qrcode }}</div>
+                                                    @endif
                                             </div>
                                         </div>
                                     </td>
@@ -212,6 +235,17 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="text-sm font-semibold text-wwc-neutral-900">RM{{ number_format($order->total_amount, 0) }}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                                            <div class="flex items-center justify-center">
+                                                <div class="h-8 w-8 rounded-lg bg-wwc-primary-light flex items-center justify-center mr-2">
+                                                    <i class='bx bx-package text-sm text-wwc-primary'></i>
+                                                </div>
+                                                <div>
+                                                    <div class="text-sm font-semibold text-wwc-neutral-900">{{ $order->tickets->count() }}</div>
+                                                    <div class="text-xs text-wwc-neutral-500">quantity</div>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-center">
                                             @if($order->status === 'Paid')

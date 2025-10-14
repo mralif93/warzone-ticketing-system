@@ -136,7 +136,7 @@ class GateStaffController extends Controller
         $user = Auth::user();
         
         $query = AdmittanceLog::where('staff_user_id', $user->id)
-            ->with(['ticket.event', 'ticket.seat']);
+            ->with(['ticket.event']);
 
         // Filter by date
         if ($request->filled('date_from')) {

@@ -31,7 +31,7 @@ class TicketValidationService
             }
 
             // Check if ticket is already scanned
-            if ($ticket->is_scanned) {
+            if ($ticket->isScanned()) {
                 return $this->createValidationResult('DUPLICATE', 'Ticket already scanned', $gateId, $staffUserId, $startTime, $ticket);
             }
 
@@ -72,12 +72,10 @@ class TicketValidationService
     {
         // Use raw SQL for maximum performance with proper indexing
         $result = DB::selectOne("
-            SELECT t.id, t.event_id, t.seat_id, t.qrcode, t.status, t.is_scanned, 
-                   t.scanned_at, t.gate_location, t.price_paid, t.created_at,
-                   s.section, s.row, s.number, s.price_zone,
+            SELECT t.id, t.event_id, t.qrcode, t.status, t.scanned_at, 
+                   t.price_paid, t.created_at, t.zone,
                    e.name as event_name, e.date_time as event_date
             FROM tickets t
-            LEFT JOIN seats s ON t.seat_id = s.id
             LEFT JOIN events e ON t.event_id = e.id
             WHERE t.qrcode = ? 
             AND t.deleted_at IS NULL
@@ -92,20 +90,12 @@ class TicketValidationService
         $ticket = new Ticket();
         $ticket->id = $result->id;
         $ticket->event_id = $result->event_id;
-        $ticket->seat_id = $result->seat_id;
         $ticket->qrcode = $result->qrcode;
         $ticket->status = $result->status;
-        $ticket->is_scanned = (bool) $result->is_scanned;
         $ticket->scanned_at = $result->scanned_at;
-        $ticket->gate_location = $result->gate_location;
         $ticket->price_paid = $result->price_paid;
         $ticket->created_at = $result->created_at;
-
-        // Add seat information
-        $ticket->seat_section = $result->section;
-        $ticket->seat_row = $result->row;
-        $ticket->seat_number = $result->number;
-        $ticket->seat_price_zone = $result->price_zone;
+        $ticket->zone = $result->zone;
 
         // Add event information
         $ticket->event_name = $result->event_name;
@@ -133,17 +123,13 @@ class TicketValidationService
             // Use raw SQL for atomic update
             DB::update("
                 UPDATE tickets 
-                SET is_scanned = 1, 
+                SET status = 'Scanned',
                     scanned_at = ?, 
-                    gate_location = ?,
-                    scanned_by = ?,
                     updated_at = ?
                 WHERE id = ? 
-                AND is_scanned = 0
+                AND status = 'Sold'
             ", [
                 now(),
-                $gateId,
-                $staffUserId,
                 now(),
                 $ticket->id
             ]);
@@ -184,11 +170,10 @@ class TicketValidationService
 
         if ($ticket) {
             $response['ticket_info'] = [
-                'id' => $ticket->id,
-                'event_name' => $ticket->event_name ?? 'Unknown Event',
-                'seat' => ($ticket->seat_section ?? 'N/A') . ($ticket->seat_row ?? '') . ($ticket->seat_number ?? ''),
-                'price_zone' => $ticket->seat_price_zone ?? 'N/A',
-                'price_paid' => $ticket->price_paid ?? 0,
+            'id' => $ticket->id,
+            'event_name' => $ticket->event_name ?? 'Unknown Event',
+            'ticket_identifier' => $ticket->ticket_identifier ?? 'N/A',
+            'price_paid' => $ticket->price_paid ?? 0,
             ];
         }
 

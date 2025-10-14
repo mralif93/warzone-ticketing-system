@@ -1,5 +1,5 @@
 <?php $__env->startSection('title', 'Checkout - ' . $event->name); ?>
-<?php $__env->startSection('description', 'Complete your ticket purchase for ' . $event->name . ' on ' . $event->date_time->format('M j, Y') . '.'); ?>
+<?php $__env->startSection('description', 'Complete your ticket purchase for ' . $event->name . '.'); ?>
 
 <?php $__env->startSection('content'); ?>
 <?php if(!$event): ?>
@@ -7,7 +7,72 @@
         <div class="text-center">
             <h1 class="text-2xl font-bold text-gray-900 mb-4">No Event Selected</h1>
             <p class="text-gray-600 mb-4">Please select an event first.</p>
-            <a href="<?php echo e(route('public.events.index')); ?>" class="bg-wwc-primary text-white px-6 py-3 rounded-lg hover:bg-wwc-primary-dark transition-colors">Browse Events</a>
+            <a href="<?php echo e(route('public.events')); ?>" class="bg-wwc-primary text-white px-6 py-3 rounded-lg hover:bg-wwc-primary-dark transition-colors">Browse Events</a>
+        </div>
+    </div>
+<?php elseif(!auth()->check()): ?>
+    <!-- Login Required Section -->
+    <div class="min-h-screen bg-wwc-neutral-50 flex items-center justify-center">
+        <div class="max-w-md w-full mx-4">
+            <div class="bg-white rounded-2xl shadow-lg border border-wwc-neutral-200 p-8">
+                <!-- Login Icon -->
+                <div class="text-center mb-8">
+                    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-wwc-primary/10 mb-4">
+                        <i class='bx bx-lock text-3xl text-wwc-primary'></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-wwc-neutral-900 font-display mb-2">Login Required</h1>
+                    <p class="text-wwc-neutral-600">Please login to proceed with your ticket purchase for</p>
+                    <p class="text-lg font-semibold text-wwc-primary mt-2"><?php echo e($event->name); ?></p>
+                </div>
+
+                <!-- Event Preview -->
+                <div class="bg-wwc-neutral-50 rounded-xl p-6 mb-8">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-wwc-neutral-900">Event Details</h3>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-wwc-success/10 text-wwc-success border border-wwc-success/20">
+                            <i class="bx bx-check-circle mr-1"></i>
+                            On Sale
+                        </span>
+                    </div>
+                    <div class="space-y-2 text-sm text-wwc-neutral-600">
+                        <div class="flex items-center">
+                            <i class='bx bx-calendar mr-2 text-wwc-primary'></i>
+                            <span><?php echo e($event->getFormattedDateRange()); ?></span>
+                        </div>
+                        <?php if($event->venue): ?>
+                        <div class="flex items-center">
+                            <i class='bx bx-map mr-2 text-wwc-primary'></i>
+                            <span><?php echo e($event->venue); ?></span>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- Login Buttons -->
+                <div class="space-y-4">
+                    <a href="<?php echo e(route('login')); ?>" 
+                       class="w-full bg-wwc-primary text-white py-3 px-6 rounded-xl font-semibold hover:bg-wwc-primary-dark transition-colors duration-200 flex items-center justify-center">
+                        <i class='bx bx-log-in mr-2'></i>
+                        Login to Continue
+                    </a>
+                    
+                    <div class="text-center">
+                        <span class="text-sm text-wwc-neutral-500">Don't have an account?</span>
+                        <a href="<?php echo e(route('register')); ?>" class="text-sm text-wwc-primary hover:text-wwc-primary-dark font-medium ml-1">
+                            Create Account
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Back to Event -->
+                <div class="mt-6 pt-6 border-t border-wwc-neutral-200">
+                    <a href="<?php echo e(route('public.events.show', $event)); ?>" 
+                       class="w-full bg-wwc-neutral-100 text-wwc-neutral-700 py-3 px-6 rounded-xl font-medium hover:bg-wwc-neutral-200 transition-colors duration-200 flex items-center justify-center">
+                        <i class='bx bx-arrow-back mr-2'></i>
+                        Back to Event
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 <?php else: ?>
@@ -22,28 +87,26 @@
     <?php endif; ?>
 
     <!-- Header Section -->
-    <div class="bg-white border-b border-gray-200">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="bg-white border-b border-wwc-neutral-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="flex items-center justify-between">
                 <!-- Back Navigation -->
                 <div class="flex items-center">
-                    <a href="<?php echo e(route('public.tickets.select', $event)); ?>" 
-                       class="flex items-center text-gray-600 hover:text-wwc-primary transition-colors duration-200 group">
-                        <i class="bx bx-chevron-left text-lg mr-1 group-hover:-translate-x-1 transition-transform"></i>
-                        <span class="font-medium">Back to Zone Selection</span>
+                    <a href="<?php echo e(route('public.events.show', $event)); ?>" 
+                       class="flex items-center text-wwc-neutral-600 hover:text-wwc-primary transition-colors duration-200 group">
+                        <div class="h-8 w-8 bg-wwc-neutral-100 rounded-lg flex items-center justify-center group-hover:bg-wwc-primary/10 transition-colors duration-200">
+                            <i class="bx bx-chevron-left text-lg group-hover:-translate-x-1 transition-transform"></i>
+                        </div>
+                        <span class="font-semibold ml-3">Back to Event</span>
                     </a>
                 </div>
                 
                 <!-- Event Details -->
                 <div class="text-center flex-1 mx-8">
-                    <h1 class="text-2xl font-bold text-gray-900 mb-1"><?php echo e($event->name ?? 'Event'); ?></h1>
-                    <p class="text-sm text-gray-600">
-                        <?php echo e($event->event_date ? \Carbon\Carbon::parse($event->event_date)->format('M j, Y') : 'TBD'); ?>
+                    <h1 class="text-2xl font-bold text-wwc-neutral-900 font-display mb-1"><?php echo e($event->name); ?></h1>
+                    <p class="text-sm text-wwc-neutral-600">
+                        <?php echo e($event->getFormattedDateRange()); ?>
 
-                        <?php if($event->event_date): ?>
-                            at <?php echo e(\Carbon\Carbon::parse($event->event_date)->format('g:i A')); ?>
-
-                        <?php endif; ?>
                         <?php if($event->venue): ?>
                             • <?php echo e($event->venue); ?>
 
@@ -51,383 +114,389 @@
                     </p>
                 </div>
                 
-                <!-- Status Badge -->
-                <div class="text-right">
-                    <p class="text-xs text-gray-500 mb-1">Status</p>
-                    <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        <div class="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                <!-- Event Status -->
+                <div class="flex items-center">
+                    <span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-wwc-success/10 text-wwc-success border border-wwc-success/20">
+                        <i class="bx bx-check-circle mr-2"></i>
                         On Sale
-                    </div>
+                    </span>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="space-y-8">
-            <!-- Order Summary -->
-            <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-                <!-- Event Info Header -->
-                <div class="bg-wwc-primary p-6 text-white">
-                    <div class="flex items-center justify-between">
+            
+            <!-- Checkout Form -->
+            <form action="<?php echo e(route('public.tickets.purchase', $event)); ?>" method="POST" class="space-y-8">
+                <?php echo csrf_field(); ?>
+                
+                <!-- Ticket Selection -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                    <!-- Header -->
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Select Your Tickets</h2>
+                        <p class="text-sm text-gray-600 mt-1">Choose your zone and quantity</p>
+                    </div>
+                    
+                    <div class="px-6 py-6 space-y-6">
+                        <!-- Zone Selection -->
                         <div>
-                            <h2 class="text-xl font-bold"><?php echo e($event->name ?? 'Event'); ?></h2>
-                            <p class="text-wwc-primary-light text-sm mt-1 flex items-center">
-                                <i class="bx bx-calendar mr-2"></i>
-                                <?php echo e($event->event_date ? \Carbon\Carbon::parse($event->event_date)->format('M d, Y') : 'TBD'); ?>
-
-                            </p>
+                            <label for="zone" class="block text-sm font-medium text-gray-700 mb-3">
+                                Select Zone <span class="text-red-500">*</span>
+                            </label>
+                            <select id="zone" name="zone" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary <?php $__errorArgs = ['zone'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
+                                <option value="">Choose a zone</option>
+                                <option value="Warzone Exclusive" <?php echo e(old('zone') == 'Warzone Exclusive' ? 'selected' : ''); ?>>Warzone Exclusive - RM500</option>
+                                <option value="Warzone VIP" <?php echo e(old('zone') == 'Warzone VIP' ? 'selected' : ''); ?>>Warzone VIP - RM250</option>
+                                <option value="Warzone Grandstand" <?php echo e(old('zone') == 'Warzone Grandstand' ? 'selected' : ''); ?>>Warzone Grandstand - RM199</option>
+                                <option value="Warzone Premium Ringside" <?php echo e(old('zone') == 'Warzone Premium Ringside' ? 'selected' : ''); ?>>Warzone Premium Ringside - RM150</option>
+                                <option value="Level 1 Zone A/B/C/D" <?php echo e(old('zone') == 'Level 1 Zone A/B/C/D' ? 'selected' : ''); ?>>Level 1 Zone A/B/C/D - RM100</option>
+                                <option value="Level 2 Zone A/B/C/D" <?php echo e(old('zone') == 'Level 2 Zone A/B/C/D' ? 'selected' : ''); ?>>Level 2 Zone A/B/C/D - RM75</option>
+                                <option value="Standing Zone A/B" <?php echo e(old('zone') == 'Standing Zone A/B' ? 'selected' : ''); ?>>Standing Zone A/B - RM50</option>
+                            </select>
+                            <?php $__errorArgs = ['zone'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <p class="text-red-500 text-sm mt-1"><?php echo e($message); ?></p>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
-                        <div class="text-right">
-                            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                                <i class="bx bx-receipt text-2xl"></i>
+                        
+                        <!-- Quantity Selection -->
+                        <div>
+                            <label for="quantity" class="block text-sm font-medium text-gray-700 mb-3">
+                                Quantity <span class="text-red-500">*</span>
+                            </label>
+                            <div class="flex items-center justify-center space-x-4">
+                                <button type="button" id="quantity-decrease" 
+                                        class="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-wwc-primary transition-colors">
+                                    <i class="bx bx-minus text-lg"></i>
+                                </button>
+                                <input type="number" 
+                                       id="quantity" 
+                                       name="quantity" 
+                                       min="1" 
+                                       max="10" 
+                                       value="<?php echo e(old('quantity', 1)); ?>" 
+                                       required
+                                       class="w-24 text-center px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary <?php $__errorArgs = ['quantity'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?> text-lg font-semibold">
+                                <button type="button" id="quantity-increase" 
+                                        class="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-wwc-primary transition-colors">
+                                    <i class="bx bx-plus text-lg"></i>
+                                </button>
                             </div>
+                            <p class="text-xs text-gray-500 mt-2 text-center">Maximum 10 tickets per order</p>
+                            <?php $__errorArgs = ['quantity'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <p class="text-red-500 text-sm mt-1 text-center"><?php echo e($message); ?></p>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
                     </div>
                 </div>
-
-                <div class="p-6">
-                    <!-- Zone Selection Summary -->
-                    <div class="mb-6">
-                        <?php if(isset($selectedZone) && isset($quantity)): ?>
-                            <div class="bg-wwc-primary-light rounded-xl p-5 border border-wwc-primary">
-                                <div class="flex items-center justify-between mb-4">
-                                    <div class="flex items-center">
-                                        <div class="w-12 h-12 bg-wwc-primary rounded-full flex items-center justify-center mr-4">
-                                            <i class="bx bx-map text-white text-xl"></i>
-                                        </div>
-                                        <div>
-                                            <h3 class="font-bold text-gray-900 text-lg"><?php echo e($selectedZone); ?> Zone</h3>
-                                            <p class="text-sm text-gray-600"><?php echo e($quantity); ?> <?php echo e($quantity == 1 ? 'ticket' : 'tickets'); ?></p>
-                                        </div>
-                                    </div>
-                                    <div class="text-right">
-                                        <p class="font-bold text-wwc-primary text-2xl">RM<?php echo e(number_format($totalPrice, 0)); ?></p>
-                                        <p class="text-xs text-gray-500">RM<?php echo e(number_format($totalPrice / $quantity, 0)); ?> each</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-white bg-opacity-60 rounded-lg p-4">
-                                    <div class="flex items-start">
-                                        <i class="bx bx-info-circle text-wwc-primary mr-3 mt-0.5"></i>
-                                        <p class="text-sm text-wwc-primary-dark">
-                                            <strong>Seat Assignment:</strong> Specific seats will be assigned when you arrive at the venue. Staff will scan your QR code and assign your actual seats within the <?php echo e($selectedZone); ?> zone.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php else: ?>
-                            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-                                <div class="flex items-center">
-                                    <i class="bx bx-error-circle text-red-500 mr-2"></i>
-                                    <p class="text-sm text-red-700">No zone selection found. Please go back and select your preferred zone.</p>
-                                </div>
-                            </div>
-                        <?php endif; ?>
+                
+                <!-- Order Summary -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Order Summary</h2>
                     </div>
-
-                    <!-- Hold Timer -->
-                    <div class="bg-wwc-warning-light border border-wwc-warning rounded-xl p-4 mb-6">
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 bg-wwc-warning rounded-full flex items-center justify-center mr-4">
-                                <i class="bx bx-time text-white text-lg"></i>
-                            </div>
-                            <div>
-                                <p class="text-sm font-medium text-wwc-warning-dark">Reservation expires at</p>
-                                <p id="hold-timer" class="text-2xl font-bold text-wwc-warning-dark"><?php echo e(\Carbon\Carbon::parse($holdUntil)->format('g:i A')); ?></p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Pricing Breakdown -->
-                    <div class="space-y-4">
-                        <h4 class="font-semibold text-gray-900 text-sm uppercase tracking-wide">Order Details</h4>
-                        <div class="space-y-3">
+                    <div class="px-6 py-6">
+                        <div class="space-y-2" id="order-summary">
                             <div class="flex justify-between text-sm">
-                                <span class="text-gray-600">Subtotal (<?php echo e($quantity ?? count($heldSeats)); ?> <?php echo e(($quantity ?? count($heldSeats)) == 1 ? 'ticket' : 'tickets'); ?>)</span>
-                                <span class="font-medium">RM<?php echo e(number_format($totalPrice, 0)); ?></span>
+                                <span class="text-gray-600">Subtotal</span>
+                                <span class="font-medium" id="subtotal">RM0</span>
                             </div>
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-600">Service Fee (5%)</span>
-                                <span class="font-medium">RM<?php echo e(number_format($serviceFee, 0)); ?></span>
+                                <span class="font-medium" id="service-fee">RM0</span>
                             </div>
                             <div class="flex justify-between text-sm">
-                                <span class="text-gray-600">Tax (8%)</span>
-                                <span class="font-medium">RM<?php echo e(number_format($taxAmount, 0)); ?></span>
+                                <span class="text-gray-600">Tax (6%)</span>
+                                <span class="font-medium" id="tax">RM0</span>
                             </div>
-                            <div class="border-t border-gray-200 pt-3">
-                                <div class="flex justify-between text-xl font-bold">
-                                    <span>Total</span>
-                                    <span class="text-wwc-primary">RM<?php echo e(number_format($grandTotal, 0)); ?></span>
-                                </div>
+                            <div class="flex justify-between text-lg font-semibold border-t border-gray-200 pt-2">
+                                <span>Total</span>
+                                <span class="text-wwc-primary" id="total">RM0</span>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Checkout Form -->
-            <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-                <div class="p-8">
-                    <div class="text-center mb-8">
-                        <h2 class="text-2xl font-bold text-gray-900 mb-2">Complete Your Purchase</h2>
-                        <p class="text-gray-600">Enter your information to secure your tickets</p>
+                    
+                <!-- Customer Information -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Customer Information</h2>
                     </div>
                     
-                    <form action="<?php echo e(route('public.tickets.purchase', $event)); ?>" method="POST" id="checkout-form">
-                        <?php echo csrf_field(); ?>
+                    <div class="px-6 py-6 space-y-4">
+                        <div>
+                            <label for="customer_name" class="block text-sm font-medium text-gray-700 mb-2">
+                                Full Name <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" 
+                                    id="customer_name" 
+                                    name="customer_name" 
+                                    value="<?php echo e(old('customer_name', auth()->user()->name ?? '')); ?>"
+                                    required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary <?php $__errorArgs = ['customer_name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
+                            <?php $__errorArgs = ['customer_name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <p class="text-red-500 text-sm mt-1"><?php echo e($message); ?></p>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                        </div>
                         
-                        <?php if($errors->any()): ?>
-                            <div class="bg-red-50 border-l-4 border-red-400 text-red-700 px-6 py-4 mb-8 rounded-r-lg">
-                                <div class="flex items-center">
-                                    <i class="bx bx-error-circle text-xl mr-3"></i>
-                                    <div>
-                                        <h4 class="font-medium">Please correct the following errors:</h4>
-                                        <ul class="list-disc list-inside text-sm mt-2">
-                                            <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                <li><?php echo e($error); ?></li>
-                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endif; ?>
-
-                        <!-- Customer Information Section -->
-                        <div class="mb-8">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
-                                <div class="w-10 h-10 bg-wwc-primary rounded-full flex items-center justify-center mr-3">
-                                    <i class="bx bx-user text-white text-sm"></i>
-                                </div>
-                                Customer Information
-                            </h3>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <!-- Customer Name -->
-                                <div class="md:col-span-2">
-                                    <label for="customer_name" class="block text-sm font-medium text-gray-700 mb-2">
-                                        Full Name *
-                                    </label>
-                                    <div class="relative">
-                                        <input type="text" name="customer_name" id="customer_name" required
-                                               value="<?php echo e(old('customer_name', auth()->user()->name ?? '')); ?>"
-                                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary transition-all duration-200 <?php $__errorArgs = ['customer_name'];
+                        <div>
+                            <label for="customer_email" class="block text-sm font-medium text-gray-700 mb-2">
+                                Email Address <span class="text-red-500">*</span>
+                            </label>
+                            <input type="email" 
+                                    id="customer_email" 
+                                    name="customer_email" 
+                                    value="<?php echo e(old('customer_email', auth()->user()->email ?? '')); ?>"
+                                    required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary <?php $__errorArgs = ['customer_email'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?>"
-                                               placeholder="Enter your full name">
-                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                            <i class="bx bx-user text-gray-400"></i>
-                                        </div>
-                                    </div>
-                                    <?php $__errorArgs = ['customer_name'];
+unset($__errorArgs, $__bag); ?>">
+                            <?php $__errorArgs = ['customer_email'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?>
-                                        <div class="text-red-500 text-sm mt-1 flex items-center">
-                                            <i class="bx bx-error-circle mr-1"></i>
-                                            <?php echo e($message); ?>
-
-                                        </div>
-                                    <?php unset($message);
+                                <p class="text-red-500 text-sm mt-1"><?php echo e($message); ?></p>
+                            <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
-                                </div>
-
-                                <!-- Customer Email -->
-                                <div>
-                                    <label for="customer_email" class="block text-sm font-medium text-gray-700 mb-2">
-                                        Email Address *
-                                    </label>
-                                    <div class="relative">
-                                        <input type="email" name="customer_email" id="customer_email" required
-                                               value="<?php echo e(old('customer_email', auth()->user()->email ?? '')); ?>"
-                                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary transition-all duration-200 <?php $__errorArgs = ['customer_email'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>"
-                                               placeholder="Enter your email address">
-                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                            <i class="bx bx-envelope text-gray-400"></i>
-                                        </div>
-                                    </div>
-                                    <?php $__errorArgs = ['customer_email'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                        <div class="text-red-500 text-sm mt-1 flex items-center">
-                                            <i class="bx bx-error-circle mr-1"></i>
-                                            <?php echo e($message); ?>
-
-                                        </div>
-                                    <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                                </div>
-
-                                <!-- Customer Phone -->
-                                <div>
-                                    <label for="customer_phone" class="block text-sm font-medium text-gray-700 mb-2">
-                                        Phone Number
-                                    </label>
-                                    <div class="relative">
-                                        <input type="tel" name="customer_phone" id="customer_phone"
-                                               value="<?php echo e(old('customer_phone', auth()->user()->phone_number ?? '')); ?>"
-                                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary transition-all duration-200 <?php $__errorArgs = ['customer_phone'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>"
-                                               placeholder="Enter your phone number">
-                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                            <i class="bx bx-phone text-gray-400"></i>
-                                        </div>
-                                    </div>
-                                    <?php $__errorArgs = ['customer_phone'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                        <div class="text-red-500 text-sm mt-1 flex items-center">
-                                            <i class="bx bx-error-circle mr-1"></i>
-                                            <?php echo e($message); ?>
-
-                                        </div>
-                                    <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                                </div>
-                            </div>
                         </div>
-
-                        <!-- Payment Information Section -->
-                        <div class="border-t border-gray-200 pt-8">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
-                                <div class="w-10 h-10 bg-wwc-primary rounded-full flex items-center justify-center mr-3">
-                                    <i class="bx bx-credit-card text-white text-sm"></i>
-                                </div>
-                                Payment Information
-                            </h3>
-
-                            <div class="bg-wwc-primary-light border border-wwc-primary rounded-xl p-6 mb-6">
-                                <div class="flex items-start">
-                                    <i class="bx bx-info-circle text-wwc-primary text-xl mr-3 mt-0.5"></i>
-                                    <div>
-                                        <h4 class="font-semibold text-wwc-primary-dark mb-2">Payment Processing</h4>
-                                        <p class="text-sm text-wwc-primary-dark">
-                                            Payment processing will be implemented with Stripe integration for secure transactions.
-                                            For now, this is a demo checkout process to test the ticket purchasing flow.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Submit Button -->
-                            <div class="mt-8">
-                                <button type="submit" 
-                                        class="w-full bg-wwc-primary hover:bg-wwc-primary-dark text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl">
-                                    <div class="flex items-center justify-center">
-                                        <i class="bx bx-credit-card text-xl mr-2"></i>
-                                        <span>Complete Purchase - RM<?php echo e(number_format($grandTotal, 0)); ?></span>
-                                    </div>
-                                </button>
-                            </div>
-
-                            <!-- Security & Terms -->
-                            <div class="mt-6 text-center">
-                                <div class="flex items-center justify-center mb-3">
-                                    <i class="bx bx-shield-check text-green-500 mr-2"></i>
-                                    <span class="text-sm text-gray-600">Secure checkout protected by SSL encryption</span>
-                                </div>
-                                <p class="text-xs text-gray-500">
-                                    By completing this purchase, you agree to our 
-                                    <a href="#" class="text-wwc-primary hover:underline">terms of service</a> 
-                                    and 
-                                    <a href="#" class="text-wwc-primary hover:underline">refund policy</a>.
-                                </p>
-                            </div>
+                        
+                        <div>
+                            <label for="customer_phone" class="block text-sm font-medium text-gray-700 mb-2">
+                                Phone Number
+                            </label>
+                            <input type="tel" 
+                                    id="customer_phone" 
+                                    name="customer_phone" 
+                                    value="<?php echo e(old('customer_phone', auth()->user()->phone ?? '')); ?>"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary <?php $__errorArgs = ['customer_phone'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
+                            <?php $__errorArgs = ['customer_phone'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <p class="text-red-500 text-sm mt-1"><?php echo e($message); ?></p>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
-                    </form>
+                    </div>
                 </div>
-            </div>
+                
+                <!-- Payment Information -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Payment Information</h2>
+                    </div>
+                    
+                    <div class="px-6 py-6">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div class="flex items-center">
+                                <i class="bx bx-info-circle text-blue-600 mr-2"></i>
+                                <div class="text-sm text-blue-800">
+                                    <strong>Payment Processing:</strong> Payment will be processed securely after form submission. 
+                                    You will receive a confirmation email with your tickets.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Terms and Conditions -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                    <div class="px-6 py-4">
+                        <div class="flex items-start">
+                            <input type="checkbox" 
+                                    id="terms_agreement" 
+                                    name="terms_agreement" 
+                                    required
+                                    class="mt-1 h-4 w-4 text-wwc-primary border-gray-300 rounded focus:ring-wwc-primary">
+                            <label for="terms_agreement" class="ml-3 text-sm text-gray-700">
+                                I agree to the <a href="#" class="text-wwc-primary hover:underline">Terms and Conditions</a> 
+                                and <a href="#" class="text-wwc-primary hover:underline">Privacy Policy</a>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Submit Button -->
+                <div class="flex justify-end">
+                    <button type="submit" 
+                            id="purchase-button"
+                            class="bg-wwc-primary text-white px-8 py-3 rounded-lg font-semibold hover:bg-wwc-primary-dark transition-colors duration-200 flex items-center">
+                        <i class="bx bx-credit-card mr-2"></i>
+                        Complete Purchase - <span id="purchase-total">RM0</span>
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Check if holdUntil is valid before proceeding
-    const holdUntilString = '<?php echo e($holdUntil); ?>';
-    
-    if (!holdUntilString || holdUntilString === 'null' || holdUntilString === '') {
-        // No valid hold time, redirect immediately
-        window.location.href = '<?php echo e(route("public.tickets.select", $event)); ?>';
-        return;
-    }
-    
-    // Parse the ISO date string
-    const holdUntil = new Date(holdUntilString);
-    let holdTimer = null;
-
-    // Check if the date is valid
-    if (isNaN(holdUntil.getTime())) {
-        // Invalid date, redirect immediately
-        window.location.href = '<?php echo e(route("public.tickets.select", $event)); ?>';
-        return;
-    }
-
-    function updateHoldTimer() {
-        const now = new Date();
-        const timeLeft = holdUntil - now;
-        
-        if (timeLeft <= 0) {
-            document.getElementById('hold-timer').textContent = 'Expired';
-            clearInterval(holdTimer);
-            
-            // Redirect back to seat selection without alert
-            window.location.href = '<?php echo e(route("public.tickets.select", $event)); ?>';
-            return;
-        }
-        
-        const minutes = Math.floor(timeLeft / 60000);
-        const seconds = Math.floor((timeLeft % 60000) / 1000);
-        document.getElementById('hold-timer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-    }
-    
-    updateHoldTimer();
-    holdTimer = setInterval(updateHoldTimer, 1000);
-
-    // Form submission
-    document.getElementById('checkout-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Show loading state
-        const submitBtn = this.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="bx bx-loader-alt animate-spin mr-2"></i>Processing...';
-        
-        // Submit form
-        this.submit();
-    });
-});
-</script>
 <?php endif; ?>
 <?php $__env->stopSection(); ?>
+
+<?php $__env->startPush('scripts'); ?>
+<script>
+// Zone pricing data
+const zonePrices = {
+    'Warzone Exclusive': 500,
+    'Warzone VIP': 250,
+    'Warzone Grandstand': 199,
+    'Warzone Premium Ringside': 150,
+    'Level 1 Zone A/B/C/D': 100,
+    'Level 2 Zone A/B/C/D': 75,
+    'Standing Zone A/B': 50
+};
+
+// DOM elements
+const zoneSelect = document.getElementById('zone');
+const quantityInput = document.getElementById('quantity');
+const quantityDecrease = document.getElementById('quantity-decrease');
+const quantityIncrease = document.getElementById('quantity-increase');
+const subtotalElement = document.getElementById('subtotal');
+const serviceFeeElement = document.getElementById('service-fee');
+const taxElement = document.getElementById('tax');
+const totalElement = document.getElementById('total');
+const purchaseTotalElement = document.getElementById('purchase-total');
+
+// Calculate pricing
+function calculatePricing() {
+    const selectedZone = zoneSelect.value;
+    const quantity = parseInt(quantityInput.value) || 1;
+    
+    if (!selectedZone) {
+        subtotalElement.textContent = 'RM0';
+        serviceFeeElement.textContent = 'RM0';
+        taxElement.textContent = 'RM0';
+        totalElement.textContent = 'RM0';
+        purchaseTotalElement.textContent = 'RM0';
+        return;
+    }
+    
+    const basePrice = zonePrices[selectedZone] || 0;
+    const subtotal = basePrice * quantity;
+    const serviceFee = Math.round(subtotal * 0.05);
+    const tax = Math.round((subtotal + serviceFee) * 0.06);
+    const total = subtotal + serviceFee + tax;
+    
+    subtotalElement.textContent = `RM${subtotal.toLocaleString()}`;
+    serviceFeeElement.textContent = `RM${serviceFee.toLocaleString()}`;
+    taxElement.textContent = `RM${tax.toLocaleString()}`;
+    totalElement.textContent = `RM${total.toLocaleString()}`;
+    purchaseTotalElement.textContent = `RM${total.toLocaleString()}`;
+}
+
+// Quantity controls
+quantityDecrease.addEventListener('click', function() {
+    const currentValue = parseInt(quantityInput.value) || 1;
+    if (currentValue > 1) {
+        quantityInput.value = currentValue - 1;
+        calculatePricing();
+    }
+});
+
+quantityIncrease.addEventListener('click', function() {
+    const currentValue = parseInt(quantityInput.value) || 1;
+    if (currentValue < 10) {
+        quantityInput.value = currentValue + 1;
+        calculatePricing();
+    }
+});
+
+// Event listeners
+zoneSelect.addEventListener('change', calculatePricing);
+quantityInput.addEventListener('input', calculatePricing);
+
+// Initialize pricing on page load
+calculatePricing();
+
+// Countdown timer for reservation expiry
+<?php if($holdUntil): ?>
+function updateCountdown() {
+    const holdUntil = new Date('<?php echo e($holdUntil->toISOString()); ?>');
+    const now = new Date();
+    const diff = holdUntil - now;
+    
+    if (diff <= 0) {
+        document.getElementById('countdown-timer').textContent = 'Expired';
+        // Redirect to event page
+        setTimeout(() => {
+            window.location.href = '<?php echo e(route("public.events.show", $event)); ?>';
+        }, 1000);
+        return;
+    }
+    
+    const minutes = Math.floor(diff / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+    
+    document.getElementById('countdown-timer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
+// Update countdown every second
+setInterval(updateCountdown, 1000);
+updateCountdown();
+<?php endif; ?>
+</script>
+<?php $__env->stopPush(); ?>
 <?php echo $__env->make('layouts.public', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /Users/administrator/Desktop/Project/Github/warzone-ticketing-system/resources/views/public/tickets/cart.blade.php ENDPATH**/ ?>

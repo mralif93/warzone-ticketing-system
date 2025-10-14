@@ -8,7 +8,6 @@ use App\Models\Order;
 use App\Models\Ticket;
 use App\Models\Payment;
 use App\Models\AuditLog;
-use App\Models\Seat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -100,8 +99,8 @@ class AdminController extends Controller
             'total_revenue' => Payment::where('status', 'Completed')->sum('amount'),
             'pending_orders' => Order::where('status', 'Pending')->count(),
             'completed_orders' => Order::where('status', 'Paid')->count(),
-            'total_seats' => Seat::count(),
-            'available_seats' => Seat::where('status', 'Available')->count(),
+            'total_tickets' => Ticket::count(),
+            'sold_tickets' => Ticket::where('status', 'Sold')->count(),
         ];
 
         // Get recent activity
@@ -110,7 +109,7 @@ class AdminController extends Controller
             ->limit(5)
             ->get();
 
-        $recentTickets = Ticket::with(['order.user', 'event', 'seat'])
+        $recentTickets = Ticket::with(['order.user', 'event'])
             ->latest()
             ->limit(10)
             ->get();
@@ -378,7 +377,7 @@ class AdminController extends Controller
      */
     public function showOrder(Order $order)
     {
-        $order->load(['user', 'tickets.seat', 'tickets.event', 'payments']);
+        $order->load(['user', 'tickets.event', 'payments']);
 
         return view('admin.orders.show', compact('order'));
     }
@@ -388,7 +387,7 @@ class AdminController extends Controller
      */
     public function tickets(Request $request)
     {
-        $query = Ticket::with(['order.user', 'event', 'seat']);
+        $query = Ticket::with(['order.user', 'event']);
 
         // Search functionality
         if ($request->filled('search')) {
@@ -420,7 +419,7 @@ class AdminController extends Controller
      */
     public function showTicket(Ticket $ticket)
     {
-        $ticket->load(['order.user', 'event', 'seat', 'admittanceLogs.staffUser']);
+        $ticket->load(['order.user', 'event', 'admittanceLogs.staffUser']);
 
         return view('admin.tickets.show', compact('ticket'));
     }
@@ -571,7 +570,7 @@ class AdminController extends Controller
     public function showEvent(Event $event)
     {
         $event->loadCount('tickets');
-        $recentTickets = $event->tickets()->with('order.user', 'seat')->latest()->take(10)->get();
+        $recentTickets = $event->tickets()->with('order.user')->latest()->take(10)->get();
         
         $ticketStats = [
             'total_capacity' => 7000,
@@ -640,7 +639,7 @@ class AdminController extends Controller
         // Default settings - in a real application, these would come from a database
         $settings = [
             'max_tickets_per_order' => 10,
-            'seat_hold_duration_minutes' => 10,
+            'ticket_hold_duration_minutes' => 10,
             'maintenance_mode' => '0',
             'auto_release_holds' => '1',
             'email_notifications' => '1',
@@ -661,7 +660,7 @@ class AdminController extends Controller
             'site_name' => 'required|string|max:255',
             'site_email' => 'required|email',
             'max_tickets_per_order' => 'required|integer|min:1|max:20',
-            'seat_hold_duration' => 'required|integer|min:5|max:30',
+            'ticket_hold_duration' => 'required|integer|min:5|max:30',
             'service_fee_percentage' => 'required|numeric|min:0|max:100',
             'tax_percentage' => 'required|numeric|min:0|max:100',
         ]);

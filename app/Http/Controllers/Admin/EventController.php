@@ -32,12 +32,12 @@ class EventController extends Controller
             $query->where('status', $request->status);
         }
 
-        // Filter by date range
+        // Filter by date range (check start_date)
         if ($request->filled('date_from')) {
-            $query->where('date_time', '>=', $request->date_from);
+            $query->where('start_date', '>=', $request->date_from);
         }
         if ($request->filled('date_to')) {
-            $query->where('date_time', '<=', $request->date_to . ' 23:59:59');
+            $query->where('start_date', '<=', $request->date_to . ' 23:59:59');
         }
 
         $events = $query->withCount('tickets')->latest()->paginate(15);
@@ -62,6 +62,8 @@ class EventController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'date_time' => 'required|date|after:now',
+            'start_date' => 'nullable|date|after_or_equal:date_time',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
             'venue' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'max_tickets_per_order' => 'required|integer|min:1|max:20',
@@ -92,7 +94,7 @@ class EventController extends Controller
     public function show(Event $event)
     {
         $event->loadCount('tickets');
-        $recentTickets = $event->tickets()->with('order.user', 'seat')->latest()->take(10)->get();
+        $recentTickets = $event->tickets()->with('order.user')->latest()->take(10)->get();
         
         $ticketStats = [
             'total_capacity' => 7000,
@@ -124,6 +126,8 @@ class EventController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'date_time' => 'required|date|after:now',
+            'start_date' => 'nullable|date|after_or_equal:date_time',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
             'venue' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'max_tickets_per_order' => 'required|integer|min:1|max:20',

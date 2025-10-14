@@ -101,12 +101,8 @@
                                     <span id="ticket_event" class="font-medium"></span>
                                 </div>
                                 <div>
-                                    <span class="text-gray-500">Zone:</span>
+                                    <span class="text-gray-500">Ticket ID:</span>
                                     <span id="ticket_zone" class="font-medium"></span>
-                                </div>
-                                <div>
-                                    <span class="text-gray-500">Seat:</span>
-                                    <span id="ticket_seat" class="font-medium"></span>
                                 </div>
                                 <div>
                                     <span class="text-gray-500">Price:</span>
@@ -297,9 +293,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show ticket details for successful scans
         if (data.status === 'SUCCESS' && data.ticket) {
             document.getElementById('ticket_event').textContent = data.ticket.event_name || 'N/A';
-            document.getElementById('ticket_zone').textContent = data.ticket.seat_price_zone || 'N/A';
-            document.getElementById('ticket_seat').textContent = `${data.ticket.seat_section || ''}${data.ticket.seat_row || ''}-${data.ticket.seat_number || ''}`;
-            document.getElementById('ticket_price').textContent = `$${data.ticket.price_paid || '0.00'}`;
+            document.getElementById('ticket_zone').textContent = data.ticket.ticket_identifier || 'N/A';
+            document.getElementById('ticket_price').textContent = `RM${data.ticket.price_paid || '0'}`;
             ticketDetails.classList.remove('hidden');
         } else {
             ticketDetails.classList.add('hidden');

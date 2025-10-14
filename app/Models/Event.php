@@ -13,14 +13,20 @@ class Event extends Model
     protected $fillable = [
         'name',
         'date_time',
+        'start_date',
+        'end_date',
         'status',
         'max_tickets_per_order',
+        'total_seats',
         'description',
         'venue',
     ];
 
     protected $casts = [
         'date_time' => 'datetime',
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
+        'total_seats' => 'integer',
     ];
 
     /**
@@ -29,19 +35,6 @@ class Event extends Model
     public function tickets()
     {
         return $this->hasMany(Ticket::class);
-    }
-
-    /**
-     * Get available seats for this event
-     */
-    public function availableSeats()
-    {
-        return Seat::whereNotIn('id', function($query) {
-            $query->select('seat_id')
-                  ->from('tickets')
-                  ->where('event_id', $this->id)
-                  ->whereIn('status', ['Held', 'Sold']);
-        });
     }
 
     /**
@@ -69,11 +62,11 @@ class Event extends Model
     }
 
     /**
-     * Get total capacity (7000 seats)
+     * Get total capacity from database
      */
     public function getTotalCapacity(): int
     {
-        return 7000;
+        return $this->total_seats ?? 7000; // Default to 7000 if not set
     }
 
     /**
@@ -82,5 +75,86 @@ class Event extends Model
     public function getRemainingTicketsCount(): int
     {
         return $this->getTotalCapacity() - $this->getTicketsSoldCount();
+    }
+
+    /**
+     * Check if event has available seats
+     */
+    public function hasAvailableSeats(): bool
+    {
+        return $this->getRemainingTicketsCount() > 0;
+    }
+
+    /**
+     * Get tickets sold percentage
+     */
+    public function getSoldPercentage(): float
+    {
+        $totalCapacity = $this->getTotalCapacity();
+        if ($totalCapacity === 0) {
+            return 0;
+        }
+        
+        return round(($this->getTicketsSoldCount() / $totalCapacity) * 100, 2);
+    }
+
+    /**
+     * Get tickets available percentage
+     */
+    public function getAvailablePercentage(): float
+    {
+        $totalCapacity = $this->getTotalCapacity();
+        if ($totalCapacity === 0) {
+            return 0;
+        }
+        
+        return round(($this->getRemainingTicketsCount() / $totalCapacity) * 100, 2);
+    }
+
+    /**
+     * Check if event is multi-day
+     */
+    public function isMultiDay(): bool
+    {
+        return $this->start_date && $this->end_date && 
+               $this->start_date->format('Y-m-d') !== $this->end_date->format('Y-m-d');
+    }
+
+    /**
+     * Get event duration in days
+     */
+    public function getDurationInDays(): int
+    {
+        if (!$this->start_date || !$this->end_date) {
+            return 1; // Single day event
+        }
+        
+        return (int) $this->start_date->diffInDays($this->end_date) + 1;
+    }
+
+    /**
+     * Get formatted date range
+     */
+    public function getFormattedDateRange(): string
+    {
+        // If we have start_date and end_date, use them
+        if ($this->start_date && $this->end_date) {
+            if ($this->isMultiDay()) {
+                return $this->start_date->format('M j, Y') . ' - ' . $this->end_date->format('M j, Y');
+            } else {
+                return $this->start_date->format('M j, Y \a\t g:i A') . ' - ' . $this->end_date->format('g:i A');
+            }
+        }
+        
+        // Fallback to date_time for backward compatibility
+        return $this->date_time->format('M j, Y \a\t g:i A');
+    }
+
+    /**
+     * Get primary date for display (backward compatibility)
+     */
+    public function getPrimaryDate(): \Carbon\Carbon
+    {
+        return $this->start_date ?? $this->date_time;
     }
 }

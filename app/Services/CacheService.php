@@ -29,65 +29,75 @@ class CacheService
                 return [];
             }
 
-            // Get seat counts by status
-            $seatCounts = DB::select("
+            // Get ticket counts by status for zone-based system
+            $ticketCounts = DB::select("
                 SELECT 
-                    COUNT(CASE WHEN t.status = 'Sold' THEN 1 END) as sold_count,
-                    COUNT(CASE WHEN t.status = 'Held' THEN 1 END) as held_count,
-                    COUNT(CASE WHEN t.status = 'Available' OR t.status IS NULL THEN 1 END) as available_count
-                FROM seats s
-                LEFT JOIN tickets t ON s.id = t.seat_id AND t.event_id = ? AND t.deleted_at IS NULL
-                WHERE s.deleted_at IS NULL
+                    COUNT(CASE WHEN status = 'Sold' THEN 1 END) as sold_count,
+                    COUNT(CASE WHEN status = 'Held' THEN 1 END) as held_count,
+                    COUNT(CASE WHEN status = 'Scanned' THEN 1 END) as scanned_count
+                FROM tickets 
+                WHERE event_id = ? AND deleted_at IS NULL
             ", [$eventId]);
 
-            $counts = $seatCounts[0] ?? (object)['sold_count' => 0, 'held_count' => 0, 'available_count' => 0];
-            $totalSeats = $counts->sold_count + $counts->held_count + $counts->available_count;
+            $counts = $ticketCounts[0] ?? (object)['sold_count' => 0, 'held_count' => 0, 'scanned_count' => 0];
+            $totalCapacity = $event->getTotalCapacity();
+            $available = $totalCapacity - $counts->sold_count - $counts->held_count;
 
             return [
                 'event_id' => $eventId,
                 'event_name' => $event->name,
-                'total_seats' => $totalSeats,
+                'total_seats' => $totalCapacity,
                 'sold' => $counts->sold_count,
                 'held' => $counts->held_count,
-                'available' => $counts->available_count,
-                'sold_percentage' => $totalSeats > 0 ? round(($counts->sold_count / $totalSeats) * 100, 2) : 0,
-                'availability_percentage' => $totalSeats > 0 ? round(($counts->available_count / $totalSeats) * 100, 2) : 0,
+                'scanned' => $counts->scanned_count,
+                'available' => max(0, $available),
+                'sold_percentage' => $totalCapacity > 0 ? round(($counts->sold_count / $totalCapacity) * 100, 2) : 0,
+                'availability_percentage' => $totalCapacity > 0 ? round(($available / $totalCapacity) * 100, 2) : 0,
                 'cached_at' => now()->toISOString(),
             ];
         });
     }
 
     /**
-     * Get price zone availability with caching
+     * Get zone availability with caching
      */
-    public function getPriceZoneAvailability(int $eventId): array
+    public function getZoneAvailability(int $eventId): array
     {
-        $cacheKey = "price_zone_availability_{$eventId}";
+        $cacheKey = "zone_availability_{$eventId}";
         
         return Cache::remember($cacheKey, self::SHORT_CACHE_DURATION, function() use ($eventId) {
-            $priceZones = ['VIP', 'Premium', 'Standard', 'Economy'];
+            $zones = [
+                'Warzone Exclusive' => 100,
+                'Warzone VIP' => 28,
+                'Warzone Grandstand' => 60,
+                'Warzone Premium Ringside' => 1716,
+                'Level 1 Zone A/B/C/D' => 1946,
+                'Level 2 Zone A/B/C/D' => 1682,
+                'Standing Zone A/B' => 300,
+            ];
+            
             $availability = [];
 
-            foreach ($priceZones as $zone) {
+            foreach ($zones as $zone => $totalSeats) {
                 $zoneStats = DB::select("
                     SELECT 
-                        COUNT(s.id) as total_seats,
-                        COUNT(CASE WHEN t.status = 'Sold' THEN 1 END) as sold_count,
-                        COUNT(CASE WHEN t.status = 'Held' THEN 1 END) as held_count
-                    FROM seats s
-                    LEFT JOIN tickets t ON s.id = t.seat_id AND t.event_id = ? AND t.deleted_at IS NULL
-                    WHERE s.price_zone = ? AND s.deleted_at IS NULL
+                        COUNT(CASE WHEN status = 'Sold' THEN 1 END) as sold_count,
+                        COUNT(CASE WHEN status = 'Held' THEN 1 END) as held_count,
+                        COUNT(CASE WHEN status = 'Scanned' THEN 1 END) as scanned_count
+                    FROM tickets 
+                    WHERE event_id = ? AND zone = ? AND deleted_at IS NULL
                 ", [$eventId, $zone]);
 
-                $stats = $zoneStats[0] ?? (object)['total_seats' => 0, 'sold_count' => 0, 'held_count' => 0];
-                $available = $stats->total_seats - $stats->sold_count - $stats->held_count;
+                $stats = $zoneStats[0] ?? (object)['sold_count' => 0, 'held_count' => 0, 'scanned_count' => 0];
+                $available = $totalSeats - $stats->sold_count - $stats->held_count;
 
                 $availability[$zone] = [
-                    'total' => $stats->total_seats,
+                    'total' => $totalSeats,
                     'sold' => $stats->sold_count,
                     'held' => $stats->held_count,
+                    'scanned' => $stats->scanned_count,
                     'available' => max(0, $available),
-                    'sold_percentage' => $stats->total_seats > 0 ? round(($stats->sold_count / $stats->total_seats) * 100, 2) : 0,
+                    'sold_percentage' => $totalSeats > 0 ? round(($stats->sold_count / $totalSeats) * 100, 2) : 0,
                 ];
             }
 

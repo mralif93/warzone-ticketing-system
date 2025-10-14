@@ -178,7 +178,7 @@
                                 </div>
                                 <div class="ml-4 flex-1 min-w-0">
                                     <h3 class="text-sm font-semibold text-wwc-neutral-900 truncate">{{ $ticket->event->name }}</h3>
-                                    <p class="text-xs text-wwc-neutral-500">{{ $ticket->event->date_time->format('M j, Y') }} • {{ $ticket->seat_identifier }}</p>
+                                    <p class="text-xs text-wwc-neutral-500">{{ $ticket->event->date_time->format('M j, Y') }} • {{ $ticket->zone }}</p>
                                 </div>
                                 <div class="flex items-center space-x-2">
                                     <span class="text-sm font-semibold text-wwc-neutral-900">RM{{ number_format($ticket->price_paid, 0) }}</span>

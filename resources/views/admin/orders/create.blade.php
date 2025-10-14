@@ -51,6 +51,7 @@
                         @endif
 
                         <div class="space-y-6">
+                            <!-- Order Information -->
                             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                 <!-- User -->
                                 <div>
@@ -69,34 +70,19 @@
                                     @enderror
                                 </div>
 
-                                <!-- Status -->
+                                <!-- Event -->
                                 <div>
-                                    <label for="status" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
-                                        Status <span class="text-wwc-error">*</span>
+                                    <label for="event_id" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                        Event <span class="text-wwc-error">*</span>
                                     </label>
-                                    <select name="status" id="status" required
-                                            class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('status') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
-                                        <option value="">Select Status</option>
-                                        <option value="Pending" {{ old('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
-                                        <option value="Paid" {{ old('status') == 'Paid' ? 'selected' : '' }}>Paid</option>
-                                        <option value="Cancelled" {{ old('status') == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                        <option value="Refunded" {{ old('status') == 'Refunded' ? 'selected' : '' }}>Refunded</option>
+                                    <select name="event_id" id="event_id" required
+                                            class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('event_id') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
+                                        <option value="">Select Event</option>
+                                        @foreach($events as $event)
+                                            <option value="{{ $event->id }}" {{ old('event_id') == $event->id ? 'selected' : '' }}>{{ $event->name }}</option>
+                                        @endforeach
                                     </select>
-                                    @error('status')
-                                        <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
-                                <!-- Customer Name -->
-                                <div>
-                                    <label for="customer_name" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
-                                        Customer Name <span class="text-wwc-error">*</span>
-                                    </label>
-                                    <input type="text" name="customer_name" id="customer_name" required
-                                           value="{{ old('customer_name') }}"
-                                           class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('customer_name') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror"
-                                           placeholder="Enter customer name">
-                                    @error('customer_name')
+                                    @error('event_id')
                                         <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
                                     @enderror
                                 </div>
@@ -115,72 +101,20 @@
                                     @enderror
                                 </div>
 
-                                <!-- Customer Phone -->
+                                <!-- Payment Method -->
                                 <div>
-                                    <label for="customer_phone" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
-                                        Customer Phone
+                                    <label for="payment_method" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                        Payment Method <span class="text-wwc-error">*</span>
                                     </label>
-                                    <input type="text" name="customer_phone" id="customer_phone"
-                                           value="{{ old('customer_phone') }}"
-                                           class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('customer_phone') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror"
-                                           placeholder="Enter customer phone">
-                                    @error('customer_phone')
-                                        <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
-                                <!-- Subtotal -->
-                                <div>
-                                    <label for="subtotal" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
-                                        Subtotal (RM) <span class="text-wwc-error">*</span>
-                                    </label>
-                                    <input type="number" name="subtotal" id="subtotal" required step="0.01" min="0"
-                                           value="{{ old('subtotal') }}"
-                                           class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('subtotal') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror"
-                                           placeholder="Enter subtotal amount">
-                                    @error('subtotal')
-                                        <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
-                                <!-- Service Fee -->
-                                <div>
-                                    <label for="service_fee" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
-                                        Service Fee (RM)
-                                    </label>
-                                    <input type="number" name="service_fee" id="service_fee" step="0.01" min="0"
-                                           value="{{ old('service_fee', 0) }}"
-                                           class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('service_fee') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror"
-                                           placeholder="Enter service fee">
-                                    @error('service_fee')
-                                        <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
-                                <!-- Tax Amount -->
-                                <div>
-                                    <label for="tax_amount" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
-                                        Tax Amount (RM)
-                                    </label>
-                                    <input type="number" name="tax_amount" id="tax_amount" step="0.01" min="0"
-                                           value="{{ old('tax_amount', 0) }}"
-                                           class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('tax_amount') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror"
-                                           placeholder="Enter tax amount">
-                                    @error('tax_amount')
-                                        <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
-                                <!-- Total Amount -->
-                                <div>
-                                    <label for="total_amount" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
-                                        Total Amount (RM) <span class="text-wwc-error">*</span>
-                                    </label>
-                                    <input type="number" name="total_amount" id="total_amount" required step="0.01" min="0"
-                                           value="{{ old('total_amount') }}"
-                                           class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('total_amount') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror"
-                                           placeholder="Enter total amount">
-                                    @error('total_amount')
+                                    <select name="payment_method" id="payment_method" required
+                                            class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('payment_method') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
+                                        <option value="">Select Payment Method</option>
+                                        <option value="Credit Card" {{ old('payment_method') == 'Credit Card' ? 'selected' : '' }}>Credit Card</option>
+                                        <option value="Cash" {{ old('payment_method') == 'Cash' ? 'selected' : '' }}>Cash</option>
+                                        <option value="Bank Transfer" {{ old('payment_method') == 'Bank Transfer' ? 'selected' : '' }}>Bank Transfer</option>
+                                        <option value="Comp" {{ old('payment_method') == 'Comp' ? 'selected' : '' }}>Comp</option>
+                                    </select>
+                                    @error('payment_method')
                                         <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
                                     @enderror
                                 </div>
@@ -196,6 +130,63 @@
                                     @error('notes')
                                         <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
                                     @enderror
+                                </div>
+                            </div>
+
+                            <!-- Ticket Information -->
+                            <div class="border-t border-wwc-neutral-200 pt-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-lg font-semibold text-wwc-neutral-900">Ticket Details</h3>
+                                    <div class="text-sm text-wwc-neutral-500">
+                                        <i class='bx bx-info-circle text-sm mr-1'></i>
+                                        Pricing will be calculated automatically
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                                    <!-- Zone -->
+                                    <div>
+                                        <label for="zone" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                            Zone <span class="text-wwc-error">*</span>
+                                        </label>
+                                        <select name="zone" id="zone" required
+                                                class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('zone') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
+                                            <option value="">Select Zone</option>
+                                            <option value="Warzone Exclusive" {{ old('zone') == 'Warzone Exclusive' ? 'selected' : '' }}>Warzone Exclusive - RM500</option>
+                                            <option value="Warzone VIP" {{ old('zone') == 'Warzone VIP' ? 'selected' : '' }}>Warzone VIP - RM250</option>
+                                            <option value="Warzone Grandstand" {{ old('zone') == 'Warzone Grandstand' ? 'selected' : '' }}>Warzone Grandstand - RM199</option>
+                                            <option value="Warzone Premium Ringside" {{ old('zone') == 'Warzone Premium Ringside' ? 'selected' : '' }}>Warzone Premium Ringside - RM150</option>
+                                            <option value="Level 1 Zone A/B/C/D" {{ old('zone') == 'Level 1 Zone A/B/C/D' ? 'selected' : '' }}>Level 1 Zone A/B/C/D - RM100</option>
+                                            <option value="Level 2 Zone A/B/C/D" {{ old('zone') == 'Level 2 Zone A/B/C/D' ? 'selected' : '' }}>Level 2 Zone A/B/C/D - RM75</option>
+                                            <option value="Standing Zone A/B" {{ old('zone') == 'Standing Zone A/B' ? 'selected' : '' }}>Standing Zone A/B - RM50</option>
+                                        </select>
+                                        @error('zone')
+                                            <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <!-- Quantity -->
+                                    <div>
+                                        <label for="quantity" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                            Quantity <span class="text-wwc-error">*</span>
+                                        </label>
+                                        <input type="number" name="quantity" id="quantity" min="1" max="10" value="{{ old('quantity', 1) }}" required
+                                               class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('quantity') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror"
+                                               placeholder="Enter quantity">
+                                        <p class="text-xs text-wwc-neutral-500 mt-1">Maximum 10 tickets per order</p>
+                                        @error('quantity')
+                                            <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <!-- Pricing Preview -->
+                                <div class="mt-4 p-4 bg-wwc-neutral-50 rounded-lg border border-wwc-neutral-200">
+                                    <h4 class="text-sm font-semibold text-wwc-neutral-900 mb-2">Pricing Preview</h4>
+                                    <div id="pricing-preview" class="text-sm text-wwc-neutral-600">
+                                        <p>Select a zone and quantity to see pricing preview.</p>
+                                        <p class="mt-1">Service fee: 5% of subtotal | Tax: 6% of (subtotal + service fee)</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -219,4 +210,96 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Pricing preview script loaded');
+    
+    const zoneSelect = document.getElementById('zone');
+    const quantityInput = document.getElementById('quantity');
+    const pricingPreview = document.getElementById('pricing-preview');
+    
+    // Debug: Check if elements exist
+    console.log('Zone select:', zoneSelect);
+    console.log('Quantity input:', quantityInput);
+    console.log('Pricing preview:', pricingPreview);
+    
+    if (!zoneSelect || !quantityInput || !pricingPreview) {
+        console.error('Required elements not found');
+        return;
+    }
+    
+    const zonePrices = {
+        'Warzone Exclusive': 500,
+        'Warzone VIP': 250,
+        'Warzone Grandstand': 199,
+        'Warzone Premium Ringside': 150,
+        'Level 1 Zone A/B/C/D': 100,
+        'Level 2 Zone A/B/C/D': 75,
+        'Standing Zone A/B': 50
+    };
+    
+    function updatePricingPreview() {
+        console.log('Updating pricing preview');
+        const selectedZone = zoneSelect.value;
+        const quantity = parseInt(quantityInput.value) || 1;
+        
+        console.log('Selected zone:', selectedZone);
+        console.log('Quantity:', quantity);
+        
+        if (selectedZone && quantity > 0) {
+            const basePrice = zonePrices[selectedZone] || 0;
+            const subtotal = basePrice * quantity;
+            const serviceFee = Math.round(subtotal * 0.05 * 100) / 100;
+            const taxAmount = Math.round((subtotal + serviceFee) * 0.06 * 100) / 100;
+            const total = subtotal + serviceFee + taxAmount;
+            
+            console.log('Calculated pricing:', { basePrice, subtotal, serviceFee, taxAmount, total });
+            
+            pricingPreview.innerHTML = `
+                <div class="space-y-1">
+                    <div class="flex justify-between">
+                        <span>Subtotal (${quantity} × RM${basePrice}):</span>
+                        <span class="font-semibold">RM${subtotal.toFixed(2)}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Service Fee (5%):</span>
+                        <span class="font-semibold">RM${serviceFee.toFixed(2)}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Tax (6%):</span>
+                        <span class="font-semibold">RM${taxAmount.toFixed(2)}</span>
+                    </div>
+                    <div class="flex justify-between border-t border-wwc-neutral-300 pt-1">
+                        <span class="font-semibold">Total:</span>
+                        <span class="font-bold text-wwc-primary">RM${total.toFixed(2)}</span>
+                    </div>
+                </div>
+            `;
+        } else {
+            pricingPreview.innerHTML = `
+                <p>Select a zone and quantity to see pricing preview.</p>
+                <p class="mt-1">Service fee: 5% of subtotal | Tax: 6% of (subtotal + service fee)</p>
+            `;
+        }
+    }
+    
+    // Add event listeners
+    zoneSelect.addEventListener('change', function() {
+        console.log('Zone changed to:', zoneSelect.value);
+        updatePricingPreview();
+    });
+    
+    quantityInput.addEventListener('input', function() {
+        console.log('Quantity changed to:', quantityInput.value);
+        updatePricingPreview();
+    });
+    
+    // Initial calculation if values are pre-filled
+    console.log('Running initial calculation');
+    updatePricingPreview();
+});
+</script>
+@endpush
 @endsection

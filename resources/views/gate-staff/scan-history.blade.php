@@ -134,12 +134,9 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         @if($scan->ticket)
                                             <div>
-                                                <div class="font-medium">Zone: {{ $scan->ticket->seat_price_zone ?? 'N/A' }}</div>
+                                                <div class="font-medium">Ticket ID: {{ $scan->ticket->ticket_identifier ?? 'N/A' }}</div>
                                                 <div class="text-gray-500">
-                                                    Seat: {{ $scan->ticket->seat_section ?? '' }}{{ $scan->ticket->seat_row ?? '' }}-{{ $scan->ticket->seat_number ?? '' }}
-                                                </div>
-                                                <div class="text-gray-500">
-                                                    Price: ${{ number_format($scan->ticket->price_paid ?? 0, 2) }}
+                                                    Price: RM{{ number_format($scan->ticket->price_paid ?? 0, 0) }}
                                                 </div>
                                             </div>
                                         @else

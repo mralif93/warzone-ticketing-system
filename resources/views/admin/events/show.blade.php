@@ -57,10 +57,33 @@
                                         </div>
                                     </div>
                                     <div class="flex-1 flex items-center justify-between">
-                                        <span class="text-sm font-semibold text-wwc-neutral-600">Date & Time</span>
-                                        <span class="text-base font-medium text-wwc-neutral-900">{{ $event->date_time->format('M j, Y \a\t g:i A') }}</span>
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">
+                                            @if($event->isMultiDay())
+                                                Event Duration
+                                            @else
+                                                Date & Time
+                                            @endif
+                                        </span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">
+                                            {{ $event->getFormattedDateRange() }}
+                                        </span>
                                     </div>
                                 </div>
+
+                                @if($event->isMultiDay())
+                                <!-- Event Duration Info -->
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                                            <i class='bx bx-calendar text-sm text-blue-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Duration</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">{{ $event->getDurationInDays() }} day{{ $event->getDurationInDays() > 1 ? 's' : '' }}</span>
+                                    </div>
+                                </div>
+                                @endif
 
                                 <!-- Venue -->
                                 <div class="flex items-center py-3 border-b border-wwc-neutral-100">
@@ -137,7 +160,7 @@
                                                 {{ $ticket->order->user->name }}
                                             </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-wwc-neutral-900">
-                                                {{ $ticket->seat_identifier }}
+                                                {{ $ticket->zone }}
                                             </td>
                                                 <td class="px-6 py-4 whitespace-nowrap">
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
@@ -239,7 +262,7 @@
                     <div class="p-6">
                         <div class="space-y-3">
                             @if($event->isOnSale())
-                                <a href="{{ route('public.tickets.select', $event) }}" 
+                                <a href="{{ route('public.tickets.cart', $event) }}" 
                                     class="w-full bg-wwc-success hover:bg-wwc-success-dark text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 text-center block text-sm">
                                         <i class='bx bx-receipt text-sm mr-2'></i>
                                     Buy Tickets

@@ -91,74 +91,80 @@
             
             @if($tickets->count() > 0)
                 <div class="p-6">
-                    <div class="space-y-4">
+                    <div class="space-y-6">
                         @foreach($tickets as $ticket)
-                        <div class="bg-wwc-neutral-50 border border-wwc-neutral-200 rounded-lg hover:bg-wwc-neutral-100 transition-colors duration-200 overflow-hidden">
+                        <div class="bg-white border border-wwc-neutral-200 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group">
                             <div class="p-6">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center space-x-4">
+                                <div class="flex items-start justify-between">
+                                    <!-- Left Section: Icon and Event Details -->
+                                    <div class="flex items-start space-x-6 flex-1">
                                         <!-- Ticket Icon -->
                                         <div class="flex-shrink-0">
-                                            <div class="h-12 w-12 rounded-lg bg-wwc-primary flex items-center justify-center">
-                                                <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
-                                                </svg>
+                                            <div class="h-16 w-16 bg-wwc-primary/10 rounded-2xl flex items-center justify-center group-hover:bg-wwc-primary/20 transition-colors duration-200">
+                                                <i class='bx bx-receipt text-wwc-primary text-2xl'></i>
                                             </div>
                                         </div>
                                         
-                                        <!-- Ticket Details -->
+                                        <!-- Event Details -->
                                         <div class="flex-1 min-w-0">
-                                            <h3 class="text-lg font-semibold text-wwc-neutral-900 truncate">{{ $ticket->event->name }}</h3>
-                                            <div class="space-y-1 mt-1">
-                                                <p class="text-sm text-wwc-neutral-600">
-                                                    <svg class="h-4 w-4 inline mr-2 text-wwc-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                                    </svg>
-                                                    {{ $ticket->event->date_time->format('M j, Y \a\t g:i A') }}
-                                                </p>
-                                                <p class="text-sm text-wwc-neutral-600">
-                                                    <svg class="h-4 w-4 inline mr-2 text-wwc-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                                    </svg>
-                                                    {{ $ticket->event->venue ?? 'Venue TBA' }}
-                                                </p>
-                                                <p class="text-sm text-wwc-neutral-600">
-                                                    <svg class="h-4 w-4 inline mr-2 text-wwc-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z"></path>
-                                                    </svg>
-                                                    Seat: {{ $ticket->seat_identifier }} • {{ $ticket->seat->price_zone }}
-                                                </p>
+                                            <h3 class="text-xl font-bold text-wwc-neutral-900 font-display mb-3">{{ $ticket->event->name }}</h3>
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                <div class="flex items-center text-sm text-wwc-neutral-600">
+                                                    <i class='bx bx-calendar text-wwc-info mr-3 text-lg'></i>
+                                                    <span class="font-medium">{{ $ticket->event->date_time->format('M j, Y \a\t g:i A') }}</span>
+                                                </div>
+                                                <div class="flex items-center text-sm text-wwc-neutral-600">
+                                                    <i class='bx bx-map text-wwc-accent mr-3 text-lg'></i>
+                                                    <span class="font-medium">{{ $ticket->event->venue ?? 'Venue TBA' }}</span>
+                                                </div>
+                                                <div class="flex items-center text-sm text-wwc-neutral-600">
+                                                    <i class='bx bx-layer text-wwc-primary mr-3 text-lg'></i>
+                                                    <span class="font-medium">Zone: {{ $ticket->zone }}</span>
+                                                </div>
+                                                <div class="flex items-center text-sm text-wwc-neutral-600">
+                                                    <i class='bx bx-hash text-wwc-neutral-400 mr-3 text-lg'></i>
+                                                    <span class="font-medium">Ticket #{{ $ticket->id }}</span>
+                                                </div>
                                             </div>
-                                        </div>
-                                        
-                                        <!-- Price and Status -->
-                                        <div class="text-right flex-shrink-0">
-                                            <div class="text-xl font-bold text-wwc-neutral-900 mb-2">RM{{ number_format($ticket->price_paid, 0) }}</div>
-                                            <div class="text-sm text-wwc-neutral-500 mb-2">Ticket #{{ $ticket->id }}</div>
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
-                                                @if($ticket->status === 'Sold') bg-wwc-success text-white
-                                                @elseif($ticket->status === 'Held') bg-wwc-warning text-white
-                                                @elseif($ticket->status === 'Cancelled') bg-wwc-error text-white
-                                                @elseif($ticket->status === 'Used') bg-wwc-info text-white
-                                                @else bg-wwc-neutral-200 text-wwc-neutral-800
-                                                @endif">
-                                                {{ $ticket->status }}
-                                            </span>
                                         </div>
                                     </div>
                                     
-                                    <!-- Action Button -->
-                                    <div class="ml-4 flex-shrink-0">
-                                        <a href="{{ route('customer.tickets.show', $ticket) }}" 
-                                           class="inline-flex items-center px-4 py-2 text-sm font-semibold text-wwc-primary hover:bg-wwc-primary-light hover:text-wwc-primary-dark rounded-lg transition-colors duration-200">
-                                            <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                            </svg>
-                                            View Details
-                                        </a>
+                                    <!-- Right Section: Price, Status, and Action -->
+                                    <div class="flex flex-col items-end space-y-4 ml-6">
+                                        <!-- Price -->
+                                        <div class="text-right">
+                                            <div class="text-3xl font-bold text-wwc-primary mb-1">RM{{ number_format($ticket->price_paid, 0) }}</div>
+                                            <div class="text-sm text-wwc-neutral-500">Per Ticket</div>
+                                        </div>
+                                        
+                                        <!-- Status Badge -->
+                                        <div>
+                                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold
+                                                @if($ticket->status === 'Sold') bg-wwc-success/10 text-wwc-success border border-wwc-success/20
+                                                @elseif($ticket->status === 'Held') bg-wwc-warning/10 text-wwc-warning border border-wwc-warning/20
+                                                @elseif($ticket->status === 'Cancelled') bg-wwc-error/10 text-wwc-error border border-wwc-error/20
+                                                @elseif($ticket->status === 'Used') bg-wwc-info/10 text-wwc-info border border-wwc-info/20
+                                                @else bg-wwc-neutral-100 text-wwc-neutral-600 border border-wwc-neutral-200
+                                                @endif">
+                                                <i class='bx 
+                                                    @if($ticket->status === 'Sold') bx-check-circle
+                                                    @elseif($ticket->status === 'Held') bx-time
+                                                    @elseif($ticket->status === 'Cancelled') bx-x-circle
+                                                    @elseif($ticket->status === 'Used') bx-check-double
+                                                    @else bx-question-mark
+                                                    @endif mr-2'></i>
+                                                {{ $ticket->status }}
+                                            </span>
+                                        </div>
+                                        
+                                        <!-- Action Button -->
+                                        <div>
+                                            <a href="{{ route('customer.tickets.show', $ticket) }}" 
+                                               class="inline-flex items-center px-6 py-3 bg-wwc-primary text-white rounded-xl font-semibold hover:bg-wwc-primary-dark hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200">
+                                                <i class='bx bx-show mr-2'></i>
+                                                View Details
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

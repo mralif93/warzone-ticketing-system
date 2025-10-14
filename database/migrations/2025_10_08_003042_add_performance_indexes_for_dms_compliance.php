@@ -62,17 +62,7 @@ return new class extends Migration
             $table->index(['status', 'date_time'], 'idx_events_status_datetime');
         });
 
-        // Seats table indexes
-        Schema::table('seats', function (Blueprint $table) {
-            // Index on price_zone for zone-based queries
-            $table->index('price_zone', 'idx_seats_price_zone');
-            
-            // Composite index for seat selection
-            $table->index(['section', 'row', 'number'], 'idx_seats_location');
-            
-            // Index on seat_type for accessibility
-            $table->index('seat_type', 'idx_seats_type');
-        });
+        // Seats table indexes - REMOVED (seats module was removed)
 
         // Payments table indexes
         Schema::table('payments', function (Blueprint $table) {
@@ -146,12 +136,7 @@ return new class extends Migration
             $table->dropIndex('idx_events_status_datetime');
         });
 
-        // Seats table
-        Schema::table('seats', function (Blueprint $table) {
-            $table->dropIndex('idx_seats_price_zone');
-            $table->dropIndex('idx_seats_location');
-            $table->dropIndex('idx_seats_type');
-        });
+        // Seats table - REMOVED (seats module was removed)
 
         // Payments table
         Schema::table('payments', function (Blueprint $table) {

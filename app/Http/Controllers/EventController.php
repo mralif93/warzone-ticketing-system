@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
-use App\Models\Seat;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +19,7 @@ class EventController extends Controller
             ->orderBy('date_time', 'asc')
             ->paginate(10);
 
-        return view('events.index', compact('events'));
+        return view('public.events', compact('events'));
     }
 
     /**
@@ -42,6 +41,7 @@ class EventController extends Controller
             'description' => 'nullable|string',
             'venue' => 'nullable|string|max:255',
             'max_tickets_per_order' => 'required|integer|min:1|max:20',
+            'total_seats' => 'required|integer|min:1|max:100000',
         ]);
 
         DB::beginTransaction();
@@ -52,6 +52,7 @@ class EventController extends Controller
                 'description' => $request->description,
                 'venue' => $request->venue ?? 'Warzone Arena',
                 'max_tickets_per_order' => $request->max_tickets_per_order,
+                'total_seats' => $request->total_seats,
                 'status' => 'Draft',
             ]);
 
@@ -68,7 +69,7 @@ class EventController extends Controller
 
             DB::commit();
 
-            return redirect()->route('events.index')
+            return redirect()->route('public.events')
                 ->with('success', 'Event created successfully!');
 
         } catch (\Exception $e) {
@@ -97,7 +98,7 @@ class EventController extends Controller
 
         // Get recent tickets
         $recentTickets = $event->tickets()
-            ->with(['order.user', 'seat'])
+            ->with(['order.user'])
             ->latest()
             ->limit(10)
             ->get();
@@ -124,6 +125,7 @@ class EventController extends Controller
             'description' => 'nullable|string',
             'venue' => 'nullable|string|max:255',
             'max_tickets_per_order' => 'required|integer|min:1|max:20',
+            'total_seats' => 'required|integer|min:1|max:100000',
             'status' => 'required|in:Draft,On Sale,Sold Out,Cancelled',
         ]);
 
@@ -137,6 +139,7 @@ class EventController extends Controller
                 'description' => $request->description,
                 'venue' => $request->venue ?? 'Warzone Arena',
                 'max_tickets_per_order' => $request->max_tickets_per_order,
+                'total_seats' => $request->total_seats,
                 'status' => $request->status,
             ]);
 
@@ -193,7 +196,7 @@ class EventController extends Controller
 
             DB::commit();
 
-            return redirect()->route('events.index')
+            return redirect()->route('public.events')
                 ->with('success', 'Event deleted successfully!');
 
         } catch (\Exception $e) {
@@ -240,41 +243,22 @@ class EventController extends Controller
     }
 
     /**
-     * Get available seats for an event
+     * Get zone pricing information
      */
-    public function getAvailableSeats(Event $event)
+    public function getZonePricing()
     {
-        $priceZone = request('price_zone');
-        $quantity = request('quantity', 1);
-
-        $query = $event->availableSeats();
-        
-        if ($priceZone) {
-            $query->byPriceZone($priceZone);
-        }
-
-        $availableSeats = $query->limit($quantity)->get();
+        $zones = [
+            'Warzone Exclusive' => ['price' => 350.00, 'available' => 100],
+            'Warzone VIP' => ['price' => 250.00, 'available' => 28],
+            'Warzone Grandstand' => ['price' => 220.00, 'available' => 60],
+            'Warzone Premium Ringside' => ['price' => 199.00, 'available' => 1716],
+            'Level 1 Zone A/B/C/D' => ['price' => 129.00, 'available' => 1946],
+            'Level 2 Zone A/B/C/D' => ['price' => 89.00, 'available' => 1682],
+            'Standing Zone A/B' => ['price' => 49.00, 'available' => 300],
+        ];
 
         return response()->json([
-            'available_seats' => $availableSeats,
-            'count' => $availableSeats->count(),
+            'zones' => $zones,
         ]);
-    }
-
-    /**
-     * Get seat pricing information
-     */
-    public function getSeatPricing()
-    {
-        $pricing = Seat::select('price_zone', 'seat_type')
-            ->selectRaw('MIN(base_price) as min_price')
-            ->selectRaw('MAX(base_price) as max_price')
-            ->selectRaw('AVG(base_price) as avg_price')
-            ->selectRaw('COUNT(*) as seat_count')
-            ->groupBy('price_zone', 'seat_type')
-            ->orderBy('min_price')
-            ->get();
-
-        return response()->json($pricing);
     }
 }

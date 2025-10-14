@@ -14,18 +14,14 @@ class Ticket extends Model
     protected $fillable = [
         'order_id',
         'event_id',
-        'seat_id',
+        'zone',
         'qrcode',
         'status',
-        'is_scanned',
         'scanned_at',
-        'scanned_by',
-        'gate_location',
         'price_paid',
     ];
 
     protected $casts = [
-        'is_scanned' => 'boolean',
         'scanned_at' => 'datetime',
         'price_paid' => 'decimal:2',
     ];
@@ -44,14 +40,6 @@ class Ticket extends Model
     public function event()
     {
         return $this->belongsTo(Event::class);
-    }
-
-    /**
-     * Get the seat for this ticket
-     */
-    public function seat()
-    {
-        return $this->belongsTo(Seat::class);
     }
 
     /**
@@ -95,7 +83,7 @@ class Ticket extends Model
      */
     public function isScanned(): bool
     {
-        return $this->status === 'Scanned' || $this->is_scanned;
+        return $this->status === 'Scanned';
     }
 
     /**
@@ -117,23 +105,20 @@ class Ticket extends Model
     /**
      * Mark ticket as scanned
      */
-    public function markAsScanned(string $scannedBy, string $gateLocation): void
+    public function markAsScanned(): void
     {
         $this->update([
             'status' => 'Scanned',
-            'is_scanned' => true,
             'scanned_at' => now(),
-            'scanned_by' => $scannedBy,
-            'gate_location' => $gateLocation,
         ]);
     }
 
     /**
-     * Get seat identifier
+     * Get ticket identifier
      */
-    public function getSeatIdentifierAttribute(): string
+    public function getTicketIdentifierAttribute(): string
     {
-        return $this->seat ? $this->seat->seat_identifier : 'Unknown';
+        return "TKT-{$this->id}";
     }
 
     /**
@@ -141,7 +126,7 @@ class Ticket extends Model
      */
     public function getDisplayNameAttribute(): string
     {
-        return "Ticket #{$this->id} - {$this->seat_identifier}";
+        return "Ticket #{$this->id}";
     }
 
     /**
@@ -174,5 +159,47 @@ class Ticket extends Model
     public function scopeForEvent($query, Event $event)
     {
         return $query->where('event_id', $event->id);
+    }
+
+    /**
+     * Scope for zone
+     */
+    public function scopeForZone($query, string $zone)
+    {
+        return $query->where('zone', $zone);
+    }
+
+    /**
+     * Scope for available tickets (not sold or held)
+     */
+    public function scopeAvailable($query)
+    {
+        return $query->whereNotIn('status', ['Sold', 'Held']);
+    }
+
+    /**
+     * Get zone price based on zone
+     */
+    public function getZonePrice(): float
+    {
+        $zonePrices = [
+            'Warzone Exclusive' => 350.00,
+            'Warzone VIP' => 250.00,
+            'Warzone Grandstand' => 220.00,
+            'Warzone Premium Ringside' => 199.00,
+            'Level 1 Zone A/B/C/D' => 129.00,
+            'Level 2 Zone A/B/C/D' => 89.00,
+            'Standing Zone A/B' => 49.00,
+        ];
+
+        return $zonePrices[$this->zone] ?? 49.00;
+    }
+
+    /**
+     * Check if ticket is for a specific zone
+     */
+    public function isForZone(string $zone): bool
+    {
+        return $this->zone === $zone;
     }
 }

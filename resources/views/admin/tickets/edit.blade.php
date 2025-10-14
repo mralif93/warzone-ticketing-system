@@ -52,7 +52,7 @@
                         @endif
 
                         <div class="space-y-6">
-                            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <div class="grid grid-cols-1 gap-6 sm:grid-cols-1">
                                 <!-- Event -->
                                 <div>
                                     <label for="event_id" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
@@ -72,40 +72,17 @@
                                     @enderror
                                 </div>
 
-                                <!-- Seat -->
+                                <!-- Zone Name -->
                                 <div>
-                                    <label for="seat_id" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
-                                        Seat <span class="text-wwc-error">*</span>
+                                    <label for="zone" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                        Zone Name <span class="text-wwc-error">*</span>
                                     </label>
-                                    <select name="seat_id" id="seat_id" required
-                                            class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('seat_id') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
-                                        <option value="">Select a seat</option>
-                                        @foreach($seats as $seat)
-                                            <option value="{{ $seat->id }}" {{ old('seat_id', $ticket->seat_id) == $seat->id ? 'selected' : '' }}>
-                                                {{ $seat->row }}{{ $seat->number }} - {{ $seat->price_zone }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('seat_id')
-                                        <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
-                                <!-- Order -->
-                                <div>
-                                    <label for="order_id" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
-                                        Order <span class="text-wwc-error">*</span>
-                                    </label>
-                                    <select name="order_id" id="order_id" required
-                                            class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('order_id') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
-                                        <option value="">Select an order</option>
-                                        @foreach($orders as $order)
-                                            <option value="{{ $order->id }}" {{ old('order_id', $ticket->order_id) == $order->id ? 'selected' : '' }}>
-                                                #{{ $order->id }} - {{ $order->user->name }} - RM{{ number_format($order->total_amount, 0) }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('order_id')
+                                    <input type="text" name="zone" id="zone" required
+                                           value="{{ old('zone', $ticket->zone) }}"
+                                           class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('zone') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror"
+                                           placeholder="Enter zone name (e.g., Warzone VIP, Level 1 Zone A, etc.)">
+                                    <p class="text-xs text-wwc-neutral-500 mt-1">Enter the zone name for this ticket category</p>
+                                    @error('zone')
                                         <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
                                     @enderror
                                 </div>
@@ -115,10 +92,16 @@
                                     <label for="price_paid" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
                                         Price Paid <span class="text-wwc-error">*</span>
                                     </label>
-                                    <input type="number" name="price_paid" id="price_paid" required step="0.01" min="0"
-                                           value="{{ old('price_paid', $ticket->price_paid) }}"
-                                           class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('price_paid') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror"
-                                           placeholder="Enter price paid">
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <span class="text-wwc-neutral-500 text-sm">RM</span>
+                                        </div>
+                                        <input type="number" name="price_paid" id="price_paid" required step="0.01" min="0"
+                                               value="{{ old('price_paid', $ticket->price_paid) }}"
+                                               class="block w-full pl-10 pr-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('price_paid') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror"
+                                               placeholder="0.00">
+                                    </div>
+                                    <p class="text-xs text-wwc-neutral-500 mt-1">Enter the price paid for this ticket</p>
                                     @error('price_paid')
                                         <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
                                     @enderror
@@ -134,8 +117,9 @@
                                         <option value="">Select status</option>
                                         <option value="Sold" {{ old('status', $ticket->status) == 'Sold' ? 'selected' : '' }}>Sold</option>
                                         <option value="Held" {{ old('status', $ticket->status) == 'Held' ? 'selected' : '' }}>Held</option>
-                                        <option value="Used" {{ old('status', $ticket->status) == 'Used' ? 'selected' : '' }}>Used</option>
-                                        <option value="Cancelled" {{ old('status', $ticket->status) == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                        <option value="Scanned" {{ old('status', $ticket->status) == 'Scanned' ? 'selected' : '' }}>Scanned</option>
+                                        <option value="Invalid" {{ old('status', $ticket->status) == 'Invalid' ? 'selected' : '' }}>Invalid</option>
+                                        <option value="Refunded" {{ old('status', $ticket->status) == 'Refunded' ? 'selected' : '' }}>Refunded</option>
                                     </select>
                                     @error('status')
                                         <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
@@ -143,7 +127,7 @@
                                 </div>
 
                                 <!-- QR Code -->
-                                <div class="sm:col-span-2">
+                                <div>
                                     <label for="qrcode" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
                                         QR Code
                                     </label>
@@ -151,10 +135,24 @@
                                            value="{{ old('qrcode', $ticket->qrcode) }}"
                                            class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('qrcode') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror"
                                            placeholder="Enter QR code">
+                                    <p class="text-xs text-wwc-neutral-500 mt-1">Unique QR code for this ticket</p>
                                     @error('qrcode')
                                         <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
                                     @enderror
                                 </div>
+
+                                <!-- Scanned At (Read-only if scanned) -->
+                                @if($ticket->scanned_at)
+                                <div>
+                                    <label class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                        Scanned At
+                                    </label>
+                                    <div class="px-3 py-2 bg-wwc-neutral-50 border border-wwc-neutral-200 rounded-lg text-sm text-wwc-neutral-700">
+                                        {{ $ticket->scanned_at->format('M j, Y g:i A') }}
+                                    </div>
+                                    <p class="text-xs text-wwc-neutral-500 mt-1">This ticket has been scanned for entry</p>
+                                </div>
+                                @endif
                             </div>
                         </div>
 
@@ -177,4 +175,35 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const zoneSelect = document.getElementById('zone');
+    const priceInput = document.getElementById('price_paid');
+    
+    // Zone pricing mapping
+    const zonePrices = {
+        'Warzone Exclusive': 350.00,
+        'Warzone VIP': 250.00,
+        'Warzone Grandstand': 220.00,
+        'Warzone Premium Ringside': 199.00,
+        'Level 1 Zone A/B/C/D': 129.00,
+        'Level 2 Zone A/B/C/D': 89.00,
+        'Standing Zone A/B': 49.00
+    };
+    
+    // Auto-populate price when zone changes
+    zoneSelect.addEventListener('change', function() {
+        const selectedZone = this.value;
+        if (selectedZone && zonePrices[selectedZone]) {
+            priceInput.value = zonePrices[selectedZone];
+        }
+    });
+    
+    // Auto-populate price on page load if zone is already selected
+    if (zoneSelect.value && zonePrices[zoneSelect.value]) {
+        priceInput.value = zonePrices[zoneSelect.value];
+    }
+});
+</script>
 @endsection

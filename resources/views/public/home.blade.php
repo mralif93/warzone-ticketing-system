@@ -79,7 +79,7 @@
                         <div class="space-y-2 mb-4">
                             <div class="flex items-center text-wwc-neutral-600">
                                 <i class='bx bx-calendar text-sm mr-2 text-wwc-neutral-400'></i>
-                                {{ $event->date_time->format('M j, Y \a\t g:i A') }}
+                                {{ $event->getFormattedDateRange() }}
                             </div>
                             <div class="flex items-center text-wwc-neutral-600">
                                 <i class='bx bx-map text-sm mr-2 text-wwc-neutral-400'></i>

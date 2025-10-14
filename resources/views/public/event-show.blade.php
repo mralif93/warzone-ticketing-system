@@ -1,213 +1,292 @@
 @extends('layouts.public')
 
-@section('title', $event->name . ' - Warzone Ticketing')
+@section('title', $event->name . ' - Event Details')
 @section('description', $event->description ?: 'Get tickets for ' . $event->name . ' at ' . ($event->venue ?? 'TBA venue') . ' on ' . $event->date_time->format('M j, Y') . '.')
 
 @section('content')
-<!-- Event Header -->
-<section class="bg-wwc-primary text-white py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center mb-6">
-            <a href="{{ route('public.events') }}" class="text-wwc-primary-light hover:text-white mr-4">
-                <i class='bx bx-chevron-left text-2xl'></i>
-            </a>
-            <span class="text-wwc-primary-light">Back to Events</span>
-        </div>
-        
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            <div>
-                <h1 class="text-4xl md:text-5xl font-bold font-display mb-4">{{ $event->name }}</h1>
-                <div class="space-y-3 mb-6">
-                    <div class="flex items-center text-xl">
-                        <i class='bx bx-calendar text-2xl mr-3 text-wwc-primary-light'></i>
-                        {{ $event->date_time->format('l, M j, Y \a\t g:i A') }}
-                    </div>
-                    <div class="flex items-center text-xl">
-                        <i class='bx bx-map text-2xl mr-3 text-wwc-primary-light'></i>
-                        {{ $event->venue ?? 'Venue TBA' }}
-                    </div>
+<!-- Professional Event Details -->
+<div class="min-h-screen bg-wwc-neutral-50">
+
+    <!-- Header Section -->
+    <div class="bg-white border-b border-wwc-neutral-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex items-center justify-between">
+                <!-- Back Navigation -->
+                <div class="flex items-center">
+                    <a href="{{ route('public.events') }}" 
+                       class="flex items-center text-wwc-neutral-600 hover:text-wwc-primary transition-colors duration-200 group">
+                        <div class="h-8 w-8 bg-wwc-neutral-100 rounded-lg flex items-center justify-center group-hover:bg-wwc-primary/10 transition-colors duration-200">
+                            <i class="bx bx-chevron-left text-lg group-hover:-translate-x-1 transition-transform"></i>
+                        </div>
+                        <span class="font-semibold ml-3">Back to Events</span>
+                    </a>
                 </div>
                 
-                <div class="flex items-center space-x-4">
-                    <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold
-                        @if($event->status === 'On Sale') bg-wwc-success text-white
-                        @elseif($event->status === 'Sold Out') bg-wwc-error text-white
-                        @else bg-wwc-neutral-400 text-white
+                <!-- Event Details -->
+                <div class="text-center flex-1 mx-8">
+                    <h1 class="text-2xl font-bold text-wwc-neutral-900 font-display mb-1">{{ $event->name }}</h1>
+                    <p class="text-sm text-wwc-neutral-600">
+                        {{ $event->getFormattedDateRange() }}
+                        @if($event->venue)
+                            • {{ $event->venue }}
+                        @endif
+                    </p>
+                </div>
+                
+                <!-- Event Status -->
+                <div class="flex items-center">
+                    <span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold
+                        @if($event->status === 'On Sale') bg-wwc-success/10 text-wwc-success border border-wwc-success/20
+                        @elseif($event->status === 'Sold Out') bg-wwc-error/10 text-wwc-error border border-wwc-error/20
+                        @else bg-wwc-neutral-100 text-wwc-neutral-600 border border-wwc-neutral-200
                         @endif">
+                        <i class="bx bx-check-circle mr-2"></i>
                         {{ $event->status }}
                     </span>
-                    @if($event->status === 'On Sale')
-                        <a href="{{ route('public.tickets.select', $event) }}" 
-                           class="bg-white text-wwc-primary hover:bg-wwc-neutral-100 px-8 py-3 rounded-xl text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white transition-colors duration-200">
-                            Get Tickets Now
-                        </a>
-                    @endif
-                </div>
-            </div>
-            
-            <!-- Event Image Placeholder -->
-            <div class="flex justify-center">
-                <div class="w-full max-w-md h-64 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
-                    <div class="text-center">
-                        <i class='bx bx-calendar text-6xl text-wwc-primary-light mx-auto mb-4'></i>
-                        <p class="text-lg font-semibold text-wwc-primary-light">{{ $event->name }}</p>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
-</section>
 
-<!-- Event Details -->
-<section class="py-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+
+        <!-- 1. ABOUT & INFORMATION SECTION -->
+        <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-8 mb-12">
+            <!-- About Section -->
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-wwc-neutral-900 font-display mb-4">About This Event</h2>
+                <div class="w-24 h-1 bg-wwc-primary mx-auto rounded-full mb-8"></div>
+                <div class="max-w-4xl mx-auto">
+                    <p class="text-lg text-wwc-neutral-700 leading-relaxed text-center">
+                        {{ $event->description ?: 'Join us for an amazing event! More details coming soon.' }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Information Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="text-center p-6 bg-wwc-neutral-50 rounded-xl">
+                    <div class="h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class='bx bx-calendar text-blue-600 text-2xl'></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-wwc-neutral-900 mb-2">Date & Time</h3>
+                    <p class="text-wwc-neutral-700">{{ $event->getFormattedDateRange() }}</p>
+                </div>
+                
+                <div class="text-center p-6 bg-wwc-neutral-50 rounded-xl">
+                    <div class="h-16 w-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class='bx bx-map text-orange-600 text-2xl'></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-wwc-neutral-900 mb-2">Venue</h3>
+                    <p class="text-wwc-neutral-700">{{ $event->venue ?? 'Venue TBA' }}</p>
+                </div>
+                
+                <div class="text-center p-6 bg-wwc-neutral-50 rounded-xl">
+                    <div class="h-16 w-16 bg-wwc-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class='bx bx-user text-wwc-primary text-2xl'></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-wwc-neutral-900 mb-2">Max per Order</h3>
+                    <p class="text-wwc-neutral-700">{{ $event->max_tickets_per_order }} tickets</p>
+                </div>
+                
+                <div class="text-center p-6 bg-wwc-neutral-50 rounded-xl">
+                    <div class="h-16 w-16 bg-wwc-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class='bx bx-group text-wwc-accent text-2xl'></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-wwc-neutral-900 mb-2">Capacity</h3>
+                    <p class="text-wwc-neutral-700">{{ number_format($event->total_seats ?? 0) }} seats</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. TICKETS SECTION -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
             <!-- Main Content -->
             <div class="lg:col-span-2">
-                <!-- Event Description -->
-                <div class="bg-white rounded-xl shadow-sm border border-wwc-neutral-200 p-8 mb-8">
-                    <h2 class="text-2xl font-bold text-wwc-neutral-900 font-display mb-4">About This Event</h2>
-                    <div class="prose max-w-none">
-                        <p class="text-wwc-neutral-700 leading-relaxed">
-                            {{ $event->description ?: 'Join us for an amazing event! More details coming soon.' }}
-                        </p>
-                    </div>
-                </div>
 
                 <!-- Price Zones -->
-                @if($priceZones->count() > 0)
-                <div class="bg-white rounded-xl shadow-sm border border-wwc-neutral-200 p-8 mb-8">
-                    <h2 class="text-2xl font-bold text-wwc-neutral-900 font-display mb-6">Ticket Prices</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        @foreach($priceZones as $zone)
-                        <div class="border border-wwc-neutral-200 rounded-xl p-6 hover:border-wwc-primary-light transition-colors duration-200">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="text-lg font-semibold text-wwc-neutral-900">{{ $zone['zone'] }}</h3>
-                                <span class="text-2xl font-bold text-wwc-primary font-display">RM{{ number_format($zone['price'], 0) }}</span>
+                @if(count($zones) > 0)
+                <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-8">
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl font-bold text-wwc-neutral-900 font-display mb-4">Available Tickets</h2>
+                        <div class="w-24 h-1 bg-wwc-primary mx-auto rounded-full"></div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        @foreach($zones as $zoneName => $zoneData)
+                        <div class="group bg-white border-2 border-wwc-neutral-200 rounded-xl p-6 hover:border-wwc-primary hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-bold text-wwc-neutral-900 group-hover:text-wwc-primary transition-colors duration-200">{{ $zoneName }}</h3>
+                                <div class="text-right">
+                                    <span class="text-3xl font-bold text-wwc-primary font-display">RM{{ number_format($zoneData['price'], 0) }}</span>
+                                    <p class="text-sm text-wwc-neutral-500">per ticket</p>
+                                </div>
                             </div>
-                            <div class="text-sm text-wwc-neutral-600 mb-3">
-                                {{ $zone['available'] }} of {{ $zone['total'] }} tickets available
+                            
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between text-sm">
+                                    <span class="text-wwc-neutral-600">Available</span>
+                                    <span class="font-semibold text-wwc-neutral-900">{{ $zoneData['available'] }} tickets</span>
+                                </div>
+                                
+                                <div class="flex items-center justify-between text-sm">
+                                    <span class="text-wwc-neutral-600">Sold</span>
+                                    <span class="font-semibold text-wwc-neutral-900">{{ $zoneData['sold'] }} tickets</span>
+                                </div>
+                                
+                                <div class="w-full bg-wwc-neutral-200 rounded-full h-3">
+                                    <div class="bg-wwc-primary h-3 rounded-full transition-all duration-500" 
+                                         style="width: {{ $zoneData['availability_percentage'] }}%"></div>
+                                </div>
+                                
+                                <div class="text-center">
+                                    <span class="text-sm font-semibold text-wwc-neutral-700">{{ $zoneData['availability_percentage'] }}% available</span>
+                                </div>
                             </div>
-                            <div class="w-full bg-wwc-neutral-200 rounded-full h-2 mb-2">
-                                <div class="bg-wwc-primary h-2 rounded-full" style="width: {{ 100 - $zone['sold_percentage'] }}%"></div>
-                            </div>
-                            <div class="text-xs text-wwc-neutral-500">
-                                {{ $zone['sold_percentage'] }}% sold
+                            
+                            <div class="mt-4 pt-4 border-t border-wwc-neutral-200">
+                                <div class="flex items-center text-sm text-wwc-neutral-600">
+                                    <i class='bx bx-check-circle text-wwc-success mr-2'></i>
+                                    <span>Best value for money</span>
+                                </div>
                             </div>
                         </div>
                         @endforeach
                     </div>
+                    
+                    @if($event->status === 'On Sale')
+                    <div class="text-center mt-10">
+                        @auth
+                            <a href="{{ route('public.tickets.cart', $event) }}" 
+                               class="inline-flex items-center px-12 py-4 bg-wwc-primary text-white rounded-xl text-xl font-bold hover:bg-wwc-primary-dark hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
+                                <i class='bx bx-ticket mr-3 text-2xl'></i>
+                                Get Tickets Now
+                            </a>
+                        @else
+                            <div class="inline-flex flex-col items-center space-y-4">
+                                <a href="{{ route('login') }}" 
+                                   class="inline-flex items-center px-12 py-4 bg-wwc-primary text-white rounded-xl text-xl font-bold hover:bg-wwc-primary-dark hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
+                                    <i class='bx bx-log-in mr-3 text-2xl'></i>
+                                    Login to Get Tickets
+                                </a>
+                                <div class="text-center">
+                                    <span class="text-sm text-wwc-neutral-500">Don't have an account?</span>
+                                    <a href="{{ route('register') }}" class="text-sm text-wwc-primary hover:text-wwc-primary-dark font-medium ml-1">
+                                        Create Account
+                                    </a>
+                                </div>
+                            </div>
+                        @endauth
+                    </div>
+                    @endif
                 </div>
                 @endif
-
-                <!-- Event Information -->
-                <div class="bg-white rounded-xl shadow-sm border border-wwc-neutral-200 p-8">
-                    <h2 class="text-2xl font-bold text-wwc-neutral-900 font-display mb-6">Event Information</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-3">Date & Time</h3>
-                            <p class="text-wwc-neutral-700">{{ $event->date_time->format('l, F j, Y') }}</p>
-                            <p class="text-wwc-neutral-700">{{ $event->date_time->format('g:i A') }}</p>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-3">Venue</h3>
-                            <p class="text-wwc-neutral-700">{{ $event->venue ?? 'Venue TBA' }}</p>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-3">Max Tickets per Order</h3>
-                            <p class="text-wwc-neutral-700">{{ $event->max_tickets_per_order }} tickets</p>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-3">Event Status</h3>
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold
-                                @if($event->status === 'On Sale') bg-wwc-success text-white
-                                @elseif($event->status === 'Sold Out') bg-wwc-error text-white
-                                @else bg-wwc-neutral-400 text-white
-                                @endif">
-                                {{ $event->status }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <!-- Sidebar -->
             <div class="space-y-6">
                 <!-- Ticket Availability -->
-                <div class="bg-white rounded-xl shadow-sm border border-wwc-neutral-200 p-6">
-                    <h3 class="text-lg font-semibold text-wwc-neutral-900 font-display mb-4">Ticket Availability</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <div class="flex justify-between text-sm mb-2">
-                                <span class="text-wwc-neutral-600">Total Capacity</span>
-                                <span class="font-semibold text-wwc-neutral-900">{{ number_format($availabilityStats['total_capacity']) }}</span>
-                            </div>
-                            <div class="w-full bg-wwc-neutral-200 rounded-full h-2">
-                                <div class="bg-wwc-primary h-2 rounded-full" style="width: 100%"></div>
-                            </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-6">
+                    <h3 class="text-xl font-bold text-wwc-neutral-900 font-display mb-6 text-center">Ticket Availability</h3>
+                    <div class="space-y-6">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-wwc-primary mb-2">{{ number_format($availabilityStats['tickets_available']) }}</div>
+                            <div class="text-sm text-wwc-neutral-600">Available Tickets</div>
                         </div>
                         
-                        <div>
-                            <div class="flex justify-between text-sm mb-2">
-                                <span class="text-wwc-neutral-600">Available</span>
-                                <span class="font-semibold text-wwc-neutral-900">{{ number_format($availabilityStats['tickets_available']) }}</span>
-                            </div>
-                            <div class="w-full bg-wwc-neutral-200 rounded-full h-2">
-                                <div class="bg-wwc-success h-2 rounded-full" style="width: {{ $availabilityStats['availability_percentage'] }}%"></div>
-                            </div>
+                        <div class="w-full bg-wwc-neutral-200 rounded-full h-3">
+                            <div class="bg-gradient-to-r from-wwc-success to-wwc-primary h-3 rounded-full transition-all duration-500" 
+                                 style="width: {{ $availabilityStats['availability_percentage'] }}%"></div>
                         </div>
                         
-                        <div>
-                            <div class="flex justify-between text-sm mb-2">
-                                <span class="text-wwc-neutral-600">Sold</span>
-                                <span class="font-semibold text-wwc-neutral-900">{{ number_format($availabilityStats['tickets_sold']) }}</span>
+                        <div class="grid grid-cols-2 gap-4 text-center">
+                            <div>
+                                <div class="text-lg font-bold text-wwc-neutral-900">{{ number_format($availabilityStats['total_capacity']) }}</div>
+                                <div class="text-xs text-wwc-neutral-600">Total Capacity</div>
                             </div>
-                            <div class="w-full bg-wwc-neutral-200 rounded-full h-2">
-                                <div class="bg-wwc-accent h-2 rounded-full" style="width: {{ $availabilityStats['sold_percentage'] }}%"></div>
+                            <div>
+                                <div class="text-lg font-bold text-wwc-accent">{{ number_format($availabilityStats['tickets_sold']) }}</div>
+                                <div class="text-xs text-wwc-neutral-600">Sold</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Get Tickets CTA -->
-                @if($event->status === 'On Sale')
-                <div class="bg-wwc-primary text-white rounded-xl p-6 text-center">
-                    <h3 class="text-lg font-semibold mb-2">Ready to Get Tickets?</h3>
-                    <p class="text-wwc-primary-light text-sm mb-4">Don't miss out on this amazing event!</p>
-                    <a href="{{ route('public.tickets.select', $event) }}" 
-                       class="w-full inline-flex justify-center items-center px-6 py-3 bg-white text-wwc-primary hover:bg-wwc-neutral-100 rounded-xl text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white transition-colors duration-200">
-                        <i class='bx bx-receipt text-lg mr-2'></i>
-                        Buy Tickets
-                    </a>
+                <!-- Event Highlights -->
+                <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-6">
+                    <h3 class="text-xl font-bold text-wwc-neutral-900 mb-6 text-center">Why Choose Us?</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center text-sm text-wwc-neutral-700">
+                            <div class="h-8 w-8 bg-wwc-success/20 rounded-full flex items-center justify-center mr-3">
+                                <i class='bx bx-check text-wwc-success text-sm'></i>
+                            </div>
+                            <span class="font-medium">Secure online booking</span>
+                        </div>
+                        <div class="flex items-center text-sm text-wwc-neutral-700">
+                            <div class="h-8 w-8 bg-wwc-success/20 rounded-full flex items-center justify-center mr-3">
+                                <i class='bx bx-check text-wwc-success text-sm'></i>
+                            </div>
+                            <span class="font-medium">Instant confirmation</span>
+                        </div>
+                        <div class="flex items-center text-sm text-wwc-neutral-700">
+                            <div class="h-8 w-8 bg-wwc-success/20 rounded-full flex items-center justify-center mr-3">
+                                <i class='bx bx-check text-wwc-success text-sm'></i>
+                            </div>
+                            <span class="font-medium">Mobile-friendly tickets</span>
+                        </div>
+                        <div class="flex items-center text-sm text-wwc-neutral-700">
+                            <div class="h-8 w-8 bg-wwc-success/20 rounded-full flex items-center justify-center mr-3">
+                                <i class='bx bx-check text-wwc-success text-sm'></i>
+                            </div>
+                            <span class="font-medium">24/7 customer support</span>
+                        </div>
+                    </div>
                 </div>
-                @elseif($event->status === 'Sold Out')
-                <div class="bg-wwc-error text-white rounded-xl p-6 text-center">
-                    <h3 class="text-lg font-semibold mb-2">Sold Out</h3>
-                    <p class="text-red-100 text-sm mb-4">This event is completely sold out.</p>
-                    <button disabled class="w-full inline-flex justify-center items-center px-6 py-3 bg-red-600 text-white rounded-xl text-lg font-semibold cursor-not-allowed">
-                        <i class='bx bx-x text-lg mr-2'></i>
-                        Sold Out
-                    </button>
-                </div>
-                @endif
 
                 <!-- Need Help -->
-                <div class="bg-wwc-neutral-50 rounded-xl p-6">
-                    <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-3">Need Help?</h3>
-                    <p class="text-sm text-wwc-neutral-600 mb-4">Our support team is here to help you with any questions.</p>
-                    <div class="space-y-2">
+                <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-6">
+                    <h3 class="text-xl font-bold text-wwc-neutral-900 mb-4 text-center">Need Help?</h3>
+                    <p class="text-sm text-wwc-neutral-600 mb-6 text-center">Our support team is here to help you with any questions.</p>
+                    <div class="space-y-3">
                         <a href="mailto:support@warzone-ticketing.com" 
-                           class="block text-sm text-wwc-primary hover:text-wwc-primary-dark transition-colors duration-200">
-                            support@warzone-ticketing.com
+                           class="flex items-center justify-center px-4 py-3 bg-wwc-neutral-50 hover:bg-wwc-primary hover:text-white rounded-xl transition-colors duration-200 border border-wwc-neutral-200">
+                            <i class='bx bx-envelope mr-2'></i>
+                            <span class="text-sm font-medium">support@warzone-ticketing.com</span>
                         </a>
-                        <a href="tel:+15551234567" 
-                           class="block text-sm text-wwc-primary hover:text-wwc-primary-dark transition-colors duration-200">
-                            +1 (555) 123-4567
+                        <a href="tel:+60123456789" 
+                           class="flex items-center justify-center px-4 py-3 bg-wwc-neutral-50 hover:bg-wwc-primary hover:text-white rounded-xl transition-colors duration-200 border border-wwc-neutral-200">
+                            <i class='bx bx-phone mr-2'></i>
+                            <span class="text-sm font-medium">+60 12-345 6789</span>
                         </a>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- 3. ADDITIONAL INFORMATION SECTION -->
+        @if($event->isMultiDay())
+        <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-8">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-wwc-neutral-900 font-display mb-4">Event Schedule</h2>
+                <div class="w-24 h-1 bg-wwc-primary mx-auto rounded-full"></div>
+            </div>
+            <div class="max-w-4xl mx-auto text-center">
+                <div class="bg-wwc-info/10 rounded-xl p-6">
+                    <div class="flex items-center justify-center mb-4">
+                        <div class="h-12 w-12 bg-wwc-info/20 rounded-full flex items-center justify-center mr-4">
+                            <i class='bx bx-calendar-check text-wwc-info text-xl'></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-wwc-neutral-900">{{ $event->getFormattedDateRange() }}</h3>
+                            <p class="text-wwc-neutral-600">{{ $event->getDurationInDays() }} day{{ $event->getDurationInDays() > 1 ? 's' : '' }} event</p>
+                        </div>
+                    </div>
+                    <p class="text-wwc-neutral-700">This is a multi-day event. Please check the specific schedule for each day's activities and timings.</p>
+                </div>
+            </div>
+        </div>
+        @endif
     </div>
-</section>
+</div>
 @endsection

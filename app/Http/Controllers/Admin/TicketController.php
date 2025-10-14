@@ -15,7 +15,7 @@ class TicketController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Ticket::with(['order.user', 'event', 'seat']);
+        $query = Ticket::with(['order.user', 'event']);
 
         // Search functionality
         if ($request->filled('search')) {
@@ -36,9 +36,9 @@ class TicketController extends Controller
             $query->where('status', $request->status);
         }
 
-        // Filter by price zone
-        if ($request->filled('price_zone')) {
-            $query->where('price_zone', $request->price_zone);
+        // Filter by zone
+        if ($request->filled('zone')) {
+            $query->where('zone', $request->zone);
         }
 
         // Filter by event
@@ -56,10 +56,9 @@ class TicketController extends Controller
 
         $tickets = $query->latest()->paginate(15);
         $statuses = Ticket::select('status')->distinct()->pluck('status');
-        $priceZones = \App\Models\PriceZone::active()->ordered()->pluck('name');
         $events = \App\Models\Event::select('id', 'name')->get();
 
-        return view('admin.tickets.index', compact('tickets', 'statuses', 'priceZones', 'events'));
+        return view('admin.tickets.index', compact('tickets', 'statuses', 'events'));
     }
 
     /**
@@ -68,10 +67,8 @@ class TicketController extends Controller
     public function create()
     {
         $events = \App\Models\Event::where('status', 'On Sale')->get();
-        $seats = \App\Models\Seat::all();
-        $orders = \App\Models\Order::with('user')->get();
 
-        return view('admin.tickets.create', compact('events', 'seats', 'orders'));
+        return view('admin.tickets.create', compact('events'));
     }
 
     /**
@@ -81,34 +78,41 @@ class TicketController extends Controller
     {
         $request->validate([
             'event_id' => 'required|exists:events,id',
-            'seat_id' => 'required|exists:seats,id',
-            'order_id' => 'required|exists:orders,id',
-            'price_paid' => 'required|numeric|min:0',
-            'status' => 'required|in:Sold,Held,Used,Cancelled',
-            'qrcode' => 'nullable|string|max:255|unique:tickets,qrcode'
+            'zone' => 'required|string|max:255',
+            'price_per_person' => 'required|numeric|min:0',
+            'total_seats' => 'required|integer|min:1|max:10000',
         ]);
 
-        // Generate QR code if not provided
-        if (!$request->qrcode) {
-            $request->merge(['qrcode' => 'TKT-' . strtoupper(uniqid())]);
+        $event = \App\Models\Event::findOrFail($request->event_id);
+        $createdTickets = [];
+
+        // Create multiple tickets based on total_seats
+        for ($i = 1; $i <= $request->total_seats; $i++) {
+            $ticket = Ticket::create([
+                'event_id' => $request->event_id,
+                'zone' => $request->zone,
+                'qrcode' => 'WZ' . strtoupper(uniqid()) . rand(1000, 9999),
+                'status' => 'Held', // Default status for newly created tickets
+                'price_paid' => $request->price_per_person,
+            ]);
+
+            $createdTickets[] = $ticket;
+
+            // Log each ticket creation
+            AuditLog::create([
+                'user_id' => Auth::id(),
+                'action' => 'CREATE',
+                'table_name' => 'tickets',
+                'record_id' => $ticket->id,
+                'old_values' => null,
+                'new_values' => $ticket->toArray(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
         }
 
-        $ticket = Ticket::create($request->all());
-
-        // Log the ticket creation
-        AuditLog::create([
-            'user_id' => Auth::id(),
-            'action' => 'CREATE',
-            'table_name' => 'tickets',
-            'record_id' => $ticket->id,
-            'old_values' => null,
-            'new_values' => $ticket->toArray(),
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
-
-        return redirect()->route('admin.tickets.show', $ticket)
-                        ->with('success', 'Ticket created successfully!');
+        return redirect()->route('admin.tickets.index')
+                        ->with('success', "Successfully created {$request->total_seats} tickets for {$request->zone} zone in {$event->name}!");
     }
 
     /**
@@ -116,7 +120,7 @@ class TicketController extends Controller
      */
     public function show(Ticket $ticket)
     {
-        $ticket->load(['order.user', 'event', 'seat', 'admittanceLogs.staffUser']);
+        $ticket->load(['order.user', 'event', 'admittanceLogs.staffUser']);
 
         return view('admin.tickets.show', compact('ticket'));
     }
@@ -127,10 +131,8 @@ class TicketController extends Controller
     public function edit(Ticket $ticket)
     {
         $events = \App\Models\Event::where('status', 'On Sale')->get();
-        $seats = \App\Models\Seat::all();
-        $orders = \App\Models\Order::with('user')->get();
 
-        return view('admin.tickets.edit', compact('ticket', 'events', 'seats', 'orders'));
+        return view('admin.tickets.edit', compact('ticket', 'events'));
     }
 
     /**
@@ -140,10 +142,9 @@ class TicketController extends Controller
     {
         $request->validate([
             'event_id' => 'required|exists:events,id',
-            'seat_id' => 'required|exists:seats,id',
-            'order_id' => 'required|exists:orders,id',
+            'zone' => 'required|string|max:255',
             'price_paid' => 'required|numeric|min:0',
-            'status' => 'required|in:Sold,Held,Used,Cancelled',
+            'status' => 'required|in:Sold,Held,Scanned,Invalid,Refunded',
             'qrcode' => 'nullable|string|max:255|unique:tickets,qrcode,' . $ticket->id
         ]);
 
@@ -200,7 +201,7 @@ class TicketController extends Controller
     public function updateStatus(Request $request, Ticket $ticket)
     {
         $request->validate([
-            'status' => 'required|in:Sold,Held,Used,Cancelled'
+            'status' => 'required|in:Sold,Held,Scanned,Invalid,Refunded'
         ]);
 
         $oldValues = $ticket->toArray();

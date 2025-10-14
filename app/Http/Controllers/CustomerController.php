@@ -24,7 +24,7 @@ class CustomerController extends Controller
         $recentTickets = Ticket::whereHas('order', function($query) use ($user) {
                 $query->where('user_id', $user->id);
             })
-            ->with(['event', 'seat'])
+            ->with(['event'])
             ->latest()
             ->take(5)
             ->get();
@@ -183,7 +183,7 @@ class CustomerController extends Controller
             $query->where('event_id', $request->event);
         }
 
-        $tickets = $query->with(['event', 'seat', 'order'])
+        $tickets = $query->with(['event', 'order'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -228,7 +228,7 @@ class CustomerController extends Controller
             $query->where('created_at', '<=', $request->date_to . ' 23:59:59');
         }
 
-        $orders = $query->with(['tickets.seat', 'tickets.event'])
+        $orders = $query->with(['tickets.event'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -254,7 +254,7 @@ class CustomerController extends Controller
             abort(403, 'Unauthorized access to ticket.');
         }
 
-        $ticket->load(['event', 'seat', 'order.user']);
+        $ticket->load(['event', 'order.user']);
         
         return view('customer.ticket-details', compact('ticket'));
     }
@@ -268,7 +268,7 @@ class CustomerController extends Controller
             abort(403, 'Unauthorized access to order.');
         }
 
-        $order->load(['tickets.seat', 'tickets.event', 'user']);
+        $order->load(['tickets.event', 'user']);
         
         return view('customer.order-details', compact('order'));
     }

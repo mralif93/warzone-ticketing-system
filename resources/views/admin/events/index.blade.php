@@ -210,8 +210,13 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
+                                    @if($event->isMultiDay())
+                                        <div class="text-sm text-wwc-neutral-900">{{ $event->getFormattedDateRange() }}</div>
+                                        <div class="text-xs text-wwc-neutral-500">{{ $event->getDurationInDays() }} day{{ $event->getDurationInDays() > 1 ? 's' : '' }}</div>
+                                    @else
                                     <div class="text-sm text-wwc-neutral-900">{{ $event->date_time->format('M j, Y') }}</div>
                                     <div class="text-xs text-wwc-neutral-500">{{ $event->date_time->format('g:i A') }}</div>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-wwc-neutral-900">{{ $event->venue ?? 'No venue' }}</div>

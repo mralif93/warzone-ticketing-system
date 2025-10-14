@@ -51,7 +51,7 @@
                         @endif
 
                         <div class="space-y-6">
-                            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <div class="grid grid-cols-1 gap-6 sm:grid-cols-1">
                                 <!-- Event -->
                                 <div>
                                     <label for="event_id" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
@@ -71,87 +71,52 @@
                                     @enderror
                                 </div>
 
-                                <!-- Seat -->
+                                <!-- Zone Name -->
                                 <div>
-                                    <label for="seat_id" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
-                                        Seat <span class="text-wwc-error">*</span>
+                                    <label for="zone" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                        Zone Name <span class="text-wwc-error">*</span>
                                     </label>
-                                    <select name="seat_id" id="seat_id" required
-                                            class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('seat_id') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
-                                        <option value="">Select a seat</option>
-                                        @foreach($seats as $seat)
-                                            <option value="{{ $seat->id }}" {{ old('seat_id') == $seat->id ? 'selected' : '' }}>
-                                                {{ $seat->row }}{{ $seat->number }} - {{ $seat->price_zone }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('seat_id')
+                                    <input type="text" name="zone" id="zone" required
+                                           value="{{ old('zone') }}"
+                                           class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('zone') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror"
+                                           placeholder="Enter zone name (e.g., Warzone VIP, Level 1 Zone A, etc.)">
+                                    <p class="text-xs text-wwc-neutral-500 mt-1">Enter the zone name for this ticket category</p>
+                                    @error('zone')
                                         <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
                                     @enderror
                                 </div>
 
-                                <!-- Order -->
+                                <!-- Price Per Person -->
                                 <div>
-                                    <label for="order_id" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
-                                        Order <span class="text-wwc-error">*</span>
+                                    <label for="price_per_person" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                        Price Per Person <span class="text-wwc-error">*</span>
                                     </label>
-                                    <select name="order_id" id="order_id" required
-                                            class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('order_id') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
-                                        <option value="">Select an order</option>
-                                        @foreach($orders as $order)
-                                            <option value="{{ $order->id }}" {{ old('order_id') == $order->id ? 'selected' : '' }}>
-                                                #{{ $order->id }} - {{ $order->user->name }} - RM{{ number_format($order->total_amount, 0) }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('order_id')
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <span class="text-wwc-neutral-500 text-sm">RM</span>
+                                        </div>
+                                        <input type="number" name="price_per_person" id="price_per_person" required step="0.01" min="0"
+                                               value="{{ old('price_per_person') }}"
+                                               class="block w-full pl-10 pr-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('price_per_person') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror"
+                                               placeholder="0.00">
+                                    </div>
+                                    <p class="text-xs text-wwc-neutral-500 mt-1">Enter the price per person for this zone</p>
+                                    @error('price_per_person')
                                         <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
                                     @enderror
                                 </div>
 
-                                <!-- Price Paid -->
+                                <!-- Total Seats -->
                                 <div>
-                                    <label for="price_paid" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
-                                        Price Paid <span class="text-wwc-error">*</span>
+                                    <label for="total_seats" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                        Total Seats <span class="text-wwc-error">*</span>
                                     </label>
-                                    <input type="number" name="price_paid" id="price_paid" required step="0.01" min="0"
-                                           value="{{ old('price_paid') }}"
-                                           class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('price_paid') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror"
-                                           placeholder="Enter price paid">
-                                    @error('price_paid')
-                                        <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
-                                <!-- Status -->
-                                <div>
-                                    <label for="status" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
-                                        Status <span class="text-wwc-error">*</span>
-                                    </label>
-                                    <select name="status" id="status" required
-                                            class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('status') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
-                                        <option value="">Select status</option>
-                                        <option value="Sold" {{ old('status') == 'Sold' ? 'selected' : '' }}>Sold</option>
-                                        <option value="Held" {{ old('status') == 'Held' ? 'selected' : '' }}>Held</option>
-                                        <option value="Used" {{ old('status') == 'Used' ? 'selected' : '' }}>Used</option>
-                                        <option value="Cancelled" {{ old('status') == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                    </select>
-                                    @error('status')
-                                        <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
-                                <!-- QR Code -->
-                                <div class="sm:col-span-2">
-                                    <label for="qrcode" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
-                                        QR Code
-                                    </label>
-                                    <input type="text" name="qrcode" id="qrcode" 
-                                           value="{{ old('qrcode') }}"
-                                           class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('qrcode') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror"
-                                           placeholder="Leave empty to auto-generate">
-                                    <p class="text-xs text-wwc-neutral-500 mt-1">Leave empty to auto-generate a unique QR code</p>
-                                    @error('qrcode')
+                                    <input type="number" name="total_seats" id="total_seats" required min="1"
+                                           value="{{ old('total_seats') }}"
+                                           class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('total_seats') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror"
+                                           placeholder="Enter total number of seats">
+                                    <p class="text-xs text-wwc-neutral-500 mt-1">Number of seats available for this zone</p>
+                                    @error('total_seats')
                                         <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
                                     @enderror
                                 </div>
@@ -177,4 +142,26 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const zoneInput = document.getElementById('zone');
+    const priceInput = document.getElementById('price_per_person');
+    const totalSeatsInput = document.getElementById('total_seats');
+    
+    // Focus on price input when zone is entered
+    zoneInput.addEventListener('blur', function() {
+        if (this.value.trim() && !priceInput.value) {
+            priceInput.focus();
+        }
+    });
+    
+    // Focus on total seats when price is entered
+    priceInput.addEventListener('blur', function() {
+        if (this.value && !totalSeatsInput.value) {
+            totalSeatsInput.focus();
+        }
+    });
+});
+</script>
 @endsection

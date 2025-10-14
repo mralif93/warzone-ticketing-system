@@ -68,15 +68,44 @@
                                     @enderror
                                 </div>
 
-                                <!-- Date & Time -->
+                                <!-- Event Date & Time -->
                                 <div>
                                     <label for="date_time" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
-                                        Date & Time <span class="text-wwc-error">*</span>
+                                        Event Date & Time <span class="text-wwc-error">*</span>
+                                        <span class="text-xs text-wwc-neutral-500 font-normal">(Main event date)</span>
                                     </label>
                                     <input type="datetime-local" name="date_time" id="date_time" required
                                            value="{{ old('date_time', $event->date_time->format('Y-m-d\TH:i')) }}"
                                            class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('date_time') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
                                     @error('date_time')
+                                        <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <!-- Start Date & Time -->
+                                <div>
+                                    <label for="start_date" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                        Start Date & Time
+                                        <span class="text-xs text-wwc-neutral-500 font-normal">(Optional - for multi-day events)</span>
+                                    </label>
+                                    <input type="datetime-local" name="start_date" id="start_date"
+                                           value="{{ old('start_date', $event->start_date ? $event->start_date->format('Y-m-d\TH:i') : '') }}"
+                                           class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('start_date') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
+                                    @error('start_date')
+                                        <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <!-- End Date & Time -->
+                                <div>
+                                    <label for="end_date" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                        End Date & Time
+                                        <span class="text-xs text-wwc-neutral-500 font-normal">(Optional - for multi-day events)</span>
+                                    </label>
+                                    <input type="datetime-local" name="end_date" id="end_date"
+                                           value="{{ old('end_date', $event->end_date ? $event->end_date->format('Y-m-d\TH:i') : '') }}"
+                                           class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('end_date') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
+                                    @error('end_date')
                                         <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
                                     @enderror
                                 </div>
@@ -96,6 +125,20 @@
                                         @endfor
                                     </select>
                                     @error('max_tickets_per_order')
+                                        <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <!-- Total Seats -->
+                                <div>
+                                    <label for="total_seats" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                        Total Seats <span class="text-wwc-error">*</span>
+                                    </label>
+                                    <input type="number" name="total_seats" id="total_seats" required min="1"
+                                           value="{{ old('total_seats', $event->total_seats) }}"
+                                           class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('total_seats') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror"
+                                           placeholder="Enter total number of seats">
+                                    @error('total_seats')
                                         <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
                                     @enderror
                                 </div>

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\Order;
 use App\Models\Ticket;
-use App\Services\SeatAssignmentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -13,154 +12,34 @@ use Illuminate\Support\Facades\Log;
 
 class TicketController extends Controller
 {
-    protected $seatAssignmentService;
-
-    public function __construct(SeatAssignmentService $seatAssignmentService)
-    {
-        $this->seatAssignmentService = $seatAssignmentService;
-    }
-
     /**
-     * Show ticket selection page for an event
+     * Show cart/checkout page for zone-based ticket purchasing
      */
-    public function select(Event $event)
+    public function cart(Event $event)
     {
+        // Check if user is authenticated
+        if (!Auth::check()) {
+            return redirect()->route('login')
+                ->with('error', 'Please login to proceed with your ticket purchase.')
+                ->with('intended', route('public.tickets.cart', $event));
+        }
+
         if (!$event->isOnSale()) {
             return redirect()->route('public.events.show', $event)
                 ->with('error', 'This event is not currently on sale.');
         }
 
-        $availabilityStats = $this->seatAssignmentService->getAvailabilityStats($event);
-        $priceZoneAvailability = $this->seatAssignmentService->getPriceZoneAvailability($event);
-
-        return view('public.tickets.select', compact('event', 'availabilityStats', 'priceZoneAvailability'));
-    }
-
-    /**
-     * Find and hold seats for an event
-     */
-    public function findSeats(Request $request, Event $event)
-    {
-        // Get valid price zones from database
-        $validPriceZones = \App\Models\PriceZone::active()->pluck('name')->toArray();
-        
-        $request->validate([
-            'price_zone' => 'required|in:' . implode(',', $validPriceZones),
-            'quantity' => 'required|integer|min:1|max:20',
-        ]);
-
-        if (!$event->isOnSale()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'This event is not currently on sale.'
-            ], 400);
-        }
-
-        // Check if user has exceeded max tickets per order
-        if ($request->quantity > $event->max_tickets_per_order) {
-            return response()->json([
-                'success' => false,
-                'message' => "Maximum {$event->max_tickets_per_order} tickets per order allowed."
-            ], 400);
-        }
-
-        $result = $this->seatAssignmentService->findBestAvailableSeats(
-            $event,
-            $request->price_zone,
-            $request->quantity
-        );
-
-        if ($result['success']) {
-            // Store the held seats in session for checkout
-            session(['held_seats' => $result['seats']->toArray()]);
-            session(['hold_until' => $result['hold_until']->toISOString()]);
-            
-            // Force save the session
-            session()->save();
-            
-            // Debug logging
-            \Log::info('Seats stored in session', [
-                'session_id' => session()->getId(),
-                'held_seats_count' => count($result['seats']),
-                'hold_until' => $result['hold_until']->toDateTimeString()
-            ]);
-        }
-
-        return response()->json($result);
-    }
-
-    /**
-     * Show cart/checkout page
-     */
-    public function cart(Event $event)
-    {
-        // Force clear any problematic session data first
-        $heldSeats = session('held_seats', []);
+        // Get hold information from session (if any)
         $holdUntil = session('hold_until');
-        
-        // If hold_until is null, empty, or invalid, clear it
-        if (!$holdUntil || empty($holdUntil) || $holdUntil === 'null') {
-            session()->forget(['held_seats', 'hold_until']);
-            $heldSeats = [];
-            $holdUntil = null;
+
+        // Check if hold has expired
+        if ($holdUntil && now()->isAfter($holdUntil)) {
+            session()->forget(['ticket_quantity', 'selected_zone', 'hold_until']);
+            return redirect()->route('public.events.show', $event)
+                ->with('error', 'Your ticket hold has expired. Please try again.');
         }
 
-        // Debug logging
-        \Log::info('Cart method called', [
-            'session_id' => session()->getId(),
-            'held_seats_count' => count($heldSeats),
-            'hold_until' => $holdUntil,
-            'current_time' => now()->toDateTimeString()
-        ]);
-
-        // Always redirect to select-seats if no seats are held
-        if (empty($heldSeats)) {
-            return redirect()->route('public.tickets.select', $event)
-                ->with('info', 'Please select your seats first.');
-        }
-
-        // Only check expiration if we have a valid hold_until timestamp
-        if ($holdUntil && !empty($holdUntil) && $holdUntil !== 'null') {
-            try {
-                $holdTime = \Carbon\Carbon::parse($holdUntil);
-                if (now()->isAfter($holdTime)) {
-                    session()->forget(['held_seats', 'hold_until']);
-                    return redirect()->route('public.tickets.select', $event)
-                        ->with('info', 'Your seat selection has expired. Please select seats again.');
-                }
-            } catch (\Exception $e) {
-                // If parsing fails, clear the session and redirect
-                session()->forget(['held_seats', 'hold_until']);
-                return redirect()->route('public.tickets.select', $event)
-                    ->with('info', 'Please select your seats first.');
-            }
-        }
-
-        // Extract zone and quantity information from held seats
-        $selectedZone = null;
-        $quantity = count($heldSeats);
-        
-        if (!empty($heldSeats)) {
-            // Get the zone from the first seat (all seats should be in the same zone)
-            $selectedZone = $heldSeats[0]['price_zone'] ?? 'General';
-        }
-
-        $totalPrice = collect($heldSeats)->sum('price');
-        $serviceFee = $this->calculateServiceFee($totalPrice);
-        $taxAmount = $this->calculateTax($totalPrice + $serviceFee);
-        $grandTotal = $totalPrice + $serviceFee + $taxAmount;
-
-        return view('public.tickets.cart', compact(
-            'event',
-            'heldSeats',
-            'holdUntil',
-            'selectedZone',
-            'quantity',
-            'totalPrice',
-            'serviceFee',
-            'taxAmount',
-            'grandTotal'
-        ));
+        return view('public.tickets.cart', compact('event', 'holdUntil'));
     }
 
     /**
@@ -168,58 +47,81 @@ class TicketController extends Controller
      */
     public function purchase(Request $request, Event $event)
     {
+        // Check if user is authenticated
+        if (!Auth::check()) {
+            return redirect()->route('login')
+                ->with('error', 'Please login to complete your ticket purchase.')
+                ->with('intended', route('public.tickets.cart', $event));
+        }
+
         $request->validate([
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'required|email|max:255',
             'customer_phone' => 'nullable|string|max:20',
+            'quantity' => 'required|integer|min:1|max:' . $event->max_tickets_per_order,
+            'zone' => 'required|string|in:Warzone Exclusive,Warzone VIP,Warzone Grandstand,Warzone Premium Ringside,Level 1 Zone A/B/C/D,Level 2 Zone A/B/C/D,Standing Zone A/B',
         ]);
 
-        $heldSeats = session('held_seats', []);
-        $holdUntil = session('hold_until');
-
-        if (empty($heldSeats)) {
-            return redirect()->route('public.tickets.select', $event)
-                ->with('error', 'No seats selected. Please select seats first.');
+        if (!$event->isOnSale()) {
+            return redirect()->route('public.events.show', $event)
+                ->with('error', 'This event is not currently on sale.');
         }
 
-        // Check if hold has expired
-        if ($holdUntil && now()->isAfter($holdUntil)) {
-            session()->forget(['held_seats', 'hold_until']);
-            return redirect()->route('public.tickets.select', $event)
-                ->with('error', 'Your seat hold has expired. Please select seats again.');
+        // Check if event has enough available seats
+        if (!$event->hasAvailableSeats()) {
+            return redirect()->route('public.events.show', $event)
+                ->with('error', 'This event is sold out.');
+        }
+
+        // Check if requested quantity exceeds available seats
+        if ($request->quantity > $event->getRemainingTicketsCount()) {
+            return redirect()->route('public.events.show', $event)
+                ->with('error', 'Not enough seats available. Only ' . $event->getRemainingTicketsCount() . ' seats remaining.');
         }
 
         DB::beginTransaction();
         try {
-            // Create order
+            // Calculate base pricing
+            $basePrice = $this->getZonePrice($request->zone);
+            $totalPrice = $basePrice * $request->quantity;
+            
+            // Create single order for all tickets
             $order = Order::create([
                 'user_id' => Auth::id(),
                 'customer_email' => $request->customer_email,
                 'order_number' => Order::generateOrderNumber(),
-                'subtotal' => collect($heldSeats)->sum('price'),
-                'service_fee' => $this->calculateServiceFee(collect($heldSeats)->sum('price')),
-                'tax_amount' => $this->calculateTax(collect($heldSeats)->sum('price') + $this->calculateServiceFee(collect($heldSeats)->sum('price'))),
-                'total_amount' => $this->calculateGrandTotal($heldSeats),
-                'status' => 'Pending',
-                'payment_method' => 'Credit Card', // Will be updated when payment is processed
-                'held_until' => $holdUntil,
+                'qrcode' => Order::generateQRCode(),
+                'subtotal' => $totalPrice,
+                'service_fee' => $this->calculateServiceFee($totalPrice),
+                'tax_amount' => $this->calculateTax($totalPrice + $this->calculateServiceFee($totalPrice)),
+                'total_amount' => $totalPrice + $this->calculateServiceFee($totalPrice) + $this->calculateTax($totalPrice + $this->calculateServiceFee($totalPrice)),
+                'status' => 'Paid', // Set to Paid since payment is completed
+                'payment_method' => 'Credit Card',
             ]);
-
-            // Confirm seat assignment
-            $ticketIds = collect($heldSeats)->pluck('ticket_id')->toArray();
-            $confirmed = $this->seatAssignmentService->confirmSeatAssignment($order, $ticketIds);
-
-            if (!$confirmed) {
-                throw new \Exception('Failed to confirm seat assignment');
+            
+            // Create multiple tickets for this single order
+            $tickets = collect();
+            for ($i = 0; $i < $request->quantity; $i++) {
+                $ticket = Ticket::create([
+                    'order_id' => $order->id,
+                    'event_id' => $event->id,
+                    'zone' => $request->zone,
+                    'qrcode' => Ticket::generateQRCode(),
+                    'status' => 'Sold',
+                    'price_paid' => $basePrice,
+                ]);
+                
+                $tickets->push($ticket);
             }
 
             // Clear session
-            session()->forget(['held_seats', 'hold_until']);
+            session()->forget(['ticket_quantity', 'selected_zone', 'hold_until']);
 
             DB::commit();
 
-            return redirect()->route('tickets.confirmation', $order)
-                ->with('success', 'Tickets purchased successfully!');
+            // Redirect to order confirmation
+            return redirect()->route('public.tickets.confirmation', $order)
+                ->with('success', 'Tickets purchased successfully! ' . $tickets->count() . ' tickets in 1 order.');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -243,24 +145,24 @@ class TicketController extends Controller
             abort(403, 'Unauthorized access to order.');
         }
 
-        $order->load(['tickets.seat', 'user']);
+        $order->load(['tickets', 'user']);
         
         return view('public.tickets.confirmation', compact('order'));
     }
 
     /**
-     * Show user's tickets
+     * Show user's tickets - redirect to customer dashboard
      */
     public function myTickets()
     {
-        $tickets = Ticket::whereHas('order', function($query) {
-                $query->where('user_id', Auth::id());
-            })
-            ->with(['event', 'seat', 'order'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
-
-        return view('public.tickets.my-tickets', compact('tickets'));
+        // Check if user is authenticated
+        if (Auth::check()) {
+            // Redirect to customer dashboard (which has tickets section)
+            return redirect()->route('dashboard');
+        } else {
+            // Redirect to login page
+            return redirect()->route('login')->with('message', 'Please login to view your tickets.');
+        }
     }
 
     /**
@@ -272,23 +174,44 @@ class TicketController extends Controller
             abort(403, 'Unauthorized access to ticket.');
         }
 
-        $ticket->load(['event', 'seat', 'order.user']);
+        $ticket->load(['event', 'order.user']);
         
         return view('public.tickets.show', compact('ticket'));
     }
 
     /**
-     * Release held seats (for testing/cleanup)
+     * Release held tickets (for testing/cleanup)
      */
     public function releaseHolds()
     {
-        $releasedCount = $this->seatAssignmentService->releaseExpiredHolds();
+        $releasedCount = Ticket::where('status', 'Held')
+            ->where('created_at', '<', now()->subMinutes(10))
+            ->delete();
         
         return response()->json([
             'success' => true,
-            'message' => "Released {$releasedCount} expired seat holds",
+            'message' => "Released {$releasedCount} expired ticket holds",
             'released_count' => $releasedCount
         ]);
+    }
+
+    /**
+     * Get price for a specific zone
+     */
+    private function getZonePrice(string $zone): float
+    {
+        // Define zone prices based on the provided categories
+        $zonePrices = [
+            'Warzone Exclusive' => 500.00,
+            'Warzone VIP' => 250.00,
+            'Warzone Grandstand' => 199.00,
+            'Warzone Premium Ringside' => 150.00,
+            'Level 1 Zone A/B/C/D' => 100.00,
+            'Level 2 Zone A/B/C/D' => 75.00,
+            'Standing Zone A/B' => 50.00,
+        ];
+
+        return $zonePrices[$zone] ?? 50.00;
     }
 
     /**
@@ -300,22 +223,10 @@ class TicketController extends Controller
     }
 
     /**
-     * Calculate tax (8% of subtotal + service fee)
+     * Calculate tax (6% of subtotal + service fee)
      */
     private function calculateTax(float $subtotal): float
     {
-        return round($subtotal * 0.08, 2);
-    }
-
-    /**
-     * Calculate grand total
-     */
-    private function calculateGrandTotal(array $heldSeats): float
-    {
-        $subtotal = collect($heldSeats)->sum('price');
-        $serviceFee = $this->calculateServiceFee($subtotal);
-        $taxAmount = $this->calculateTax($subtotal + $serviceFee);
-        
-        return $subtotal + $serviceFee + $taxAmount;
+        return round($subtotal * 0.06, 2);
     }
 }

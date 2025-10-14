@@ -43,10 +43,17 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
+            // Check if there's an intended URL
+            $intended = session('url.intended');
+            
             // Redirect based on user role to preserve session message
             if (auth()->user()->hasRole('Administrator')) {
                 return redirect()->intended(route('admin.dashboard'))->with('success', 'Login successful!');
             } else {
+                // For customers, check if they were trying to access a specific page
+                if ($intended && str_contains($intended, '/events/') && str_contains($intended, '/cart')) {
+                    return redirect()->intended($intended)->with('success', 'Login successful! You can now proceed with your ticket purchase.');
+                }
                 return redirect()->intended(route('customer.dashboard'))->with('success', 'Login successful!');
             }
         }

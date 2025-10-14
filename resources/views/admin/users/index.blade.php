@@ -105,7 +105,7 @@
                     <form method="GET" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                         <div>
                             <label for="search" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Search Users</label>
-                            <input type="text" name="search" id="search" value="{{ request('search') }}"
+                        <input type="text" name="search" id="search" value="{{ request('search') }}"
                                    placeholder="Search by name, email, or role..."
                                    class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
                     </div>

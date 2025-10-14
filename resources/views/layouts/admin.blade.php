@@ -181,19 +181,19 @@
                         @endif
                     </a>
 
-                    <!-- Seats -->
-                    <a href="{{ route('admin.seats.index') }}" 
-                       class="group flex items-center px-4 py-4 text-sm font-semibold rounded-xl transition-all duration-300 {{ request()->routeIs('admin.seats*') ? 'bg-gradient-to-r from-wwc-primary-light to-red-100 text-wwc-primary shadow-lg border border-red-200' : 'text-wwc-neutral-600 hover:bg-wwc-neutral-50 hover:text-wwc-neutral-900 hover:shadow-md' }}">
+                    <!-- Orders -->
+                    <a href="{{ route('admin.orders.index') }}" 
+                       class="group flex items-center px-4 py-4 text-sm font-semibold rounded-xl transition-all duration-300 {{ request()->routeIs('admin.orders*') ? 'bg-gradient-to-r from-wwc-primary-light to-red-100 text-wwc-primary shadow-lg border border-red-200' : 'text-wwc-neutral-600 hover:bg-wwc-neutral-50 hover:text-wwc-neutral-900 hover:shadow-md' }}">
                         <div class="flex-shrink-0 mr-4">
-                            <div class="h-10 w-10 rounded-xl flex items-center justify-center {{ request()->routeIs('admin.seats*') ? 'bg-wwc-primary-light' : 'bg-wwc-neutral-100 group-hover:bg-wwc-neutral-200' }} transition-colors duration-300">
-                                <i class='bx bx-chair text-lg {{ request()->routeIs('admin.seats*') ? 'text-wwc-primary' : 'text-wwc-neutral-500 group-hover:text-wwc-neutral-700' }}'></i>
+                            <div class="h-10 w-10 rounded-xl flex items-center justify-center {{ request()->routeIs('admin.orders*') ? 'bg-wwc-primary-light' : 'bg-wwc-neutral-100 group-hover:bg-wwc-neutral-200' }} transition-colors duration-300">
+                                <i class='bx bx-shopping-bag text-lg {{ request()->routeIs('admin.orders*') ? 'text-wwc-primary' : 'text-wwc-neutral-500 group-hover:text-wwc-neutral-700' }}'></i>
                             </div>
                         </div>
                         <div class="flex-1">
-                            <div class="font-semibold">Seats</div>
-                            <div class="text-xs text-wwc-neutral-500 mt-0.5">Seat Management</div>
+                            <div class="font-semibold">Orders</div>
+                            <div class="text-xs text-wwc-neutral-500 mt-0.5">Order Processing</div>
                         </div>
-                        @if(request()->routeIs('admin.seats*'))
+                        @if(request()->routeIs('admin.orders*'))
                         <div class="h-2 w-2 bg-wwc-primary rounded-full"></div>
                         @endif
                     </a>
@@ -211,40 +211,6 @@
                             <div class="text-xs text-wwc-neutral-500 mt-0.5">Payment Management</div>
                         </div>
                         @if(request()->routeIs('admin.payments*'))
-                        <div class="h-2 w-2 bg-wwc-primary rounded-full"></div>
-                        @endif
-                    </a>
-
-                    <!-- Price Zones -->
-                    <a href="{{ route('admin.price-zones.index') }}" 
-                       class="group flex items-center px-4 py-4 text-sm font-semibold rounded-xl transition-all duration-300 {{ request()->routeIs('admin.price-zones*') ? 'bg-gradient-to-r from-wwc-primary-light to-red-100 text-wwc-primary shadow-lg border border-red-200' : 'text-wwc-neutral-600 hover:bg-wwc-neutral-50 hover:text-wwc-neutral-900 hover:shadow-md' }}">
-                        <div class="flex-shrink-0 mr-4">
-                            <div class="h-10 w-10 rounded-xl flex items-center justify-center {{ request()->routeIs('admin.price-zones*') ? 'bg-wwc-primary-light' : 'bg-wwc-neutral-100 group-hover:bg-wwc-neutral-200' }} transition-colors duration-300">
-                                <i class='bx bx-tag text-lg {{ request()->routeIs('admin.price-zones*') ? 'text-wwc-primary' : 'text-wwc-neutral-500 group-hover:text-wwc-neutral-700' }}'></i>
-                            </div>
-                        </div>
-                        <div class="flex-1">
-                            <div class="font-semibold">Price Zones</div>
-                            <div class="text-xs text-wwc-neutral-500 mt-0.5">Pricing Management</div>
-                        </div>
-                        @if(request()->routeIs('admin.price-zones*'))
-                        <div class="h-2 w-2 bg-wwc-primary rounded-full"></div>
-                        @endif
-                    </a>
-
-                    <!-- Orders -->
-                    <a href="{{ route('admin.orders.index') }}" 
-                       class="group flex items-center px-4 py-4 text-sm font-semibold rounded-xl transition-all duration-300 {{ request()->routeIs('admin.orders*') ? 'bg-gradient-to-r from-wwc-primary-light to-red-100 text-wwc-primary shadow-lg border border-red-200' : 'text-wwc-neutral-600 hover:bg-wwc-neutral-50 hover:text-wwc-neutral-900 hover:shadow-md' }}">
-                        <div class="flex-shrink-0 mr-4">
-                            <div class="h-10 w-10 rounded-xl flex items-center justify-center {{ request()->routeIs('admin.orders*') ? 'bg-wwc-primary-light' : 'bg-wwc-neutral-100 group-hover:bg-wwc-neutral-200' }} transition-colors duration-300">
-                                <i class='bx bx-shopping-bag text-lg {{ request()->routeIs('admin.orders*') ? 'text-wwc-primary' : 'text-wwc-neutral-500 group-hover:text-wwc-neutral-700' }}'></i>
-                            </div>
-                        </div>
-                        <div class="flex-1">
-                            <div class="font-semibold">Orders</div>
-                            <div class="text-xs text-wwc-neutral-500 mt-0.5">Order Processing</div>
-                        </div>
-                        @if(request()->routeIs('admin.orders*'))
                         <div class="h-2 w-2 bg-wwc-primary rounded-full"></div>
                         @endif
                     </a>
@@ -441,6 +407,7 @@
                         <a href="{{ route('admin.events.index') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Events</a>
                         <a href="{{ route('admin.tickets.index') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Tickets</a>
                         <a href="{{ route('admin.orders.index') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Orders</a>
+                        <a href="{{ route('admin.payments.index') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Payments</a>
                         <a href="{{ route('admin.reports') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Reports</a>
                         <a href="{{ route('admin.settings') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Settings</a>
                     </div>
@@ -516,5 +483,12 @@
             </main>
         </div>
     </div>
+
+    <!-- QR Code Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.umd.min.js"></script>
+    
+    <!-- Scripts Stack -->
+    @stack('scripts')
 </body>
 </html>

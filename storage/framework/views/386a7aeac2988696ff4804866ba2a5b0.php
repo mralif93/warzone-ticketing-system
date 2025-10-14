@@ -1,34 +1,33 @@
-<?php $__env->startSection('title', 'Ticket Details'); ?>
-<?php $__env->startSection('description', 'View detailed information about your ticket in your Warzone World Championship customer portal.'); ?>
+<?php $__env->startSection('title', 'Ticket Details - ' . $ticket->event->name); ?>
+<?php $__env->startSection('description', 'View your ticket details and QR code for ' . $ticket->event->name . '.'); ?>
 
 <?php $__env->startSection('content'); ?>
-<!-- Professional Ticket Details -->
-<div class="min-h-screen bg-wwc-neutral-50">
+<!-- Standard Ticket Details -->
+<div class="min-h-screen bg-gray-50">
 
-    <!-- Header Section -->
-    <div class="bg-white border-b border-wwc-neutral-200">
+    <!-- Header -->
+    <div class="bg-white shadow-sm border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="flex items-center justify-between">
-                <div class="flex items-center">
-                    <a href="<?php echo e(route('customer.tickets')); ?>" class="text-wwc-neutral-400 hover:text-wwc-neutral-600 mr-4">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                        </svg>
+                <div class="flex items-center space-x-4">
+                    <a href="<?php echo e(route('customer.tickets')); ?>" 
+                       class="flex items-center text-gray-600 hover:text-blue-600 transition-colors duration-200">
+                        <div class="h-9 w-9 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-blue-50">
+                            <i class="bx bx-chevron-left text-lg"></i>
+                        </div>
                     </a>
                     <div>
-                        <h1 class="text-2xl font-bold text-wwc-neutral-900 font-display">Ticket Details</h1>
-                        <p class="text-wwc-neutral-600 mt-1">Ticket #<?php echo e($ticket->id); ?></p>
+                        <h1 class="text-xl font-semibold text-gray-900">Ticket Details</h1>
+                        <p class="text-gray-500 text-sm">Ticket #<?php echo e($ticket->id); ?></p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-3">
-                    <a href="<?php echo e(route('customer.orders')); ?>" 
-                       class="inline-flex items-center px-4 py-2 bg-wwc-primary text-white rounded-lg text-sm font-semibold hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
-                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        My Orders
-                    </a>
-                </div>
+                <a href="<?php echo e(route('customer.orders.show', $ticket->order)); ?>" 
+                    class="inline-flex items-center px-4 py-2 bg-wwc-primary text-white rounded-lg text-sm font-medium hover:bg-wwc-primary-dark transition-colors duration-200">
+                    <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    My Orders
+                </a>
             </div>
         </div>
     </div>
@@ -36,128 +35,148 @@
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Ticket Information -->
-            <div class="lg:col-span-2">
-                <div class="bg-white rounded-xl shadow-sm border border-wwc-neutral-200 mb-8">
+            
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- Event Card -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                     <div class="px-6 py-4 border-b border-wwc-neutral-200">
-                        <h2 class="text-lg font-semibold text-wwc-neutral-900">Ticket Information</h2>
-                        <p class="text-wwc-neutral-600 text-sm mt-1">Your ticket details and QR code</p>
-                    </div>
-                    <div class="p-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Event Details -->
+                        <div class="flex items-center justify-between">
                             <div>
-                                <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-4">Event Details</h3>
-                                <div class="space-y-3">
-                                    <div>
-                                        <p class="text-sm font-semibold text-wwc-neutral-600">Event Name</p>
-                                        <p class="text-lg text-wwc-neutral-900 font-display"><?php echo e($ticket->event->name); ?></p>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-semibold text-wwc-neutral-600">Date & Time</p>
-                                        <p class="text-wwc-neutral-900"><?php echo e($ticket->event->date_time->format('M j, Y \a\t g:i A')); ?></p>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-semibold text-wwc-neutral-600">Venue</p>
-                                        <p class="text-wwc-neutral-900"><?php echo e($ticket->event->venue ?? 'Venue TBA'); ?></p>
-                                    </div>
-                                </div>
+                                <h2 class="text-lg font-semibold text-gray-900"><?php echo e($ticket->event->name); ?></h2>
+                                <p class="text-gray-500 text-sm mt-1">Event Information</p>
                             </div>
-
-                            <!-- Seat Information -->
-                            <div>
-                                <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-4">Seat Information</h3>
-                                <div class="space-y-3">
-                                    <div>
-                                        <p class="text-sm font-semibold text-wwc-neutral-600">Seat Number</p>
-                                        <p class="text-2xl font-bold text-wwc-primary font-display"><?php echo e($ticket->seat_identifier); ?></p>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-semibold text-wwc-neutral-600">Price Zone</p>
-                                        <p class="text-wwc-neutral-900"><?php echo e($ticket->seat->price_zone); ?></p>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-semibold text-wwc-neutral-600">Price Paid</p>
-                                        <p class="text-2xl font-bold text-wwc-neutral-900 font-display">RM<?php echo e(number_format($ticket->price_paid, 0)); ?></p>
-                                    </div>
-                                </div>
+                            <div class="text-right">
+                                <div class="text-xl font-semibold text-gray-900">RM<?php echo e(number_format($ticket->price_paid, 0)); ?></div>
+                                <div class="text-gray-500 text-sm">Price Paid</div>
                             </div>
                         </div>
-
-                        <!-- QR Code -->
-                        <div class="mt-8 pt-6 border-t border-wwc-neutral-200">
-                            <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-4">QR Code</h3>
-                            <div class="flex items-center justify-center p-8 bg-wwc-neutral-50 rounded-lg">
-                                <div class="text-center">
-                                    <div class="w-48 h-48 bg-white border-2 border-wwc-neutral-200 rounded-lg flex items-center justify-center mb-4">
-                                        <div class="text-center">
-                                            <div class="w-32 h-32 bg-wwc-neutral-900 rounded-lg flex items-center justify-center mb-2">
-                                                <div class="text-white text-xs font-mono">QR CODE</div>
-                                            </div>
-                                            <p class="text-xs text-wwc-neutral-500">Scan at venue</p>
-                                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="h-10 w-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                                        <i class='bx bx-calendar text-blue-600'></i>
                                     </div>
-                                    <p class="text-sm text-wwc-neutral-600">Present this QR code at the venue entrance</p>
+                                    <p class="text-sm font-medium text-gray-500">Date & Time</p>
                                 </div>
+                                <p class="text-gray-900 font-medium"><?php echo e($ticket->event->getFormattedDateRange()); ?></p>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="h-10 w-10 bg-green-50 rounded-lg flex items-center justify-center">
+                                        <i class='bx bx-map text-green-600'></i>
+                                    </div>
+                                    <p class="text-sm font-medium text-gray-500">Venue</p>
+                                </div>
+                                <p class="text-gray-900 font-medium"><?php echo e($ticket->event->venue ?? 'Venue TBA'); ?></p>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="h-10 w-10 bg-emerald-50 rounded-lg flex items-center justify-center">
+                                        <i class='bx bx-check-circle text-emerald-600'></i>
+                                    </div>
+                                    <p class="text-sm font-medium text-gray-500">Status</p>
+                                </div>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-emerald-100 text-emerald-800">
+                                    <?php echo e($ticket->status); ?>
+
+                                </span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="h-10 w-10 bg-purple-50 rounded-lg flex items-center justify-center">
+                                        <i class='bx bx-time text-purple-600'></i>
+                                    </div>
+                                    <p class="text-sm font-medium text-gray-500">Duration</p>
+                                </div>
+                                <p class="text-gray-900 font-medium">Full Event</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Order Information -->
-                <div class="bg-white rounded-xl shadow-sm border border-wwc-neutral-200">
-                    <div class="px-6 py-4 border-b border-wwc-neutral-200">
-                        <h2 class="text-lg font-semibold text-wwc-neutral-900">Order Information</h2>
-                        <p class="text-wwc-neutral-600 text-sm mt-1">Details about your purchase</p>
+                <!-- Ticket Information Card -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-base font-semibold text-gray-900">Ticket Information</h3>
+                        <p class="text-gray-500 text-sm">Your ticket details for entry</p>
                     </div>
                     <div class="p-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-4">Order Details</h3>
-                                <div class="space-y-3">
-                                    <div>
-                                        <p class="text-sm font-semibold text-wwc-neutral-600">Order Number</p>
-                                        <p class="text-wwc-neutral-900 font-mono"><?php echo e($ticket->order->order_number); ?></p>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="h-10 w-10 bg-orange-50 rounded-lg flex items-center justify-center">
+                                        <i class='bx bx-receipt text-orange-600'></i>
                                     </div>
-                                    <div>
-                                        <p class="text-sm font-semibold text-wwc-neutral-600">Purchase Date</p>
-                                        <p class="text-wwc-neutral-900"><?php echo e($ticket->order->created_at->format('M j, Y \a\t g:i A')); ?></p>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-semibold text-wwc-neutral-600">Payment Method</p>
-                                        <p class="text-wwc-neutral-900"><?php echo e($ticket->order->payment_method); ?></p>
-                                    </div>
+                                    <p class="text-sm font-medium text-gray-500">Ticket ID</p>
                                 </div>
+                                <p class="text-gray-900 font-medium"><?php echo e($ticket->ticket_identifier ?? 'TKT-' . $ticket->id); ?></p>
                             </div>
-                            <div>
-                                <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-4">Order Status</h3>
-                                <div class="space-y-3">
-                                    <div>
-                                        <p class="text-sm font-semibold text-wwc-neutral-600">Order Status</p>
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
-                                            <?php if($ticket->order->status === 'Completed'): ?> bg-wwc-success text-white
-                                            <?php elseif($ticket->order->status === 'Pending'): ?> bg-wwc-warning text-white
-                                            <?php elseif($ticket->order->status === 'Cancelled'): ?> bg-wwc-error text-white
-                                            <?php else: ?> bg-wwc-neutral-200 text-wwc-neutral-800
-                                            <?php endif; ?>">
-                                            <?php echo e($ticket->order->status); ?>
-
-                                        </span>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="h-10 w-10 bg-indigo-50 rounded-lg flex items-center justify-center">
+                                        <i class='bx bx-layer text-indigo-600'></i>
                                     </div>
-                                    <div>
-                                        <p class="text-sm font-semibold text-wwc-neutral-600">Ticket Status</p>
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
-                                            <?php if($ticket->status === 'Sold'): ?> bg-wwc-success text-white
-                                            <?php elseif($ticket->status === 'Held'): ?> bg-wwc-warning text-white
-                                            <?php elseif($ticket->status === 'Cancelled'): ?> bg-wwc-error text-white
-                                            <?php elseif($ticket->status === 'Used'): ?> bg-wwc-info text-white
-                                            <?php else: ?> bg-wwc-neutral-200 text-wwc-neutral-800
-                                            <?php endif; ?>">
-                                            <?php echo e($ticket->status); ?>
-
-                                        </span>
-                                    </div>
+                                    <p class="text-sm font-medium text-gray-500">Zone</p>
                                 </div>
+                                <p class="text-gray-900 font-medium"><?php echo e($ticket->zone ?? 'General'); ?></p>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="h-10 w-10 bg-cyan-50 rounded-lg flex items-center justify-center">
+                                        <i class='bx bx-hash text-cyan-600'></i>
+                                    </div>
+                                    <p class="text-sm font-medium text-gray-500">Ticket Number</p>
+                                </div>
+                                <p class="text-gray-900 font-medium">#<?php echo e($ticket->id); ?></p>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="h-10 w-10 bg-pink-50 rounded-lg flex items-center justify-center">
+                                        <i class='bx bx-file text-pink-600'></i>
+                                    </div>
+                                    <p class="text-sm font-medium text-gray-500">Order Number</p>
+                                </div>
+                                <p class="text-gray-900 font-medium"><?php echo e($ticket->order->order_number); ?></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Important Guidelines -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-base font-semibold text-gray-900">Important Guidelines</h3>
+                        <p class="text-gray-500 text-sm">Essential information for your event</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-3">
+                            <div class="flex items-start space-x-3">
+                                <div class="h-5 w-5 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <i class='bx bx-check text-amber-600 text-xs'></i>
+                                </div>
+                                <p class="text-sm text-gray-700">Arrive 30 minutes early</p>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <div class="h-5 w-5 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <i class='bx bx-check text-amber-600 text-xs'></i>
+                                </div>
+                                <p class="text-sm text-gray-700">Bring valid ID</p>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <div class="h-5 w-5 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <i class='bx bx-check text-amber-600 text-xs'></i>
+                                </div>
+                                <p class="text-sm text-gray-700">Keep phone charged</p>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <div class="h-5 w-5 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <i class='bx bx-check text-amber-600 text-xs'></i>
+                                </div>
+                                <p class="text-sm text-gray-700">Contact support if needed</p>
                             </div>
                         </div>
                     </div>
@@ -166,55 +185,74 @@
 
             <!-- Sidebar -->
             <div class="space-y-6">
+                
+                <!-- QR Code Card -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-base font-semibold text-gray-900">QR Code</h3>
+                        <p class="text-gray-500 text-sm">Present at venue entrance</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="text-center">
+                            <!-- QR Code Image -->
+                            <div class="w-48 h-48 bg-white border-2 border-gray-200 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                                <img src="<?php echo e(\App\Services\QRCodeService::generateQRCodeImage($ticket->order)); ?>" 
+                                     alt="Ticket QR Code" 
+                                     class="w-44 h-44 rounded-lg">
+                            </div>
+                            
+                            <!-- QR Code Text -->
+                            <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                                <p class="text-xs text-gray-600 break-all"><?php echo e($ticket->qrcode); ?></p>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-3">Scan at venue entrance</p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Quick Actions -->
-                <div class="bg-white rounded-xl shadow-sm border border-wwc-neutral-200">
-                    <div class="px-6 py-4 border-b border-wwc-neutral-200">
-                        <h2 class="text-lg font-semibold text-wwc-neutral-900">Quick Actions</h2>
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-base font-semibold text-gray-900">Quick Actions</h3>
                     </div>
                     <div class="p-6">
                         <div class="space-y-3">
                             <a href="<?php echo e(route('customer.orders.show', $ticket->order)); ?>" 
-                               class="w-full inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-wwc-primary hover:bg-wwc-primary-light hover:text-wwc-primary-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
-                                <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                </svg>
-                                View Order
+                               class="flex items-center p-3 bg-gray-50 hover:bg-blue-50 rounded-lg transition-colors duration-200 group">
+                                <div class="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3 group-hover:bg-blue-200">
+                                    <i class='bx bx-receipt text-blue-600 text-lg'></i>
+                                </div>
+                                <div>
+                                    <span class="font-medium text-gray-900 group-hover:text-blue-600">View Order</span>
+                                    <p class="text-sm text-gray-600">See order details</p>
+                                </div>
                             </a>
+                            
                             <a href="<?php echo e(route('customer.tickets')); ?>" 
-                               class="w-full inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-wwc-neutral-600 hover:bg-wwc-neutral-100 hover:text-wwc-neutral-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-neutral transition-colors duration-200">
-                                <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
-                                </svg>
-                                All Tickets
+                               class="flex items-center p-3 bg-gray-50 hover:bg-green-50 rounded-lg transition-colors duration-200 group">
+                                <div class="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center mr-3 group-hover:bg-green-200">
+                                    <i class='bx bx-receipt text-green-600 text-lg'></i>
+                                </div>
+                                <div>
+                                    <span class="font-medium text-gray-900 group-hover:text-green-600">All Tickets</span>
+                                    <p class="text-sm text-gray-600">View all tickets</p>
+                                </div>
                             </a>
+                            
                             <a href="<?php echo e(route('customer.support')); ?>" 
-                               class="w-full inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-wwc-accent hover:bg-wwc-accent-light hover:text-wwc-accent-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-accent transition-colors duration-200">
-                                <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                Get Help
+                               class="flex items-center p-3 bg-gray-50 hover:bg-orange-50 rounded-lg transition-colors duration-200 group">
+                                <div class="h-10 w-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3 group-hover:bg-orange-200">
+                                    <i class='bx bx-help-circle text-orange-600 text-lg'></i>
+                                </div>
+                                <div>
+                                    <span class="font-medium text-gray-900 group-hover:text-orange-600">Get Help</span>
+                                    <p class="text-sm text-gray-600">Contact support</p>
+                                </div>
                             </a>
                         </div>
                     </div>
                 </div>
 
-                <!-- Important Information -->
-                <div class="bg-wwc-warning-light border border-wwc-warning rounded-xl p-6">
-                    <div class="flex items-start">
-                        <svg class="h-5 w-5 text-wwc-warning mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                        </svg>
-                        <div>
-                            <h3 class="text-sm font-semibold text-wwc-warning mb-2">Important Information</h3>
-                            <ul class="text-xs text-wwc-warning space-y-1">
-                                <li>• Arrive at least 30 minutes before the event</li>
-                                <li>• Bring a valid ID matching the ticket holder</li>
-                                <li>• Keep your phone charged for QR code display</li>
-                                <li>• Contact support if you have any issues</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>

@@ -208,5 +208,9 @@
     
     <!-- SweetAlert2 for beautiful alerts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- QR Code Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.umd.min.js"></script>
 </body>
 </html><?php /**PATH /Users/administrator/Desktop/Project/Github/warzone-ticketing-system/resources/views/layouts/customer.blade.php ENDPATH**/ ?>

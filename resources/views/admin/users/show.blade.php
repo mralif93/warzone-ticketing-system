@@ -29,7 +29,7 @@
                                 <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
                                     <i class='bx bx-info-circle text-sm'></i>
                                     <span>User information</span>
-                                </div>
+        </div>
                             </div>
                         </div>
                         <div class="p-6">
@@ -71,9 +71,9 @@
                                         <span class="text-sm font-semibold text-wwc-neutral-600">Role</span>
                                         <span class="text-base font-medium text-wwc-neutral-900">{{ $user->role }}</span>
                                     </div>
-                                </div>
+                            </div>
 
-                                <!-- Status -->
+                            <!-- Status -->
                                 <div class="flex items-center py-3 border-b border-wwc-neutral-100">
                                     <div class="flex-shrink-0 mr-4">
                                         <div class="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center">
@@ -118,8 +118,8 @@
                                             @endif
                                             @if($user->country)
                                                 <br>{{ $user->country }}
-                                            @endif
-                                        </span>
+                                    @endif
+                                </span>
                                     </div>
                                 </div>
                                 @endif
@@ -137,31 +137,31 @@
                                 <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
                                     <i class='bx bx-bar-chart text-sm'></i>
                                     <span>Activity overview</span>
-                                </div>
                             </div>
-                        </div>
+                            </div>
+                    </div>
                         <div class="p-6">
                             <div class="space-y-6">
                                 <!-- Orders Count -->
                                 <div class="text-center">
                                     <div class="text-3xl font-bold text-wwc-neutral-900 font-display">{{ $user->orders_count ?? 0 }}</div>
                                     <div class="text-sm text-wwc-neutral-600 font-medium">Total Orders</div>
-                                </div>
+            </div>
 
                                 <!-- Tickets Count -->
                                 <div class="text-center">
                                     <div class="text-3xl font-bold text-wwc-neutral-900 font-display">{{ $user->tickets_count ?? 0 }}</div>
                                     <div class="text-sm text-wwc-neutral-600 font-medium">Tickets Purchased</div>
-                                </div>
+                </div>
 
                                 <!-- Member Since -->
-                                <div class="text-center">
+                            <div class="text-center">
                                     <div class="text-3xl font-bold text-wwc-neutral-900 font-display">{{ $user->created_at->format('M Y') }}</div>
                                     <div class="text-sm text-wwc-neutral-600 font-medium">Member Since</div>
-                                </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
                     <!-- Quick Actions -->
                     <div class="mt-6 bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
@@ -202,7 +202,7 @@
                                             Activate User
                                         </button>
                                     </form>
-                                @endif
+                            @endif
 
                                 <a href="{{ route('admin.users.update-password', $user) }}" 
                                    class="w-full bg-wwc-neutral-600 hover:bg-wwc-neutral-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 text-center block text-sm">

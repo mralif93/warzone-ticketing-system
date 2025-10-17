@@ -151,7 +151,7 @@ Route::middleware(['auth', 'gate.staff'])->prefix('gate-staff')->name('gate-staf
 
 // Public routes (must be at the end to override protected routes)
 Route::get('/', [PublicController::class, 'home'])->name('home');
-Route::get('/events', [PublicController::class, 'events'])->name('public.events');
+// Route::get('/events', [PublicController::class, 'events'])->name('public.events'); // DISABLED
 Route::get('/events/{event}', [PublicController::class, 'showEvent'])->name('public.events.show');
 
 // Public ticket management routes

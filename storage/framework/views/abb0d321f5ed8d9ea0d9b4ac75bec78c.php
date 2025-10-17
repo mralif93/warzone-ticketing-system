@@ -79,10 +79,6 @@
                            class="text-wwc-neutral-600 hover:text-wwc-primary px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 <?php echo e(request()->routeIs('home') ? 'text-wwc-primary bg-wwc-primary-light' : ''); ?>">
                             Home
                         </a>
-                        <a href="<?php echo e(route('public.events')); ?>" 
-                           class="text-wwc-neutral-600 hover:text-wwc-primary px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 <?php echo e(request()->routeIs('public.events*') ? 'text-wwc-primary bg-wwc-primary-light' : ''); ?>">
-                            Events
-                        </a>
                         <a href="<?php echo e(route('public.about')); ?>" 
                            class="text-wwc-neutral-600 hover:text-wwc-primary px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 <?php echo e(request()->routeIs('public.about') ? 'text-wwc-primary bg-wwc-primary-light' : ''); ?>">
                             About
@@ -154,10 +150,6 @@
                         <a href="<?php echo e(route('home')); ?>" 
                            class="block px-3 py-2 rounded-md text-base font-medium text-wwc-neutral-600 hover:text-wwc-primary hover:bg-wwc-primary-light">
                             Home
-                        </a>
-                        <a href="<?php echo e(route('public.events')); ?>" 
-                           class="block px-3 py-2 rounded-md text-base font-medium text-wwc-neutral-600 hover:text-wwc-primary hover:bg-wwc-primary-light">
-                            Events
                         </a>
                         <a href="<?php echo e(route('public.about')); ?>" 
                            class="block px-3 py-2 rounded-md text-base font-medium text-wwc-neutral-600 hover:text-wwc-primary hover:bg-wwc-primary-light">

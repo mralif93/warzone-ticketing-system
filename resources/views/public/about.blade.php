@@ -221,10 +221,10 @@
             Join thousands of satisfied customers and discover amazing events in your area.
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="{{ route('public.events') }}" 
+            {{-- <a href="{{ route('public.events') }}" 
                class="bg-white text-wwc-primary px-8 py-3 rounded-lg font-semibold hover:bg-wwc-neutral-50 transition-colors duration-200">
                 Browse Events
-            </a>
+            </a> --}}
             <a href="{{ route('public.contact') }}" 
                class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-wwc-primary transition-colors duration-200">
                 Contact Us

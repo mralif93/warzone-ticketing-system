@@ -53,12 +53,11 @@ class Event extends Model
     }
 
     /**
-     * Get the tickets for this event - legacy
-     * @deprecated Use purchaseTickets() instead
+     * Get the ticket types for this event
      */
     public function tickets()
     {
-        return $this->purchaseTickets();
+        return $this->hasMany(Ticket::class);
     }
 
     /**

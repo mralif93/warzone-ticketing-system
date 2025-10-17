@@ -290,11 +290,11 @@
                 <i class='bx bx-receipt mr-2'></i>
                 View My Tickets
             </a>
-            <a href="{{ route('public.events') }}" 
+            {{-- <a href="{{ route('public.events') }}" 
                class="inline-flex items-center justify-center px-6 py-3 bg-wwc-neutral-600 text-white rounded-lg font-semibold hover:bg-wwc-neutral-700 transition-colors duration-200">
                 <i class='bx bx-calendar mr-2'></i>
                 Browse More Events
-            </a>
+            </a> --}}
         </div>
     </div>
 </div>

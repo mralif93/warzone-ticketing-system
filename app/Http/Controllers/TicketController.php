@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Log;
 class TicketController extends Controller
 {
     /**
-     * Show cart/checkout page for zone-based ticket purchasing
+     * Show cart/checkout page for ticket purchasing
      */
     public function cart(Event $event)
     {
@@ -29,13 +29,13 @@ class TicketController extends Controller
                 ->with('error', 'This event is not currently on sale.');
         }
 
-        // Load zones for this event
-        $event->load(['zones' => function($query) {
+        // Load tickets for this event
+        $event->load(['tickets' => function($query) {
             $query->where('status', 'Active');
         }]);
 
-        // Check if there are any available zones
-        if ($event->zones->where('available_seats', '>', 0)->count() === 0) {
+        // Check if there are any available tickets
+        if ($event->tickets->where('available_seats', '>', 0)->count() === 0) {
             return redirect()->route('public.events.show', $event)
                 ->with('error', 'This event is sold out.');
         }
@@ -45,7 +45,7 @@ class TicketController extends Controller
 
         // Check if hold has expired
         if ($holdUntil && now()->isAfter($holdUntil)) {
-            session()->forget(['ticket_quantity', 'selected_zone', 'hold_until']);
+            session()->forget(['ticket_quantity', 'selected_ticket_type', 'hold_until']);
             return redirect()->route('public.events.show', $event)
                 ->with('error', 'Your ticket hold has expired. Please try again.');
         }
@@ -54,7 +54,7 @@ class TicketController extends Controller
     }
 
     /**
-     * Process ticket purchase
+     * Process ticket purchase using admin order creation logic
      */
     public function purchase(Request $request, Event $event)
     {
@@ -65,99 +65,219 @@ class TicketController extends Controller
                 ->with('intended', route('public.tickets.cart', $event));
         }
 
-        // Load zones for this event
-        $event->load(['zones' => function($query) {
+        // Load tickets for this event
+        $event->load(['tickets' => function($query) {
             $query->where('status', 'Active');
         }]);
 
-        // Get available zone names for validation
-        $availableZones = $event->zones->where('available_seats', '>', 0)->pluck('name')->toArray();
+        // Get available ticket IDs for validation
+        $availableTicketIds = $event->tickets->where('available_seats', '>', 0)->pluck('id')->toArray();
 
-        $request->validate([
-            'customer_name' => 'required|string|max:255',
-            'customer_email' => 'required|email|max:255',
-            'customer_phone' => 'nullable|string|max:20',
-            'quantity' => 'required|integer|min:1|max:' . $event->max_tickets_per_order,
-            'zone' => 'required|string|in:' . implode(',', $availableZones),
-        ]);
+        // Validate based on purchase type
+        $purchaseType = $request->purchase_type ?? 'single_day';
+        
+        if ($purchaseType === 'single_day') {
+            $request->validate([
+                'purchase_type' => 'required|in:single_day',
+                'ticket_type_id' => 'required|integer|in:' . implode(',', $availableTicketIds),
+                'quantity' => 'required|integer|min:1|max:10',
+                'customer_name' => 'required|string|max:255',
+                'customer_email' => 'required|email|max:255',
+                'customer_phone' => 'nullable|string|max:20',
+                'payment_method' => 'required|string|in:Bank Transfer,Online Banking,QR Code / E-Wallet,Debit / Credit Card,Others',
+            ]);
+        } else {
+            $request->validate([
+                'purchase_type' => 'required|in:multi_day',
+                'day1_ticket_type' => 'nullable|integer|in:' . implode(',', $availableTicketIds),
+                'day1_quantity' => 'nullable|integer|min:0|max:10',
+                'day2_ticket_type' => 'nullable|integer|in:' . implode(',', $availableTicketIds),
+                'day2_quantity' => 'nullable|integer|min:0|max:10',
+                'customer_name' => 'required|string|max:255',
+                'customer_email' => 'required|email|max:255',
+                'customer_phone' => 'nullable|string|max:20',
+                'payment_method' => 'required|string|in:Bank Transfer,Online Banking,QR Code / E-Wallet,Debit / Credit Card,Others',
+            ]);
+
+            // At least one day must have tickets
+            if (($request->day1_quantity ?? 0) === 0 && ($request->day2_quantity ?? 0) === 0) {
+                return redirect()->back()
+                    ->with('error', 'Please select at least one day with tickets.')
+                    ->withInput();
+            }
+        }
 
         if (!$event->isOnSale()) {
             return redirect()->route('public.events.show', $event)
                 ->with('error', 'This event is not currently on sale.');
         }
 
-        // Find the selected zone
-        $selectedZone = $event->zones->where('name', $request->zone)->first();
-        
-        if (!$selectedZone) {
-            return redirect()->route('public.events.show', $event)
-                ->with('error', 'Selected zone is not available.');
-        }
-
-        // Check if requested quantity exceeds available seats in this zone
-        if ($request->quantity > $selectedZone->available_seats) {
-            return redirect()->route('public.events.show', $event)
-                ->with('error', 'Not enough seats available in ' . $selectedZone->name . '. Only ' . $selectedZone->available_seats . ' seats remaining.');
-        }
-
         DB::beginTransaction();
         try {
-            // Calculate base pricing from database
-            $basePrice = $selectedZone->price;
-            $totalPrice = $basePrice * $request->quantity;
+            $tickets = [];
+            $totalQuantity = 0;
+            $subtotal = 0;
+            $discountAmount = 0;
             
-            // Create single order for all tickets
+            // Handle different purchase types using admin logic
+            if ($purchaseType === 'multi_day') {
+                // Multi-day purchase (Day 1 & Day 2) with individual quantities
+                $day1Ticket = \App\Models\Ticket::findOrFail($request->day1_ticket_type);
+                $day2Ticket = \App\Models\Ticket::findOrFail($request->day2_ticket_type);
+                $day1Quantity = $request->day1_quantity ?? 1;
+                $day2Quantity = $request->day2_quantity ?? 1;
+                
+                // Verify ticket types belong to selected event
+                if ($day1Ticket->event_id != $event->id || $day2Ticket->event_id != $event->id) {
+                    return redirect()->back()
+                        ->with('error', 'Selected ticket types do not belong to the selected event.')
+                        ->withInput();
+                }
+                
+                // Check availability
+                if ($day1Ticket->available_seats < $day1Quantity || $day2Ticket->available_seats < $day2Quantity) {
+                    return redirect()->back()
+                        ->with('error', 'Insufficient tickets available for one or both days.')
+                        ->withInput();
+                }
+                
+                // Calculate pricing
+                $day1Price = $day1Ticket->price;
+                $day2Price = $day2Ticket->price;
+                $day1Subtotal = $day1Price * $day1Quantity;
+                $day2Subtotal = $day2Price * $day2Quantity;
+                $subtotal = $day1Subtotal + $day2Subtotal;
+                
+                // Apply combo discount if enabled
+                $isCombo = $event->isTwoDayEvent() && $event->combo_discount_enabled;
+                if ($isCombo) {
+                    $discountAmount = $event->calculateComboDiscount($subtotal);
+                    $subtotal = $subtotal - $discountAmount;
+                }
+                
+                $tickets = [
+                    ['ticket' => $day1Ticket, 'price' => $day1Price, 'quantity' => $day1Quantity, 'day' => 1],
+                    ['ticket' => $day2Ticket, 'price' => $day2Price, 'quantity' => $day2Quantity, 'day' => 2]
+                ];
+                $totalQuantity = $day1Quantity + $day2Quantity;
+                
+            } else {
+                // Single day purchase
+                $ticketType = \App\Models\Ticket::findOrFail($request->ticket_type_id);
+                
+                // Verify ticket type belongs to selected event
+                if ($ticketType->event_id != $event->id) {
+                    return redirect()->back()
+                        ->with('error', 'Selected ticket type does not belong to the selected event.')
+                        ->withInput();
+                }
+                
+                // Check availability
+                $quantity = $request->quantity;
+                if ($ticketType->available_seats < $quantity) {
+                    return redirect()->back()
+                        ->with('error', 'Insufficient tickets available. Only ' . $ticketType->available_seats . ' tickets remaining.')
+                        ->withInput();
+                }
+                
+                // Calculate pricing
+                $basePrice = $ticketType->price;
+                $subtotal = $basePrice * $quantity;
+                
+                $tickets = [
+                    ['ticket' => $ticketType, 'price' => $basePrice, 'quantity' => $quantity]
+                ];
+                $totalQuantity = $quantity;
+            }
+            
+            // Calculate final pricing using admin logic
+            $serviceFee = $this->calculateServiceFee($subtotal);
+            $taxAmount = $this->calculateTax($subtotal + $serviceFee);
+            $totalAmount = $subtotal + $serviceFee + $taxAmount;
+            
+            // Create order using admin order creation logic
             $order = Order::create([
                 'user_id' => Auth::id(),
                 'customer_email' => $request->customer_email,
                 'order_number' => Order::generateOrderNumber(),
                 'qrcode' => Order::generateQRCode(),
-                'subtotal' => $totalPrice,
-                'service_fee' => $this->calculateServiceFee($totalPrice),
-                'tax_amount' => $this->calculateTax($totalPrice + $this->calculateServiceFee($totalPrice)),
-                'total_amount' => $totalPrice + $this->calculateServiceFee($totalPrice) + $this->calculateTax($totalPrice + $this->calculateServiceFee($totalPrice)),
-                'status' => 'Paid', // Set to Paid since payment is completed
-                'payment_method' => 'Credit Card',
+                'subtotal' => $subtotal,
+                'service_fee' => $serviceFee,
+                'tax_amount' => $taxAmount,
+                'total_amount' => $totalAmount,
+                'status' => 'Paid',
+                'payment_method' => $request->payment_method,
+                'notes' => $purchaseType === 'multi_day' ? 'Multi-day purchase with combo discount' : 'Single day purchase',
             ]);
+
+            // Create purchase tickets using admin logic
+            $comboGroupId = ($purchaseType === 'multi_day') ? 'COMBO_' . $order->id . '_' . time() : null;
             
-            // Create multiple tickets for this single order
-            $tickets = collect();
-            for ($i = 0; $i < $request->quantity; $i++) {
-                $ticket = Ticket::create([
-                    'order_id' => $order->id,
-                    'event_id' => $event->id,
-                    'zone_id' => $selectedZone->id,
-                    'zone' => $request->zone,
-                    'qrcode' => Ticket::generateQRCode(),
-                    'status' => 'Sold',
-                    'price_paid' => $basePrice,
-                ]);
+            foreach ($tickets as $ticketData) {
+                $ticket = $ticketData['ticket'];
+                $price = $ticketData['price'];
+                $quantity = $ticketData['quantity'] ?? 1;
+                $day = $ticketData['day'] ?? null;
                 
-                $tickets->push($ticket);
+                for ($i = 0; $i < $quantity; $i++) {
+                    \App\Models\PurchaseTicket::create([
+                        'order_id' => $order->id,
+                        'event_id' => $event->id,
+                        'ticket_type_id' => $ticket->id,
+                        'zone' => $ticket->name,
+                        'event_day' => $day ? $event->getEventDays()[$day-1]['date'] : $event->getEventDays()[0]['date'],
+                        'event_day_name' => $day ? $event->getEventDays()[$day-1]['day_name'] : $event->getEventDays()[0]['day_name'],
+                        'is_combo_purchase' => $purchaseType === 'multi_day',
+                        'combo_group_id' => $comboGroupId,
+                        'original_price' => $price,
+                        'discount_amount' => $discountAmount > 0 ? $discountAmount / $totalQuantity : 0,
+                        'qrcode' => \App\Models\PurchaseTicket::generateQRCode(),
+                        'status' => 'Sold',
+                        'price_paid' => $discountAmount > 0 ? ($subtotal / $totalQuantity) : $price,
+                    ]);
+                }
+                
+                // Update ticket type availability
+                $ticket->update([
+                    'sold_seats' => $ticket->sold_seats + $quantity,
+                    'available_seats' => $ticket->available_seats - $quantity,
+                    'status' => $ticket->available_seats - $quantity <= 0 ? 'Sold Out' : 'Active',
+                ]);
             }
 
-            // Update zone availability
-            $selectedZone->decrement('available_seats', $request->quantity);
-            $selectedZone->increment('sold_seats', $request->quantity);
+            // Create audit log
+            \App\Models\AuditLog::create([
+                'user_id' => Auth::id(),
+                'action' => 'CREATE',
+                'table_name' => 'orders',
+                'record_id' => $order->id,
+                'old_values' => null,
+                'new_values' => $order->toArray(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
 
             // Clear session
-            session()->forget(['ticket_quantity', 'selected_zone', 'hold_until']);
+            session()->forget(['ticket_quantity', 'selected_ticket_type', 'hold_until']);
 
             DB::commit();
 
             // Redirect to order confirmation
+            $purchaseTypeText = $purchaseType === 'multi_day' ? 'tickets (Day 1 & Day 2)' : 'tickets';
             return redirect()->route('public.tickets.confirmation', $order)
-                ->with('success', 'Tickets purchased successfully! ' . $tickets->count() . ' tickets in 1 order.');
+                ->with('success', 'Tickets purchased successfully! ' . $totalQuantity . ' ' . $purchaseTypeText . ' in 1 order.');
 
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Ticket purchase failed', [
                 'event_id' => $event->id,
                 'user_id' => Auth::id(),
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all()
             ]);
 
-            return back()->withErrors(['error' => 'Failed to process purchase. Please try again.'])
+            return back()->withErrors(['error' => 'Failed to process purchase: ' . $e->getMessage()])
                 ->withInput();
         }
     }

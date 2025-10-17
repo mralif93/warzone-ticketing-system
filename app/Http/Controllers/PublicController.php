@@ -12,34 +12,22 @@ class PublicController extends Controller
      */
     public function home()
     {
-        // Get featured events (on sale, upcoming)
-        $featuredEvents = Event::where('status', 'On Sale')
-            ->where('date_time', '>', now())
-            ->with(['zones' => function($query) {
+        // Get the default event or the first upcoming event
+        $mainEvent = Event::where('default', true)
+            ->orWhere(function($query) {
+                $query->where('status', 'On Sale')
+                      ->where('date_time', '>', now());
+            })
+            ->with(['tickets' => function($query) {
                 $query->where('status', 'Active');
             }])
+            ->orderBy('default', 'desc')
             ->orderBy('date_time')
-            ->take(6)
-            ->get();
+            ->first();
 
-        // Get upcoming events for the calendar
-        $upcomingEvents = Event::where('status', 'On Sale')
-            ->where('date_time', '>', now())
-            ->with(['zones' => function($query) {
-                $query->where('status', 'Active');
-            }])
-            ->orderBy('date_time')
-            ->take(12)
-            ->get();
+        // Featured events removed - focusing on main event tickets only
 
-        // Get event statistics
-        $stats = [
-            'total_events' => Event::where('status', 'On Sale')->count(),
-            'upcoming_events' => Event::where('status', 'On Sale')->where('date_time', '>', now())->count(),
-            'total_tickets_sold' => Event::withCount('customerTickets')->get()->sum('customer_tickets_count'),
-        ];
-
-        return view('public.home', compact('featuredEvents', 'upcomingEvents', 'stats'));
+        return view('public.home', compact('mainEvent'));
     }
 
     /**
@@ -75,10 +63,10 @@ public function events(Request $request)
             $query->where('venue', 'like', "%{$request->venue}%");
         }
 
-        $events = $query->with(['zones' => function($query) {
+        $events = $query->with(['tickets' => function($query) {
                 $query->where('status', 'Active');
             }])
-            ->withCount('customerTickets')
+            ->withCount('purchaseTickets')
             ->orderBy('date_time')
             ->paginate(12);
 
@@ -99,14 +87,14 @@ public function events(Request $request)
     {
         // Load relationships
         $event->loadCount('tickets');
-        $event->load(['zones' => function($query) {
+        $event->load(['tickets' => function($query) {
             $query->where('status', 'Active');
         }]);
 
-        // Get availability statistics from zones
-        $totalCapacity = $event->zones->sum('total_seats');
-        $totalSold = $event->zones->sum('sold_seats');
-        $totalAvailable = $event->zones->sum('available_seats');
+        // Get availability statistics from tickets
+        $totalCapacity = $event->tickets->sum('total_seats');
+        $totalSold = $event->tickets->sum('sold_seats');
+        $totalAvailable = $event->tickets->sum('available_seats');
         $availabilityPercentage = $totalCapacity > 0 ? round(($totalAvailable / $totalCapacity) * 100, 1) : 0;
 
         $availabilityStats = [
@@ -117,22 +105,22 @@ public function events(Request $request)
             'availability_percentage' => $availabilityPercentage,
         ];
         
-        // Build zones array from database
-        $zones = [];
-        foreach ($event->zones as $zone) {
-            $availabilityPercentage = $zone->total_seats > 0 ? round(($zone->available_seats / $zone->total_seats) * 100, 1) : 0;
+        // Build tickets array from database
+        $ticketTypes = [];
+        foreach ($event->tickets as $ticket) {
+            $availabilityPercentage = $ticket->total_seats > 0 ? round(($ticket->available_seats / $ticket->total_seats) * 100, 1) : 0;
             
-            $zones[$zone->name] = [
-                'price' => $zone->price,
-                'capacity' => $zone->total_seats,
-                'sold' => $zone->sold_seats,
-                'available' => $zone->available_seats,
+            $ticketTypes[$ticket->name] = [
+                'price' => $ticket->price,
+                'capacity' => $ticket->total_seats,
+                'sold' => $ticket->sold_seats,
+                'available' => $ticket->available_seats,
                 'availability_percentage' => $availabilityPercentage,
-                'description' => $zone->description
+                'description' => $ticket->description
             ];
         }
 
-        return view('public.event-show', compact('event', 'availabilityStats', 'zones'));
+        return view('public.event-show', compact('event', 'availabilityStats', 'ticketTypes'));
     }
 
 

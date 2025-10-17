@@ -11,8 +11,8 @@
     <div class="bg-white border-b border-wwc-neutral-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="flex items-center justify-between">
-                <!-- Back Navigation -->
-                <div class="flex items-center">
+                <!-- Back Navigation - REMOVED -->
+                {{-- <div class="flex items-center">
                     <a href="{{ route('public.events') }}" 
                        class="flex items-center text-wwc-neutral-600 hover:text-wwc-primary transition-colors duration-200 group">
                         <div class="h-8 w-8 bg-wwc-neutral-100 rounded-lg flex items-center justify-center group-hover:bg-wwc-primary/10 transition-colors duration-200">
@@ -20,7 +20,7 @@
                         </div>
                         <span class="font-semibold ml-3">Back to Events</span>
                     </a>
-                </div>
+                </div> --}}
                 
                 <!-- Event Details -->
                 <div class="text-center flex-1 mx-8">
@@ -106,28 +106,28 @@
             <!-- Main Content -->
             <div class="lg:col-span-2">
                 <!-- Ticket Selection -->
-                @if(count($zones) > 0)
+                @if(count($ticketTypes) > 0)
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-8">
                     <!-- Header with Event Info -->
                     <div class="text-center mb-8">
                         <h2 class="text-2xl font-bold text-wwc-neutral-900 font-display mb-2">Choose Your Tickets</h2>
-                        <p class="text-wwc-neutral-600">Select from {{ count($zones) }} available zones</p>
+                        <p class="text-wwc-neutral-600">Select from {{ count($ticketTypes) }} available ticket types</p>
                     </div>
 
-                    <!-- Zone Selection Grid -->
+                    <!-- Ticket Type Selection Grid -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                        @foreach($zones as $zoneName => $zoneData)
-                        <div class="group bg-wwc-neutral-50 border-2 border-wwc-neutral-200 rounded-xl p-6 hover:border-wwc-primary hover:bg-white hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 cursor-pointer zone-card" 
-                             data-zone="{{ $zoneName }}" 
-                             data-price="{{ $zoneData['price'] }}" 
-                             data-available="{{ $zoneData['available'] }}">
+                        @foreach($ticketTypes as $ticketName => $ticketData)
+                        <div class="group bg-wwc-neutral-50 border-2 border-wwc-neutral-200 rounded-xl p-6 hover:border-wwc-primary hover:bg-white hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 cursor-pointer ticket-card" 
+                             data-ticket="{{ $ticketName }}" 
+                             data-price="{{ $ticketData['price'] }}" 
+                             data-available="{{ $ticketData['available'] }}">
                             <div class="flex justify-between items-center">
                                 <div class="flex-1">
-                                    <h3 class="text-lg font-bold text-wwc-neutral-900 group-hover:text-wwc-primary transition-colors duration-200 mb-1">{{ $zoneName }}</h3>
-                                    <p class="text-sm text-wwc-neutral-500">{{ $zoneData['available'] }} seats available</p>
+                                    <h3 class="text-lg font-bold text-wwc-neutral-900 group-hover:text-wwc-primary transition-colors duration-200 mb-1">{{ $ticketName }}</h3>
+                                    <p class="text-sm text-wwc-neutral-500">{{ $ticketData['available'] }} seats available</p>
                                 </div>
                                 <div class="text-right">
-                                    <span class="text-2xl font-bold text-wwc-primary font-display">RM{{ number_format($zoneData['price'], 0) }}</span>
+                                    <span class="text-2xl font-bold text-wwc-primary font-display">RM{{ number_format($ticketData['price'], 0) }}</span>
                                     <p class="text-xs text-wwc-neutral-500">per ticket</p>
                                 </div>
                             </div>
@@ -167,7 +167,7 @@
                             Sold Out
                         </div>
                     </div>
-                    @elseif(count($zones) === 0)
+                    @elseif(count($ticketTypes) === 0)
                     <div class="text-center">
                         <div class="inline-flex items-center px-8 py-4 bg-wwc-neutral-400 text-white rounded-xl text-lg font-bold cursor-not-allowed">
                             <i class='bx bx-time mr-3 text-xl'></i>
@@ -292,7 +292,6 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const zoneCards = document.querySelectorAll('.zone-card');
     
     // Zone images mapping
     const zoneImages = {
@@ -307,40 +306,41 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Zone descriptions from database
     const zoneDescriptions = {
-        @foreach($zones as $zoneName => $zoneData)
-        '{{ $zoneName }}': '{{ $zoneData['description'] ?? 'Premium seating with excellent views and great value for money.' }}',
+        @foreach($ticketTypes as $ticketName => $ticketData)
+        '{{ $ticketName }}': '{{ $ticketData['description'] ?? 'Premium seating with excellent views and great value for money.' }}',
         @endforeach
     };
     
-    // Add click event to each zone card
-    zoneCards.forEach(card => {
+    // Add click event to each ticket card
+    const ticketCards = document.querySelectorAll('.ticket-card');
+    ticketCards.forEach(card => {
         card.addEventListener('click', function() {
-            const zoneName = this.dataset.zone;
-            const zonePrice = this.dataset.price;
-            const zoneAvailable = this.dataset.available;
-            const zoneImage = zoneImages[zoneName] || 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800&h=600&fit=crop&crop=center';
-            const zoneDescription = zoneDescriptions[zoneName] || 'Premium seating with excellent views.';
+            const ticketName = this.dataset.ticket;
+            const ticketPrice = this.dataset.price;
+            const ticketAvailable = this.dataset.available;
+            const ticketImage = zoneImages[ticketName] || 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800&h=600&fit=crop&crop=center';
+            const ticketDescription = zoneDescriptions[ticketName] || 'Premium seating with excellent views.';
             
-            // Show SweetAlert with zone details
+            // Show SweetAlert with ticket details
             Swal.fire({
-                title: zoneName,
+                title: ticketName,
                 html: `
                     <div class="text-left">
                         <div class="mb-4">
-                            <img src="${zoneImage}" alt="${zoneName}" class="w-full h-48 object-cover rounded-lg mb-4">
+                            <img src="${ticketImage}" alt="${ticketName}" class="w-full h-48 object-cover rounded-lg mb-4">
                         </div>
                         <div class="space-y-3">
                             <div class="flex justify-between items-center">
                                 <span class="text-lg font-semibold text-gray-700">Price:</span>
-                                <span class="text-2xl font-bold text-red-600">RM${parseFloat(zonePrice).toLocaleString()}</span>
+                                <span class="text-2xl font-bold text-red-600">RM${parseFloat(ticketPrice).toLocaleString()}</span>
                             </div>
                             <div class="flex justify-between items-center">
                                 <span class="text-lg font-semibold text-gray-700">Available Seats:</span>
-                                <span class="text-lg font-semibold text-green-600">${zoneAvailable} seats</span>
+                                <span class="text-lg font-semibold text-green-600">${ticketAvailable} seats</span>
                             </div>
                             <div class="bg-gray-50 rounded-lg p-4 mt-4">
-                                <h4 class="font-semibold text-gray-900 mb-2">Zone Description</h4>
-                                <p class="text-gray-600 text-sm">${zoneDescription}</p>
+                                <h4 class="font-semibold text-gray-900 mb-2">Ticket Description</h4>
+                                <p class="text-gray-600 text-sm">${ticketDescription}</p>
                             </div>
                         </div>
                     </div>

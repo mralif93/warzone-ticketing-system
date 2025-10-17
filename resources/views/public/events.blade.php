@@ -1,9 +1,13 @@
+{{-- 
 @extends('layouts.public')
 
 @section('title', 'Browse Events - Warzone Ticketing')
 @section('description', 'Browse all available events and find the perfect tickets for concerts, sports, and entertainment.')
 
 @section('content')
+--}}
+
+{{-- COMMENTED OUT - EVENTS PAGE DISABLED
 <!-- Header Section -->
 <section class="bg-gradient-to-r from-wwc-primary to-wwc-primary-dark text-white py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -186,3 +190,4 @@
     </div>
 </section>
 @endsection
+--}}

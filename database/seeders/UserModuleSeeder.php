@@ -15,6 +15,10 @@ class UserModuleSeeder extends Seeder
     {
         $this->command->info('Seeding User Module...');
 
+        // Clear existing users to prevent duplicates
+        $this->command->info('Clearing existing users...');
+        User::query()->delete();
+
         // Create Administrator
         User::create([
             'name' => 'System Administrator',

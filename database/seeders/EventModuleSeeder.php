@@ -14,6 +14,10 @@ class EventModuleSeeder extends Seeder
     {
         $this->command->info('Seeding Event Module...');
 
+        // Clear existing events to prevent duplicates
+        $this->command->info('Clearing existing events...');
+        Event::query()->delete();
+
         $events = [
             [
                 'name' => 'Warzone Championship Finals 2024',

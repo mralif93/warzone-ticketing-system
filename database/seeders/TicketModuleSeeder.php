@@ -15,6 +15,10 @@ class TicketModuleSeeder extends Seeder
     {
         $this->command->info('Seeding Ticket Module...');
 
+        // Clear existing tickets to prevent duplicates
+        $this->command->info('Clearing existing tickets...');
+        Ticket::query()->delete();
+
         $events = Event::all();
         
         if ($events->isEmpty()) {

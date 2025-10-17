@@ -18,6 +18,10 @@ class SystemModuleSeeder extends Seeder
     {
         $this->command->info('Seeding System Module...');
 
+        // Clear existing audit logs to prevent duplicates
+        $this->command->info('Clearing existing audit logs...');
+        AuditLog::query()->delete();
+
         // Create audit logs for various actions
         $this->createAuditLogs();
 

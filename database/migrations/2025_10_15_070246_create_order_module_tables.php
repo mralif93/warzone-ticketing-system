@@ -44,6 +44,7 @@ return new class extends Migration
             $table->string('stripe_charge_id')->nullable();
             $table->string('stripe_payment_intent_id')->nullable();
             $table->string('method');
+            $table->string('transaction_id')->nullable(); // Added: External transaction reference
             $table->decimal('amount', 10, 2);
             $table->decimal('refund_amount', 10, 2)->nullable();
             $table->timestamp('refund_date')->nullable();
@@ -55,12 +56,16 @@ return new class extends Migration
             $table->text('stripe_response')->nullable();
             $table->text('failure_reason')->nullable();
             $table->datetime('processed_at')->nullable();
+            $table->datetime('payment_date')->nullable(); // Added: Actual payment completion date
+            $table->text('notes')->nullable(); // Added: Payment notes and comments
             $table->timestamps();
             
             // Indexes
             $table->index(['order_id', 'status']);
             $table->index('stripe_charge_id');
             $table->index('refund_date');
+            $table->index('transaction_id'); // Added: Index for transaction lookup
+            $table->index('payment_date'); // Added: Index for payment date queries
         });
     }
 

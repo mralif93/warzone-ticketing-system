@@ -33,8 +33,10 @@ class UserController extends Controller
             $query->where('role', $request->role);
         }
 
+        $perPage = $request->get('limit', 10);
+        $perPage = in_array($perPage, [10, 15, 25, 50, 100]) ? $perPage : 10;
         $users = $query->withCount(['orders', 'tickets'])
-            ->paginate(10);
+            ->paginate($perPage);
 
         $roles = User::select('role')->distinct()->pluck('role');
 

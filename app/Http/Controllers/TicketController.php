@@ -29,6 +29,17 @@ class TicketController extends Controller
                 ->with('error', 'This event is not currently on sale.');
         }
 
+        // Load zones for this event
+        $event->load(['zones' => function($query) {
+            $query->where('status', 'Active');
+        }]);
+
+        // Check if there are any available zones
+        if ($event->zones->where('available_seats', '>', 0)->count() === 0) {
+            return redirect()->route('public.events.show', $event)
+                ->with('error', 'This event is sold out.');
+        }
+
         // Get hold information from session (if any)
         $holdUntil = session('hold_until');
 
@@ -54,12 +65,20 @@ class TicketController extends Controller
                 ->with('intended', route('public.tickets.cart', $event));
         }
 
+        // Load zones for this event
+        $event->load(['zones' => function($query) {
+            $query->where('status', 'Active');
+        }]);
+
+        // Get available zone names for validation
+        $availableZones = $event->zones->where('available_seats', '>', 0)->pluck('name')->toArray();
+
         $request->validate([
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'required|email|max:255',
             'customer_phone' => 'nullable|string|max:20',
             'quantity' => 'required|integer|min:1|max:' . $event->max_tickets_per_order,
-            'zone' => 'required|string|in:Warzone Exclusive,Warzone VIP,Warzone Grandstand,Warzone Premium Ringside,Level 1 Zone A/B/C/D,Level 2 Zone A/B/C/D,Standing Zone A/B',
+            'zone' => 'required|string|in:' . implode(',', $availableZones),
         ]);
 
         if (!$event->isOnSale()) {
@@ -67,22 +86,24 @@ class TicketController extends Controller
                 ->with('error', 'This event is not currently on sale.');
         }
 
-        // Check if event has enough available seats
-        if (!$event->hasAvailableSeats()) {
+        // Find the selected zone
+        $selectedZone = $event->zones->where('name', $request->zone)->first();
+        
+        if (!$selectedZone) {
             return redirect()->route('public.events.show', $event)
-                ->with('error', 'This event is sold out.');
+                ->with('error', 'Selected zone is not available.');
         }
 
-        // Check if requested quantity exceeds available seats
-        if ($request->quantity > $event->getRemainingTicketsCount()) {
+        // Check if requested quantity exceeds available seats in this zone
+        if ($request->quantity > $selectedZone->available_seats) {
             return redirect()->route('public.events.show', $event)
-                ->with('error', 'Not enough seats available. Only ' . $event->getRemainingTicketsCount() . ' seats remaining.');
+                ->with('error', 'Not enough seats available in ' . $selectedZone->name . '. Only ' . $selectedZone->available_seats . ' seats remaining.');
         }
 
         DB::beginTransaction();
         try {
-            // Calculate base pricing
-            $basePrice = $this->getZonePrice($request->zone);
+            // Calculate base pricing from database
+            $basePrice = $selectedZone->price;
             $totalPrice = $basePrice * $request->quantity;
             
             // Create single order for all tickets
@@ -105,6 +126,7 @@ class TicketController extends Controller
                 $ticket = Ticket::create([
                     'order_id' => $order->id,
                     'event_id' => $event->id,
+                    'zone_id' => $selectedZone->id,
                     'zone' => $request->zone,
                     'qrcode' => Ticket::generateQRCode(),
                     'status' => 'Sold',
@@ -113,6 +135,10 @@ class TicketController extends Controller
                 
                 $tickets->push($ticket);
             }
+
+            // Update zone availability
+            $selectedZone->decrement('available_seats', $request->quantity);
+            $selectedZone->increment('sold_seats', $request->quantity);
 
             // Clear session
             session()->forget(['ticket_quantity', 'selected_zone', 'hold_until']);

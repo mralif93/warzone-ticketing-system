@@ -64,6 +64,14 @@
                 <h2 class="text-2xl font-bold text-wwc-neutral-900 font-display">All Events</h2>
                 <p class="text-wwc-neutral-600">Showing {{ $events->count() }} of {{ $events->total() }} events</p>
             </div>
+            <div class="text-right">
+                <div class="text-sm text-wwc-neutral-500">
+                    <span class="font-semibold text-wwc-primary">{{ $events->sum(function($event) { return $event->zones->sum('available_seats'); }) }}</span> tickets available
+                </div>
+                <div class="text-sm text-wwc-neutral-500">
+                    <span class="font-semibold text-wwc-success">{{ $events->sum(function($event) { return $event->zones->sum('sold_seats'); }) }}</span> tickets sold
+                </div>
+            </div>
         </div>
 
         @if($events->count() > 0)
@@ -104,18 +112,44 @@
                                 {{ $event->status }}
                             </span>
                             <div class="text-sm text-wwc-neutral-500">
-                                {{ $event->tickets_count ?? 0 }} tickets sold
+                                {{ $event->zones->sum('sold_seats') ?? 0 }} tickets sold
                             </div>
                         </div>
 
+                        <!-- Ticket Zones -->
+                        @if($event->zones->count() > 0)
+                            <div class="mb-4">
+                                <h4 class="text-sm font-semibold text-wwc-neutral-900 mb-2">Available Zones</h4>
+                                <div class="space-y-2">
+                                    @foreach($event->zones->take(3) as $zone)
+                                        <div class="flex items-center justify-between p-2 bg-wwc-neutral-50 rounded-lg">
+                                            <div class="flex items-center space-x-2">
+                                                <div class="w-2 h-2 bg-wwc-primary rounded-full"></div>
+                                                <span class="text-sm font-medium text-wwc-neutral-900">{{ $zone->name }}</span>
+                                            </div>
+                                            <div class="text-right">
+                                                <div class="text-sm font-semibold text-wwc-primary">RM{{ number_format($zone->price, 0) }}</div>
+                                                <div class="text-xs text-wwc-neutral-500">{{ $zone->available_seats }} available</div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                    @if($event->zones->count() > 3)
+                                        <div class="text-xs text-wwc-neutral-500 text-center">
+                                            +{{ $event->zones->count() - 3 }} more zones
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
+
                         <!-- Action Button -->
-                        @if($event->status === 'On Sale')
+                        @if($event->status === 'On Sale' && $event->zones->where('available_seats', '>', 0)->count() > 0)
                             <a href="{{ route('public.events.show', $event) }}" 
                                class="w-full inline-flex justify-center items-center px-4 py-3 border border-transparent shadow-sm text-sm font-semibold rounded-2xl text-white bg-wwc-primary hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
                                 <i class='bx bx-receipt text-sm mr-2'></i>
                                 Get Tickets
                             </a>
-                        @elseif($event->status === 'Sold Out')
+                        @elseif($event->status === 'Sold Out' || $event->zones->where('available_seats', '>', 0)->count() === 0)
                             <button disabled class="w-full inline-flex justify-center items-center px-4 py-3 border border-transparent shadow-sm text-sm font-semibold rounded-2xl text-white bg-wwc-neutral-400 cursor-not-allowed">
                                 <i class='bx bx-x text-sm mr-2'></i>
                                 Sold Out

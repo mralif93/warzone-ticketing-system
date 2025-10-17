@@ -164,9 +164,24 @@
                     <div class="px-6 py-4 border-b border-wwc-neutral-100">
                         <div class="flex items-center justify-between">
                             <h3 class="text-lg font-bold text-wwc-neutral-900">All Users</h3>
-                            <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
-                                <i class='bx bx-group text-sm'></i>
-                                <span>Showing {{ $users->count() }} of {{ $users->total() }} users</span>
+                            <div class="flex items-center space-x-4">
+                                <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
+                                    <i class='bx bx-group text-sm'></i>
+                                    <span>Showing {{ $users->count() }} of {{ $users->total() }} users</span>
+                                </div>
+                                <form method="GET" class="flex items-center space-x-2">
+                                    @foreach(request()->except('limit') as $key => $value)
+                                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                                    @endforeach
+                                    <label for="limit" class="text-xs font-semibold text-wwc-neutral-600">Limit:</label>
+                                    <select name="limit" id="limit" onchange="this.form.submit()" class="px-2 py-1 border border-wwc-neutral-300 rounded text-xs focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary">
+                                        <option value="10" {{ request('limit', 10) == 10 ? 'selected' : '' }}>10</option>
+                                        <option value="15" {{ request('limit', 10) == 15 ? 'selected' : '' }}>15</option>
+                                        <option value="25" {{ request('limit', 10) == 25 ? 'selected' : '' }}>25</option>
+                                        <option value="50" {{ request('limit', 10) == 50 ? 'selected' : '' }}>50</option>
+                                        <option value="100" {{ request('limit', 10) == 100 ? 'selected' : '' }}>100</option>
+                                    </select>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -234,7 +249,7 @@
                                         <div class="text-xs text-wwc-neutral-500">orders</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-semibold text-wwc-neutral-900">{{ $user->tickets_count }}</div>
+                                        <div class="text-sm font-semibold text-wwc-neutral-900">{{ $user->customer_tickets_count }}</div>
                                         <div class="text-xs text-wwc-neutral-500">tickets</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">

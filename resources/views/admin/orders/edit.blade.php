@@ -23,7 +23,7 @@
             <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
                 <div class="px-6 py-4 border-b border-wwc-neutral-100">
                     <div class="flex items-center justify-between">
-                        <h3 class="text-lg font-bold text-wwc-neutral-900">Edit Order Details</h3>
+                        <h3 class="text-lg font-bold text-wwc-neutral-900">Edit Order #{{ $order->order_number }}</h3>
                         <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
                             <i class='bx bx-edit text-sm'></i>
                             <span>Update order information</span>
@@ -52,9 +52,20 @@
                         @endif
 
                         <div class="space-y-6">
-                            <!-- Order Information -->
+                            <!-- Order Information Section -->
                             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                                <!-- User -->
+                                <!-- Event (Read-only for edit) -->
+                                <div>
+                                    <label for="event_display" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                        Event
+                                    </label>
+                                    <div class="px-3 py-2 bg-wwc-neutral-50 border border-wwc-neutral-300 rounded-lg text-sm text-wwc-neutral-700">
+                                        {{ $order->purchaseTickets->first()->event->name ?? 'Unknown Event' }} - {{ $order->purchaseTickets->first()->event->getFormattedDateRange() ?? '' }}
+                                    </div>
+                                    <p class="text-xs text-wwc-neutral-500 mt-1">Event cannot be changed after order creation</p>
+                                </div>
+
+                                <!-- Customer -->
                                 <div>
                                     <label for="user_id" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
                                         Customer <span class="text-wwc-error">*</span>
@@ -111,10 +122,11 @@
                                     <select name="payment_method" id="payment_method" required
                                             class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('payment_method') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
                                         <option value="">Select Payment Method</option>
-                                        <option value="Credit Card" {{ old('payment_method', $order->payment_method) == 'Credit Card' ? 'selected' : '' }}>Credit Card</option>
-                                        <option value="Cash" {{ old('payment_method', $order->payment_method) == 'Cash' ? 'selected' : '' }}>Cash</option>
                                         <option value="Bank Transfer" {{ old('payment_method', $order->payment_method) == 'Bank Transfer' ? 'selected' : '' }}>Bank Transfer</option>
-                                        <option value="Comp" {{ old('payment_method', $order->payment_method) == 'Comp' ? 'selected' : '' }}>Comp</option>
+                                        <option value="Online Banking" {{ old('payment_method', $order->payment_method) == 'Online Banking' ? 'selected' : '' }}>Online Banking</option>
+                                        <option value="QR Code / E-Wallet" {{ old('payment_method', $order->payment_method) == 'QR Code / E-Wallet' ? 'selected' : '' }}>QR Code / E-Wallet</option>
+                                        <option value="Debit / Credit Card" {{ old('payment_method', $order->payment_method) == 'Debit / Credit Card' ? 'selected' : '' }}>Debit / Credit Card</option>
+                                        <option value="Others" {{ old('payment_method', $order->payment_method) == 'Others' ? 'selected' : '' }}>Others</option>
                                     </select>
                                     @error('payment_method')
                                         <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
@@ -135,59 +147,197 @@
                                 </div>
                             </div>
 
-                            <!-- Ticket Details -->
+                            <!-- Current Tickets Display -->
+                            <div class="border-t border-wwc-neutral-200 pt-6">
+                                <div class="flex items-center mb-4">
+                                    <h4 class="text-lg font-semibold text-wwc-neutral-900">Current Tickets</h4>
+                                    <span class="ml-2 text-xs text-wwc-neutral-500">({{ $order->purchaseTickets->count() }} tickets)</span>
+                                </div>
+                                
+                                @if($order->purchaseTickets->count() > 0)
+                                    <div class="space-y-3">
+                                        @foreach($order->purchaseTickets as $ticket)
+                                            <div class="flex items-center justify-between p-3 bg-wwc-neutral-50 rounded-lg border border-wwc-neutral-200">
+                                                <div class="flex items-center space-x-3">
+                                                    <div class="w-2 h-2 rounded-full bg-wwc-primary"></div>
+                                                    <div>
+                                                        <p class="text-sm font-semibold text-wwc-neutral-900">{{ $ticket->ticketType->name ?? 'Unknown Type' }}</p>
+                                                        <p class="text-xs text-wwc-neutral-600">
+                                                            Zone: {{ $ticket->zone }} | 
+                                                            Price: RM{{ number_format($ticket->price_paid, 2) }} | 
+                                                            Status: {{ $ticket->status }}
+                                                            @if($ticket->event_day)
+                                                                | Day: {{ $ticket->event_day_name ?? $ticket->event_day }}
+                                                            @endif
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div class="text-right">
+                                                    <p class="text-sm font-semibold text-wwc-neutral-900">RM{{ number_format($ticket->price_paid, 2) }}</p>
+                                                    <p class="text-xs text-wwc-neutral-600">{{ $ticket->qrcode }}</p>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <div class="text-center py-8 text-wwc-neutral-500">
+                                        <i class='bx bx-ticket text-4xl mb-2'></i>
+                                        <p>No tickets found for this order</p>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- Order Summary -->
+                            <div class="border-t border-wwc-neutral-200 pt-6">
+                                <div class="flex items-center mb-4">
+                                    <h4 class="text-lg font-semibold text-wwc-neutral-900">Order Summary</h4>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                                    <div class="p-4 bg-wwc-neutral-50 rounded-lg border border-wwc-neutral-200">
+                                        <div class="flex items-center">
+                                            <i class='bx bx-receipt text-wwc-primary text-xl mr-3'></i>
+                                            <div>
+                                                <p class="text-sm font-semibold text-wwc-neutral-900">Subtotal</p>
+                                                <p class="text-lg font-bold text-wwc-primary">RM{{ number_format($order->subtotal, 2) }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="p-4 bg-wwc-neutral-50 rounded-lg border border-wwc-neutral-200">
+                                        <div class="flex items-center">
+                                            <i class='bx bx-credit-card text-wwc-primary text-xl mr-3'></i>
+                                            <div>
+                                                <p class="text-sm font-semibold text-wwc-neutral-900">Service Fee</p>
+                                                <p class="text-lg font-bold text-wwc-primary">RM{{ number_format($order->service_fee, 2) }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="p-4 bg-wwc-neutral-50 rounded-lg border border-wwc-neutral-200">
+                                        <div class="flex items-center">
+                                            <i class='bx bx-calculator text-wwc-primary text-xl mr-3'></i>
+                                            <div>
+                                                <p class="text-sm font-semibold text-wwc-neutral-900">Total Amount</p>
+                                                <p class="text-lg font-bold text-wwc-primary">RM{{ number_format($order->total_amount, 2) }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Ticket Quantity Management -->
                             <div class="border-t border-wwc-neutral-200 pt-6">
                                 <div class="flex items-center justify-between mb-4">
-                                    <h3 class="text-lg font-semibold text-wwc-neutral-900">Ticket Details</h3>
-                                    <div class="text-sm text-wwc-neutral-500">
-                                        <i class='bx bx-info-circle text-sm mr-1'></i>
-                                        Pricing will be calculated automatically
+                                    <h4 class="text-lg font-semibold text-wwc-neutral-900">Adjust Ticket Quantity</h4>
+                                    <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
+                                        <i class='bx bx-edit text-sm'></i>
+                                        <span>Modify ticket count</span>
                                     </div>
                                 </div>
 
-                                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                                    <!-- Zone -->
+                                <!-- Current Order Summary -->
+                                <div class="bg-wwc-neutral-50 rounded-lg p-4 mb-4">
+                                    <h5 class="font-semibold text-wwc-neutral-900 mb-3">Current Order Summary</h5>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                        <div>
+                                            <span class="text-wwc-neutral-600">Total Tickets:</span>
+                                            <span class="font-semibold text-wwc-neutral-900 ml-2">{{ $order->purchaseTickets->count() }}</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-wwc-neutral-600">Order Total:</span>
+                                            <span class="font-semibold text-wwc-primary ml-2">RM{{ number_format($order->total_amount, 2) }}</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-wwc-neutral-600">Status:</span>
+                                            <span class="font-semibold text-wwc-neutral-900 ml-2">{{ $order->status }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Quantity Adjustment -->
+                                <div class="space-y-4">
                                     <div>
-                                        <label for="zone" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
-                                            Zone <span class="text-wwc-error">*</span>
+                                        <label for="ticket_quantity" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                            New Total Ticket Quantity
                                         </label>
-                                        <select name="zone" id="zone" required
-                                                class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('zone') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
-                                            <option value="">Select Zone</option>
-                                            <option value="Warzone Exclusive" {{ old('zone', $order->tickets->first()->zone ?? '') == 'Warzone Exclusive' ? 'selected' : '' }}>Warzone Exclusive - RM500</option>
-                                            <option value="Warzone VIP" {{ old('zone', $order->tickets->first()->zone ?? '') == 'Warzone VIP' ? 'selected' : '' }}>Warzone VIP - RM250</option>
-                                            <option value="Warzone Grandstand" {{ old('zone', $order->tickets->first()->zone ?? '') == 'Warzone Grandstand' ? 'selected' : '' }}>Warzone Grandstand - RM199</option>
-                                            <option value="Warzone Premium Ringside" {{ old('zone', $order->tickets->first()->zone ?? '') == 'Warzone Premium Ringside' ? 'selected' : '' }}>Warzone Premium Ringside - RM150</option>
-                                            <option value="Level 1 Zone A/B/C/D" {{ old('zone', $order->tickets->first()->zone ?? '') == 'Level 1 Zone A/B/C/D' ? 'selected' : '' }}>Level 1 Zone A/B/C/D - RM100</option>
-                                            <option value="Level 2 Zone A/B/C/D" {{ old('zone', $order->tickets->first()->zone ?? '') == 'Level 2 Zone A/B/C/D' ? 'selected' : '' }}>Level 2 Zone A/B/C/D - RM75</option>
-                                            <option value="Standing Zone A/B" {{ old('zone', $order->tickets->first()->zone ?? '') == 'Standing Zone A/B' ? 'selected' : '' }}>Standing Zone A/B - RM50</option>
+                                        <div class="flex items-center space-x-4">
+                                            <button type="button" id="decrease-quantity" class="w-10 h-10 bg-wwc-neutral-200 hover:bg-wwc-neutral-300 rounded-lg flex items-center justify-center transition-colors">
+                                                <i class='bx bx-minus text-lg'></i>
+                                            </button>
+                                            <input type="number" name="ticket_quantity" id="ticket_quantity" 
+                                                value="{{ $order->purchaseTickets->count() }}" min="1" max="20"
+                                                class="w-20 px-3 py-2 text-center border border-gray-300 bg-white text-gray-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                            <button type="button" id="increase-quantity" class="w-10 h-10 bg-wwc-neutral-200 hover:bg-wwc-neutral-300 rounded-lg flex items-center justify-center transition-colors">
+                                                <i class='bx bx-plus text-lg'></i>
+                                            </button>
+                                        </div>
+                                        <p class="text-xs text-wwc-neutral-500 mt-2">Current: {{ $order->purchaseTickets->count() }} tickets | Adjust between 1-20 tickets</p>
+                                    </div>
+
+                                    <!-- Ticket Type Selection (if increasing quantity) -->
+                                    <div id="ticket-type-selection" class="hidden">
+                                        <label for="ticket_type_id" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                            Select Ticket Type for Additional Tickets
+                                        </label>
+                                        <select name="ticket_type_id" id="ticket_type_id"
+                                                class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
+                                            <option value="">Select Ticket Type</option>
+                                            @if($order->purchaseTickets->isNotEmpty())
+                                                @php
+                                                    $event = $order->purchaseTickets->first()->event;
+                                                    $ticketTypes = $event->ticketTypes()->where('status', 'active')->get();
+                                                @endphp
+                                                @foreach($ticketTypes as $ticketType)
+                                                    <option value="{{ $ticketType->id }}" 
+                                                            data-price="{{ $ticketType->price }}"
+                                                            data-available="{{ $ticketType->available_seats }}">
+                                                        {{ $ticketType->name }} - RM{{ number_format($ticketType->price, 2) }}
+                                                        @if($ticketType->available_seats > 0)
+                                                            ({{ $ticketType->available_seats }} available)
+                                                        @else
+                                                            (Sold Out)
+                                                        @endif
+                                                    </option>
+                                                @endforeach
+                                            @endif
                                         </select>
-                                        @error('zone')
-                                            <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
-                                        @enderror
+                                        <p class="text-xs text-wwc-neutral-500 mt-2">Choose the ticket type for any additional tickets</p>
                                     </div>
 
-                                    <!-- Quantity -->
-                                    <div>
-                                        <label for="quantity" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
-                                            Quantity <span class="text-wwc-error">*</span>
-                                        </label>
-                                        <input type="number" name="quantity" id="quantity" min="1" max="10" value="{{ old('quantity', $order->tickets->count()) }}" required
-                                               class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('quantity') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror"
-                                               placeholder="Enter quantity">
-                                        <p class="text-xs text-wwc-neutral-500 mt-1">Maximum 10 tickets per order</p>
-                                        @error('quantity')
-                                            <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
-                                        @enderror
+                                    <!-- Pricing Preview -->
+                                    <div id="pricing-preview" class="bg-wwc-primary/5 border border-wwc-primary/20 rounded-lg p-4 hidden">
+                                        <h6 class="font-semibold text-wwc-primary mb-2">Pricing Preview</h6>
+                                        <div class="space-y-1 text-sm">
+                                            <div class="flex justify-between">
+                                                <span>Current Total:</span>
+                                                <span class="font-semibold">RM{{ number_format($order->total_amount, 2) }}</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>New Total:</span>
+                                                <span class="font-semibold text-wwc-primary" id="new-total">RM0.00</span>
+                                            </div>
+                                            <div class="flex justify-between border-t border-wwc-primary/20 pt-1">
+                                                <span>Difference:</span>
+                                                <span class="font-semibold" id="price-difference">RM0.00</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <!-- Pricing Preview -->
-                                <div class="mt-4 p-4 bg-wwc-neutral-50 rounded-lg border border-wwc-neutral-200">
-                                    <h4 class="text-sm font-semibold text-wwc-neutral-900 mb-2">Pricing Preview</h4>
-                                    <div id="pricing-preview" class="text-sm text-wwc-neutral-600">
-                                        <p>Select a zone and quantity to see pricing preview.</p>
-                                        <p class="mt-1">Service fee: 5% of subtotal | Tax: 6% of (subtotal + service fee)</p>
+                                <!-- Warning Message -->
+                                <div class="bg-wwc-warning-light border border-wwc-warning text-wwc-warning px-4 py-3 rounded-lg mt-4">
+                                    <div class="flex items-start">
+                                        <i class='bx bx-info-circle text-lg mr-3 mt-0.5 flex-shrink-0'></i>
+                                        <div>
+                                            <h4 class="font-semibold mb-1 text-sm">Important Notes:</h4>
+                                            <ul class="list-disc list-inside space-y-1 text-xs">
+                                                <li>Reducing quantity will permanently delete excess tickets</li>
+                                                <li>Increasing quantity will create new tickets at the selected ticket type price</li>
+                                                <li>Order total will be recalculated based on new quantity</li>
+                                                <li>This action cannot be undone</li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -213,95 +363,151 @@
     </div>
 </div>
 
-@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Pricing preview script loaded for edit');
+    // Order edit page doesn't need complex pricing calculations
+    // since we're just editing order details, not creating new tickets
     
-    const zoneSelect = document.getElementById('zone');
-    const quantityInput = document.getElementById('quantity');
-    const pricingPreview = document.getElementById('pricing-preview');
+    console.log('Order edit page loaded successfully');
     
-    // Debug: Check if elements exist
-    console.log('Zone select:', zoneSelect);
-    console.log('Quantity input:', quantityInput);
-    console.log('Pricing preview:', pricingPreview);
+    // Add any specific functionality for order editing here
+    // For example, status change notifications, etc.
     
-    if (!zoneSelect || !quantityInput || !pricingPreview) {
-        console.error('Required elements not found');
-        return;
-    }
-    
-    const zonePrices = {
-        'Warzone Exclusive': 500,
-        'Warzone VIP': 250,
-        'Warzone Grandstand': 199,
-        'Warzone Premium Ringside': 150,
-        'Level 1 Zone A/B/C/D': 100,
-        'Level 2 Zone A/B/C/D': 75,
-        'Standing Zone A/B': 50
-    };
-    
-    function updatePricingPreview() {
-        console.log('Updating pricing preview');
-        const selectedZone = zoneSelect.value;
-        const quantity = parseInt(quantityInput.value) || 1;
-        
-        console.log('Selected zone:', selectedZone);
-        console.log('Quantity:', quantity);
-        
-        if (selectedZone) {
-            const basePrice = zonePrices[selectedZone] || 0;
-            const subtotal = basePrice * quantity;
-            const serviceFee = Math.round(subtotal * 0.05 * 100) / 100;
-            const taxAmount = Math.round((subtotal + serviceFee) * 0.06 * 100) / 100;
-            const total = subtotal + serviceFee + taxAmount;
+    const statusSelect = document.getElementById('status');
+    if (statusSelect) {
+        statusSelect.addEventListener('change', function() {
+            const newStatus = this.value;
+            const currentStatus = '{{ $order->status }}';
             
-            console.log('Calculated pricing:', { basePrice, subtotal, serviceFee, taxAmount, total });
-            
-            pricingPreview.innerHTML = `
-                <div class="space-y-1">
-                    <div class="flex justify-between">
-                        <span>Subtotal (${quantity} × RM${basePrice}):</span>
-                        <span class="font-semibold">RM${subtotal.toFixed(2)}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Service Fee (5%):</span>
-                        <span class="font-semibold">RM${serviceFee.toFixed(2)}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Tax (6%):</span>
-                        <span class="font-semibold">RM${taxAmount.toFixed(2)}</span>
-                    </div>
-                    <div class="flex justify-between border-t border-wwc-neutral-300 pt-1">
-                        <span class="font-semibold">Total:</span>
-                        <span class="font-bold text-wwc-primary">RM${total.toFixed(2)}</span>
-                    </div>
-                </div>
-            `;
-        } else {
-            pricingPreview.innerHTML = `
-                <p>Select a zone and quantity to see pricing preview.</p>
-                <p class="mt-1">Service fee: 5% of subtotal | Tax: 6% of (subtotal + service fee)</p>
-            `;
-        }
+            if (newStatus !== currentStatus) {
+                // Show confirmation for status changes
+                if (confirm(`Are you sure you want to change the order status from "${currentStatus}" to "${newStatus}"?`)) {
+                    // Status change will be processed on form submission
+                    console.log(`Order status will be changed to: ${newStatus}`);
+                } else {
+                    // Revert to original status
+                    this.value = currentStatus;
+                }
+            }
+        });
     }
-    
-    // Add event listeners
-    zoneSelect.addEventListener('change', function() {
-        console.log('Zone changed to:', zoneSelect.value);
-        updatePricingPreview();
-    });
-    
-    quantityInput.addEventListener('input', function() {
-        console.log('Quantity changed to:', quantityInput.value);
-        updatePricingPreview();
-    });
-    
-    // Initial calculation if values are pre-filled
-    console.log('Running initial calculation');
-    updatePricingPreview();
 });
 </script>
-@endpush
+@endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const quantityInput = document.getElementById('ticket_quantity');
+    const decreaseBtn = document.getElementById('decrease-quantity');
+    const increaseBtn = document.getElementById('increase-quantity');
+    const ticketTypeSelect = document.getElementById('ticket_type_id');
+    const ticketTypeSelection = document.getElementById('ticket-type-selection');
+    const pricingPreview = document.getElementById('pricing-preview');
+    const newTotalSpan = document.getElementById('new-total');
+    const priceDifferenceSpan = document.getElementById('price-difference');
+    
+    const currentQuantity = {{ $order->purchaseTickets->count() }};
+    const currentTotal = {{ $order->total_amount }};
+    
+    // Quantity control buttons
+    decreaseBtn.addEventListener('click', function() {
+        if (quantityInput.value > 1) {
+            quantityInput.value = parseInt(quantityInput.value) - 1;
+            updatePricingPreview();
+        }
+    });
+    
+    increaseBtn.addEventListener('click', function() {
+        if (quantityInput.value < 20) {
+            quantityInput.value = parseInt(quantityInput.value) + 1;
+            updatePricingPreview();
+        }
+    });
+    
+    // Quantity input change
+    quantityInput.addEventListener('input', function() {
+        updatePricingPreview();
+    });
+    
+    // Ticket type selection change
+    ticketTypeSelect.addEventListener('change', function() {
+        updatePricingPreview();
+    });
+    
+    function updatePricingPreview() {
+        const newQuantity = parseInt(quantityInput.value);
+        const selectedTicketType = ticketTypeSelect.options[ticketTypeSelect.selectedIndex];
+        
+        // Show/hide ticket type selection based on quantity change
+        if (newQuantity > currentQuantity) {
+            ticketTypeSelection.classList.remove('hidden');
+            if (!selectedTicketType.value) {
+                pricingPreview.classList.add('hidden');
+                return;
+            }
+        } else {
+            ticketTypeSelection.classList.add('hidden');
+        }
+        
+        // Calculate new total
+        let newTotal = currentTotal;
+        
+        if (newQuantity > currentQuantity && selectedTicketType.value) {
+            const additionalTickets = newQuantity - currentQuantity;
+            const ticketPrice = parseFloat(selectedTicketType.getAttribute('data-price'));
+            const additionalCost = additionalTickets * ticketPrice;
+            
+            // Add service fee and tax to additional cost
+            const serviceFee = additionalCost * 0.05;
+            const tax = (additionalCost + serviceFee) * 0.06;
+            const totalAdditional = additionalCost + serviceFee + tax;
+            
+            newTotal = currentTotal + totalAdditional;
+        } else if (newQuantity < currentQuantity) {
+            // For reducing quantity, we'll need to calculate based on average ticket price
+            const averageTicketPrice = currentTotal / currentQuantity;
+            const removedTickets = currentQuantity - newQuantity;
+            const removedCost = removedTickets * averageTicketPrice;
+            
+            newTotal = currentTotal - removedCost;
+        }
+        
+        // Update pricing preview
+        newTotalSpan.textContent = 'RM' + newTotal.toFixed(2);
+        const difference = newTotal - currentTotal;
+        priceDifferenceSpan.textContent = 'RM' + difference.toFixed(2);
+        
+        if (difference > 0) {
+            priceDifferenceSpan.className = 'font-semibold text-wwc-success';
+        } else if (difference < 0) {
+            priceDifferenceSpan.className = 'font-semibold text-wwc-error';
+        } else {
+            priceDifferenceSpan.className = 'font-semibold text-wwc-neutral-600';
+        }
+        
+        pricingPreview.classList.remove('hidden');
+    }
+    
+    // Form submission validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const newQuantity = parseInt(quantityInput.value);
+        const selectedTicketType = ticketTypeSelect.options[ticketTypeSelect.selectedIndex];
+        
+        if (newQuantity > currentQuantity && !selectedTicketType.value) {
+            e.preventDefault();
+            alert('Please select a ticket type for additional tickets.');
+            return false;
+        }
+        
+        if (newQuantity !== currentQuantity) {
+            if (!confirm('Are you sure you want to change the ticket quantity? This action cannot be undone.')) {
+                e.preventDefault();
+                return false;
+            }
+        }
+    });
+});
+</script>
 @endsection

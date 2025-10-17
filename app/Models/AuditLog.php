@@ -42,9 +42,9 @@ class AuditLog extends Model
         string $action,
         string $tableName,
         int $recordId,
-        array $oldValues = null,
-        array $newValues = null,
-        string $description = null
+        ?array $oldValues = null,
+        ?array $newValues = null,
+        ?string $description = null
     ): self {
         return self::create([
             'user_id' => $userId,

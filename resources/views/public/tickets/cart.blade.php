@@ -150,13 +150,14 @@
                             <select id="zone" name="zone" required
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary @error('zone') border-red-500 @enderror">
                                 <option value="">Choose a zone</option>
-                                <option value="Warzone Exclusive" {{ old('zone') == 'Warzone Exclusive' ? 'selected' : '' }}>Warzone Exclusive - RM500</option>
-                                <option value="Warzone VIP" {{ old('zone') == 'Warzone VIP' ? 'selected' : '' }}>Warzone VIP - RM250</option>
-                                <option value="Warzone Grandstand" {{ old('zone') == 'Warzone Grandstand' ? 'selected' : '' }}>Warzone Grandstand - RM199</option>
-                                <option value="Warzone Premium Ringside" {{ old('zone') == 'Warzone Premium Ringside' ? 'selected' : '' }}>Warzone Premium Ringside - RM150</option>
-                                <option value="Level 1 Zone A/B/C/D" {{ old('zone') == 'Level 1 Zone A/B/C/D' ? 'selected' : '' }}>Level 1 Zone A/B/C/D - RM100</option>
-                                <option value="Level 2 Zone A/B/C/D" {{ old('zone') == 'Level 2 Zone A/B/C/D' ? 'selected' : '' }}>Level 2 Zone A/B/C/D - RM75</option>
-                                <option value="Standing Zone A/B" {{ old('zone') == 'Standing Zone A/B' ? 'selected' : '' }}>Standing Zone A/B - RM50</option>
+                                @foreach($event->zones->where('available_seats', '>', 0) as $zone)
+                                    <option value="{{ $zone->name }}" 
+                                            data-price="{{ $zone->price }}"
+                                            data-available="{{ $zone->available_seats }}"
+                                            {{ old('zone') == $zone->name ? 'selected' : '' }}>
+                                        {{ $zone->name }} - RM{{ number_format($zone->price, 0) }} ({{ $zone->available_seats }} available)
+                                    </option>
+                                @endforeach
                             </select>
                             @error('zone')
                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -186,7 +187,7 @@
                                     <i class="bx bx-plus text-lg"></i>
                                 </button>
                             </div>
-                            <p class="text-xs text-gray-500 mt-2 text-center">Maximum 10 tickets per order</p>
+                            <p class="text-xs text-gray-500 mt-2 text-center" id="quantity-limit">Maximum 10 tickets per order</p>
                             @error('quantity')
                                 <p class="text-red-500 text-sm mt-1 text-center">{{ $message }}</p>
                             @enderror
@@ -328,15 +329,11 @@
 
 @push('scripts')
 <script>
-// Zone pricing data
+// Zone pricing data from database
 const zonePrices = {
-    'Warzone Exclusive': 500,
-    'Warzone VIP': 250,
-    'Warzone Grandstand': 199,
-    'Warzone Premium Ringside': 150,
-    'Level 1 Zone A/B/C/D': 100,
-    'Level 2 Zone A/B/C/D': 75,
-    'Standing Zone A/B': 50
+    @foreach($event->zones->where('available_seats', '>', 0) as $zone)
+        '{{ $zone->name }}': {{ $zone->price }},
+    @endforeach
 };
 
 // DOM elements
@@ -349,6 +346,7 @@ const serviceFeeElement = document.getElementById('service-fee');
 const taxElement = document.getElementById('tax');
 const totalElement = document.getElementById('total');
 const purchaseTotalElement = document.getElementById('purchase-total');
+const quantityLimitElement = document.getElementById('quantity-limit');
 
 // Calculate pricing
 function calculatePricing() {
@@ -361,7 +359,24 @@ function calculatePricing() {
         taxElement.textContent = 'RM0';
         totalElement.textContent = 'RM0';
         purchaseTotalElement.textContent = 'RM0';
+        quantityLimitElement.textContent = 'Maximum 10 tickets per order';
+        quantityInput.max = 10;
         return;
+    }
+    
+    // Get available seats for selected zone
+    const selectedOption = zoneSelect.options[zoneSelect.selectedIndex];
+    const availableSeats = parseInt(selectedOption.dataset.available) || 0;
+    const maxQuantity = Math.min(10, availableSeats);
+    
+    // Update quantity input max and limit text
+    quantityInput.max = maxQuantity;
+    quantityLimitElement.textContent = `Maximum ${maxQuantity} tickets available (${availableSeats} seats remaining)`;
+    
+    // Adjust quantity if it exceeds available seats
+    if (quantity > maxQuantity) {
+        quantityInput.value = maxQuantity;
+        return calculatePricing(); // Recursive call with adjusted quantity
     }
     
     const basePrice = zonePrices[selectedZone] || 0;
@@ -388,7 +403,8 @@ quantityDecrease.addEventListener('click', function() {
 
 quantityIncrease.addEventListener('click', function() {
     const currentValue = parseInt(quantityInput.value) || 1;
-    if (currentValue < 10) {
+    const maxQuantity = parseInt(quantityInput.max) || 10;
+    if (currentValue < maxQuantity) {
         quantityInput.value = currentValue + 1;
         calculatePricing();
     }

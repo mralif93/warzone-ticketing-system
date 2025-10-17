@@ -42,11 +42,29 @@ class Order extends Model
     }
 
     /**
-     * Get the tickets for this order
+     * Get the purchase tickets for this order
+     */
+    public function purchaseTickets()
+    {
+        return $this->hasMany(PurchaseTicket::class);
+    }
+
+    /**
+     * Get the customer tickets for this order - legacy
+     * @deprecated Use purchaseTickets() instead
+     */
+    public function customerTickets()
+    {
+        return $this->purchaseTickets();
+    }
+
+    /**
+     * Get the tickets for this order - legacy
+     * @deprecated Use purchaseTickets() instead
      */
     public function tickets()
     {
-        return $this->hasMany(Ticket::class);
+        return $this->purchaseTickets();
     }
 
     /**
@@ -118,7 +136,7 @@ class Order extends Model
      */
     public function getTicketsCount(): int
     {
-        return $this->tickets()->count();
+        return $this->purchaseTickets()->count();
     }
 
     /**

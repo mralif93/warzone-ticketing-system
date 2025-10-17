@@ -133,7 +133,7 @@
                                         {{ $event->status }}
                                     </span>
                                     <div class="text-right">
-                                        <div class="text-sm font-semibold text-wwc-neutral-900">{{ $event->tickets_count ?? 0 }} / 7,000</div>
+                                        <div class="text-sm font-semibold text-wwc-neutral-900">{{ $event->customer_tickets_count ?? 0 }} / 7,000</div>
                                         <div class="text-xs text-wwc-neutral-500">tickets sold</div>
                                     </div>
                                 </div>

@@ -62,11 +62,29 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the tickets for this user (through orders)
+     * Get the purchase tickets for this user (through orders)
+     */
+    public function purchaseTickets()
+    {
+        return $this->hasManyThrough(PurchaseTicket::class, Order::class);
+    }
+
+    /**
+     * Get the customer tickets for this user - legacy
+     * @deprecated Use purchaseTickets() instead
+     */
+    public function customerTickets()
+    {
+        return $this->purchaseTickets();
+    }
+
+    /**
+     * Get the tickets for this user - legacy
+     * @deprecated Use purchaseTickets() instead
      */
     public function tickets()
     {
-        return $this->hasManyThrough(Ticket::class, Order::class);
+        return $this->purchaseTickets();
     }
 
     /**

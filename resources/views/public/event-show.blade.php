@@ -105,69 +105,50 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
             <!-- Main Content -->
             <div class="lg:col-span-2">
-
-                <!-- Price Zones -->
+                <!-- Ticket Selection -->
                 @if(count($zones) > 0)
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-8">
+                    <!-- Header with Event Info -->
                     <div class="text-center mb-8">
-                        <h2 class="text-3xl font-bold text-wwc-neutral-900 font-display mb-4">Available Tickets</h2>
-                        <div class="w-24 h-1 bg-wwc-primary mx-auto rounded-full"></div>
+                        <h2 class="text-2xl font-bold text-wwc-neutral-900 font-display mb-2">Choose Your Tickets</h2>
+                        <p class="text-wwc-neutral-600">Select from {{ count($zones) }} available zones</p>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                    <!-- Zone Selection Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                         @foreach($zones as $zoneName => $zoneData)
-                        <div class="group bg-white border-2 border-wwc-neutral-200 rounded-xl p-6 hover:border-wwc-primary hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 cursor-pointer">
-                            <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-lg font-bold text-wwc-neutral-900 group-hover:text-wwc-primary transition-colors duration-200">{{ $zoneName }}</h3>
+                        <div class="group bg-wwc-neutral-50 border-2 border-wwc-neutral-200 rounded-xl p-6 hover:border-wwc-primary hover:bg-white hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 cursor-pointer zone-card" 
+                             data-zone="{{ $zoneName }}" 
+                             data-price="{{ $zoneData['price'] }}" 
+                             data-available="{{ $zoneData['available'] }}">
+                            <div class="flex justify-between items-center">
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-bold text-wwc-neutral-900 group-hover:text-wwc-primary transition-colors duration-200 mb-1">{{ $zoneName }}</h3>
+                                    <p class="text-sm text-wwc-neutral-500">{{ $zoneData['available'] }} seats available</p>
+                                </div>
                                 <div class="text-right">
-                                    <span class="text-3xl font-bold text-wwc-primary font-display">RM{{ number_format($zoneData['price'], 0) }}</span>
-                                    <p class="text-sm text-wwc-neutral-500">per ticket</p>
-                                </div>
-                            </div>
-                            
-                            <div class="space-y-3">
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-wwc-neutral-600">Available</span>
-                                    <span class="font-semibold text-wwc-neutral-900">{{ $zoneData['available'] }} tickets</span>
-                                </div>
-                                
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-wwc-neutral-600">Sold</span>
-                                    <span class="font-semibold text-wwc-neutral-900">{{ $zoneData['sold'] }} tickets</span>
-                                </div>
-                                
-                                <div class="w-full bg-wwc-neutral-200 rounded-full h-3">
-                                    <div class="bg-wwc-primary h-3 rounded-full transition-all duration-500" 
-                                         style="width: {{ $zoneData['availability_percentage'] }}%"></div>
-                                </div>
-                                
-                                <div class="text-center">
-                                    <span class="text-sm font-semibold text-wwc-neutral-700">{{ $zoneData['availability_percentage'] }}% available</span>
-                                </div>
-                            </div>
-                            
-                            <div class="mt-4 pt-4 border-t border-wwc-neutral-200">
-                                <div class="flex items-center text-sm text-wwc-neutral-600">
-                                    <i class='bx bx-check-circle text-wwc-success mr-2'></i>
-                                    <span>Best value for money</span>
+                                    <span class="text-2xl font-bold text-wwc-primary font-display">RM{{ number_format($zoneData['price'], 0) }}</span>
+                                    <p class="text-xs text-wwc-neutral-500">per ticket</p>
                                 </div>
                             </div>
                         </div>
                         @endforeach
                     </div>
-                    
-                    @if($event->status === 'On Sale')
-                    <div class="text-center mt-10">
+
+                    <!-- Action Button -->
+                    @if($event->status === 'On Sale' && $availabilityStats['tickets_available'] > 0)
+                    <div class="text-center">
                         @auth
                             <a href="{{ route('public.tickets.cart', $event) }}" 
-                               class="inline-flex items-center px-12 py-4 bg-wwc-primary text-white rounded-xl text-xl font-bold hover:bg-wwc-primary-dark hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
-                                <i class='bx bx-ticket mr-3 text-2xl'></i>
+                               class="inline-flex items-center px-8 py-4 bg-wwc-primary text-white rounded-xl text-lg font-bold hover:bg-wwc-primary-dark hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
+                                <i class='bx bx-ticket mr-3 text-xl'></i>
                                 Get Tickets Now
                             </a>
                         @else
                             <div class="inline-flex flex-col items-center space-y-4">
                                 <a href="{{ route('login') }}" 
-                                   class="inline-flex items-center px-12 py-4 bg-wwc-primary text-white rounded-xl text-xl font-bold hover:bg-wwc-primary-dark hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
-                                    <i class='bx bx-log-in mr-3 text-2xl'></i>
+                                   class="inline-flex items-center px-8 py-4 bg-wwc-primary text-white rounded-xl text-lg font-bold hover:bg-wwc-primary-dark hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
+                                    <i class='bx bx-log-in mr-3 text-xl'></i>
                                     Login to Get Tickets
                                 </a>
                                 <div class="text-center">
@@ -179,6 +160,20 @@
                             </div>
                         @endauth
                     </div>
+                    @elseif($event->status === 'Sold Out' || $availabilityStats['tickets_available'] <= 0)
+                    <div class="text-center">
+                        <div class="inline-flex items-center px-8 py-4 bg-wwc-neutral-400 text-white rounded-xl text-lg font-bold cursor-not-allowed">
+                            <i class='bx bx-x mr-3 text-xl'></i>
+                            Sold Out
+                        </div>
+                    </div>
+                    @elseif(count($zones) === 0)
+                    <div class="text-center">
+                        <div class="inline-flex items-center px-8 py-4 bg-wwc-neutral-400 text-white rounded-xl text-lg font-bold cursor-not-allowed">
+                            <i class='bx bx-time mr-3 text-xl'></i>
+                            Tickets Not Available
+                        </div>
+                    </div>
                     @endif
                 </div>
                 @endif
@@ -186,26 +181,26 @@
 
             <!-- Sidebar -->
             <div class="space-y-6">
-                <!-- Ticket Availability -->
+                <!-- Quick Stats -->
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-6">
-                    <h3 class="text-xl font-bold text-wwc-neutral-900 font-display mb-6 text-center">Ticket Availability</h3>
-                    <div class="space-y-6">
+                    <h3 class="text-lg font-bold text-wwc-neutral-900 font-display mb-4 text-center">Event Summary</h3>
+                    <div class="space-y-4">
                         <div class="text-center">
-                            <div class="text-3xl font-bold text-wwc-primary mb-2">{{ number_format($availabilityStats['tickets_available']) }}</div>
-                            <div class="text-sm text-wwc-neutral-600">Available Tickets</div>
+                            <div class="text-2xl font-bold text-wwc-primary mb-1">{{ number_format($availabilityStats['tickets_available']) }}</div>
+                            <div class="text-sm text-wwc-neutral-600">Tickets Available</div>
                         </div>
                         
-                        <div class="w-full bg-wwc-neutral-200 rounded-full h-3">
-                            <div class="bg-gradient-to-r from-wwc-success to-wwc-primary h-3 rounded-full transition-all duration-500" 
+                        <div class="w-full bg-wwc-neutral-200 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-wwc-success to-wwc-primary h-2 rounded-full transition-all duration-500" 
                                  style="width: {{ $availabilityStats['availability_percentage'] }}%"></div>
                         </div>
                         
-                        <div class="grid grid-cols-2 gap-4 text-center">
-                            <div>
+                        <div class="grid grid-cols-2 gap-3 text-center">
+                            <div class="bg-wwc-neutral-50 rounded-lg p-3">
                                 <div class="text-lg font-bold text-wwc-neutral-900">{{ number_format($availabilityStats['total_capacity']) }}</div>
                                 <div class="text-xs text-wwc-neutral-600">Total Capacity</div>
                             </div>
-                            <div>
+                            <div class="bg-wwc-neutral-50 rounded-lg p-3">
                                 <div class="text-lg font-bold text-wwc-accent">{{ number_format($availabilityStats['tickets_sold']) }}</div>
                                 <div class="text-xs text-wwc-neutral-600">Sold</div>
                             </div>
@@ -289,4 +284,95 @@
         @endif
     </div>
 </div>
+
+
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const zoneCards = document.querySelectorAll('.zone-card');
+    
+    // Zone images mapping
+    const zoneImages = {
+        'Exclusive': 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800&h=600&fit=crop&crop=center',
+        'VIP': 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=600&fit=crop&crop=center',
+        'Grandstand': 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&h=600&fit=crop&crop=center',
+        'Premium Ringside': 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=800&h=600&fit=crop&crop=center',
+        'Level 1 Zone A/B/C/D': 'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=800&h=600&fit=crop&crop=center',
+        'Level 2 Zone A/B/C/D': 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop&crop=center',
+        'Standing Zone A/B': 'https://images.unsplash.com/photo-1571266028243-e4732b0a0a6e?w=800&h=600&fit=crop&crop=center'
+    };
+    
+    // Zone descriptions from database
+    const zoneDescriptions = {
+        @foreach($zones as $zoneName => $zoneData)
+        '{{ $zoneName }}': '{{ $zoneData['description'] ?? 'Premium seating with excellent views and great value for money.' }}',
+        @endforeach
+    };
+    
+    // Add click event to each zone card
+    zoneCards.forEach(card => {
+        card.addEventListener('click', function() {
+            const zoneName = this.dataset.zone;
+            const zonePrice = this.dataset.price;
+            const zoneAvailable = this.dataset.available;
+            const zoneImage = zoneImages[zoneName] || 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800&h=600&fit=crop&crop=center';
+            const zoneDescription = zoneDescriptions[zoneName] || 'Premium seating with excellent views.';
+            
+            // Show SweetAlert with zone details
+            Swal.fire({
+                title: zoneName,
+                html: `
+                    <div class="text-left">
+                        <div class="mb-4">
+                            <img src="${zoneImage}" alt="${zoneName}" class="w-full h-48 object-cover rounded-lg mb-4">
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-lg font-semibold text-gray-700">Price:</span>
+                                <span class="text-2xl font-bold text-red-600">RM${parseFloat(zonePrice).toLocaleString()}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-lg font-semibold text-gray-700">Available Seats:</span>
+                                <span class="text-lg font-semibold text-green-600">${zoneAvailable} seats</span>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-4 mt-4">
+                                <h4 class="font-semibold text-gray-900 mb-2">Zone Description</h4>
+                                <p class="text-gray-600 text-sm">${zoneDescription}</p>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                width: '600px',
+                showCloseButton: true,
+                showCancelButton: true,
+                confirmButtonText: 'Get Tickets',
+                cancelButtonText: 'Close',
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                customClass: {
+                    popup: 'rounded-2xl',
+                    title: 'text-2xl font-bold text-gray-900',
+                    confirmButton: 'px-6 py-2 rounded-lg font-semibold',
+                    cancelButton: 'px-6 py-2 rounded-lg font-semibold'
+                },
+                didOpen: () => {
+                    // Add custom styling to the modal
+                    const popup = document.querySelector('.swal2-popup');
+                    if (popup) {
+                        popup.style.borderRadius = '1rem';
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Redirect to cart page
+                    window.location.href = '{{ route("public.tickets.cart", $event) }}';
+                }
+            });
+        });
+    });
+});
+</script>
+@endpush

@@ -40,7 +40,9 @@ class EventController extends Controller
             $query->where('start_date', '<=', $request->date_to . ' 23:59:59');
         }
 
-        $events = $query->withCount('tickets')->latest()->paginate(15);
+        $perPage = $request->get('limit', 10);
+        $perPage = in_array($perPage, [10, 15, 25, 50, 100]) ? $perPage : 10;
+        $events = $query->withCount('purchaseTickets')->latest()->paginate($perPage);
         $statuses = Event::select('status')->distinct()->pluck('status');
 
         return view('admin.events.index', compact('events', 'statuses'));
@@ -67,10 +69,26 @@ class EventController extends Controller
             'venue' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'max_tickets_per_order' => 'required|integer|min:1|max:20',
-            'status' => 'required|in:Draft,On Sale,Sold Out,Cancelled',
+            'total_seats' => 'required|integer|min:1',
+            'combo_discount_percentage' => 'nullable|numeric|min:0|max:100',
+            'combo_discount_enabled' => 'nullable|boolean',
         ]);
 
-        $event = Event::create($request->all());
+        // Prepare data for creation
+        $data = $request->all();
+        
+        // Set default status to Draft
+        $data['status'] = 'Draft';
+        
+        // Handle combo discount checkbox
+        $data['combo_discount_enabled'] = $request->has('combo_discount_enabled');
+        
+        // Set default combo discount percentage if not provided
+        if (!isset($data['combo_discount_percentage'])) {
+            $data['combo_discount_percentage'] = 10.00;
+        }
+
+        $event = Event::create($data);
 
         // Log the event creation
         AuditLog::create([
@@ -93,14 +111,15 @@ class EventController extends Controller
      */
     public function show(Event $event)
     {
-        $event->loadCount('tickets');
-        $recentTickets = $event->tickets()->with('order.user')->latest()->take(10)->get();
+        $event->loadCount('purchaseTickets');
+        $event->load('ticketTypes');
+        $recentTickets = $event->purchaseTickets()->with('order.user')->latest()->take(10)->get();
         
         $ticketStats = [
-            'total_capacity' => 7000,
-            'tickets_sold' => $event->tickets()->where('status', 'Sold')->count(),
-            'tickets_held' => $event->tickets()->where('status', 'Held')->count(),
-            'tickets_available' => 7000 - $event->tickets()->whereIn('status', ['Sold', 'Held'])->count(),
+            'total_capacity' => $event->total_seats,
+            'tickets_sold' => $event->purchaseTickets()->where('status', 'Sold')->count(),
+            'tickets_held' => $event->purchaseTickets()->where('status', 'Held')->count(),
+            'tickets_available' => $event->total_seats - $event->purchaseTickets()->whereIn('status', ['Sold', 'Held'])->count(),
         ];
         
         $ticketStats['sold_percentage'] = $ticketStats['total_capacity'] > 0 
@@ -131,12 +150,25 @@ class EventController extends Controller
             'venue' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'max_tickets_per_order' => 'required|integer|min:1|max:20',
-            'status' => 'required|in:Draft,On Sale,Sold Out,Cancelled',
+            'total_seats' => 'required|integer|min:1',
+            'combo_discount_percentage' => 'nullable|numeric|min:0|max:100',
+            'combo_discount_enabled' => 'nullable|boolean',
         ]);
 
         $oldValues = $event->toArray();
 
-        $event->update($request->all());
+        // Prepare data for update
+        $data = $request->all();
+        
+        // Handle combo discount checkbox
+        $data['combo_discount_enabled'] = $request->has('combo_discount_enabled');
+        
+        // Set default combo discount percentage if not provided
+        if (!isset($data['combo_discount_percentage'])) {
+            $data['combo_discount_percentage'] = 10.00;
+        }
+
+        $event->update($data);
 
         // Log the event update
         AuditLog::create([
@@ -210,5 +242,28 @@ class EventController extends Controller
         ]);
 
         return back()->with('success', 'Event status updated successfully.');
+    }
+
+    /**
+     * Get ticket types for a specific event
+     */
+    public function getTicketTypes(Event $event)
+    {
+        $ticketTypes = $event->ticketTypes()
+            ->where('status', 'active')
+            ->select('id', 'name', 'price', 'available_seats', 'total_seats', 'sold_seats')
+            ->get();
+
+        return response()->json([
+            'ticketTypes' => $ticketTypes,
+            'event' => [
+                'id' => $event->id,
+                'name' => $event->name,
+                'is_multi_day' => $event->isMultiDay(),
+                'combo_discount_enabled' => $event->combo_discount_enabled,
+                'combo_discount_percentage' => $event->combo_discount_percentage,
+                'event_days' => $event->getEventDays()
+            ]
+        ]);
     }
 }

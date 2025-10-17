@@ -21,7 +21,15 @@ class AuthController extends Controller
     public function showLogin()
     {
         if (Auth::check()) {
-            return redirect()->route('dashboard');
+            $user = Auth::user();
+            
+            if ($user->hasRole('Administrator')) {
+                return redirect()->route('admin.dashboard');
+            } elseif ($user->hasRole('Gate Staff')) {
+                return redirect()->route('gate-staff.dashboard');
+            } else {
+                return redirect()->route('customer.dashboard');
+            }
         }
 
         return view('auth.login');
@@ -47,8 +55,12 @@ class AuthController extends Controller
             $intended = session('url.intended');
             
             // Redirect based on user role to preserve session message
-            if (auth()->user()->hasRole('Administrator')) {
+            $user = auth()->user();
+            
+            if ($user->hasRole('Administrator')) {
                 return redirect()->intended(route('admin.dashboard'))->with('success', 'Login successful!');
+            } elseif ($user->hasRole('Gate Staff')) {
+                return redirect()->intended(route('gate-staff.dashboard'))->with('success', 'Login successful!');
             } else {
                 // For customers, check if they were trying to access a specific page
                 if ($intended && str_contains($intended, '/events/') && str_contains($intended, '/cart')) {
@@ -69,7 +81,15 @@ class AuthController extends Controller
     public function showRegister()
     {
         if (Auth::check()) {
-            return redirect()->route('dashboard');
+            $user = Auth::user();
+            
+            if ($user->hasRole('Administrator')) {
+                return redirect()->route('admin.dashboard');
+            } elseif ($user->hasRole('Gate Staff')) {
+                return redirect()->route('gate-staff.dashboard');
+            } else {
+                return redirect()->route('customer.dashboard');
+            }
         }
 
         return view('auth.register');

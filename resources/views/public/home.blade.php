@@ -92,9 +92,28 @@
                                 On Sale
                             </span>
                             <div class="text-sm text-wwc-neutral-500">
-                                {{ $event->tickets_count ?? 0 }} tickets sold
+                                {{ $event->zones->sum('sold_seats') ?? 0 }} tickets sold
                             </div>
                         </div>
+
+                        <!-- Ticket Zones -->
+                        @if($event->zones->count() > 0)
+                            <div class="mb-4">
+                                <div class="space-y-1">
+                                    @foreach($event->zones->take(2) as $zone)
+                                        <div class="flex items-center justify-between text-xs">
+                                            <span class="text-wwc-neutral-600">{{ $zone->name }}</span>
+                                            <span class="font-semibold text-wwc-primary">RM{{ number_format($zone->price, 0) }}</span>
+                                        </div>
+                                    @endforeach
+                                    @if($event->zones->count() > 2)
+                                        <div class="text-xs text-wwc-neutral-500 text-center">
+                                            +{{ $event->zones->count() - 2 }} more zones
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
 
                         <a href="{{ route('public.events.show', $event) }}" 
                            class="w-full inline-flex justify-center items-center px-4 py-3 border border-transparent shadow-sm text-sm font-semibold rounded-2xl text-white bg-wwc-primary hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">

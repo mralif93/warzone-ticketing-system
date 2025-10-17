@@ -150,7 +150,7 @@
 
                                 <!-- Tickets Count -->
                                 <div class="text-center">
-                                    <div class="text-3xl font-bold text-wwc-neutral-900 font-display">{{ $user->tickets_count ?? 0 }}</div>
+                                    <div class="text-3xl font-bold text-wwc-neutral-900 font-display">{{ $user->customer_tickets_count ?? 0 }}</div>
                                     <div class="text-sm text-wwc-neutral-600 font-medium">Tickets Purchased</div>
                 </div>
 

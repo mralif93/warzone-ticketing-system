@@ -20,6 +20,8 @@ class Event extends Model
         'total_seats',
         'description',
         'venue',
+        'combo_discount_percentage',
+        'combo_discount_enabled',
     ];
 
     protected $casts = [
@@ -27,14 +29,51 @@ class Event extends Model
         'start_date' => 'datetime',
         'end_date' => 'datetime',
         'total_seats' => 'integer',
+        'combo_discount_percentage' => 'decimal:2',
+        'combo_discount_enabled' => 'boolean',
     ];
 
     /**
-     * Get the tickets for this event
+     * Get the purchase tickets for this event
+     */
+    public function purchaseTickets()
+    {
+        return $this->hasMany(PurchaseTicket::class);
+    }
+
+    /**
+     * Get the customer tickets for this event - legacy
+     * @deprecated Use purchaseTickets() instead
+     */
+    public function customerTickets()
+    {
+        return $this->purchaseTickets();
+    }
+
+    /**
+     * Get the tickets for this event - legacy
+     * @deprecated Use purchaseTickets() instead
      */
     public function tickets()
     {
+        return $this->purchaseTickets();
+    }
+
+    /**
+     * Get the ticket types for this event
+     */
+    public function ticketTypes()
+    {
         return $this->hasMany(Ticket::class);
+    }
+
+    /**
+     * Get the zones for this event - legacy
+     * @deprecated Use ticketTypes() instead
+     */
+    public function zones()
+    {
+        return $this->ticketTypes();
     }
 
     /**
@@ -58,7 +97,7 @@ class Event extends Model
      */
     public function getTicketsSoldCount(): int
     {
-        return $this->tickets()->where('status', 'Sold')->count();
+        return $this->purchaseTickets()->where('status', 'Sold')->count();
     }
 
     /**
@@ -156,5 +195,165 @@ class Event extends Model
     public function getPrimaryDate(): \Carbon\Carbon
     {
         return $this->start_date ?? $this->date_time;
+    }
+
+
+    /**
+     * Get tickets sold for a specific day
+     */
+    public function getTicketsSoldForDay($eventDay): int
+    {
+        return $this->purchaseTickets()
+            ->where('event_day', $eventDay)
+            ->where('status', 'Sold')
+            ->count();
+    }
+
+    /**
+     * Get tickets available for a specific day
+     */
+    public function getTicketsAvailableForDay($eventDay): int
+    {
+        $sold = $this->getTicketsSoldForDay($eventDay);
+        return $this->getTotalCapacity() - $sold;
+    }
+
+    /**
+     * Check if a specific day has available tickets
+     */
+    public function hasAvailableTicketsForDay($eventDay): bool
+    {
+        return $this->getTicketsAvailableForDay($eventDay) > 0;
+    }
+
+    /**
+     * Check if this is a 2-day event
+     */
+    public function isTwoDayEvent(): bool
+    {
+        return $this->isMultiDay() && $this->getDurationInDays() === 2;
+    }
+
+    /**
+     * Get combo discount percentage
+     */
+    public function getComboDiscountPercentage(): float
+    {
+        return $this->combo_discount_enabled ? (float) $this->combo_discount_percentage : 0;
+    }
+
+    /**
+     * Calculate combo discount amount
+     */
+    public function calculateComboDiscount($originalPrice): float
+    {
+        if (!$this->combo_discount_enabled || !$this->isTwoDayEvent()) {
+            return 0;
+        }
+        
+        return round($originalPrice * ($this->getComboDiscountPercentage() / 100), 2);
+    }
+
+    /**
+     * Calculate combo price (2 tickets with discount)
+     */
+    public function calculateComboPrice($singleTicketPrice): array
+    {
+        $originalTotal = $singleTicketPrice * 2;
+        $discountAmount = $this->calculateComboDiscount($originalTotal);
+        $finalPrice = $originalTotal - $discountAmount;
+        
+        return [
+            'original_price' => $originalTotal,
+            'discount_percentage' => $this->getComboDiscountPercentage(),
+            'discount_amount' => $discountAmount,
+            'final_price' => $finalPrice,
+            'savings' => $discountAmount,
+        ];
+    }
+
+    /**
+     * Calculate combo price for mixed ticket types
+     */
+    public function calculateMixedComboPrice($ticketPrices): array
+    {
+        if (!$this->combo_discount_enabled || !$this->isTwoDayEvent() || count($ticketPrices) !== 2) {
+            return [
+                'original_price' => array_sum($ticketPrices),
+                'discount_percentage' => 0,
+                'discount_amount' => 0,
+                'final_price' => array_sum($ticketPrices),
+                'savings' => 0,
+            ];
+        }
+
+        $originalTotal = array_sum($ticketPrices);
+        $discountAmount = $this->calculateComboDiscount($originalTotal);
+        $finalPrice = $originalTotal - $discountAmount;
+        
+        return [
+            'original_price' => $originalTotal,
+            'discount_percentage' => $this->getComboDiscountPercentage(),
+            'discount_amount' => $discountAmount,
+            'final_price' => $finalPrice,
+            'savings' => $discountAmount,
+            'ticket_breakdown' => $this->calculateTicketBreakdown($ticketPrices, $discountAmount),
+        ];
+    }
+
+    /**
+     * Calculate individual ticket breakdown for mixed combo
+     */
+    private function calculateTicketBreakdown($ticketPrices, $totalDiscount): array
+    {
+        $totalOriginal = array_sum($ticketPrices);
+        $breakdown = [];
+        
+        foreach ($ticketPrices as $index => $price) {
+            $discountShare = ($price / $totalOriginal) * $totalDiscount;
+            $breakdown[] = [
+                'original_price' => $price,
+                'discount_amount' => round($discountShare, 2),
+                'final_price' => round($price - $discountShare, 2),
+            ];
+        }
+        
+        return $breakdown;
+    }
+
+    /**
+     * Get available event days (max 2 days)
+     */
+    public function getEventDays(): array
+    {
+        if (!$this->isMultiDay()) {
+            return [
+                [
+                    'date' => $this->date_time->toDateString(),
+                    'day_name' => 'Event Day',
+                    'display' => $this->date_time->format('M j, Y'),
+                ]
+            ];
+        }
+
+        $days = [];
+        $current = $this->start_date->copy();
+        $end = $this->end_date->copy();
+        $dayNumber = 1;
+
+        // Limit to maximum 2 days
+        $maxDays = min(2, $this->getDurationInDays());
+        
+        while ($current->lte($end) && $dayNumber <= $maxDays) {
+            $days[] = [
+                'date' => $current->toDateString(),
+                'day_name' => "Day {$dayNumber}",
+                'display' => $current->format('M j, Y'),
+            ];
+            $current->addDay();
+            $dayNumber++;
+        }
+
+        return $days;
     }
 }

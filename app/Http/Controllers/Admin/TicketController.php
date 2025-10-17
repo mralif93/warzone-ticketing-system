@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Ticket;
+use App\Models\PurchaseTicket;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,20 +12,17 @@ use Illuminate\Support\Facades\Auth;
 class TicketController extends Controller
 {
     /**
-     * Display a listing of tickets
+     * Display a listing of ticket types (zones)
      */
     public function index(Request $request)
     {
-        $query = Ticket::with(['order.user', 'event']);
+        $query = Ticket::with('event');
 
         // Search functionality
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
-                $q->where('qrcode', 'like', "%{$search}%")
-                  ->orWhereHas('order.user', function($userQuery) use ($search) {
-                      $userQuery->where('name', 'like', "%{$search}%");
-                  })
+                $q->where('name', 'like', "%{$search}%")
                   ->orWhereHas('event', function($eventQuery) use ($search) {
                       $eventQuery->where('name', 'like', "%{$search}%");
                   });
@@ -36,9 +34,9 @@ class TicketController extends Controller
             $query->where('status', $request->status);
         }
 
-        // Filter by zone
+        // Filter by zone name
         if ($request->filled('zone')) {
-            $query->where('zone', $request->zone);
+            $query->where('name', 'like', "%{$request->zone}%");
         }
 
         // Filter by event
@@ -54,104 +52,150 @@ class TicketController extends Controller
             $query->where('created_at', '<=', $request->date_to . ' 23:59:59');
         }
 
-        $tickets = $query->latest()->paginate(15);
+        $perPage = $request->get('limit', 10);
+        $perPage = in_array($perPage, [10, 15, 25, 50, 100]) ? $perPage : 10;
+        $ticketTypes = $query->latest()->paginate($perPage);
         $statuses = Ticket::select('status')->distinct()->pluck('status');
         $events = \App\Models\Event::select('id', 'name')->get();
 
-        return view('admin.tickets.index', compact('tickets', 'statuses', 'events'));
+        // Calculate additional statistics
+        $totalSeats = $ticketTypes->sum('total_seats');
+        $soldSeats = $ticketTypes->sum('sold_seats');
+        $availableSeats = $ticketTypes->sum('available_seats');
+        $comboTicketTypes = $ticketTypes->where('is_combo', true)->count();
+        $soldOutTicketTypes = $ticketTypes->where('status', 'sold_out')->count();
+
+        return view('admin.tickets.index', compact('ticketTypes', 'statuses', 'events', 'totalSeats', 'soldSeats', 'availableSeats', 'comboTicketTypes', 'soldOutTicketTypes'));
     }
 
     /**
-     * Show the form for creating a new ticket
+     * Show the form for creating a new ticket type
      */
     public function create()
     {
-        $events = \App\Models\Event::where('status', 'On Sale')->get();
+        $events = \App\Models\Event::select('id', 'name', 'date_time', 'status')
+                                  ->orderBy('date_time', 'asc')
+                                  ->get();
 
         return view('admin.tickets.create', compact('events'));
     }
 
     /**
-     * Store a newly created ticket
+     * Store a newly created ticket type
      */
     public function store(Request $request)
     {
         $request->validate([
             'event_id' => 'required|exists:events,id',
-            'zone' => 'required|string|max:255',
-            'price_per_person' => 'required|numeric|min:0',
+            'name' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
             'total_seats' => 'required|integer|min:1|max:10000',
+            'status' => 'required|in:active,inactive,sold_out',
+            'description' => 'nullable|string|max:1000',
+            'is_combo' => 'nullable|boolean',
         ]);
 
         $event = \App\Models\Event::findOrFail($request->event_id);
-        $createdTickets = [];
 
-        // Create multiple tickets based on total_seats
-        for ($i = 1; $i <= $request->total_seats; $i++) {
-            $ticket = Ticket::create([
-                'event_id' => $request->event_id,
-                'zone' => $request->zone,
-                'qrcode' => 'WZ' . strtoupper(uniqid()) . rand(1000, 9999),
-                'status' => 'Held', // Default status for newly created tickets
-                'price_paid' => $request->price_per_person,
-            ]);
+        // Check if ticket type already exists for this event
+        $existingTicketType = Ticket::where('event_id', $request->event_id)
+                                 ->where('name', $request->name)
+                                 ->first();
 
-            $createdTickets[] = $ticket;
-
-            // Log each ticket creation
-            AuditLog::create([
-                'user_id' => Auth::id(),
-                'action' => 'CREATE',
-                'table_name' => 'tickets',
-                'record_id' => $ticket->id,
-                'old_values' => null,
-                'new_values' => $ticket->toArray(),
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-            ]);
+        if ($existingTicketType) {
+            return redirect()->back()
+                           ->withErrors(['name' => 'A ticket type with this name already exists for this event.'])
+                           ->withInput();
         }
 
+        // Prepare data for creation
+        $data = [
+            'event_id' => $request->event_id,
+            'name' => $request->name,
+            'price' => $request->price,
+            'total_seats' => $request->total_seats,
+            'available_seats' => $request->total_seats,
+            'sold_seats' => 0,
+            'scanned_seats' => 0,
+            'status' => $request->status, // Admin-selected status
+            'description' => $request->description,
+            'is_combo' => $request->has('is_combo'),
+        ];
+
+        // Create ticket type record
+        $ticketType = Ticket::create($data);
+
+        // Log ticket type creation
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'CREATE',
+            'table_name' => 'tickets',
+            'record_id' => $ticketType->id,
+            'old_values' => null,
+            'new_values' => $ticketType->toArray(),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        $comboText = $request->has('is_combo') ? ' (Combo)' : '';
         return redirect()->route('admin.tickets.index')
-                        ->with('success', "Successfully created {$request->total_seats} tickets for {$request->zone} zone in {$event->name}!");
+                        ->with('success', "Successfully created ticket type '{$request->name}'{$comboText} with {$request->total_seats} seats for {$event->name}!");
     }
 
     /**
-     * Display the specified ticket
+     * Display the specified ticket type
      */
     public function show(Ticket $ticket)
     {
-        $ticket->load(['order.user', 'event', 'admittanceLogs.staffUser']);
+        $ticket->load('event');
 
         return view('admin.tickets.show', compact('ticket'));
     }
 
     /**
-     * Show the form for editing the specified ticket
+     * Show the form for editing the specified ticket type
      */
     public function edit(Ticket $ticket)
     {
-        $events = \App\Models\Event::where('status', 'On Sale')->get();
+        $events = \App\Models\Event::select('id', 'name', 'date_time', 'status')
+            ->orderBy('date_time', 'asc')
+            ->get();
 
         return view('admin.tickets.edit', compact('ticket', 'events'));
     }
 
     /**
-     * Update the specified ticket
+     * Update the specified ticket type
      */
     public function update(Request $request, Ticket $ticket)
     {
         $request->validate([
             'event_id' => 'required|exists:events,id',
-            'zone' => 'required|string|max:255',
-            'price_paid' => 'required|numeric|min:0',
-            'status' => 'required|in:Sold,Held,Scanned,Invalid,Refunded',
-            'qrcode' => 'nullable|string|max:255|unique:tickets,qrcode,' . $ticket->id
+            'name' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'total_seats' => 'required|integer|min:1|max:10000',
+            'status' => 'required|in:active,inactive,sold_out',
+            'description' => 'nullable|string|max:1000',
+            'is_combo' => 'nullable|boolean'
         ]);
 
         $oldValues = $ticket->toArray();
-        $ticket->update($request->all());
+        
+        // Calculate new available seats
+        $newAvailableSeats = $request->total_seats - $ticket->sold_seats;
+        
+        $ticket->update([
+            'event_id' => $request->event_id,
+            'name' => $request->name,
+            'price' => $request->price,
+            'total_seats' => $request->total_seats,
+            'available_seats' => max(0, $newAvailableSeats),
+            'description' => $request->description,
+            'is_combo' => $request->has('is_combo'),
+            'status' => $request->status, // Admin-selected status
+        ]);
 
-        // Log the ticket update
+        // Log the ticket type update
         AuditLog::create([
             'user_id' => Auth::id(),
             'action' => 'UPDATE',
@@ -163,23 +207,24 @@ class TicketController extends Controller
             'user_agent' => $request->userAgent(),
         ]);
 
-        return redirect()->route('admin.tickets.show', $ticket)
-                        ->with('success', 'Ticket updated successfully!');
+        $comboText = $request->has('is_combo') ? ' (Combo)' : '';
+        return redirect()->route('admin.tickets.index')
+                        ->with('success', "Successfully updated ticket type '{$request->name}'{$comboText}!");
     }
 
     /**
-     * Remove the specified ticket
+     * Remove the specified ticket type
      */
     public function destroy(Ticket $ticket)
     {
-        if ($ticket->status === 'Used') {
-            return back()->withErrors(['error' => 'Cannot delete a used ticket.']);
+        if ($ticket->sold_seats > 0) {
+            return back()->withErrors(['error' => 'Cannot delete a ticket type that has sold tickets.']);
         }
 
         $oldValues = $ticket->toArray();
         $ticket->delete();
 
-        // Log the ticket deletion
+        // Log the ticket type deletion
         AuditLog::create([
             'user_id' => Auth::id(),
             'action' => 'DELETE',
@@ -192,124 +237,7 @@ class TicketController extends Controller
         ]);
 
         return redirect()->route('admin.tickets.index')
-                        ->with('success', 'Ticket deleted successfully!');
+                        ->with('success', 'Ticket type deleted successfully!');
     }
 
-    /**
-     * Update ticket status
-     */
-    public function updateStatus(Request $request, Ticket $ticket)
-    {
-        $request->validate([
-            'status' => 'required|in:Sold,Held,Scanned,Invalid,Refunded'
-        ]);
-
-        $oldValues = $ticket->toArray();
-        $ticket->update(['status' => $request->status]);
-
-        // Log the status update
-        AuditLog::create([
-            'user_id' => Auth::id(),
-            'action' => 'UPDATE',
-            'table_name' => 'tickets',
-            'record_id' => $ticket->id,
-            'old_values' => $oldValues,
-            'new_values' => $ticket->toArray(),
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
-
-        return back()->with('success', 'Ticket status updated successfully!');
-    }
-
-    /**
-     * Cancel ticket
-     */
-    public function cancel(Ticket $ticket)
-    {
-        if ($ticket->status === 'Used') {
-            return back()->withErrors(['error' => 'Cannot cancel a used ticket.']);
-        }
-
-        $oldValues = $ticket->toArray();
-        $ticket->update(['status' => 'Cancelled']);
-
-        // Log the ticket cancellation
-        AuditLog::create([
-            'user_id' => Auth::id(),
-            'action' => 'UPDATE',
-            'table_name' => 'tickets',
-            'record_id' => $ticket->id,
-            'old_values' => $oldValues,
-            'new_values' => $ticket->toArray(),
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-        ]);
-
-        return back()->with('success', 'Ticket cancelled successfully!');
-    }
-
-    /**
-     * Mark ticket as used
-     */
-    public function markUsed(Ticket $ticket)
-    {
-        if ($ticket->status !== 'Sold') {
-            return back()->withErrors(['error' => 'Only sold tickets can be marked as used.']);
-        }
-
-        $oldValues = $ticket->toArray();
-        $ticket->update(['status' => 'Used']);
-
-        // Log the ticket usage
-        AuditLog::create([
-            'user_id' => Auth::id(),
-            'action' => 'UPDATE',
-            'table_name' => 'tickets',
-            'record_id' => $ticket->id,
-            'old_values' => $oldValues,
-            'new_values' => $ticket->toArray(),
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-        ]);
-
-        return back()->with('success', 'Ticket marked as used successfully!');
-    }
-
-    /**
-     * Bulk update ticket statuses
-     */
-    public function bulkUpdate(Request $request)
-    {
-        $request->validate([
-            'ticket_ids' => 'required|array|min:1',
-            'ticket_ids.*' => 'exists:tickets,id',
-            'status' => 'required|in:Sold,Held,Used,Cancelled'
-        ]);
-
-        $tickets = Ticket::whereIn('id', $request->ticket_ids)->get();
-        $updatedCount = 0;
-
-        foreach ($tickets as $ticket) {
-            if ($ticket->status !== $request->status) {
-                $oldValues = $ticket->toArray();
-                $ticket->update(['status' => $request->status]);
-                $updatedCount++;
-
-                // Log each ticket update
-                AuditLog::create([
-                    'user_id' => Auth::id(),
-                    'action' => 'UPDATE',
-                    'table_name' => 'tickets',
-                    'record_id' => $ticket->id,
-                    'old_values' => $oldValues,
-                    'new_values' => $ticket->toArray(),
-                    'ip_address' => $request->ip(),
-                    'user_agent' => $request->userAgent(),
-                ]);
-            }
-        }
-
-        return back()->with('success', "Updated {$updatedCount} tickets successfully!");
-    }
 }

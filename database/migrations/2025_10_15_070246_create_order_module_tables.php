@@ -1,0 +1,75 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     * 
+     * ORDER MODULE - Handles customer orders and payments
+     */
+    public function up(): void
+    {
+        // Create orders table
+        Schema::create('orders', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('customer_email');
+            $table->string('order_number')->unique();
+            $table->decimal('subtotal', 10, 2)->default(0);
+            $table->decimal('service_fee', 10, 2)->default(0);
+            $table->decimal('tax_amount', 10, 2)->default(0);
+            $table->decimal('total_amount', 10, 2);
+            $table->string('status'); // Pending, Paid, Cancelled, Refunded
+            $table->string('payment_method')->nullable();
+            $table->text('notes')->nullable();
+            $table->datetime('held_until')->nullable();
+            $table->string('qrcode')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+            
+            // Indexes
+            $table->index(['user_id', 'status']);
+            $table->index('order_number');
+            $table->index('customer_email');
+        });
+
+        // Create payments table
+        Schema::create('payments', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('order_id')->constrained()->onDelete('cascade');
+            $table->string('stripe_charge_id')->nullable();
+            $table->string('stripe_payment_intent_id')->nullable();
+            $table->string('method');
+            $table->decimal('amount', 10, 2);
+            $table->decimal('refund_amount', 10, 2)->nullable();
+            $table->timestamp('refund_date')->nullable();
+            $table->text('refund_reason')->nullable();
+            $table->string('refund_method')->nullable();
+            $table->string('refund_reference')->nullable();
+            $table->string('currency')->default('USD');
+            $table->string('status'); // Pending, Succeeded, Failed, Cancelled, Refunded, Partially Refunded
+            $table->text('stripe_response')->nullable();
+            $table->text('failure_reason')->nullable();
+            $table->datetime('processed_at')->nullable();
+            $table->timestamps();
+            
+            // Indexes
+            $table->index(['order_id', 'status']);
+            $table->index('stripe_charge_id');
+            $table->index('refund_date');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('payments');
+        Schema::dropIfExists('orders');
+    }
+};

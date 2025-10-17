@@ -18,16 +18,14 @@
                             <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $events->total() }}</div>
                             <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Total Events</div>
                             <div class="flex items-center">
-                                <div class="flex items-center text-xs text-wwc-success font-semibold">
-                                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                                    </svg>
+                                <div class="flex items-center text-xs text-wwc-info font-semibold">
+                                    <i class='bx bx-calendar text-xs mr-1'></i>
                                     {{ $events->where('status', 'On Sale')->count() }} Active
                                 </div>
                             </div>
                         </div>
-                        <div class="h-12 w-12 rounded-lg bg-red-100 flex items-center justify-center">
-                            <i class='bx bx-calendar text-2xl text-red-600'></i>
+                        <div class="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center">
+                            <i class='bx bx-calendar text-2xl text-blue-600'></i>
                         </div>
                     </div>
                 </div>
@@ -40,7 +38,7 @@
                             <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">On Sale</div>
                             <div class="flex items-center">
                                 <div class="flex items-center text-xs text-wwc-success font-semibold">
-                                    <i class='bx bx-time text-xs mr-1'></i>
+                                    <i class='bx bx-dollar text-xs mr-1'></i>
                                     {{ $events->where('status', 'Draft')->count() }} Draft
                                 </div>
                             </div>
@@ -74,13 +72,11 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">RM{{ number_format($events->sum(function($event) { return $event->tickets_count * 50; }), 0) }}</div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">RM{{ number_format($events->sum(function($event) { return $event->purchase_tickets_count * 50; }), 0) }}</div>
                             <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Est. Revenue</div>
                             <div class="flex items-center">
                                 <div class="flex items-center text-xs text-wwc-accent font-semibold">
-                                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                                    </svg>
+                                    <i class='bx bx-trending-up text-xs mr-1'></i>
                                     +12% this month
                                 </div>
                             </div>
@@ -149,7 +145,7 @@
             <!-- Header Section with Create Button -->
             <div class="flex justify-end items-center mb-6">
                 <a href="{{ route('admin.events.create') }}" 
-                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-semibold rounded-lg text-white bg-wwc-primary hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
+                   class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-semibold rounded-lg text-white bg-wwc-primary hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
                     <i class='bx bx-plus text-sm mr-2'></i>
                     Create New Event
                 </a>
@@ -161,9 +157,24 @@
                     <div class="px-6 py-4 border-b border-wwc-neutral-100">
                         <div class="flex items-center justify-between">
                             <h3 class="text-lg font-bold text-wwc-neutral-900">All Events</h3>
-                            <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
-                                <i class='bx bx-calendar text-sm'></i>
-                                <span>Showing {{ $events->count() }} of {{ $events->total() }} events</span>
+                            <div class="flex items-center space-x-4">
+                                <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
+                                    <i class='bx bx-calendar text-sm'></i>
+                                    <span>Showing {{ $events->count() }} of {{ $events->total() }} events</span>
+                                </div>
+                                <form method="GET" class="flex items-center space-x-2">
+                                    @foreach(request()->except('limit') as $key => $value)
+                                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                                    @endforeach
+                                    <label for="limit" class="text-xs font-semibold text-wwc-neutral-600">Limit:</label>
+                                    <select name="limit" id="limit" onchange="this.form.submit()" class="px-2 py-1 border border-wwc-neutral-300 rounded text-xs focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary">
+                                        <option value="10" {{ request('limit', 10) == 10 ? 'selected' : '' }}>10</option>
+                                        <option value="15" {{ request('limit', 10) == 15 ? 'selected' : '' }}>15</option>
+                                        <option value="25" {{ request('limit', 10) == 25 ? 'selected' : '' }}>25</option>
+                                        <option value="50" {{ request('limit', 10) == 50 ? 'selected' : '' }}>50</option>
+                                        <option value="100" {{ request('limit', 10) == 100 ? 'selected' : '' }}>100</option>
+                                    </select>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -233,11 +244,11 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-semibold text-wwc-neutral-900">{{ \App\Models\Ticket::where('event_id', $event->id)->where('status', 'Sold')->count() }}</div>
+                                        <div class="text-sm font-semibold text-wwc-neutral-900">{{ \App\Models\PurchaseTicket::where('event_id', $event->id)->where('status', 'Sold')->count() }}</div>
                                         <div class="text-xs text-wwc-neutral-500">tickets sold</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-semibold text-wwc-neutral-900">RM{{ number_format($event->tickets()->where('status', 'Sold')->sum('price_paid'), 0) }}</div>
+                                        <div class="text-sm font-semibold text-wwc-neutral-900">RM{{ number_format($event->purchaseTickets()->where('status', 'Sold')->sum('price_paid'), 0) }}</div>
                                         <div class="text-xs text-wwc-neutral-500">total revenue</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">

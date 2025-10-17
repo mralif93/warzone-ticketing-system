@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Limit Functionality</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .test-link { display: inline-block; margin: 5px; padding: 10px 15px; background: #007bff; color: white; text-decoration: none; border-radius: 3px; }
+        .test-link:hover { background: #0056b3; }
+        .result { margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>Limit Functionality Test</h1>
+    
+    <div class="test-section">
+        <h3>Test Admin Index Pages with Different Limits</h3>
+        <p>Click the links below to test the limit functionality on different admin pages:</p>
+        
+        <h4>Events Index:</h4>
+        <a href="http://127.0.0.1:8000/admin/events?limit=10" class="test-link" target="_blank">Events - 10 per page</a>
+        <a href="http://127.0.0.1:8000/admin/events?limit=25" class="test-link" target="_blank">Events - 25 per page</a>
+        <a href="http://127.0.0.1:8000/admin/events?limit=50" class="test-link" target="_blank">Events - 50 per page</a>
+        
+        <h4>Users Index:</h4>
+        <a href="http://127.0.0.1:8000/admin/users?limit=10" class="test-link" target="_blank">Users - 10 per page</a>
+        <a href="http://127.0.0.1:8000/admin/users?limit=25" class="test-link" target="_blank">Users - 25 per page</a>
+        <a href="http://127.0.0.1:8000/admin/users?limit=50" class="test-link" target="_blank">Users - 50 per page</a>
+        
+        <h4>Orders Index:</h4>
+        <a href="http://127.0.0.1:8000/admin/orders?limit=10" class="test-link" target="_blank">Orders - 10 per page</a>
+        <a href="http://127.0.0.1:8000/admin/orders?limit=25" class="test-link" target="_blank">Orders - 25 per page</a>
+        <a href="http://127.0.0.1:8000/admin/orders?limit=50" class="test-link" target="_blank">Orders - 50 per page</a>
+        
+        <h4>Tickets Index:</h4>
+        <a href="http://127.0.0.1:8000/admin/tickets?limit=10" class="test-link" target="_blank">Tickets - 10 per page</a>
+        <a href="http://127.0.0.1:8000/admin/tickets?limit=25" class="test-link" target="_blank">Tickets - 25 per page</a>
+        <a href="http://127.0.0.1:8000/admin/tickets?limit=50" class="test-link" target="_blank">Tickets - 50 per page</a>
+        
+        <h4>Purchases Index:</h4>
+        <a href="http://127.0.0.1:8000/admin/purchases?limit=10" class="test-link" target="_blank">Purchases - 10 per page</a>
+        <a href="http://127.0.0.1:8000/admin/purchases?limit=25" class="test-link" target="_blank">Purchases - 25 per page</a>
+        <a href="http://127.0.0.1:8000/admin/purchases?limit=50" class="test-link" target="_blank">Purchases - 50 per page</a>
+        
+        <h4>Payments Index:</h4>
+        <a href="http://127.0.0.1:8000/admin/payments?limit=10" class="test-link" target="_blank">Payments - 10 per page</a>
+        <a href="http://127.0.0.1:8000/admin/payments?limit=25" class="test-link" target="_blank">Payments - 25 per page</a>
+        <a href="http://127.0.0.1:8000/admin/payments?limit=50" class="test-link" target="_blank">Payments - 50 per page</a>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test Invalid Values</h3>
+        <p>These should default to 10 per page:</p>
+        <a href="http://127.0.0.1:8000/admin/events?limit=999" class="test-link" target="_blank">Events - Invalid (999)</a>
+        <a href="http://127.0.0.1:8000/admin/events?limit=abc" class="test-link" target="_blank">Events - Invalid (abc)</a>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test with Search Filters</h3>
+        <p>These should preserve search filters while changing limit:</p>
+        <a href="http://127.0.0.1:8000/admin/events?search=test&limit=25" class="test-link" target="_blank">Events - Search + 25 per page</a>
+        <a href="http://127.0.0.1:8000/admin/users?role=Customer&limit=10" class="test-link" target="_blank">Users - Role filter + 10 per page</a>
+    </div>
+    
+    <div class="result">
+        <h4>Expected Results:</h4>
+        <ul>
+            <li>✅ Each page should show the correct number of items per page</li>
+            <li>✅ The "Limit" dropdown should show the selected value</li>
+            <li>✅ Pagination should work correctly with the new limit</li>
+            <li>✅ Search and filter parameters should be preserved</li>
+            <li>✅ Invalid values should default to 10 per page</li>
+        </ul>
+    </div>
+</body>
+</html>

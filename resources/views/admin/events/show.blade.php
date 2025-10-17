@@ -98,11 +98,24 @@
                                     </div>
                                 </div>
 
-                                <!-- Max Tickets Per Order -->
+                                <!-- Total Seats -->
                                 <div class="flex items-center py-3 border-b border-wwc-neutral-100">
                                     <div class="flex-shrink-0 mr-4">
                                         <div class="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center">
-                                            <i class='bx bx-receipt text-sm text-blue-600'></i>
+                                            <i class='bx bx-chair text-sm text-blue-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Total Seats</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">{{ number_format($event->total_seats) }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Max Tickets Per Order -->
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
+                                    <div class="flex-shrink-0 mr-4">
+                                        <div class="h-8 w-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                                            <i class='bx bx-receipt text-sm text-purple-600'></i>
                                         </div>
                                     </div>
                                     <div class="flex-1 flex items-center justify-between">
@@ -112,7 +125,7 @@
                                 </div>
 
                                 <!-- Description -->
-                                <div class="flex items-center py-3">
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
                                     <div class="flex-shrink-0 mr-4">
                                         <div class="h-8 w-8 rounded-lg bg-purple-100 flex items-center justify-center">
                                             <i class='bx bx-detail text-sm text-purple-600'></i>
@@ -123,11 +136,55 @@
                                         <span class="text-base font-medium text-wwc-neutral-900 leading-relaxed text-right max-w-md">{{ $event->description ?: 'No description provided' }}</span>
                                     </div>
                                 </div>
+
+                                @if($event->isMultiDay())
+                                <!-- Combo Discount Information -->
+                                <div class="py-3">
+                                    <div class="bg-wwc-accent-light rounded-lg p-4">
+                                        <div class="flex items-center mb-3">
+                                            <div class="h-8 w-8 rounded-lg bg-wwc-accent flex items-center justify-center mr-3">
+                                                <i class='bx bx-discount text-sm text-white'></i>
+                                            </div>
+                                            <h4 class="text-sm font-semibold text-wwc-neutral-900">Combo Discount Settings</h4>
+                                        </div>
+                                        
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-xs font-medium text-wwc-neutral-600">Combo Discount Enabled</span>
+                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold
+                                                    {{ $event->combo_discount_enabled ? 'bg-wwc-success text-white' : 'bg-wwc-neutral-300 text-wwc-neutral-700' }}">
+                                                    @if($event->combo_discount_enabled)
+                                                        <i class='bx bx-check text-xs mr-1'></i>
+                                                        Enabled
+                                                    @else
+                                                        <i class='bx bx-x text-xs mr-1'></i>
+                                                        Disabled
+                                                    @endif
+                                                </span>
+                                            </div>
+                                            
+                                            @if($event->combo_discount_enabled)
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-xs font-medium text-wwc-neutral-600">Discount Percentage</span>
+                                                <span class="text-sm font-semibold text-wwc-accent">{{ $event->combo_discount_percentage }}%</span>
+                                            </div>
+                                            @endif
+                                        </div>
+                                        
+                                        @if($event->combo_discount_enabled)
+                                        <div class="mt-3 p-2 bg-white rounded text-xs text-wwc-neutral-600">
+                                            <i class='bx bx-info-circle text-xs mr-1'></i>
+                                            Customers purchasing tickets for both days will receive a {{ $event->combo_discount_percentage }}% discount on their total order.
+                                        </div>
+                                        @endif
+                                    </div>
+                                </div>
+                                @endif
                             </div>
                     </div>
                 </div>
 
-                <!-- Recent Tickets -->
+                <!-- Recent Purchase Tickets -->
                 @if($recentTickets->count() > 0)
                         <div class="mt-6 bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
                             <div class="px-6 py-4 border-b border-wwc-neutral-100">
@@ -145,7 +202,8 @@
                                     <tr>
                                             <th class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider">Ticket ID</th>
                                             <th class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider">Customer</th>
-                                            <th class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider">Seat</th>
+                                            <th class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider">Ticket Type</th>
+                                            <th class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider">Event Day</th>
                                             <th class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider">Status</th>
                                             <th class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider">Price</th>
                                     </tr>
@@ -162,6 +220,13 @@
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-wwc-neutral-900">
                                                 {{ $ticket->zone }}
                                             </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-wwc-neutral-900">
+                                                    @if($ticket->event_day)
+                                                        {{ $ticket->event_day_name ?: \Carbon\Carbon::parse($ticket->event_day)->format('M j, Y') }}
+                                                    @else
+                                                        <span class="text-wwc-neutral-500">Single Day</span>
+                                                    @endif
+                                                </td>
                                                 <td class="px-6 py-4 whitespace-nowrap">
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
                                                     @if($ticket->status === 'Sold') bg-wwc-success text-white
@@ -183,6 +248,9 @@
                                             </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-wwc-neutral-900">
                                                     RM{{ number_format($ticket->price_paid, 0) }}
+                                                    @if($ticket->is_combo_purchase)
+                                                        <span class="text-xs text-wwc-accent ml-1">(Combo)</span>
+                                                    @endif
                                             </td>
                                         </tr>
                                     @endforeach
@@ -190,6 +258,57 @@
                             </table>
                         </div>
                     </div>
+                @endif
+
+                <!-- Ticket Types -->
+                @if($event->ticketTypes->count() > 0)
+                <div class="mt-6 bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
+                    <div class="px-6 py-4 border-b border-wwc-neutral-100">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-bold text-wwc-neutral-900">Available Ticket Types</h3>
+                            <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
+                                <i class='bx bx-ticket text-sm'></i>
+                                <span>Ticket categories</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            @foreach($event->ticketTypes as $ticketType)
+                            <div class="border border-wwc-neutral-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-200">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="text-sm font-semibold text-wwc-neutral-900">{{ $ticketType->name }}</h4>
+                                    @if($ticketType->is_combo)
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-wwc-accent text-white">
+                                            <i class='bx bx-discount text-xs mr-1'></i>
+                                            Combo
+                                        </span>
+                                    @endif
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between text-xs">
+                                        <span class="text-wwc-neutral-600">Price</span>
+                                        <span class="font-semibold text-wwc-neutral-900">RM{{ number_format($ticketType->price, 0) }}</span>
+                                    </div>
+                                    <div class="flex justify-between text-xs">
+                                        <span class="text-wwc-neutral-600">Available</span>
+                                        <span class="font-semibold text-wwc-neutral-900">{{ number_format($ticketType->available_seats) }}</span>
+                                    </div>
+                                    <div class="flex justify-between text-xs">
+                                        <span class="text-wwc-neutral-600">Sold</span>
+                                        <span class="font-semibold text-wwc-neutral-900">{{ number_format($ticketType->sold_seats) }}</span>
+                                    </div>
+                                    @if($ticketType->description)
+                                    <div class="text-xs text-wwc-neutral-500 mt-2">
+                                        {{ Str::limit($ticketType->description, 60) }}
+                                    </div>
+                                    @endif
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
                 @endif
             </div>
 
@@ -210,8 +329,8 @@
                         <div class="space-y-4">
                             <div>
                                 <div class="flex justify-between text-sm font-semibold mb-2">
-                                    <span class="text-wwc-neutral-600">Total Capacity</span>
-                                    <span class="text-wwc-neutral-900">{{ number_format($ticketStats['total_capacity']) }}</span>
+                                    <span class="text-wwc-neutral-600">Total Seats</span>
+                                    <span class="text-wwc-neutral-900">{{ number_format($event->total_seats) }}</span>
                                 </div>
                                 <div class="w-full bg-wwc-neutral-200 rounded-full h-2">
                                     <div class="bg-wwc-primary h-2 rounded-full" style="width: 100%"></div>
@@ -237,6 +356,15 @@
                                     <div class="bg-wwc-info h-2 rounded-full" style="width: {{ 100 - $ticketStats['sold_percentage'] }}%"></div>
                                 </div>
                             </div>
+
+                            @if($event->isMultiDay() && $event->combo_discount_enabled)
+                            <div class="pt-2 border-t border-wwc-neutral-200">
+                                <div class="text-center">
+                                    <div class="text-lg font-bold text-wwc-accent">{{ $event->combo_discount_percentage }}%</div>
+                                    <div class="text-xs text-wwc-neutral-600 font-medium">Combo Discount</div>
+                                </div>
+                            </div>
+                            @endif
                         </div>
 
                         <div class="mt-6 pt-4 border-t border-wwc-neutral-200">

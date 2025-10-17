@@ -15,7 +15,7 @@ class EventController extends Controller
      */
     public function index()
     {
-        $events = Event::withCount('tickets')
+        $events = Event::withCount('customerTickets')
             ->orderBy('date_time', 'asc')
             ->paginate(10);
 

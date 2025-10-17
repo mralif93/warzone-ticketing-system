@@ -20,12 +20,23 @@ class Payment extends Model
         'stripe_response',
         'failure_reason',
         'processed_at',
+        'refund_amount',
+        'refund_date',
+        'refund_reason',
+        'refund_method',
+        'refund_reference',
+        'transaction_id',
+        'payment_date',
+        'notes',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'refund_amount' => 'decimal:2',
         'stripe_response' => 'array',
         'processed_at' => 'datetime',
+        'refund_date' => 'datetime',
+        'payment_date' => 'datetime',
     ];
 
     /**
@@ -98,5 +109,93 @@ class Payment extends Model
     public function getFormattedAmountAttribute(): string
     {
         return '$' . number_format($this->amount, 2);
+    }
+
+    /**
+     * Check if payment has been refunded
+     */
+    public function hasRefund(): bool
+    {
+        return !is_null($this->refund_amount) && $this->refund_amount > 0;
+    }
+
+    /**
+     * Check if payment is fully refunded
+     */
+    public function isFullyRefunded(): bool
+    {
+        return $this->hasRefund() && $this->refund_amount >= $this->amount;
+    }
+
+    /**
+     * Check if payment is partially refunded
+     */
+    public function isPartiallyRefunded(): bool
+    {
+        return $this->hasRefund() && $this->refund_amount < $this->amount;
+    }
+
+    /**
+     * Get remaining refundable amount
+     */
+    public function getRemainingRefundableAmount(): float
+    {
+        if (!$this->hasRefund()) {
+            return $this->amount;
+        }
+        
+        return max(0, $this->amount - $this->refund_amount);
+    }
+
+    /**
+     * Process refund
+     */
+    public function processRefund(float $amount, string $reason, ?string $method = null, ?string $reference = null): bool
+    {
+        // Validate payment status
+        if (!$this->isSuccessful()) {
+            throw new \InvalidArgumentException('Only successful payments can be refunded');
+        }
+
+        // Validate refund amount
+        if ($amount <= 0) {
+            throw new \InvalidArgumentException('Refund amount must be greater than 0');
+        }
+
+        if ($amount > $this->getRemainingRefundableAmount()) {
+            throw new \InvalidArgumentException('Refund amount cannot exceed remaining refundable amount');
+        }
+
+        // Update payment with refund information
+        $this->update([
+            'refund_amount' => ($this->refund_amount ?? 0) + $amount,
+            'refund_date' => now(),
+            'refund_reason' => $reason,
+            'refund_method' => $method ?? $this->method,
+            'refund_reference' => $reference,
+            'status' => $this->isFullyRefunded() ? 'Refunded' : 'Partially Refunded'
+        ]);
+
+        return true;
+    }
+
+    /**
+     * Get refund status
+     */
+    public function getRefundStatus(): string
+    {
+        if (!$this->hasRefund()) {
+            return 'No Refund';
+        }
+
+        if ($this->isFullyRefunded()) {
+            return 'Fully Refunded';
+        }
+
+        if ($this->isPartiallyRefunded()) {
+            return 'Partially Refunded';
+        }
+
+        return 'Unknown';
     }
 }

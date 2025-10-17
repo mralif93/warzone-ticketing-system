@@ -81,6 +81,9 @@
                                            value="{{ old('amount', $payment->amount) }}"
                                            class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('amount') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror"
                                            placeholder="Enter payment amount">
+                                    <div class="text-xs text-wwc-neutral-500 mt-1">
+                                        <span id="order-total-info" class="hidden">Order total: RM<span id="order-total-amount">0.00</span></span>
+                                    </div>
                                     @error('amount')
                                         <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
                                     @enderror
@@ -88,20 +91,20 @@
 
                                 <!-- Payment Method -->
                                 <div>
-                                    <label for="payment_method" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                    <label for="method" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
                                         Payment Method <span class="text-wwc-error">*</span>
                                     </label>
-                                    <select name="payment_method" id="payment_method" required
-                                            class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('payment_method') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
+                                    <select name="method" id="method" required
+                                            class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('method') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
                                         <option value="">Select Payment Method</option>
-                                        <option value="Credit Card" {{ old('payment_method', $payment->payment_method) == 'Credit Card' ? 'selected' : '' }}>Credit Card</option>
-                                        <option value="Debit Card" {{ old('payment_method', $payment->payment_method) == 'Debit Card' ? 'selected' : '' }}>Debit Card</option>
-                                        <option value="Bank Transfer" {{ old('payment_method', $payment->payment_method) == 'Bank Transfer' ? 'selected' : '' }}>Bank Transfer</option>
-                                        <option value="E-Wallet" {{ old('payment_method', $payment->payment_method) == 'E-Wallet' ? 'selected' : '' }}>E-Wallet</option>
-                                        <option value="Cash" {{ old('payment_method', $payment->payment_method) == 'Cash' ? 'selected' : '' }}>Cash</option>
-                                        <option value="Other" {{ old('payment_method', $payment->payment_method) == 'Other' ? 'selected' : '' }}>Other</option>
+                                        <option value="Credit Card" {{ old('method', $payment->method) == 'Credit Card' ? 'selected' : '' }}>Credit Card</option>
+                                        <option value="Debit Card" {{ old('method', $payment->method) == 'Debit Card' ? 'selected' : '' }}>Debit Card</option>
+                                        <option value="Bank Transfer" {{ old('method', $payment->method) == 'Bank Transfer' ? 'selected' : '' }}>Bank Transfer</option>
+                                        <option value="E-Wallet" {{ old('method', $payment->method) == 'E-Wallet' ? 'selected' : '' }}>E-Wallet</option>
+                                        <option value="Cash" {{ old('method', $payment->method) == 'Cash' ? 'selected' : '' }}>Cash</option>
+                                        <option value="Other" {{ old('method', $payment->method) == 'Other' ? 'selected' : '' }}>Other</option>
                                     </select>
-                                    @error('payment_method')
+                                    @error('method')
                                         <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
                                     @enderror
                                 </div>
@@ -115,8 +118,9 @@
                                             class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('status') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
                                         <option value="">Select Status</option>
                                         <option value="Pending" {{ old('status', $payment->status) == 'Pending' ? 'selected' : '' }}>Pending</option>
-                                        <option value="Completed" {{ old('status', $payment->status) == 'Completed' ? 'selected' : '' }}>Completed</option>
+                                        <option value="Succeeded" {{ old('status', $payment->status) == 'Succeeded' ? 'selected' : '' }}>Succeeded</option>
                                         <option value="Failed" {{ old('status', $payment->status) == 'Failed' ? 'selected' : '' }}>Failed</option>
+                                        <option value="Cancelled" {{ old('status', $payment->status) == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
                                         <option value="Refunded" {{ old('status', $payment->status) == 'Refunded' ? 'selected' : '' }}>Refunded</option>
                                     </select>
                                     @error('status')
@@ -185,4 +189,95 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const orderSelect = document.getElementById('order_id');
+    const amountInput = document.getElementById('amount');
+    const orderTotalInfo = document.getElementById('order-total-info');
+    const orderTotalAmount = document.getElementById('order-total-amount');
+    const paymentDateInput = document.getElementById('payment_date');
+    
+    // Order data for dynamic loading
+    const orderData = @json($orderData);
+    
+    // Set minimum date to today for payment date
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    
+    const minDateTime = year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+    paymentDateInput.min = minDateTime;
+    
+    // Handle order selection change
+    orderSelect.addEventListener('change', function() {
+        const selectedOrderId = this.value;
+        
+        if (selectedOrderId && orderData[selectedOrderId]) {
+            const order = orderData[selectedOrderId];
+            
+            // Show order total info
+            orderTotalAmount.textContent = parseFloat(order.total_amount).toFixed(2);
+            orderTotalInfo.classList.remove('hidden');
+            
+            // Add visual feedback
+            amountInput.classList.add('bg-green-50', 'border-green-300');
+            setTimeout(() => {
+                amountInput.classList.remove('bg-green-50', 'border-green-300');
+            }, 2000);
+        } else {
+            // Hide info
+            orderTotalInfo.classList.add('hidden');
+        }
+    });
+    
+    // Handle amount input change
+    amountInput.addEventListener('input', function() {
+        const value = parseFloat(this.value);
+        const orderId = orderSelect.value;
+        
+        if (orderId && orderData[orderId]) {
+            const orderTotal = parseFloat(orderData[orderId].total_amount);
+            
+            if (value > orderTotal) {
+                this.classList.add('border-yellow-400', 'bg-yellow-50');
+                this.classList.remove('border-green-300', 'bg-green-50');
+            } else if (value === orderTotal) {
+                this.classList.add('border-green-300', 'bg-green-50');
+                this.classList.remove('border-yellow-400', 'bg-yellow-50');
+            } else {
+                this.classList.remove('border-yellow-400', 'bg-yellow-50', 'border-green-300', 'bg-green-50');
+            }
+        }
+    });
+    
+    // Initialize order total info if order is already selected
+    if (orderSelect.value && orderData[orderSelect.value]) {
+        const order = orderData[orderSelect.value];
+        orderTotalAmount.textContent = parseFloat(order.total_amount).toFixed(2);
+        orderTotalInfo.classList.remove('hidden');
+    }
+    
+    // Form validation enhancement
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const orderId = orderSelect.value;
+        const amount = parseFloat(amountInput.value);
+        
+        if (orderId && orderData[orderId]) {
+            const orderTotal = parseFloat(orderData[orderId].total_amount);
+            
+            if (amount > orderTotal) {
+                e.preventDefault();
+                alert('Payment amount (RM' + amount.toFixed(2) + ') cannot exceed order total (RM' + orderTotal.toFixed(2) + '). Please adjust the amount.');
+                amountInput.focus();
+                return false;
+            }
+        }
+    });
+});
+</script>
 @endsection

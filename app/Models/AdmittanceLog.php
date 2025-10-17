@@ -25,11 +25,20 @@ class AdmittanceLog extends Model
     ];
 
     /**
-     * Get the ticket for this log entry
+     * Get the purchase ticket for this log entry
+     */
+    public function purchaseTicket()
+    {
+        return $this->belongsTo(PurchaseTicket::class, 'ticket_id');
+    }
+
+    /**
+     * Get the ticket for this log entry - legacy
+     * @deprecated Use purchaseTicket() instead
      */
     public function ticket()
     {
-        return $this->belongsTo(Ticket::class);
+        return $this->purchaseTicket();
     }
 
     /**

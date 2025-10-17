@@ -5,37 +5,31 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
 
 class Ticket extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'order_id',
         'event_id',
-        'zone',
-        'qrcode',
+        'name',
+        'price',
+        'total_seats',
+        'available_seats',
+        'sold_seats',
+        'scanned_seats',
         'status',
-        'scanned_at',
-        'price_paid',
+        'description',
+        'is_combo',
     ];
 
     protected $casts = [
-        'scanned_at' => 'datetime',
-        'price_paid' => 'decimal:2',
+        'price' => 'decimal:2',
+        'is_combo' => 'boolean',
     ];
 
     /**
-     * Get the order for this ticket
-     */
-    public function order()
-    {
-        return $this->belongsTo(Order::class);
-    }
-
-    /**
-     * Get the event for this ticket
+     * Get the event for this zone
      */
     public function event()
     {
@@ -43,114 +37,89 @@ class Ticket extends Model
     }
 
     /**
-     * Get the admittance logs for this ticket
+     * Get the purchase tickets for this ticket type
      */
-    public function admittanceLogs()
+    public function purchaseTickets()
     {
-        return $this->hasMany(AdmittanceLog::class);
+        return $this->hasMany(PurchaseTicket::class, 'ticket_type_id');
     }
 
     /**
-     * Generate unique QR code
+     * Get the customer tickets for this zone - legacy
+     * @deprecated Use purchaseTickets() instead
      */
-    public static function generateQRCode(): string
+    public function customerTickets()
     {
-        do {
-            $qrcode = 'WZ' . Str::random(32);
-        } while (self::where('qrcode', $qrcode)->exists());
-
-        return $qrcode;
+        return $this->purchaseTickets();
     }
 
     /**
-     * Check if ticket is sold
+     * Get the tickets for this zone - legacy
+     * @deprecated Use purchaseTickets() instead
      */
-    public function isSold(): bool
+    public function tickets()
     {
-        return $this->status === 'Sold';
+        return $this->purchaseTickets();
     }
 
     /**
-     * Check if ticket is held
+     * Check if zone is sold out
      */
-    public function isHeld(): bool
+    public function isSoldOut(): bool
     {
-        return $this->status === 'Held';
+        return $this->available_seats <= 0;
     }
 
     /**
-     * Check if ticket is scanned
+     * Check if zone is active
      */
-    public function isScanned(): bool
+    public function isActive(): bool
     {
-        return $this->status === 'Scanned';
+        return $this->status === 'Active';
     }
 
     /**
-     * Check if ticket is invalid
+     * Get occupancy percentage
      */
-    public function isInvalid(): bool
+    public function getOccupancyPercentage(): float
     {
-        return $this->status === 'Invalid';
+        if ($this->total_seats == 0) {
+            return 0;
+        }
+        
+        return round(($this->sold_seats / $this->total_seats) * 100, 2);
     }
 
     /**
-     * Check if ticket is refunded
+     * Update sold seats count
      */
-    public function isRefunded(): bool
+    public function updateSoldSeats(): void
     {
-        return $this->status === 'Refunded';
-    }
-
-    /**
-     * Mark ticket as scanned
-     */
-    public function markAsScanned(): void
-    {
+        $soldCount = $this->purchaseTickets()->where('status', 'Sold')->count();
+        $scannedCount = $this->purchaseTickets()->where('status', 'Scanned')->count();
+        
         $this->update([
-            'status' => 'Scanned',
-            'scanned_at' => now(),
+            'sold_seats' => $soldCount,
+            'scanned_seats' => $scannedCount,
+            'available_seats' => $this->total_seats - $soldCount,
+            'status' => $this->total_seats - $soldCount <= 0 ? 'Sold Out' : 'Active',
         ]);
     }
 
     /**
-     * Get ticket identifier
+     * Scope for active zones
      */
-    public function getTicketIdentifierAttribute(): string
+    public function scopeActive($query)
     {
-        return "TKT-{$this->id}";
+        return $query->where('status', 'Active');
     }
 
     /**
-     * Get ticket display name
+     * Scope for sold out zones
      */
-    public function getDisplayNameAttribute(): string
+    public function scopeSoldOut($query)
     {
-        return "Ticket #{$this->id}";
-    }
-
-    /**
-     * Scope for sold tickets
-     */
-    public function scopeSold($query)
-    {
-        return $query->where('status', 'Sold');
-    }
-
-    /**
-     * Scope for held tickets
-     */
-    public function scopeHeld($query)
-    {
-        return $query->where('status', 'Held');
-    }
-
-    /**
-     * Scope for scanned tickets
-     */
-    public function scopeScanned($query)
-    {
-        return $query->where('status', 'Scanned');
+        return $query->where('status', 'Sold Out');
     }
 
     /**
@@ -162,44 +131,26 @@ class Ticket extends Model
     }
 
     /**
-     * Scope for zone
+     * Check if this is a combo ticket type
      */
-    public function scopeForZone($query, string $zone)
+    public function isCombo(): bool
     {
-        return $query->where('zone', $zone);
+        return $this->is_combo;
     }
 
     /**
-     * Scope for available tickets (not sold or held)
+     * Scope for combo ticket types
      */
-    public function scopeAvailable($query)
+    public function scopeCombo($query)
     {
-        return $query->whereNotIn('status', ['Sold', 'Held']);
+        return $query->where('is_combo', true);
     }
 
     /**
-     * Get zone price based on zone
+     * Scope for non-combo ticket types
      */
-    public function getZonePrice(): float
+    public function scopeNonCombo($query)
     {
-        $zonePrices = [
-            'Warzone Exclusive' => 350.00,
-            'Warzone VIP' => 250.00,
-            'Warzone Grandstand' => 220.00,
-            'Warzone Premium Ringside' => 199.00,
-            'Level 1 Zone A/B/C/D' => 129.00,
-            'Level 2 Zone A/B/C/D' => 89.00,
-            'Standing Zone A/B' => 49.00,
-        ];
-
-        return $zonePrices[$this->zone] ?? 49.00;
-    }
-
-    /**
-     * Check if ticket is for a specific zone
-     */
-    public function isForZone(string $zone): bool
-    {
-        return $this->zone === $zone;
+        return $query->where('is_combo', false);
     }
 }

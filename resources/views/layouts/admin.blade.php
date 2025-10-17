@@ -181,6 +181,23 @@
                         @endif
                     </a>
 
+                    <!-- Purchases -->
+                    <a href="{{ route('admin.purchases.index') }}" 
+                       class="group flex items-center px-4 py-4 text-sm font-semibold rounded-xl transition-all duration-300 {{ request()->routeIs('admin.purchases*') ? 'bg-gradient-to-r from-wwc-primary-light to-red-100 text-wwc-primary shadow-lg border border-red-200' : 'text-wwc-neutral-600 hover:bg-wwc-neutral-50 hover:text-wwc-neutral-900 hover:shadow-md' }}">
+                        <div class="flex-shrink-0 mr-4">
+                            <div class="h-10 w-10 rounded-xl flex items-center justify-center {{ request()->routeIs('admin.purchases*') ? 'bg-wwc-primary-light' : 'bg-wwc-neutral-100 group-hover:bg-wwc-neutral-200' }} transition-colors duration-300">
+                                <i class='bx bx-purchase-tag text-lg {{ request()->routeIs('admin.purchases*') ? 'text-wwc-primary' : 'text-wwc-neutral-500 group-hover:text-wwc-neutral-700' }}'></i>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="font-semibold">Purchases</div>
+                            <div class="text-xs text-wwc-neutral-500 mt-0.5">Ticket Purchases</div>
+                        </div>
+                        @if(request()->routeIs('admin.purchases*'))
+                        <div class="h-2 w-2 bg-wwc-primary rounded-full"></div>
+                        @endif
+                    </a>
+
                     <!-- Orders -->
                     <a href="{{ route('admin.orders.index') }}" 
                        class="group flex items-center px-4 py-4 text-sm font-semibold rounded-xl transition-all duration-300 {{ request()->routeIs('admin.orders*') ? 'bg-gradient-to-r from-wwc-primary-light to-red-100 text-wwc-primary shadow-lg border border-red-200' : 'text-wwc-neutral-600 hover:bg-wwc-neutral-50 hover:text-wwc-neutral-900 hover:shadow-md' }}">

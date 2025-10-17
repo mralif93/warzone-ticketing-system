@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\Order;
-use App\Models\Ticket;
+use App\Models\CustomerTicket;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,7 +21,7 @@ class CustomerController extends Controller
         $user = Auth::user();
         
         // Get recent tickets
-        $recentTickets = Ticket::whereHas('order', function($query) use ($user) {
+        $recentTickets = CustomerTicket::whereHas('order', function($query) use ($user) {
                 $query->where('user_id', $user->id);
             })
             ->with(['event'])
@@ -39,7 +39,7 @@ class CustomerController extends Controller
         // Get order statistics
         $orderStats = [
             'total_orders' => Order::where('user_id', $user->id)->count(),
-            'total_tickets' => Ticket::whereHas('order', function($query) use ($user) {
+            'total_tickets' => CustomerTicket::whereHas('order', function($query) use ($user) {
                 $query->where('user_id', $user->id);
             })->count(),
             'total_spent' => Order::where('user_id', $user->id)->sum('total_amount'),
@@ -144,7 +144,7 @@ class CustomerController extends Controller
             $query->where('date_time', '<=', $request->date_to . ' 23:59:59');
         }
 
-        $events = $query->withCount('tickets')->latest()->paginate(12);
+        $events = $query->withCount('customerTickets')->latest()->paginate(12);
         $statuses = Event::select('status')->distinct()->pluck('status');
 
         return view('customer.events', compact('events', 'statuses'));
@@ -157,7 +157,7 @@ class CustomerController extends Controller
     {
         $user = Auth::user();
         
-        $query = Ticket::whereHas('order', function($q) use ($user) {
+        $query = CustomerTicket::whereHas('order', function($q) use ($user) {
             $q->where('user_id', $user->id);
         });
 
@@ -187,8 +187,8 @@ class CustomerController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        $statuses = Ticket::select('status')->distinct()->pluck('status');
-        $events = Event::whereHas('tickets', function($q) use ($user) {
+        $statuses = CustomerTicket::select('status')->distinct()->pluck('status');
+        $events = Event::whereHas('customerTickets', function($q) use ($user) {
             $q->whereHas('order', function($orderQuery) use ($user) {
                 $orderQuery->where('user_id', $user->id);
             });

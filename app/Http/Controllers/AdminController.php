@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Event;
 use App\Models\Order;
-use App\Models\Ticket;
+use App\Models\PurchaseTicket;
 use App\Models\Payment;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
@@ -94,13 +94,13 @@ class AdminController extends Controller
             'events_draft' => Event::where('status', 'Draft')->count(),
             'events_sold_out' => Event::where('status', 'Sold Out')->count(),
             'total_orders' => Order::count(),
-            'total_tickets_sold' => Ticket::where('status', 'Sold')->count(),
-            'total_tickets_held' => Ticket::where('status', 'Held')->count(),
+            'total_tickets_sold' => PurchaseTicket::where('status', 'Sold')->count(),
+            'total_tickets_held' => PurchaseTicket::where('status', 'Held')->count(),
             'total_revenue' => Payment::where('status', 'Completed')->sum('amount'),
             'pending_orders' => Order::where('status', 'Pending')->count(),
             'completed_orders' => Order::where('status', 'Paid')->count(),
-            'total_tickets' => Ticket::count(),
-            'sold_tickets' => Ticket::where('status', 'Sold')->count(),
+            'total_tickets' => PurchaseTicket::count(),
+            'sold_tickets' => PurchaseTicket::where('status', 'Sold')->count(),
         ];
 
         // Get recent activity
@@ -109,7 +109,7 @@ class AdminController extends Controller
             ->limit(5)
             ->get();
 
-        $recentTickets = Ticket::with(['order.user', 'event'])
+        $recentTickets = PurchaseTicket::with(['order.user', 'event'])
             ->latest()
             ->limit(10)
             ->get();
@@ -176,7 +176,7 @@ class AdminController extends Controller
             $query->where('role', $request->role);
         }
 
-        $users = $query->withCount(['orders', 'tickets'])
+        $users = $query->withCount(['orders', 'purchaseTickets'])
             ->paginate(15);
 
         $roles = User::select('role')->distinct()->pluck('role');
@@ -189,8 +189,8 @@ class AdminController extends Controller
      */
     public function showUser(User $user)
     {
-        $user->loadCount(['orders', 'tickets']);
-        $user->load(['orders.tickets', 'auditLogs']);
+        $user->loadCount(['orders', 'purchaseTickets']);
+        $user->load(['orders.purchaseTickets', 'auditLogs']);
 
         return view('admin.users.show', compact('user'));
     }
@@ -347,7 +347,7 @@ class AdminController extends Controller
      */
     public function orders(Request $request)
     {
-        $query = Order::with(['user', 'tickets']);
+        $query = Order::with(['user', 'purchaseTickets']);
 
         // Search functionality
         if ($request->filled('search')) {
@@ -377,7 +377,7 @@ class AdminController extends Controller
      */
     public function showOrder(Order $order)
     {
-        $order->load(['user', 'tickets.event', 'payments']);
+        $order->load(['user', 'purchaseTickets.event', 'payments']);
 
         return view('admin.orders.show', compact('order'));
     }
@@ -387,7 +387,7 @@ class AdminController extends Controller
      */
     public function tickets(Request $request)
     {
-        $query = Ticket::with(['order.user', 'event']);
+        $query = PurchaseTicket::with(['order.user', 'event']);
 
         // Search functionality
         if ($request->filled('search')) {
@@ -409,7 +409,7 @@ class AdminController extends Controller
         }
 
         $tickets = $query->latest()->paginate(15);
-        $statuses = Ticket::select('status')->distinct()->pluck('status');
+        $statuses = PurchaseTicket::select('status')->distinct()->pluck('status');
 
         return view('admin.tickets.index', compact('tickets', 'statuses'));
     }
@@ -417,7 +417,7 @@ class AdminController extends Controller
     /**
      * Show ticket details
      */
-    public function showTicket(Ticket $ticket)
+    public function showTicket(PurchaseTicket $ticket)
     {
         $ticket->load(['order.user', 'event', 'admittanceLogs.staffUser']);
 
@@ -467,7 +467,7 @@ class AdminController extends Controller
         $totalRevenue = $revenueData->sum('total');
 
         // Ticket sales by event
-        $ticketSalesByEvent = Ticket::where('status', 'Sold')
+        $ticketSalesByEvent = PurchaseTicket::where('status', 'Sold')
             ->whereBetween('created_at', [$dateFrom, $dateTo])
             ->with('event')
             ->get()
@@ -541,7 +541,7 @@ class AdminController extends Controller
             $query->where('date_time', '<=', $request->date_to . ' 23:59:59');
         }
 
-        $events = $query->withCount('tickets')->latest()->paginate(15);
+        $events = $query->withCount('purchaseTickets')->latest()->paginate(15);
         $statuses = Event::select('status')->distinct()->pluck('status');
 
         return view('admin.events.index', compact('events', 'statuses'));
@@ -569,14 +569,14 @@ class AdminController extends Controller
 
     public function showEvent(Event $event)
     {
-        $event->loadCount('tickets');
-        $recentTickets = $event->tickets()->with('order.user')->latest()->take(10)->get();
+        $event->loadCount('purchaseTickets');
+        $recentTickets = $event->purchaseTickets()->with('order.user')->latest()->take(10)->get();
         
         $ticketStats = [
             'total_capacity' => 7000,
-            'tickets_sold' => $event->tickets()->where('status', 'Sold')->count(),
-            'tickets_held' => $event->tickets()->where('status', 'Held')->count(),
-            'tickets_available' => 7000 - $event->tickets()->whereIn('status', ['Sold', 'Held'])->count(),
+            'tickets_sold' => $event->purchaseTickets()->where('status', 'Sold')->count(),
+            'tickets_held' => $event->purchaseTickets()->where('status', 'Held')->count(),
+            'tickets_available' => 7000 - $event->purchaseTickets()->whereIn('status', ['Sold', 'Held'])->count(),
         ];
         
         $ticketStats['sold_percentage'] = $ticketStats['total_capacity'] > 0 
@@ -609,7 +609,7 @@ class AdminController extends Controller
     public function deleteEvent(Event $event)
     {
         // Check if event has tickets
-        if ($event->tickets()->count() > 0) {
+        if ($event->purchaseTickets()->count() > 0) {
             return back()->withErrors(['error' => 'Cannot delete event with existing tickets.']);
         }
 

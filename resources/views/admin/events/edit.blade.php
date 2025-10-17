@@ -100,7 +100,7 @@
                                 <div>
                                     <label for="end_date" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
                                         End Date & Time
-                                        <span class="text-xs text-wwc-neutral-500 font-normal">(Optional - for multi-day events)</span>
+                                        <span class="text-xs text-wwc-neutral-500 font-normal">(Optional - for multi-day events, max 2 days)</span>
                                     </label>
                                     <input type="datetime-local" name="end_date" id="end_date"
                                            value="{{ old('end_date', $event->end_date ? $event->end_date->format('Y-m-d\TH:i') : '') }}"
@@ -170,6 +170,51 @@
                                     @enderror
                                 </div>
                             </div>
+
+                            <!-- Combo Discount Section -->
+                            <div class="border-t border-wwc-neutral-200 pt-6">
+                                <div class="flex items-center mb-4">
+                                    <h4 class="text-lg font-semibold text-wwc-neutral-900">Combo Discount Settings</h4>
+                                    <span class="ml-2 text-xs text-wwc-neutral-500">(For multi-day events)</span>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                                    <!-- Combo Discount Enabled -->
+                                    <div>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" name="combo_discount_enabled" id="combo_discount_enabled" value="1"
+                                                   {{ old('combo_discount_enabled', $event->combo_discount_enabled) ? 'checked' : '' }}
+                                                   class="h-4 w-4 text-wwc-primary focus:ring-wwc-primary border-wwc-neutral-300 rounded @error('combo_discount_enabled') border-wwc-error @enderror">
+                                            <span class="ml-2 text-sm font-semibold text-wwc-neutral-900">Enable Combo Discount</span>
+                                        </label>
+                                        <p class="text-xs text-wwc-neutral-500 mt-1">Allow customers to purchase tickets for multiple days with a discount</p>
+                                        @error('combo_discount_enabled')
+                                            <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <!-- Combo Discount Percentage -->
+                                    <div>
+                                        <label for="combo_discount_percentage" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                            Combo Discount Percentage
+                                        </label>
+                                        <div class="relative">
+                                            <input type="number" name="combo_discount_percentage" id="combo_discount_percentage" 
+                                                   min="0" max="100" step="0.01"
+                                                   value="{{ old('combo_discount_percentage', $event->combo_discount_percentage) }}"
+                                                   class="block w-full px-3 py-2 pr-8 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('combo_discount_percentage') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror"
+                                                   placeholder="10.00">
+                                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                                <span class="text-wwc-neutral-500 text-sm">%</span>
+                                            </div>
+                                        </div>
+                                        <p class="text-xs text-wwc-neutral-500 mt-1">Discount percentage for 2-day combo purchases (0-100%)</p>
+                                        @error('combo_discount_percentage')
+                                            <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Submit Buttons -->
@@ -193,9 +238,14 @@
 </div>
 
 <script>
-// Set minimum date to today
 document.addEventListener('DOMContentLoaded', function() {
     const dateInput = document.getElementById('date_time');
+    const startDateInput = document.getElementById('start_date');
+    const endDateInput = document.getElementById('end_date');
+    const comboDiscountEnabled = document.getElementById('combo_discount_enabled');
+    const comboDiscountPercentage = document.getElementById('combo_discount_percentage');
+    
+    // Set minimum date to today
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -205,6 +255,48 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const minDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
     dateInput.min = minDateTime;
+    startDateInput.min = minDateTime;
+    endDateInput.min = minDateTime;
+    
+    // Handle combo discount checkbox
+    function toggleComboDiscount() {
+        const isEnabled = comboDiscountEnabled.checked;
+        comboDiscountPercentage.disabled = !isEnabled;
+        comboDiscountPercentage.style.opacity = isEnabled ? '1' : '0.5';
+    }
+    
+    comboDiscountEnabled.addEventListener('change', toggleComboDiscount);
+    toggleComboDiscount(); // Initial state
+    
+    // Validate multi-day events (max 2 days)
+    function validateMultiDayEvent() {
+        const startDate = startDateInput.value;
+        const endDate = endDateInput.value;
+        
+        if (startDate && endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            const diffTime = Math.abs(end - start);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays > 2) {
+                endDateInput.setCustomValidity('Multi-day events can only span a maximum of 2 days');
+                endDateInput.reportValidity();
+            } else {
+                endDateInput.setCustomValidity('');
+            }
+        }
+    }
+    
+    startDateInput.addEventListener('change', validateMultiDayEvent);
+    endDateInput.addEventListener('change', validateMultiDayEvent);
+    
+    // Auto-set start_date when date_time changes
+    dateInput.addEventListener('change', function() {
+        if (!startDateInput.value) {
+            startDateInput.value = dateInput.value;
+        }
+    });
 });
 </script>
 @endsection

@@ -217,6 +217,32 @@
                             </div>
                         </div>
 
+                        <!-- Default Event Section -->
+                        <div class="bg-wwc-neutral-50 rounded-lg p-4 border border-wwc-neutral-200 mt-6">
+                            <h3 class="text-sm font-semibold text-wwc-neutral-900 mb-3 flex items-center">
+                                <i class='bx bx-star text-wwc-primary mr-2'></i>
+                                Default Event Settings
+                            </h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="default" id="default" value="1" 
+                                               {{ old('default', $event->default) ? 'checked' : '' }}
+                                               class="h-4 w-4 text-wwc-primary focus:ring-wwc-primary border-wwc-neutral-300 rounded">
+                                        <span class="ml-2 text-sm text-wwc-neutral-700">
+                                            Set as default event
+                                        </span>
+                                    </label>
+                                    <p class="text-xs text-wwc-neutral-500 mt-1">
+                                        Only one event can be set as default. Setting this will unset any existing default event.
+                                    </p>
+                                    @error('default')
+                                        <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Submit Buttons -->
                         <div class="flex justify-end space-x-3 pt-6 border-t border-wwc-neutral-200 mt-6">
                             <a href="{{ route('admin.events.show', $event) }}" 

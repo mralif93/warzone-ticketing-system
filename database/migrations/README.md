@@ -27,10 +27,13 @@ This directory contains database migrations organized by functional modules for 
 - `events` - Event details and configuration
 
 **Key Features**:
-- Multi-day event support
+- Multi-day event support (max 2 days)
 - Status management (Draft, On Sale, Sold Out, Cancelled)
 - Venue information
 - Capacity management
+- Combo discount settings for multi-day events
+- Default event indicator (only one event can be default)
+- Single default event constraint enforcement
 - Soft deletes for data retention
 
 ---

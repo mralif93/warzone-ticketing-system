@@ -72,6 +72,7 @@ class EventController extends Controller
             'total_seats' => 'required|integer|min:1',
             'combo_discount_percentage' => 'nullable|numeric|min:0|max:100',
             'combo_discount_enabled' => 'nullable|boolean',
+            'default' => 'nullable|boolean',
         ]);
 
         // Prepare data for creation
@@ -82,6 +83,17 @@ class EventController extends Controller
         
         // Handle combo discount checkbox
         $data['combo_discount_enabled'] = $request->has('combo_discount_enabled');
+        
+        // Handle default checkbox
+        $data['default'] = $request->has('default');
+        
+        // If setting as default, unset any existing default event
+        if ($data['default']) {
+            $existingDefault = Event::where('default', true)->first();
+            if ($existingDefault) {
+                $existingDefault->update(['default' => false]);
+            }
+        }
         
         // Set default combo discount percentage if not provided
         if (!isset($data['combo_discount_percentage'])) {
@@ -102,8 +114,13 @@ class EventController extends Controller
             'user_agent' => $request->userAgent(),
         ]);
 
+        $message = 'Event created successfully!';
+        if ($event->default) {
+            $message .= ' This event has been set as the default event.';
+        }
+
         return redirect()->route('admin.events.show', $event)
-            ->with('success', 'Event created successfully!');
+            ->with('success', $message);
     }
 
     /**
@@ -153,6 +170,7 @@ class EventController extends Controller
             'total_seats' => 'required|integer|min:1',
             'combo_discount_percentage' => 'nullable|numeric|min:0|max:100',
             'combo_discount_enabled' => 'nullable|boolean',
+            'default' => 'nullable|boolean',
         ]);
 
         $oldValues = $event->toArray();
@@ -162,6 +180,17 @@ class EventController extends Controller
         
         // Handle combo discount checkbox
         $data['combo_discount_enabled'] = $request->has('combo_discount_enabled');
+        
+        // Handle default checkbox
+        $data['default'] = $request->has('default');
+        
+        // If setting as default, unset any existing default event
+        if ($data['default']) {
+            $existingDefault = Event::where('default', true)->where('id', '!=', $event->id)->first();
+            if ($existingDefault) {
+                $existingDefault->update(['default' => false]);
+            }
+        }
         
         // Set default combo discount percentage if not provided
         if (!isset($data['combo_discount_percentage'])) {
@@ -182,8 +211,13 @@ class EventController extends Controller
             'user_agent' => $request->userAgent(),
         ]);
 
+        $message = 'Event updated successfully!';
+        if ($event->default) {
+            $message .= ' This event has been set as the default event.';
+        }
+
         return redirect()->route('admin.events.show', $event)
-            ->with('success', 'Event updated successfully!');
+            ->with('success', $message);
     }
 
     /**

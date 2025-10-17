@@ -194,6 +194,9 @@
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider text-center">
                                     Status
                                 </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider text-center">
+                                    Default
+                                </th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider">
                                         Tickets Sold
                                     </th>
@@ -242,6 +245,16 @@
                                         @endif">
                                         {{ $event->status }}
                                     </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    @if($event->default)
+                                        <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                                            <i class='bx bx-star text-xs mr-1'></i>
+                                            Default
+                                        </span>
+                                    @else
+                                        <span class="text-xs text-wwc-neutral-400">-</span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm font-semibold text-wwc-neutral-900">{{ \App\Models\PurchaseTicket::where('event_id', $event->id)->where('status', 'Sold')->count() }}</div>

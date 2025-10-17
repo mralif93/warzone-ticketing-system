@@ -27,6 +27,7 @@ class EventModuleSeeder extends Seeder
                 'venue' => 'Warzone Arena, Kuala Lumpur',
                 'combo_discount_percentage' => 10.00,
                 'combo_discount_enabled' => true,
+                'default' => false, // Set as default event
             ],
             [
                 'name' => 'Concert Series: Rock Legends',
@@ -40,6 +41,7 @@ class EventModuleSeeder extends Seeder
                 'venue' => 'Warzone Arena, Kuala Lumpur',
                 'combo_discount_percentage' => 0.00,
                 'combo_discount_enabled' => false,
+                'default' => false,
             ],
             [
                 'name' => 'Tech Conference 2024',
@@ -122,6 +124,10 @@ class EventModuleSeeder extends Seeder
         ];
 
         foreach ($events as $eventData) {
+            // Ensure default field is set for all events
+            if (!isset($eventData['default'])) {
+                $eventData['default'] = false;
+            }
             Event::create($eventData);
         }
 

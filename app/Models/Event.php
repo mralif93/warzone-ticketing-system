@@ -22,6 +22,7 @@ class Event extends Model
         'venue',
         'combo_discount_percentage',
         'combo_discount_enabled',
+        'default',
     ];
 
     protected $casts = [
@@ -31,6 +32,7 @@ class Event extends Model
         'total_seats' => 'integer',
         'combo_discount_percentage' => 'decimal:2',
         'combo_discount_enabled' => 'boolean',
+        'default' => 'boolean',
     ];
 
     /**
@@ -355,5 +357,95 @@ class Event extends Model
         }
 
         return $days;
+    }
+
+    /**
+     * Check if this event is the default event
+     */
+    public function isDefault(): bool
+    {
+        return $this->default === true;
+    }
+
+    /**
+     * Set this event as the default event
+     */
+    public function setAsDefault(): void
+    {
+        // First, unset any existing default event
+        self::where('default', true)->update(['default' => false]);
+        
+        // Set this event as default
+        $this->update(['default' => true]);
+        
+        // Verify only one default event exists
+        $defaultCount = self::where('default', true)->count();
+        if ($defaultCount > 1) {
+            throw new \Exception('Multiple default events detected. This should not happen.');
+        }
+    }
+
+    /**
+     * Unset this event as the default event
+     */
+    public function unsetAsDefault(): void
+    {
+        $this->update(['default' => false]);
+    }
+
+    /**
+     * Get the default event
+     */
+    public static function getDefault(): ?self
+    {
+        return self::where('default', true)->first();
+    }
+
+    /**
+     * Scope for default events
+     */
+    public function scopeDefault($query)
+    {
+        return $query->where('default', true);
+    }
+
+    /**
+     * Scope for non-default events
+     */
+    public function scopeNonDefault($query)
+    {
+        return $query->where('default', false);
+    }
+
+    /**
+     * Ensure only one default event exists
+     * This method should be called after any bulk operations
+     */
+    public static function ensureSingleDefault(): void
+    {
+        $defaultEvents = self::where('default', true)->get();
+        
+        if ($defaultEvents->count() > 1) {
+            // Keep only the first one as default, unset the rest
+            $keepAsDefault = $defaultEvents->first();
+            self::where('default', true)
+                ->where('id', '!=', $keepAsDefault->id)
+                ->update(['default' => false]);
+        }
+    }
+
+    /**
+     * Boot method to ensure single default event
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // After any event is saved, ensure only one default exists
+        static::saved(function ($event) {
+            if ($event->default) {
+                self::ensureSingleDefault();
+            }
+        });
     }
 }

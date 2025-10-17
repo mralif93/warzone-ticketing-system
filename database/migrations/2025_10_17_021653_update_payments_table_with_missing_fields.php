@@ -51,16 +51,24 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('payments', function (Blueprint $table) {
-            // Remove added fields
-            $table->dropColumn([
-                'transaction_id',
-                'payment_date',
-                'notes'
-            ]);
+            // Remove added fields only if they exist
+            if (Schema::hasColumn('payments', 'transaction_id')) {
+                $table->dropColumn('transaction_id');
+            }
+            if (Schema::hasColumn('payments', 'payment_date')) {
+                $table->dropColumn('payment_date');
+            }
+            if (Schema::hasColumn('payments', 'notes')) {
+                $table->dropColumn('notes');
+            }
             
-            // Remove added indexes
-            $table->dropIndex(['transaction_id']);
-            $table->dropIndex(['payment_date']);
+            // Remove added indexes only if they exist
+            if (Schema::hasIndex('payments', 'payments_transaction_id_index')) {
+                $table->dropIndex(['transaction_id']);
+            }
+            if (Schema::hasIndex('payments', 'payments_payment_date_index')) {
+                $table->dropIndex(['payment_date']);
+            }
         });
     }
 };

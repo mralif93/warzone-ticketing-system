@@ -21,8 +21,8 @@ class OrderModuleSeeder extends Seeder
 
         // Clear existing data
         $this->command->info('Clearing existing orders and purchase tickets...');
-        DB::table('purchase')->truncate();
-        DB::table('orders')->truncate();
+        PurchaseTicket::query()->delete();
+        Order::query()->delete();
 
         // Get events, ticket types, and users
         $events = Event::all();
@@ -63,7 +63,7 @@ class OrderModuleSeeder extends Seeder
                 
                 // Generate unique order number
                 do {
-                    $orderNumber = 'WZ' . date('Ymd') . '-' . str_pad(rand(1000, 9999), 4, '0', STR_PAD_LEFT);
+                    $orderNumber = 'WZ' . date('Ymd') . '-' . str_pad(rand(1000, 9999), 4, '0', STR_PAD_LEFT) . '-' . uniqid();
                 } while (in_array($orderNumber, $usedOrderNumbers));
                 $usedOrderNumbers[] = $orderNumber;
                 

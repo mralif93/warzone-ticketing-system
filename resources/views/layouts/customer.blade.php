@@ -76,10 +76,6 @@
                            class="text-wwc-neutral-600 hover:text-wwc-primary px-3 py-2 text-sm font-medium transition-colors duration-200 {{ request()->routeIs('customer.dashboard') ? 'text-wwc-primary' : '' }}">
                             Dashboard
                         </a>
-                        <a href="{{ route('customer.events') }}" 
-                           class="text-wwc-neutral-600 hover:text-wwc-primary px-3 py-2 text-sm font-medium transition-colors duration-200 {{ request()->routeIs('customer.events*') ? 'text-wwc-primary' : '' }}">
-                            Events
-                        </a>
                         <a href="{{ route('customer.tickets') }}" 
                            class="text-wwc-neutral-600 hover:text-wwc-primary px-3 py-2 text-sm font-medium transition-colors duration-200 {{ request()->routeIs('customer.tickets*') ? 'text-wwc-primary' : '' }}">
                             Tickets
@@ -146,10 +142,6 @@
                         <a href="{{ route('customer.dashboard') }}" 
                            class="block px-3 py-2 text-base font-medium text-wwc-neutral-600 hover:text-wwc-primary">
                             Dashboard
-                        </a>
-                        <a href="{{ route('customer.events') }}" 
-                           class="block px-3 py-2 text-base font-medium text-wwc-neutral-600 hover:text-wwc-primary">
-                            Events
                         </a>
                         <a href="{{ route('customer.tickets') }}" 
                            class="block px-3 py-2 text-base font-medium text-wwc-neutral-600 hover:text-wwc-primary">

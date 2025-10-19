@@ -70,7 +70,6 @@ Route::middleware(['auth', 'log.activity'])->group(function () {
         Route::get('/profile', [CustomerController::class, 'profile'])->name('profile');
         Route::post('/profile', [CustomerController::class, 'updateProfile'])->name('profile.update');
         Route::post('/password', [CustomerController::class, 'updatePassword'])->name('password.update');
-        Route::get('/events', [CustomerController::class, 'events'])->name('events');
         Route::get('/tickets', [CustomerController::class, 'tickets'])->name('tickets');
         Route::get('/tickets/{ticket}', [CustomerController::class, 'showTicket'])->name('tickets.show');
         Route::get('/orders', [CustomerController::class, 'orders'])->name('orders');
@@ -151,7 +150,7 @@ Route::middleware(['auth', 'gate.staff'])->prefix('gate-staff')->name('gate-staf
 
 // Public routes (must be at the end to override protected routes)
 Route::get('/', [PublicController::class, 'home'])->name('home');
-// Route::get('/events', [PublicController::class, 'events'])->name('public.events'); // DISABLED
+Route::get('/events', [PublicController::class, 'events'])->name('public.events');
 Route::get('/events/{event}', [PublicController::class, 'showEvent'])->name('public.events.show');
 
 // Public ticket management routes

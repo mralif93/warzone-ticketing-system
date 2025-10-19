@@ -93,13 +93,13 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="text-center">
                 <!-- Event Details -->
-                <h1 class="text-2xl font-bold text-wwc-neutral-900 font-display mb-1">{{ $event->name }}</h1>
-                <p class="text-sm text-wwc-neutral-600">
-                    {{ $event->getFormattedDateRange() }}
-                    @if($event->venue)
-                        • {{ $event->venue }}
-                    @endif
-                </p>
+                    <h1 class="text-2xl font-bold text-wwc-neutral-900 font-display mb-1">{{ $event->name }}</h1>
+                    <p class="text-sm text-wwc-neutral-600">
+                        {{ $event->getFormattedDateRange() }}
+                        @if($event->venue)
+                            • {{ $event->venue }}
+                        @endif
+                    </p>
             </div>
         </div>
     </div>
@@ -623,7 +623,7 @@
                                             <div class="w-4 h-4 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200 shadow-lg" id="payment_bank_transfer_dot"></div>
                                         </div>
                                         <div class="ml-3">
-                                            <div class="flex items-center">
+                            <div class="flex items-center">
                                                 <h3 class="text-sm font-bold text-gray-900 mr-2">Bank Transfer</h3>
                                                 <span class="text-sm text-gray-600">|</span>
                                                 <div class="flex items-center ml-2">

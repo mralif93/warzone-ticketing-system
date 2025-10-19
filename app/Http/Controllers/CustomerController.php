@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\Order;
-use App\Models\CustomerTicket;
+use App\Models\PurchaseTicket;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,10 +21,10 @@ class CustomerController extends Controller
         $user = Auth::user();
         
         // Get recent tickets
-        $recentTickets = CustomerTicket::whereHas('order', function($query) use ($user) {
+        $recentTickets = PurchaseTicket::whereHas('order', function($query) use ($user) {
                 $query->where('user_id', $user->id);
             })
-            ->with(['event'])
+            ->with(['event', 'ticketType'])
             ->latest()
             ->take(5)
             ->get();
@@ -39,7 +39,7 @@ class CustomerController extends Controller
         // Get order statistics
         $orderStats = [
             'total_orders' => Order::where('user_id', $user->id)->count(),
-            'total_tickets' => CustomerTicket::whereHas('order', function($query) use ($user) {
+            'total_tickets' => PurchaseTicket::whereHas('order', function($query) use ($user) {
                 $query->where('user_id', $user->id);
             })->count(),
             'total_spent' => Order::where('user_id', $user->id)->sum('total_amount'),
@@ -114,41 +114,6 @@ class CustomerController extends Controller
         return back()->with('success', 'Password updated successfully.');
     }
 
-    /**
-     * Show customer events
-     */
-    public function events(Request $request)
-    {
-        $query = Event::query();
-
-        // Search functionality
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('venue', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
-            });
-        }
-
-        // Filter by status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        // Filter by date range
-        if ($request->filled('date_from')) {
-            $query->where('date_time', '>=', $request->date_from);
-        }
-        if ($request->filled('date_to')) {
-            $query->where('date_time', '<=', $request->date_to . ' 23:59:59');
-        }
-
-        $events = $query->withCount('customerTickets')->latest()->paginate(12);
-        $statuses = Event::select('status')->distinct()->pluck('status');
-
-        return view('customer.events', compact('events', 'statuses'));
-    }
 
     /**
      * Show customer tickets
@@ -157,7 +122,7 @@ class CustomerController extends Controller
     {
         $user = Auth::user();
         
-        $query = CustomerTicket::whereHas('order', function($q) use ($user) {
+        $query = PurchaseTicket::whereHas('order', function($q) use ($user) {
             $q->where('user_id', $user->id);
         });
 
@@ -183,12 +148,12 @@ class CustomerController extends Controller
             $query->where('event_id', $request->event);
         }
 
-        $tickets = $query->with(['event', 'order'])
+        $tickets = $query->with(['event', 'order', 'ticketType'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        $statuses = CustomerTicket::select('status')->distinct()->pluck('status');
-        $events = Event::whereHas('customerTickets', function($q) use ($user) {
+        $statuses = PurchaseTicket::select('status')->distinct()->pluck('status');
+        $events = Event::whereHas('purchaseTickets', function($q) use ($user) {
             $q->whereHas('order', function($orderQuery) use ($user) {
                 $orderQuery->where('user_id', $user->id);
             });
@@ -228,7 +193,7 @@ class CustomerController extends Controller
             $query->where('created_at', '<=', $request->date_to . ' 23:59:59');
         }
 
-        $orders = $query->with(['tickets.event'])
+        $orders = $query->with(['purchaseTickets.event', 'purchaseTickets.ticketType'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -248,13 +213,13 @@ class CustomerController extends Controller
     /**
      * Show individual ticket details
      */
-    public function showTicket(Ticket $ticket)
+    public function showTicket(PurchaseTicket $ticket)
     {
         if ($ticket->order->user_id !== Auth::id()) {
             abort(403, 'Unauthorized access to ticket.');
         }
 
-        $ticket->load(['event', 'order.user']);
+        $ticket->load(['event', 'order.user', 'ticketType']);
         
         return view('customer.ticket-details', compact('ticket'));
     }
@@ -268,7 +233,7 @@ class CustomerController extends Controller
             abort(403, 'Unauthorized access to order.');
         }
 
-        $order->load(['tickets.event', 'user']);
+        $order->load(['purchaseTickets.event', 'purchaseTickets.ticketType', 'user']);
         
         return view('customer.order-details', compact('order'));
     }

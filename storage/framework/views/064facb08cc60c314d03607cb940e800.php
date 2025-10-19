@@ -106,6 +106,7 @@
 
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+
         <div class="lg:col-span-2 space-y-6">
             <!-- Step 1: Purchase Type Selection -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -235,11 +236,27 @@ endif;
 unset($__errorArgs, $__bag); ?> text-sm bg-white shadow-sm transition-all duration-200 hover:border-gray-300">
                                     <option value="">Choose your preferred ticket type</option>
                                     <?php $__currentLoopData = $event->tickets->where('available_seats', '>', 0); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $ticket): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <?php
+                                            // For single-day purchase, show overall availability
+                                            $displayAvailable = $ticket->available_seats;
+                                            $displaySold = $ticket->sold_seats;
+                                        ?>
                                         <option value="<?php echo e($ticket->id); ?>" 
                                                 data-price="<?php echo e($ticket->price); ?>"
-                                                data-available="<?php echo e($ticket->available_seats); ?>"
+                                                data-available="<?php echo e($displayAvailable); ?>"
+                                                data-total="<?php echo e($ticket->total_seats); ?>"
+                                                data-sold="<?php echo e($displaySold); ?>"
                                                 <?php echo e(old('ticket_type_id') == $ticket->id ? 'selected' : ''); ?>>
-                                            <?php echo e($ticket->name); ?> - RM<?php echo e(number_format($ticket->price, 0)); ?> (<?php echo e($ticket->available_seats); ?> available)
+                                            <?php echo e($ticket->name); ?> - RM<?php echo e(number_format($ticket->price, 0)); ?> 
+                                            <?php if($event->isMultiDay()): ?>
+                                                <?php if($ticket->is_combo): ?>
+                                                    (<?php echo e($displayAvailable); ?>/<?php echo e($ticket->total_seats); ?> per day, <?php echo e($ticket->total_seats * $event->getDurationInDays()); ?> total)
+                                                <?php else: ?>
+                                                    (<?php echo e($displayAvailable); ?>/<?php echo e($ticket->total_seats); ?> per day)
+                                                <?php endif; ?>
+                                            <?php else: ?>
+                                                (<?php echo e($displayAvailable); ?>/<?php echo e($ticket->total_seats); ?> available)
+                                            <?php endif; ?>
                                     </option>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
@@ -314,6 +331,7 @@ unset($__errorArgs, $__bag); ?>
                     </div>
                 </div>
                 
+                
                 <!-- Step 2: Multi-Day Ticket Selection -->
                 <?php if($event->isMultiDay()): ?>
                 <div id="multi_day_selection" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hidden">
@@ -355,10 +373,31 @@ unset($__errorArgs, $__bag); ?>
                                                 class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary day-ticket-select text-sm bg-white shadow-sm transition-all duration-200 hover:border-gray-300">
                                             <option value="">Choose your preferred ticket type</option>
                                             <?php $__currentLoopData = $event->tickets->where('available_seats', '>', 0); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $ticket): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <?php
+                                                    // Calculate day-specific availability for single-day tickets
+                                                    $dayAvailable = $ticket->available_seats;
+                                                    $daySold = $ticket->sold_seats;
+                                                    
+                                                    if (!$ticket->is_combo) {
+                                                        // For single-day tickets, calculate how many were sold/pending for this specific day
+                                                        $daySold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
+                                                            ->where('event_day_name', $day['day_name'])
+                                                            ->whereIn('status', ['Sold', 'Pending'])
+                                                            ->count();
+                                                        $dayAvailable = $ticket->total_seats - $daySold;
+                                                    }
+                                                ?>
                                                 <option value="<?php echo e($ticket->id); ?>" 
                                                         data-price="<?php echo e($ticket->price); ?>"
-                                                        data-available="<?php echo e($ticket->available_seats); ?>">
-                                                    <?php echo e($ticket->name); ?> - RM<?php echo e(number_format($ticket->price, 0)); ?> (<?php echo e($ticket->available_seats); ?> available)
+                                                        data-available="<?php echo e($dayAvailable); ?>"
+                                                        data-total="<?php echo e($ticket->total_seats); ?>"
+                                                        data-sold="<?php echo e($daySold); ?>">
+                                                    <?php echo e($ticket->name); ?> - RM<?php echo e(number_format($ticket->price, 0)); ?> 
+                                                    <?php if($ticket->is_combo): ?>
+                                                        (<?php echo e($dayAvailable); ?>/<?php echo e($ticket->total_seats); ?> per day, <?php echo e($ticket->total_seats * $event->getDurationInDays()); ?> total)
+                                                    <?php else: ?>
+                                                        (<?php echo e($dayAvailable); ?>/<?php echo e($ticket->total_seats); ?> per day)
+                                                    <?php endif; ?>
                                                 </option>
                                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </select>
@@ -777,6 +816,7 @@ unset($__errorArgs, $__bag); ?>
 // Event data
 const eventData = {
     isMultiDay: <?php echo e($event->isMultiDay() ? 'true' : 'false'); ?>,
+    durationInDays: <?php echo e($event->getDurationInDays()); ?>,
     comboDiscountPercentage: <?php echo e($event->combo_discount_percentage ?? 0); ?>,
     comboDiscountEnabled: <?php echo e($event->combo_discount_enabled ? 'true' : 'false'); ?>,
     ticketPrices: {
@@ -1043,7 +1083,9 @@ function calculatePricing() {
     taxElement.textContent = `RM${taxAmount.toLocaleString()}`;
     totalElement.textContent = `RM${total.toLocaleString()}`;
     purchaseTotalElement.textContent = `RM${total.toLocaleString()}`;
+    
 }
+
 
 // Initialize pricing on page load
 calculatePricing();

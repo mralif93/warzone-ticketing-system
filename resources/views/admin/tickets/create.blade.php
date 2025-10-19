@@ -62,7 +62,11 @@
                                         <option value="">Select an event</option>
                                         @foreach($events as $event)
                                             <option value="{{ $event->id }}" {{ old('event_id') == $event->id ? 'selected' : '' }}>
-                                                {{ $event->name }} - {{ $event->date_time->format('M j, Y') }} ({{ ucfirst(str_replace('_', ' ', $event->status)) }})
+                                                {{ $event->name }} - {{ $event->date_time->format('M j, Y') }}
+                                                @if($event->is_multi_day)
+                                                    ({{ $event->duration_days }}-day event)
+                                                @endif
+                                                ({{ ucfirst(str_replace('_', ' ', $event->status)) }})
                                             </option>
                                         @endforeach
                                     </select>
@@ -115,7 +119,12 @@
                                            value="{{ old('total_seats') }}"
                                            class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('total_seats') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror"
                                            placeholder="Enter total number of seats">
-                                    <p class="text-xs text-wwc-neutral-500 mt-1">Enter the total number of seats available for this ticket type</p>
+                                    <p class="text-xs text-wwc-neutral-500 mt-1">
+                                        Enter the total number of seats available for this ticket type
+                                        <span id="multi-day-info" class="hidden text-wwc-primary font-medium">
+                                            (For multi-day events, this represents seats per day)
+                                        </span>
+                                    </p>
                                     @error('total_seats')
                                         <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
                                     @enderror
@@ -329,6 +338,21 @@ document.addEventListener('DOMContentLoaded', function() {
     totalSeatsInput.addEventListener('input', updatePreview);
     isComboCheckbox.addEventListener('change', updatePreview);
     document.getElementById('description').addEventListener('input', updatePreview);
+    
+    // Handle event selection change
+    const eventSelect = document.getElementById('event_id');
+    const multiDayInfo = document.getElementById('multi-day-info');
+    
+    eventSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const isMultiDay = selectedOption.textContent.includes('day event');
+        
+        if (isMultiDay) {
+            multiDayInfo.classList.remove('hidden');
+        } else {
+            multiDayInfo.classList.add('hidden');
+        }
+    });
     
     // Initial preview update
     updatePreview();

@@ -19,7 +19,7 @@ class PublicController extends Controller
                       ->where('date_time', '>', now());
             })
             ->with(['tickets' => function($query) {
-                $query->where('status', 'Active');
+                $query->whereIn('status', ['Active', 'active']);
             }])
             ->orderBy('default', 'desc')
             ->orderBy('date_time')
@@ -64,7 +64,7 @@ public function events(Request $request)
         }
 
         $events = $query->with(['tickets' => function($query) {
-                $query->where('status', 'Active');
+                $query->whereIn('status', ['Active', 'active']);
             }])
             ->withCount('purchaseTickets')
             ->orderBy('date_time')
@@ -88,7 +88,7 @@ public function events(Request $request)
         // Load relationships
         $event->loadCount('tickets');
         $event->load(['tickets' => function($query) {
-            $query->where('status', 'Active');
+            $query->whereIn('status', ['Active', 'active']);
         }]);
 
         // Get availability statistics from tickets

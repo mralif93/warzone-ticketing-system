@@ -98,34 +98,206 @@
 <div class="bg-wwc-neutral-50 py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-wwc-neutral-900 mb-4">Available Ticket Types</h2>
-            <p class="text-lg text-wwc-neutral-600">Choose your preferred seating and experience level</p>
+            <h2 class="text-3xl font-bold text-wwc-neutral-900 mb-4">Available Tickets</h2>
+            <p class="text-lg text-wwc-neutral-600">
+                @if($mainEvent->isMultiDay())
+                    Choose your preferred day and ticket type
+                @else
+                    Choose your preferred seating and experience level
+                @endif
+            </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            @foreach($mainEvent->tickets as $ticket)
-            <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-wwc-neutral-200 hover:border-wwc-primary cursor-pointer ticket-card" 
+        @if($mainEvent->isMultiDay())
+            <!-- Multi-day event: Combined layout with total availability -->
+            <div class="space-y-8">
+
+                <!-- Tickets Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @foreach($mainEvent->tickets->where('available_seats', '>', 0) as $ticket)
+                    @php
+                        // Calculate total availability across all days
+                        $totalAvailable = $ticket->available_seats;
+                        $totalSold = $ticket->sold_seats;
+                        $totalSeats = $ticket->total_seats;
+                        
+                        if (!$ticket->is_combo) {
+                            // For single-day tickets, calculate total across both days
+                            $day1Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
+                                ->where('event_day_name', $mainEvent->getEventDays()[0]['day_name'])
+                                ->whereIn('status', ['Sold', 'Pending'])
+                                ->count();
+                            $day2Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
+                                ->where('event_day_name', $mainEvent->getEventDays()[1]['day_name'])
+                                ->whereIn('status', ['Sold', 'Pending'])
+                                ->count();
+                            $totalSold = $day1Sold + $day2Sold;
+                            $totalAvailable = $totalSeats - $totalSold;
+                        }
+                    @endphp
+                    <div class="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 group ticket-card border border-gray-100 overflow-hidden flex flex-col h-full" 
+                         data-ticket="{{ $ticket->name }}" 
+                         data-price="{{ $ticket->price }}" 
+                         data-available="{{ $totalAvailable }}"
+                         data-description="{{ $ticket->description }}"
+                         data-total="{{ $totalSeats }}"
+                         data-sold="{{ $totalSold }}">
+                        
+                        <!-- Top Section with Price -->
+                        <div class="bg-gradient-to-r from-wwc-primary to-red-500 p-6 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-lg font-bold">{{ $ticket->name }}</h3>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-3xl font-black">RM{{ number_format($ticket->price, 0) }}</div>
+                                    <div class="text-sm opacity-80">per ticket</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Content Section -->
+                        <div class="p-6 flex flex-col flex-1">
+                            @if($ticket->description)
+                            <p class="text-gray-600 text-sm mb-4">{{ $ticket->description }}</p>
+                            @endif
+
+                            <!-- Bottom Section: Day Info + Buttons -->
+                            <div class="mt-auto space-y-4">
+                                <!-- Day Availability Info -->
+                                @if($ticket->is_combo)
+                                    @php
+                                        $day1Available = $totalSeats;
+                                        $day2Available = $totalSeats;
+                                        $day1Sold = 0;
+                                        $day2Sold = 0;
+                                        
+                                        // Calculate day-specific sold tickets
+                                        $day1Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
+                                            ->where('event_day_name', $mainEvent->getEventDays()[0]['day_name'])
+                                            ->whereIn('status', ['Sold', 'Pending'])
+                                            ->count();
+                                        $day2Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
+                                            ->where('event_day_name', $mainEvent->getEventDays()[1]['day_name'])
+                                            ->whereIn('status', ['Sold', 'Pending'])
+                                            ->count();
+                                        
+                                        $day1Available = $totalSeats - $day1Sold;
+                                        $day2Available = $totalSeats - $day2Sold;
+                                    @endphp
+                                    
+                                    <div>
+                                        <div class="space-y-3">
+                                            <!-- Day 1 -->
+                                            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                                <div class="flex items-center justify-between">
+                                                    <div class="flex items-center gap-3">
+                                                        <div class="text-sm font-bold text-gray-800">Day 1</div>
+                                                    </div>
+                                                    <div class="flex items-center gap-6">
+                                                        <div class="text-center">
+                                                            <div class="text-lg font-bold text-green-600">{{ $day1Available }}</div>
+                                                            <div class="text-xs text-gray-600">Available</div>
+                                                        </div>
+                                                        <div class="text-center">
+                                                            <div class="text-lg font-bold text-red-600">{{ $day1Sold }}</div>
+                                                            <div class="text-xs text-gray-600">Sold</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Day 2 -->
+                                            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                                <div class="flex items-center justify-between">
+                                                    <div class="flex items-center gap-3">
+                                                        <div class="text-sm font-bold text-gray-800">Day 2</div>
+                                                    </div>
+                                                    <div class="flex items-center gap-6">
+                                                        <div class="text-center">
+                                                            <div class="text-lg font-bold text-green-600">{{ $day2Available }}</div>
+                                                            <div class="text-xs text-gray-600">Available</div>
+                                                        </div>
+                                                        <div class="text-center">
+                                                            <div class="text-lg font-bold text-red-600">{{ $day2Sold }}</div>
+                                                            <div class="text-xs text-gray-600">Sold</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <!-- Action Buttons -->
+                                <div class="space-y-3">
+                                <a href="{{ route('public.tickets.cart', $mainEvent) }}" 
+                                   class="block w-full text-center px-6 py-3 bg-gradient-to-r from-wwc-primary to-red-500 text-white font-bold rounded-lg hover:from-red-500 hover:to-wwc-primary transition-all duration-300 shadow-md hover:shadow-lg"
+                                   onclick="event.stopPropagation()">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <i class='bx bx-shopping-cart'></i>
+                                        <span>Get This Ticket</span>
+                                    </div>
+                                </a>
+                                
+                                <button type="button" 
+                                        class="view-details-btn w-full px-4 py-2 bg-transparent border-2 border-wwc-primary text-wwc-primary font-medium rounded-lg hover:bg-wwc-primary hover:text-white transition-all duration-300"
+                                        data-ticket="{{ $ticket->name }}" 
+                                        data-price="{{ $ticket->price }}" 
+                                        data-available="{{ $totalAvailable }}"
+                                        data-description="{{ $ticket->description }}"
+                                        data-total="{{ $totalSeats }}"
+                                        data-sold="{{ $totalSold }}">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <i class='bx bx-info-circle'></i>
+                                        <span>View Details</span>
+                                    </div>
+                                </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+
+                @if($mainEvent->tickets->where('available_seats', '>', 0)->count() == 0)
+                <div class="text-center py-12">
+                    <i class='bx bx-ticket text-5xl text-wwc-neutral-300 mb-4'></i>
+                    <p class="text-wwc-neutral-500 text-lg">No tickets available</p>
+                </div>
+                @endif
+            </div>
+        @else
+            <!-- Single-day event: Original display -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                @foreach($mainEvent->tickets as $ticket)
+            <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-wwc-neutral-200 hover:border-wwc-primary ticket-card flex flex-col" 
                  data-ticket="{{ $ticket->name }}" 
                  data-price="{{ $ticket->price }}" 
                  data-available="{{ $ticket->available_seats }}"
                  data-description="{{ $ticket->description }}"
                  data-total="{{ $ticket->total_seats }}"
                  data-sold="{{ $ticket->sold_seats }}">
-                <div class="p-6">
+                <div class="p-6 flex-1 flex flex-col">
                     <div class="flex items-center justify-between mb-4">
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-wwc-primary bg-opacity-10 text-wwc-primary">
                             <i class='bx bx-ticket mr-1'></i>
                             {{ $ticket->name }}
                         </span>
-                        @if($ticket->available_seats > 0)
+                        @if(($ticket->status === 'active' || $ticket->status === 'Active') && $ticket->available_seats > 0)
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
                             <i class='bx bx-check-circle mr-1'></i>
-                            Available
+                            Active
                         </span>
-                        @else
+                        @elseif($ticket->status === 'sold_out' || $ticket->status === 'Sold Out' || $ticket->available_seats <= 0)
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">
                             <i class='bx bx-x-circle mr-1'></i>
                             Sold Out
+                        </span>
+                        @else
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800">
+                            <i class='bx bx-pause-circle mr-1'></i>
+                            Inactive
                         </span>
                         @endif
                     </div>
@@ -140,37 +312,90 @@
                     @endif
 
                     <div class="space-y-3 mb-6">
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="text-wwc-neutral-600">Total Seats:</span>
-                            <span class="font-semibold">{{ number_format($ticket->total_seats) }}</span>
-                        </div>
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="text-wwc-neutral-600">Available:</span>
-                            <span class="font-semibold text-green-600">{{ number_format($ticket->available_seats) }}</span>
-                        </div>
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="text-wwc-neutral-600">Sold:</span>
-                            <span class="font-semibold text-wwc-neutral-900">{{ number_format($ticket->sold_seats) }}</span>
-                        </div>
+                        @if($mainEvent->isMultiDay())
+                            @if($ticket->is_combo)
+                                <!-- Combo ticket display (for multi-day purchases) -->
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-wwc-neutral-600">Total Seats (Per Day):</span>
+                                    <span class="font-semibold">{{ number_format($ticket->total_seats) }}</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-wwc-neutral-600">Available (Per Day):</span>
+                                    <span class="font-semibold text-green-600">{{ number_format($ticket->available_seats) }}</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-wwc-neutral-600">Sold (Per Day):</span>
+                                    <span class="font-semibold text-wwc-neutral-900">{{ number_format($ticket->sold_seats) }}</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-wwc-neutral-600">Total Capacity ({{ $mainEvent->getDurationInDays() }} days):</span>
+                                    <span class="font-semibold text-blue-600">{{ number_format($ticket->total_seats * $mainEvent->getDurationInDays()) }}</span>
+                                </div>
+                            @else
+                                <!-- Single-day ticket display (for individual day purchases) -->
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-wwc-neutral-600">Total Seats (Per Day):</span>
+                                    <span class="font-semibold">{{ number_format($ticket->total_seats) }}</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-wwc-neutral-600">Available (Per Day):</span>
+                                    <span class="font-semibold text-green-600">{{ number_format($ticket->available_seats) }}</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-wwc-neutral-600">Sold (Per Day):</span>
+                                    <span class="font-semibold text-wwc-neutral-900">{{ number_format($ticket->sold_seats) }}</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-wwc-neutral-600">Event Duration:</span>
+                                    <span class="font-semibold text-blue-600">{{ $mainEvent->getDurationInDays() }} days</span>
+                                </div>
+                            @endif
+                        @else
+                            <!-- Single-day event display -->
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-wwc-neutral-600">Total Seats:</span>
+                                <span class="font-semibold">{{ number_format($ticket->total_seats) }}</span>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-wwc-neutral-600">Available:</span>
+                                <span class="font-semibold text-green-600">{{ number_format($ticket->available_seats) }}</span>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-wwc-neutral-600">Sold:</span>
+                                <span class="font-semibold text-wwc-neutral-900">{{ number_format($ticket->sold_seats) }}</span>
+                            </div>
+                        @endif
                     </div>
 
                     @if($ticket->total_seats > 0)
                     <div class="mb-6">
                         <div class="flex justify-between text-xs text-wwc-neutral-500 mb-2">
-                            <span>Availability</span>
+                            <span>Availability {{ $mainEvent->isMultiDay() ? '(Per Day)' : '' }}</span>
                             <span>{{ round(($ticket->available_seats / $ticket->total_seats) * 100, 1) }}%</span>
                         </div>
                         <div class="w-full bg-wwc-neutral-200 rounded-full h-2">
                             <div class="bg-gradient-to-r from-wwc-primary to-green-500 h-2 rounded-full transition-all duration-300" 
                                  style="width: {{ ($ticket->available_seats / $ticket->total_seats) * 100 }}%"></div>
                         </div>
+                        @if($mainEvent->isMultiDay())
+                            @if($ticket->is_combo)
+                            <div class="mt-2 text-xs text-wwc-neutral-500 text-center">
+                                {{ $mainEvent->getDurationInDays() }} days × {{ number_format($ticket->total_seats) }} seats = {{ number_format($ticket->total_seats * $mainEvent->getDurationInDays()) }} total capacity
+                            </div>
+                            @else
+                            <div class="mt-2 text-xs text-wwc-neutral-500 text-center">
+                                Choose any day from {{ $mainEvent->getDurationInDays() }}-day event
+                            </div>
+                            @endif
+                        @endif
                     </div>
                     @endif
 
-                    <div class="space-y-3">
+                    <div class="space-y-3 mt-auto">
                         @if($ticket->available_seats > 0)
                         <a href="{{ route('public.tickets.cart', $mainEvent) }}" 
-                           class="inline-flex items-center justify-center w-full px-4 py-3 bg-wwc-primary text-white font-semibold rounded-lg hover:bg-wwc-primary-dark transition-colors duration-200 shadow-lg hover:shadow-xl">
+                           class="inline-flex items-center justify-center w-full px-4 py-3 bg-wwc-primary text-white font-semibold rounded-lg hover:bg-wwc-primary-dark transition-colors duration-200 shadow-lg hover:shadow-xl"
+                           onclick="event.stopPropagation()">
                             <i class='bx bx-shopping-cart mr-2'></i>
                             Select This Ticket
                         </a>
@@ -197,8 +422,8 @@
                 </div>
             </div>
             @endforeach
-        </div>
-
+            </div>
+        @endif
     </div>
 </div>
 @endif
@@ -312,20 +537,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Add click event to each ticket card
-    const ticketCards = document.querySelectorAll('.ticket-card');
-    ticketCards.forEach(card => {
-        card.addEventListener('click', function() {
-            const ticketName = this.dataset.ticket;
-            const ticketPrice = this.dataset.price;
-            const ticketAvailable = this.dataset.available;
-            const ticketDescription = this.dataset.description;
-            const ticketTotal = this.dataset.total;
-            const ticketSold = this.dataset.sold;
-            
-            showTicketDetails(ticketName, ticketPrice, ticketAvailable, ticketDescription, ticketTotal, ticketSold);
-        });
-    });
 
     // Add click event to each View Details button
     const viewDetailsBtns = document.querySelectorAll('.view-details-btn');
@@ -345,5 +556,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+
+
 @endpush
 @endsection

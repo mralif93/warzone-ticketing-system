@@ -1,7 +1,7 @@
 @extends('layouts.customer')
 
-@section('title', 'My Tickets')
-@section('description', 'View and manage your purchased tickets in your Warzone World Championship customer portal.')
+@section('title', 'Available Tickets')
+@section('description', 'Browse and purchase available tickets for upcoming events in your Warzone World Championship customer portal.')
 
 @section('content')
 <div class="min-h-screen bg-wwc-neutral-50">
@@ -11,8 +11,8 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-2xl font-bold text-wwc-neutral-900 font-display">My Tickets</h1>
-                    <p class="text-wwc-neutral-600 mt-1">View and manage your purchased tickets</p>
+                    <h1 class="text-2xl font-bold text-wwc-neutral-900 font-display">Available Tickets</h1>
+                    <p class="text-wwc-neutral-600 mt-1">Browse and purchase tickets for upcoming events</p>
                 </div>
             </div>
         </div>
@@ -68,7 +68,7 @@
             <div class="bg-white rounded-xl shadow-sm border border-wwc-neutral-200">
                 <div class="px-6 py-4 border-b border-wwc-neutral-200">
                     <div class="flex items-center justify-between">
-                        <h2 class="text-lg font-semibold text-wwc-neutral-900">My Tickets</h2>
+                        <h2 class="text-lg font-semibold text-wwc-neutral-900">Available Tickets</h2>
                         <span class="text-sm text-wwc-neutral-500">Showing {{ $tickets->count() }} of {{ $tickets->total() }} tickets</span>
                     </div>
                 </div>
@@ -103,41 +103,40 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-wwc-neutral-900">{{ $ticket->ticketType->name ?? 'General' }}</div>
+                                    <div class="text-sm text-wwc-neutral-900">{{ $ticket->name }}</div>
+                                    <div class="text-sm text-wwc-neutral-500">{{ $ticket->zone }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-wwc-neutral-900">{{ $ticket->event->date_time->format('M j, Y') }}</div>
                                     <div class="text-sm text-wwc-neutral-500">{{ $ticket->event->date_time->format('g:i A') }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-wwc-neutral-900">RM{{ number_format($ticket->price_paid, 0) }}</div>
+                                    <div class="text-sm font-medium text-wwc-neutral-900">RM{{ number_format($ticket->price, 0) }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                        @if($ticket->status === 'Sold') bg-wwc-success text-white
-                                        @elseif($ticket->status === 'Held') bg-wwc-warning text-white
-                                        @elseif($ticket->status === 'Scanned') bg-wwc-info text-white
+                                        @if($ticket->status === 'active' || $ticket->status === 'Active') bg-wwc-success text-white
+                                        @elseif($ticket->status === 'sold_out' || $ticket->status === 'Sold Out') bg-wwc-error text-white
+                                        @elseif($ticket->status === 'inactive' || $ticket->status === 'Inactive') bg-wwc-neutral-200 text-wwc-neutral-800
                                         @else bg-wwc-neutral-200 text-wwc-neutral-800
                                         @endif">
-                                        {{ $ticket->status }}
+                                        {{ ucfirst(str_replace('_', ' ', $ticket->status)) }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex items-center justify-end space-x-1">
-                                        <a href="{{ route('customer.tickets.show', $ticket->id) }}" 
+                                        <a href="{{ route('public.events.show', $ticket->event->id) }}" 
                                            class="inline-flex items-center px-3 py-2 text-xs font-semibold text-white bg-wwc-primary hover:bg-wwc-primary-dark rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
-                                           title="View ticket details">
+                                           title="View event details">
                                             <i class='bx bx-show text-xs mr-1.5'></i>
-                                            View
+                                            View Event
                                         </a>
-                                        @if($ticket->qr_code)
-                                            <a href="{{ route('customer.tickets.qr', $ticket->id) }}" 
-                                               class="inline-flex items-center px-3 py-2 text-xs font-semibold text-wwc-neutral-700 bg-wwc-neutral-100 hover:bg-wwc-neutral-200 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
-                                               title="View QR code">
-                                                <i class='bx bx-qr-scan text-xs mr-1.5'></i>
-                                                QR Code
-                                            </a>
-                                        @endif
+                                        <a href="{{ route('public.tickets.cart', $ticket->event->id) }}" 
+                                           class="inline-flex items-center px-3 py-2 text-xs font-semibold text-wwc-neutral-700 bg-wwc-neutral-100 hover:bg-wwc-neutral-200 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+                                           title="Purchase tickets">
+                                            <i class='bx bx-cart text-xs mr-1.5'></i>
+                                            Purchase
+                                        </a>
                                     </div>
                                 </td>
                             </tr>
@@ -159,7 +158,7 @@
                         </svg>
                     </div>
                     <h3 class="text-lg font-medium text-wwc-neutral-900 mb-2">No tickets found</h3>
-                    <p class="text-sm text-wwc-neutral-500 mb-6">You haven't purchased any tickets yet or no tickets match your filters.</p>
+                    <p class="text-sm text-wwc-neutral-500 mb-6">No active tickets are available for purchase or no tickets match your filters.</p>
                     <div>
                         <a href="{{ route('public.events') }}" 
                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-wwc-primary hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary">

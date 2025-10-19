@@ -117,7 +117,8 @@
                             <label for="status" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Status</label>
                             <select name="status" id="status" class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
                                 <option value="">All Statuses</option>
-                                <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                                <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active (lowercase)</option>
+                                <option value="Active" {{ request('status') == 'Active' ? 'selected' : '' }}>Active (uppercase)</option>
                                 <option value="sold_out" {{ request('status') == 'sold_out' ? 'selected' : '' }}>Sold Out</option>
                                 <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
                             </select>

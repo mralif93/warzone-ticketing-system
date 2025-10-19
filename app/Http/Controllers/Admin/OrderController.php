@@ -205,6 +205,7 @@ class OrderController extends Controller
             // Create order
             $order = Order::create([
                 'user_id' => $request->user_id,
+                'event_id' => $event->id,
                 'customer_email' => $request->customer_email,
                 'order_number' => Order::generateOrderNumber(),
                 'qrcode' => Order::generateQRCode(),
@@ -244,14 +245,12 @@ class OrderController extends Controller
                     ]);
                 }
                 
-                // Update ticket type availability only for paid orders
-                if ($request->status === 'Paid') {
-                    $ticket->update([
-                        'sold_seats' => $ticket->sold_seats + $quantity,
-                        'available_seats' => $ticket->available_seats - $quantity,
-                        'status' => $ticket->available_seats - $quantity <= 0 ? 'Sold Out' : 'active',
-                    ]);
-                }
+                // Update ticket type availability for all orders (including pending)
+                $ticket->update([
+                    'sold_seats' => $ticket->sold_seats + $quantity,
+                    'available_seats' => $ticket->available_seats - $quantity,
+                    'status' => $ticket->available_seats - $quantity <= 0 ? 'Sold Out' : 'Active',
+                ]);
             }
 
             AuditLog::create([
@@ -366,7 +365,7 @@ class OrderController extends Controller
                                 $ticketType->update([
                                     'sold_seats' => $ticketType->sold_seats - 1,
                                     'available_seats' => $ticketType->available_seats + 1,
-                                    'status' => $ticketType->available_seats + 1 > 0 ? 'active' : 'Sold Out'
+                                    'status' => $ticketType->available_seats + 1 > 0 ? 'Active' : 'Sold Out'
                                 ]);
                             }
                             $ticket->delete();
@@ -419,7 +418,7 @@ class OrderController extends Controller
                         $ticketType->update([
                             'sold_seats' => $ticketType->sold_seats + $additionalTickets,
                             'available_seats' => $ticketType->available_seats - $additionalTickets,
-                            'status' => $ticketType->available_seats - $additionalTickets <= 0 ? 'Sold Out' : 'active'
+                            'status' => $ticketType->available_seats - $additionalTickets <= 0 ? 'Sold Out' : 'Active'
                         ]);
                         
                         // Recalculate order total
@@ -614,18 +613,19 @@ class OrderController extends Controller
      */
     private function updateTicketAvailabilityForOrderStatus($order, $newStatus, $oldStatus)
     {
-        // Only update availability if status changed to/from Paid
-        if ($newStatus === 'Paid' && $oldStatus !== 'Paid') {
-            // Order became paid - reduce availability
-            $this->reduceTicketAvailability($order);
-        } elseif ($oldStatus === 'Paid' && $newStatus !== 'Paid') {
-            // Order was paid but now not paid - restore availability
+        // Handle availability changes based on status transitions
+        if ($newStatus === 'Cancelled' || $newStatus === 'Refunded') {
+            // Order cancelled or refunded - restore availability
             $this->restoreTicketAvailability($order);
+        } elseif ($oldStatus === 'Cancelled' || $oldStatus === 'Refunded') {
+            // Order was cancelled/refunded but now active - reduce availability
+            $this->reduceTicketAvailability($order);
         }
+        // Note: Pending and Paid orders both reduce availability, so no change needed between them
     }
 
     /**
-     * Reduce ticket type availability for paid orders
+     * Reduce ticket type availability for orders
      */
     private function reduceTicketAvailability($order)
     {
@@ -639,14 +639,14 @@ class OrderController extends Controller
                 $ticketType->update([
                     'sold_seats' => $ticketType->sold_seats + $count,
                     'available_seats' => $ticketType->available_seats - $count,
-                    'status' => $ticketType->available_seats - $count <= 0 ? 'Sold Out' : 'active',
+                    'status' => $ticketType->available_seats - $count <= 0 ? 'Sold Out' : 'Active',
                 ]);
             }
         }
     }
 
     /**
-     * Restore ticket type availability for non-paid orders
+     * Restore ticket type availability for cancelled/refunded orders
      */
     private function restoreTicketAvailability($order)
     {
@@ -660,7 +660,7 @@ class OrderController extends Controller
                 $ticketType->update([
                     'sold_seats' => max(0, $ticketType->sold_seats - $count),
                     'available_seats' => $ticketType->available_seats + $count,
-                    'status' => 'active', // Reset to active when availability is restored
+                    'status' => 'Active', // Reset to Active when availability is restored
                 ]);
             }
         }

@@ -106,6 +106,7 @@
 
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+
         <div class="lg:col-span-2 space-y-6">
             <!-- Step 1: Purchase Type Selection -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -228,11 +229,27 @@
                                         class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary @error('ticket_type_id') border-red-500 @enderror text-sm bg-white shadow-sm transition-all duration-200 hover:border-gray-300">
                                     <option value="">Choose your preferred ticket type</option>
                                     @foreach($event->tickets->where('available_seats', '>', 0) as $ticket)
+                                        @php
+                                            // For single-day purchase, show overall availability
+                                            $displayAvailable = $ticket->available_seats;
+                                            $displaySold = $ticket->sold_seats;
+                                        @endphp
                                         <option value="{{ $ticket->id }}" 
                                                 data-price="{{ $ticket->price }}"
-                                                data-available="{{ $ticket->available_seats }}"
+                                                data-available="{{ $displayAvailable }}"
+                                                data-total="{{ $ticket->total_seats }}"
+                                                data-sold="{{ $displaySold }}"
                                                 {{ old('ticket_type_id') == $ticket->id ? 'selected' : '' }}>
-                                            {{ $ticket->name }} - RM{{ number_format($ticket->price, 0) }} ({{ $ticket->available_seats }} available)
+                                            {{ $ticket->name }} - RM{{ number_format($ticket->price, 0) }} 
+                                            @if($event->isMultiDay())
+                                                @if($ticket->is_combo)
+                                                    ({{ $displayAvailable }}/{{ $ticket->total_seats }} per day, {{ $ticket->total_seats * $event->getDurationInDays() }} total)
+                                                @else
+                                                    ({{ $displayAvailable }}/{{ $ticket->total_seats }} per day)
+                                                @endif
+                                            @else
+                                                ({{ $displayAvailable }}/{{ $ticket->total_seats }} available)
+                                            @endif
                                     </option>
                                 @endforeach
                             </select>
@@ -284,6 +301,7 @@
                     </div>
                 </div>
                 
+                
                 <!-- Step 2: Multi-Day Ticket Selection -->
                 @if($event->isMultiDay())
                 <div id="multi_day_selection" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hidden">
@@ -325,10 +343,31 @@
                                                 class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary day-ticket-select text-sm bg-white shadow-sm transition-all duration-200 hover:border-gray-300">
                                             <option value="">Choose your preferred ticket type</option>
                                             @foreach($event->tickets->where('available_seats', '>', 0) as $ticket)
+                                                @php
+                                                    // Calculate day-specific availability for single-day tickets
+                                                    $dayAvailable = $ticket->available_seats;
+                                                    $daySold = $ticket->sold_seats;
+                                                    
+                                                    if (!$ticket->is_combo) {
+                                                        // For single-day tickets, calculate how many were sold/pending for this specific day
+                                                        $daySold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
+                                                            ->where('event_day_name', $day['day_name'])
+                                                            ->whereIn('status', ['Sold', 'Pending'])
+                                                            ->count();
+                                                        $dayAvailable = $ticket->total_seats - $daySold;
+                                                    }
+                                                @endphp
                                                 <option value="{{ $ticket->id }}" 
                                                         data-price="{{ $ticket->price }}"
-                                                        data-available="{{ $ticket->available_seats }}">
-                                                    {{ $ticket->name }} - RM{{ number_format($ticket->price, 0) }} ({{ $ticket->available_seats }} available)
+                                                        data-available="{{ $dayAvailable }}"
+                                                        data-total="{{ $ticket->total_seats }}"
+                                                        data-sold="{{ $daySold }}">
+                                                    {{ $ticket->name }} - RM{{ number_format($ticket->price, 0) }} 
+                                                    @if($ticket->is_combo)
+                                                        ({{ $dayAvailable }}/{{ $ticket->total_seats }} per day, {{ $ticket->total_seats * $event->getDurationInDays() }} total)
+                                                    @else
+                                                        ({{ $dayAvailable }}/{{ $ticket->total_seats }} per day)
+                                                    @endif
                                                 </option>
                                             @endforeach
                                         </select>
@@ -694,6 +733,7 @@
 // Event data
 const eventData = {
     isMultiDay: {{ $event->isMultiDay() ? 'true' : 'false' }},
+    durationInDays: {{ $event->getDurationInDays() }},
     comboDiscountPercentage: {{ $event->combo_discount_percentage ?? 0 }},
     comboDiscountEnabled: {{ $event->combo_discount_enabled ? 'true' : 'false' }},
     ticketPrices: {
@@ -960,7 +1000,9 @@ function calculatePricing() {
     taxElement.textContent = `RM${taxAmount.toLocaleString()}`;
     totalElement.textContent = `RM${total.toLocaleString()}`;
     purchaseTotalElement.textContent = `RM${total.toLocaleString()}`;
+    
 }
+
 
 // Initialize pricing on page load
 calculatePricing();

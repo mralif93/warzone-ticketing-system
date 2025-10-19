@@ -284,9 +284,38 @@ class EventController extends Controller
     public function getTicketTypes(Event $event)
     {
         $ticketTypes = $event->ticketTypes()
-            ->where('status', 'active')
-            ->select('id', 'name', 'price', 'available_seats', 'total_seats', 'sold_seats')
+            ->whereIn('status', ['active', 'Active'])
+            ->select('id', 'event_id', 'name', 'price', 'available_seats', 'total_seats', 'sold_seats')
             ->get();
+
+        // For multi-day events, calculate day-specific availability
+        if ($event->isMultiDay()) {
+            $eventDays = $event->getEventDays();
+            $ticketTypes = $ticketTypes->map(function($ticket) use ($eventDays) {
+                $dayAvailability = [];
+                
+                foreach ($eventDays as $day) {
+                    // Count sold and pending tickets for this specific day and ticket type
+                    $soldForDay = \App\Models\PurchaseTicket::where('event_id', $ticket->event_id)
+                        ->where('ticket_type_id', $ticket->id)
+                        ->whereDate('event_day', $day['date'])
+                        ->whereIn('status', ['Sold', 'Pending'])
+                        ->count();
+                    
+                    $availableForDay = $ticket->total_seats - $soldForDay;
+                    
+                    $dayAvailability[] = [
+                        'day_name' => $day['day_name'],
+                        'date' => $day['date'],
+                        'available' => max(0, $availableForDay),
+                        'sold' => $soldForDay
+                    ];
+                }
+                
+                $ticket->day_availability = $dayAvailability;
+                return $ticket;
+            });
+        }
 
         return response()->json([
             'ticketTypes' => $ticketTypes,

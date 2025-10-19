@@ -51,8 +51,8 @@ class OrderModuleSeeder extends Seeder
                 continue;
             }
 
-            // Create 8-20 orders per event
-            $ordersPerEvent = rand(8, 20);
+            // Create more orders for Music Festival to show realistic sales patterns
+            $ordersPerEvent = ($event->name === 'Music Festival 2024') ? rand(25, 40) : rand(8, 20);
             
             for ($i = 0; $i < $ordersPerEvent; $i++) {
                 $customer = $customers->random();
@@ -111,9 +111,15 @@ class OrderModuleSeeder extends Seeder
                             $eventDay = $event->start_date->format('Y-m-d');
                             $eventDayName = 'All Days';
                         } else {
-                            // Single day tickets get random day
+                            // Single day tickets - make Day 1 more popular (70% vs 30%)
                             $days = $this->getEventDays($event);
-                            $randomDay = $days[array_rand($days)];
+                            if (count($days) >= 2) {
+                                // 70% chance for Day 1, 30% chance for Day 2
+                                $dayChoice = (rand(1, 10) <= 7) ? 0 : 1;
+                                $randomDay = $days[$dayChoice];
+                            } else {
+                                $randomDay = $days[array_rand($days)];
+                            }
                             $eventDay = $randomDay['date'];
                             $eventDayName = $randomDay['name'];
                         }

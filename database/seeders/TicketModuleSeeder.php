@@ -30,13 +30,42 @@ class TicketModuleSeeder extends Seeder
             $ticketTypes = $this->getTicketTypesForEvent($event);
             
             foreach ($ticketTypes as $ticketTypeData) {
+                // Simulate different sales for multi-day events to show day-by-day differences
+                $totalSeats = $ticketTypeData['total_seats'];
+                $soldSeats = 0;
+                $availableSeats = $totalSeats;
+                
+                // For Music Festival (multi-day event), simulate some sales to show different availability
+                if ($event->name === 'Music Festival 2024' && $event->isMultiDay()) {
+                    // Simulate different sales patterns for different ticket types
+                    if (str_contains($ticketTypeData['name'], 'VIP 2-Day')) {
+                        $soldSeats = 6; // 6 sold out of 200
+                    } elseif (str_contains($ticketTypeData['name'], 'Single Day VIP')) {
+                        $soldSeats = 16; // 16 sold out of 300
+                    } elseif (str_contains($ticketTypeData['name'], 'Single Day General')) {
+                        $soldSeats = 14; // 14 sold out of 1000
+                    } elseif (str_contains($ticketTypeData['name'], 'Premium 2-Day')) {
+                        $soldSeats = 25; // 25 sold out of 500
+                    } elseif (str_contains($ticketTypeData['name'], 'General 2-Day')) {
+                        $soldSeats = 150; // 150 sold out of 2000
+                    }
+                    
+                    $availableSeats = $totalSeats - $soldSeats;
+                }
+                
+                // For other multi-day events, simulate some sales
+                elseif ($event->isMultiDay() && $event->name !== 'Warzone Championship Finals 2024') {
+                    $soldSeats = rand(5, 20); // Random sales between 5-20
+                    $availableSeats = $totalSeats - $soldSeats;
+                }
+                
                 Ticket::create([
                     'event_id' => $event->id,
                     'name' => $ticketTypeData['name'],
                     'price' => $ticketTypeData['price'],
-                    'total_seats' => $ticketTypeData['total_seats'],
-                    'available_seats' => $ticketTypeData['total_seats'],
-                    'sold_seats' => 0,
+                    'total_seats' => $totalSeats,
+                    'available_seats' => $availableSeats,
+                    'sold_seats' => $soldSeats,
                     'scanned_seats' => 0,
                     'status' => 'Active',
                     'description' => $ticketTypeData['description'],
@@ -63,52 +92,52 @@ class TicketModuleSeeder extends Seeder
             return [
                 [
                     'name' => 'Warzone Exclusive',
-                    'price' => 500.00,
-                    'total_seats' => 50,
-                    'description' => 'Exclusive VIP experience with premium seating, backstage access, and meet & greet with players',
-                    'is_combo' => false,
+                    'price' => 350.00,
+                    'total_seats' => 100,
+                    'description' => 'Exclusive VIP experience with premium seating, backstage access, and meet & greet with players (50 seats reserved)',
+                    'is_combo' => true,
                 ],
                 [
                     'name' => 'Warzone VIP',
                     'price' => 250.00,
-                    'total_seats' => 200,
+                    'total_seats' => 28,
                     'description' => 'VIP seating with premium services, exclusive merchandise, and priority access',
-                    'is_combo' => false,
+                    'is_combo' => true,
                 ],
                 [
                     'name' => 'Warzone Grandstand',
-                    'price' => 199.00,
-                    'total_seats' => 500,
+                    'price' => 220.00,
+                    'total_seats' => 60,
                     'description' => 'Premium grandstand seating with excellent views and comfortable seating',
-                    'is_combo' => false,
+                    'is_combo' => true,
                 ],
                 [
                     'name' => 'Warzone Premium Ringside',
-                    'price' => 150.00,
-                    'total_seats' => 800,
+                    'price' => 199.00,
+                    'total_seats' => 1716,
                     'description' => 'Premium ringside seating close to the action with great visibility',
-                    'is_combo' => false,
+                    'is_combo' => true,
                 ],
                 [
                     'name' => 'Level 1 Zone A/B/C/D',
-                    'price' => 100.00,
-                    'total_seats' => 1200,
+                    'price' => 129.00,
+                    'total_seats' => 1946,
                     'description' => 'Level 1 seating with good views of the main stage and comfortable seating',
-                    'is_combo' => false,
+                    'is_combo' => true,
                 ],
                 [
                     'name' => 'Level 2 Zone A/B/C/D',
-                    'price' => 75.00,
-                    'total_seats' => 1500,
+                    'price' => 89.00,
+                    'total_seats' => 1682,
                     'description' => 'Level 2 seating with elevated views and good sightlines',
-                    'is_combo' => false,
+                    'is_combo' => true,
                 ],
                 [
                     'name' => 'Standing Zone A/B',
-                    'price' => 50.00,
-                    'total_seats' => 2000,
+                    'price' => 49.00,
+                    'total_seats' => 300,
                     'description' => 'General admission standing area with access to food and beverage vendors',
-                    'is_combo' => false,
+                    'is_combo' => true,
                 ],
             ];
         }

@@ -32,6 +32,9 @@ class TicketController extends Controller
         // Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
+        } else {
+            // Default filter: only show active tickets when no status filter is applied
+            $query->whereIn('status', ['active', 'Active']);
         }
 
         // Filter by zone name
@@ -73,9 +76,14 @@ class TicketController extends Controller
      */
     public function create()
     {
-        $events = \App\Models\Event::select('id', 'name', 'date_time', 'status')
+        $events = \App\Models\Event::select('id', 'name', 'date_time', 'start_date', 'end_date', 'status')
                                   ->orderBy('date_time', 'asc')
-                                  ->get();
+                                  ->get()
+                                  ->map(function($event) {
+                                      $event->is_multi_day = $event->isMultiDay();
+                                      $event->duration_days = $event->getDurationInDays();
+                                      return $event;
+                                  });
 
         return view('admin.tickets.create', compact('events'));
     }

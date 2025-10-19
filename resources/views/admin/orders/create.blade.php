@@ -511,23 +511,55 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (data.ticketTypes && data.ticketTypes.length > 0) {
                             console.log('Found', data.ticketTypes.length, 'ticket types');
                             data.ticketTypes.forEach(ticketType => {
-                                const option = document.createElement('option');
-                                option.value = ticketType.id;
-                                option.setAttribute('data-price', ticketType.price);
-                                option.setAttribute('data-available', ticketType.available_seats);
-                                option.textContent = `${ticketType.name} - RM${parseFloat(ticketType.price).toFixed(2)}${ticketType.available_seats > 0 ? ` (${ticketType.available_seats} available)` : ' (Sold Out)'}`;
+                                // Create option for main ticket type select (single day)
+                                const mainOption = document.createElement('option');
+                                mainOption.value = ticketType.id;
+                                mainOption.setAttribute('data-price', ticketType.price);
+                                mainOption.setAttribute('data-available', ticketType.available_seats);
+                                mainOption.textContent = `${ticketType.name} - RM${parseFloat(ticketType.price).toFixed(2)}${ticketType.available_seats > 0 ? ` (${ticketType.available_seats} available)` : ' (Sold Out)'}`;
+                                ticketTypeSelect.appendChild(mainOption);
                                 
-                                // Add to main ticket type select
-                                ticketTypeSelect.appendChild(option.cloneNode(true));
-                                
-                                // Add to day 1 and day 2 selects
-                                if (day1TicketSelect) {
-                                    day1TicketSelect.appendChild(option.cloneNode(true));
-                                    console.log('Added option to day1TicketSelect:', ticketType.name);
-                                }
-                                if (day2TicketSelect) {
-                                    day2TicketSelect.appendChild(option.cloneNode(true));
-                                    console.log('Added option to day2TicketSelect:', ticketType.name);
+                                // For multi-day events, create day-specific options
+                                if (data.event.is_multi_day && ticketType.day_availability) {
+                                    // Day 1 option
+                                    if (day1TicketSelect) {
+                                        const day1Option = document.createElement('option');
+                                        day1Option.value = ticketType.id;
+                                        day1Option.setAttribute('data-price', ticketType.price);
+                                        
+                                        const day1Availability = ticketType.day_availability.find(day => day.day_name === 'Day 1');
+                                        const day1Available = day1Availability ? day1Availability.available : ticketType.available_seats;
+                                        
+                                        day1Option.setAttribute('data-available', day1Available);
+                                        day1Option.textContent = `${ticketType.name} - RM${parseFloat(ticketType.price).toFixed(2)}${day1Available > 0 ? ` (${day1Available} available for Day 1)` : ' (Sold Out for Day 1)'}`;
+                                        day1TicketSelect.appendChild(day1Option);
+                                        console.log('Added Day 1 option:', ticketType.name, 'Available:', day1Available);
+                                    }
+                                    
+                                    // Day 2 option
+                                    if (day2TicketSelect) {
+                                        const day2Option = document.createElement('option');
+                                        day2Option.value = ticketType.id;
+                                        day2Option.setAttribute('data-price', ticketType.price);
+                                        
+                                        const day2Availability = ticketType.day_availability.find(day => day.day_name === 'Day 2');
+                                        const day2Available = day2Availability ? day2Availability.available : ticketType.available_seats;
+                                        
+                                        day2Option.setAttribute('data-available', day2Available);
+                                        day2Option.textContent = `${ticketType.name} - RM${parseFloat(ticketType.price).toFixed(2)}${day2Available > 0 ? ` (${day2Available} available for Day 2)` : ' (Sold Out for Day 2)'}`;
+                                        day2TicketSelect.appendChild(day2Option);
+                                        console.log('Added Day 2 option:', ticketType.name, 'Available:', day2Available);
+                                    }
+                                } else {
+                                    // For single-day events, add to both day selects
+                                    if (day1TicketSelect) {
+                                        day1TicketSelect.appendChild(mainOption.cloneNode(true));
+                                        console.log('Added option to day1TicketSelect:', ticketType.name);
+                                    }
+                                    if (day2TicketSelect) {
+                                        day2TicketSelect.appendChild(mainOption.cloneNode(true));
+                                        console.log('Added option to day2TicketSelect:', ticketType.name);
+                                    }
                                 }
                             });
                             

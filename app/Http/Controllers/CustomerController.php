@@ -122,16 +122,15 @@ class CustomerController extends Controller
     {
         $user = Auth::user();
         
-        $query = PurchaseTicket::whereHas('order', function($q) use ($user) {
-            $q->where('user_id', $user->id);
-        });
+        // Get active ticket types (available for purchase)
+        $query = \App\Models\Ticket::whereIn('status', ['active', 'Active']);
 
         // Search functionality
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
-                $q->where('id', 'like', "%{$search}%")
-                  ->orWhere('qrcode', 'like', "%{$search}%")
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('zone', 'like', "%{$search}%")
                   ->orWhereHas('event', function($eventQuery) use ($search) {
                       $eventQuery->where('name', 'like', "%{$search}%");
                   });
@@ -148,15 +147,13 @@ class CustomerController extends Controller
             $query->where('event_id', $request->event);
         }
 
-        $tickets = $query->with(['event', 'order', 'ticketType'])
+        $tickets = $query->with(['event'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        $statuses = PurchaseTicket::select('status')->distinct()->pluck('status');
-        $events = Event::whereHas('purchaseTickets', function($q) use ($user) {
-            $q->whereHas('order', function($orderQuery) use ($user) {
-                $orderQuery->where('user_id', $user->id);
-            });
+        $statuses = \App\Models\Ticket::select('status')->distinct()->pluck('status');
+        $events = Event::whereHas('tickets', function($q) {
+            $q->whereIn('status', ['active', 'Active']);
         })->get();
 
         return view('customer.tickets', compact('tickets', 'statuses', 'events'));

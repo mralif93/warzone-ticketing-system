@@ -55,7 +55,7 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $users->whereIn('role', ['Gate Staff', 'Counter Staff', 'Support Staff'])->count() }}</div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $users->whereIn('role', ['gate_staff', 'counter_staff', 'support_staff'])->count() }}</div>
                             <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Staff Members</div>
                             <div class="flex items-center">
                                 <div class="flex items-center text-xs text-wwc-success font-semibold">
@@ -113,11 +113,11 @@
                             <label for="role" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Role</label>
                             <select name="role" id="role" class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
                             <option value="">All Roles</option>
-                            <option value="Administrator" {{ request('role') == 'Administrator' ? 'selected' : '' }}>Administrator</option>
-                            <option value="Gate Staff" {{ request('role') == 'Gate Staff' ? 'selected' : '' }}>Gate Staff</option>
-                            <option value="Counter Staff" {{ request('role') == 'Counter Staff' ? 'selected' : '' }}>Counter Staff</option>
-                            <option value="Support Staff" {{ request('role') == 'Support Staff' ? 'selected' : '' }}>Support Staff</option>
-                            <option value="Customer" {{ request('role') == 'Customer' ? 'selected' : '' }}>Customer</option>
+                            <option value="administrator" {{ request('role') == 'administrator' ? 'selected' : '' }}>Administrator</option>
+                            <option value="gate_staff" {{ request('role') == 'gate_staff' ? 'selected' : '' }}>Gate Staff</option>
+                            <option value="counter_staff" {{ request('role') == 'counter_staff' ? 'selected' : '' }}>Counter Staff</option>
+                            <option value="support_staff" {{ request('role') == 'support_staff' ? 'selected' : '' }}>Support Staff</option>
+                            <option value="customer" {{ request('role') == 'customer' ? 'selected' : '' }}>Customer</option>
                         </select>
                     </div>
                     <div>
@@ -227,10 +227,10 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold
-                                            @if($user->role === 'Administrator') bg-red-100 text-red-800
-                                            @elseif($user->role === 'Gate Staff') bg-green-100 text-green-800
-                                            @elseif($user->role === 'Counter Staff') bg-blue-100 text-blue-800
-                                            @elseif($user->role === 'Support Staff') bg-purple-100 text-purple-800
+                                            @if($user->role === 'administrator') bg-red-100 text-red-800
+                                            @elseif($user->role === 'gate_staff') bg-green-100 text-green-800
+                                            @elseif($user->role === 'counter_staff') bg-blue-100 text-blue-800
+                                            @elseif($user->role === 'support_staff') bg-purple-100 text-purple-800
                                             @else bg-gray-100 text-gray-800
                                             @endif">
                                             {{ $user->role }}

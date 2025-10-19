@@ -36,8 +36,8 @@
                 <!-- Event Status -->
                 <div class="flex items-center">
                     <span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold
-                        @if($event->status === 'On Sale') bg-wwc-success/10 text-wwc-success border border-wwc-success/20
-                        @elseif($event->status === 'Sold Out') bg-wwc-error/10 text-wwc-error border border-wwc-error/20
+                        @if($event->status === 'on_sale') bg-wwc-success/10 text-wwc-success border border-wwc-success/20
+                        @elseif($event->status === 'sold_out') bg-wwc-error/10 text-wwc-error border border-wwc-error/20
                         @else bg-wwc-neutral-100 text-wwc-neutral-600 border border-wwc-neutral-200
                         @endif">
                         <i class="bx bx-check-circle mr-2"></i>
@@ -136,7 +136,7 @@
                     </div>
 
                     <!-- Action Button -->
-                    @if($event->status === 'On Sale' && $availabilityStats['tickets_available'] > 0)
+                    @if($event->status === 'on_sale' && $availabilityStats['tickets_available'] > 0)
                     <div class="text-center">
                         @auth
                             <a href="{{ route('public.tickets.cart', $event) }}" 
@@ -160,7 +160,7 @@
                             </div>
                         @endauth
                     </div>
-                    @elseif($event->status === 'Sold Out' || $availabilityStats['tickets_available'] <= 0)
+                    @elseif($event->status === 'sold_out' || $availabilityStats['tickets_available'] <= 0)
                     <div class="text-center">
                         <div class="inline-flex items-center px-8 py-4 bg-wwc-neutral-400 text-white rounded-xl text-lg font-bold cursor-not-allowed">
                             <i class='bx bx-x mr-3 text-xl'></i>

@@ -88,7 +88,7 @@ class PurchaseTicket extends Model
      */
     public function isSold(): bool
     {
-        return $this->status === 'Sold';
+        return $this->status === 'sold';
     }
 
     /**
@@ -96,7 +96,7 @@ class PurchaseTicket extends Model
      */
     public function isHeld(): bool
     {
-        return $this->status === 'Held';
+        return $this->status === 'held';
     }
 
     /**
@@ -104,7 +104,7 @@ class PurchaseTicket extends Model
      */
     public function isScanned(): bool
     {
-        return $this->status === 'Scanned';
+        return $this->status === 'scanned';
     }
 
     /**
@@ -112,7 +112,7 @@ class PurchaseTicket extends Model
      */
     public function isInvalid(): bool
     {
-        return $this->status === 'Invalid';
+        return $this->status === 'invalid';
     }
 
     /**
@@ -120,7 +120,7 @@ class PurchaseTicket extends Model
      */
     public function isRefunded(): bool
     {
-        return $this->status === 'Refunded';
+        return $this->status === 'refunded';
     }
 
     /**
@@ -129,7 +129,7 @@ class PurchaseTicket extends Model
     public function markAsScanned(): void
     {
         $this->update([
-            'status' => 'Scanned',
+            'status' => 'scanned',
             'scanned_at' => now(),
         ]);
     }

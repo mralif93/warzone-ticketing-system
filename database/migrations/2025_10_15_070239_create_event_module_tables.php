@@ -19,7 +19,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->datetime('date_time');
-            $table->string('status')->default('Draft'); // Draft, On Sale, Sold Out, Cancelled
+            $table->string('status')->default('draft'); // draft, on sale, sold out, cancelled
             $table->integer('max_tickets_per_order')->default(8);
             $table->text('description')->nullable();
             $table->string('venue')->nullable();

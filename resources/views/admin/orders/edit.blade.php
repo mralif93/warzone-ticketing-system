@@ -122,11 +122,11 @@
                                     <select name="payment_method" id="payment_method" required
                                             class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('payment_method') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
                                         <option value="">Select Payment Method</option>
-                                        <option value="Bank Transfer" {{ old('payment_method', $order->payment_method) == 'Bank Transfer' ? 'selected' : '' }}>Bank Transfer</option>
-                                        <option value="Online Banking" {{ old('payment_method', $order->payment_method) == 'Online Banking' ? 'selected' : '' }}>Online Banking</option>
-                                        <option value="QR Code / E-Wallet" {{ old('payment_method', $order->payment_method) == 'QR Code / E-Wallet' ? 'selected' : '' }}>QR Code / E-Wallet</option>
-                                        <option value="Debit / Credit Card" {{ old('payment_method', $order->payment_method) == 'Debit / Credit Card' ? 'selected' : '' }}>Debit / Credit Card</option>
-                                        <option value="Others" {{ old('payment_method', $order->payment_method) == 'Others' ? 'selected' : '' }}>Others</option>
+                                        <option value="bank_transfer" {{ old('payment_method', $order->payment_method) == 'bank_transfer' ? 'selected' : '' }}>Bank Transfer</option>
+                                        <option value="online_banking" {{ old('payment_method', $order->payment_method) == 'online_banking' ? 'selected' : '' }}>Online Banking</option>
+                                        <option value="qr_code_ewallet" {{ old('payment_method', $order->payment_method) == 'qr_code_ewallet' ? 'selected' : '' }}>QR Code / E-Wallet</option>
+                                        <option value="debit_credit_card" {{ old('payment_method', $order->payment_method) == 'debit_credit_card' ? 'selected' : '' }}>Debit / Credit Card</option>
+                                        <option value="others" {{ old('payment_method', $order->payment_method) == 'others' ? 'selected' : '' }}>Others</option>
                                     </select>
                                     @error('payment_method')
                                         <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>

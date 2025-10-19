@@ -23,7 +23,7 @@ return new class extends Migration
             $table->decimal('service_fee', 10, 2)->default(0);
             $table->decimal('tax_amount', 10, 2)->default(0);
             $table->decimal('total_amount', 10, 2);
-            $table->string('status'); // Pending, Paid, Cancelled, Refunded
+            $table->string('status'); // pending, paid, cancelled, refunded
             $table->string('payment_method')->nullable();
             $table->text('notes')->nullable();
             $table->datetime('held_until')->nullable();
@@ -52,7 +52,7 @@ return new class extends Migration
             $table->string('refund_method')->nullable();
             $table->string('refund_reference')->nullable();
             $table->string('currency')->default('USD');
-            $table->string('status'); // Pending, Succeeded, Failed, Cancelled, Refunded, Partially Refunded
+            $table->string('status'); // pending, succeeded, failed, cancelled, refunded, partially refunded
             $table->text('stripe_response')->nullable();
             $table->text('failure_reason')->nullable();
             $table->datetime('processed_at')->nullable();

@@ -6,6 +6,15 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\TicketController;
+use App\Http\Controllers\GateStaffController;
+use App\Http\Controllers\Admin\EventController as AdminEventController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\TicketController as AdminTicketController;
+use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
+use App\Http\Controllers\Admin\PurchaseController as AdminPurchaseController;
+use App\Http\Controllers\Admin\AuditLogController as AdminAuditLogController;
+use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -38,28 +47,18 @@ Route::middleware(['auth', 'log.activity'])->group(function () {
     Route::get('/dashboard', function () {
         $user = auth()->user();
         
-        if ($user->hasRole('Administrator')) {
+        if ($user->hasRole('administrator')) {
             return redirect()->route('admin.dashboard');
-        } elseif ($user->hasRole('Gate Staff')) {
+        } elseif ($user->hasRole('gate_staff')) {
             return redirect()->route('gate-staff.dashboard');
-        } elseif ($user->hasRole('Counter Staff')) {
+        } elseif ($user->hasRole('counter_staff')) {
             return redirect()->route('customer.dashboard'); // Counter staff can use customer dashboard for now
-        } elseif ($user->hasRole('Support Staff')) {
+        } elseif ($user->hasRole('support_staff')) {
             return redirect()->route('customer.dashboard'); // Support staff can use customer dashboard for now
         } else {
             return redirect()->route('customer.dashboard');
         }
     })->name('dashboard');
-
-    // Test route for SweetAlert (remove in production)
-    Route::get('/test-alert', function () {
-        return redirect()->route('admin.dashboard')->with('success', 'Test alert message!');
-    })->name('test.alert');
-
-    // Test route for logout alert (remove in production)
-    Route::get('/test-logout-alert', function () {
-        return redirect()->route('login')->with('success', 'Test logout alert message!');
-    })->name('test.logout.alert');
     
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -77,62 +76,55 @@ Route::middleware(['auth', 'log.activity'])->group(function () {
         Route::get('/support', [CustomerController::class, 'support'])->name('support');
     });
     
-    // Event management routes (moved to admin routes)
-    // Route::resource('events', EventController::class);
-    // Route::post('/events/{event}/change-status', [EventController::class, 'changeStatus'])->name('events.change-status');
-    // Route::get('/events/{event}/available-seats', [EventController::class, 'getAvailableSeats'])->name('events.available-seats');
-    // Route::get('/events/seat-pricing', [EventController::class, 'getSeatPricing'])->name('events.seat-pricing');
-    
-    
     // Admin routes (Administrator role required)
-    Route::middleware(['role:Administrator'])->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware(['role:administrator'])->prefix('admin')->name('admin.')->group(function () {
         // Dashboard
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
         
         // Event management
-        Route::resource('events', \App\Http\Controllers\Admin\EventController::class);
-        Route::post('/events/{event}/change-status', [\App\Http\Controllers\Admin\EventController::class, 'changeStatus'])->name('events.change-status');
-        Route::get('/events/{event}/ticket-types', [\App\Http\Controllers\Admin\EventController::class, 'getTicketTypes'])->name('events.ticket-types');
+        Route::resource('events', AdminEventController::class);
+        Route::post('/events/{event}/change-status', [AdminEventController::class, 'changeStatus'])->name('events.change-status');
+        Route::get('/events/{event}/ticket-types', [AdminEventController::class, 'getTicketTypes'])->name('events.ticket-types');
         
         // User management
-        Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
-        Route::post('/users/{user}/update-password', [\App\Http\Controllers\Admin\UserController::class, 'updatePassword'])->name('users.update-password');
-        Route::post('/users/{user}/update-status', [\App\Http\Controllers\Admin\UserController::class, 'updateStatus'])->name('users.update-status');
+        Route::resource('users', AdminUserController::class);
+        Route::post('/users/{user}/update-password', [AdminUserController::class, 'updatePassword'])->name('users.update-password');
+        Route::post('/users/{user}/update-status', [AdminUserController::class, 'updateStatus'])->name('users.update-status');
         
         // Order management
-        Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class);
-        Route::post('/orders/{order}/update-status', [\App\Http\Controllers\Admin\OrderController::class, 'updateStatus'])->name('orders.update-status');
-        Route::post('/orders/{order}/cancel', [\App\Http\Controllers\Admin\OrderController::class, 'cancel'])->name('orders.cancel');
-        Route::post('/orders/{order}/refund', [\App\Http\Controllers\Admin\OrderController::class, 'refund'])->name('orders.refund');
+        Route::resource('orders', AdminOrderController::class);
+        Route::post('/orders/{order}/update-status', [AdminOrderController::class, 'updateStatus'])->name('orders.update-status');
+        Route::post('/orders/{order}/cancel', [AdminOrderController::class, 'cancel'])->name('orders.cancel');
+        Route::post('/orders/{order}/refund', [AdminOrderController::class, 'refund'])->name('orders.refund');
         
         // Ticket management
-        Route::resource('tickets', \App\Http\Controllers\Admin\TicketController::class);
-        Route::post('/tickets/{ticket}/update-status', [\App\Http\Controllers\Admin\TicketController::class, 'updateStatus'])->name('tickets.update-status');
-        Route::post('/tickets/{ticket}/cancel', [\App\Http\Controllers\Admin\TicketController::class, 'cancel'])->name('tickets.cancel');
-        Route::post('/tickets/{ticket}/mark-used', [\App\Http\Controllers\Admin\TicketController::class, 'markUsed'])->name('tickets.mark-used');
-        Route::post('/tickets/bulk-update', [\App\Http\Controllers\Admin\TicketController::class, 'bulkUpdate'])->name('tickets.bulk-update');
+        Route::resource('tickets', AdminTicketController::class);
+        Route::post('/tickets/{ticket}/update-status', [AdminTicketController::class, 'updateStatus'])->name('tickets.update-status');
+        Route::post('/tickets/{ticket}/cancel', [AdminTicketController::class, 'cancel'])->name('tickets.cancel');
+        Route::post('/tickets/{ticket}/mark-used', [AdminTicketController::class, 'markUsed'])->name('tickets.mark-used');
+        Route::post('/tickets/bulk-update', [AdminTicketController::class, 'bulkUpdate'])->name('tickets.bulk-update');
         
         // Payment management
-        Route::resource('payments', \App\Http\Controllers\Admin\PaymentController::class);
-        Route::post('/payments/{payment}/change-status', [\App\Http\Controllers\Admin\PaymentController::class, 'changeStatus'])->name('payments.change-status');
-        Route::post('/payments/{payment}/update-status', [\App\Http\Controllers\Admin\PaymentController::class, 'updateStatus'])->name('payments.update-status');
-        Route::post('/payments/{payment}/refund', [\App\Http\Controllers\Admin\PaymentController::class, 'refund'])->name('payments.refund');
-        Route::get('/payments/export/csv', [\App\Http\Controllers\Admin\PaymentController::class, 'export'])->name('payments.export');
+        Route::resource('payments', AdminPaymentController::class);
+        Route::post('/payments/{payment}/change-status', [AdminPaymentController::class, 'changeStatus'])->name('payments.change-status');
+        Route::post('/payments/{payment}/update-status', [AdminPaymentController::class, 'updateStatus'])->name('payments.update-status');
+        Route::post('/payments/{payment}/refund', [AdminPaymentController::class, 'refund'])->name('payments.refund');
+        Route::get('/payments/export/csv', [AdminPaymentController::class, 'export'])->name('payments.export');
         
         // Purchase management
-        Route::resource('purchases', \App\Http\Controllers\Admin\PurchaseController::class);
-        Route::post('/purchases/{purchase}/mark-scanned', [\App\Http\Controllers\Admin\PurchaseController::class, 'markScanned'])->name('purchases.mark-scanned');
-        Route::post('/purchases/{purchase}/cancel', [\App\Http\Controllers\Admin\PurchaseController::class, 'cancel'])->name('purchases.cancel');
+        Route::resource('purchases', AdminPurchaseController::class);
+        Route::post('/purchases/{purchase}/mark-scanned', [AdminPurchaseController::class, 'markScanned'])->name('purchases.mark-scanned');
+        Route::post('/purchases/{purchase}/cancel', [AdminPurchaseController::class, 'cancel'])->name('purchases.cancel');
         
         // Audit logs
-        Route::get('/audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
-        Route::get('/audit-logs/{auditLog}', [\App\Http\Controllers\Admin\AuditLogController::class, 'show'])->name('audit-logs.show');
-        Route::get('/audit-logs/export/csv', [\App\Http\Controllers\Admin\AuditLogController::class, 'export'])->name('audit-logs.export');
-        Route::post('/audit-logs/clear', [\App\Http\Controllers\Admin\AuditLogController::class, 'clear'])->name('audit-logs.clear');
+        Route::get('/audit-logs', [AdminAuditLogController::class, 'index'])->name('audit-logs.index');
+        Route::get('/audit-logs/{auditLog}', [AdminAuditLogController::class, 'show'])->name('audit-logs.show');
+        Route::get('/audit-logs/export/csv', [AdminAuditLogController::class, 'export'])->name('audit-logs.export');
+        Route::post('/audit-logs/clear', [AdminAuditLogController::class, 'clear'])->name('audit-logs.clear');
         
         // Reports
-        Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports');
-        Route::get('/reports/export', [\App\Http\Controllers\Admin\ReportController::class, 'export'])->name('reports.export');
+        Route::get('/reports', [AdminReportController::class, 'index'])->name('reports');
+        Route::get('/reports/export', [AdminReportController::class, 'export'])->name('reports.export');
         
         // Settings
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
@@ -142,10 +134,10 @@ Route::middleware(['auth', 'log.activity'])->group(function () {
 
 // Gate Staff routes
 Route::middleware(['auth', 'gate.staff'])->prefix('gate-staff')->name('gate-staff.')->group(function () {
-    Route::get('/dashboard', [App\Http\Controllers\GateStaffController::class, 'dashboard'])->name('dashboard');
-    Route::get('/scanner', [App\Http\Controllers\GateStaffController::class, 'scanner'])->name('scanner');
-    Route::post('/scan-ticket', [App\Http\Controllers\GateStaffController::class, 'scanTicket'])->name('scan-ticket');
-    Route::get('/scan-history', [App\Http\Controllers\GateStaffController::class, 'scanHistory'])->name('scan-history');
+    Route::get('/dashboard', [GateStaffController::class, 'dashboard'])->name('dashboard');
+    Route::get('/scanner', [GateStaffController::class, 'scanner'])->name('scanner');
+    Route::post('/scan-ticket', [GateStaffController::class, 'scanTicket'])->name('scan-ticket');
+    Route::get('/scan-history', [GateStaffController::class, 'scanHistory'])->name('scan-history');
 });
 
 // Public routes (must be at the end to override protected routes)
@@ -163,45 +155,6 @@ Route::post('/tickets/release-holds', [TicketController::class, 'releaseHolds'])
 
 Route::get('/about', [PublicController::class, 'about'])->name('public.about');
 
-// Debug route to clear session (for development only)
-Route::get('/debug/clear-session', function() {
-    session()->flush();
-    
-    // Also clear held tickets from database
-    \App\Models\Ticket::where('status', 'Held')->delete();
-    
-    return response()->json([
-        'message' => 'Session and held tickets cleared successfully',
-        'timestamp' => now()->toDateTimeString()
-    ]);
-});
-
-// Debug route to check session status
-Route::get('/debug/session-status', function() {
-    return response()->json([
-        'held_seats' => session('held_seats', []),
-        'hold_until' => session('hold_until'),
-        'current_time' => now()->toDateTimeString(),
-        'session_id' => session()->getId()
-    ]);
-});
-
-// Debug route to test cart logic
-Route::get('/debug/test-cart', function() {
-    $heldSeats = session('held_seats', []);
-    $holdUntil = session('hold_until');
-    
-    $result = [
-        'held_seats_count' => count($heldSeats),
-        'hold_until' => $holdUntil,
-        'current_time' => now()->toDateTimeString(),
-        'session_id' => session()->getId(),
-        'empty_held_seats' => empty($heldSeats),
-        'hold_expired_check' => $holdUntil && !empty($holdUntil) && now()->isAfter($holdUntil)
-    ];
-    
-    return response()->json($result);
-});
 Route::get('/contact', [PublicController::class, 'contact'])->name('public.contact');
 Route::post('/contact', [PublicController::class, 'submitContact'])->name('public.contact.submit');
 Route::get('/faq', [PublicController::class, 'faq'])->name('public.faq');

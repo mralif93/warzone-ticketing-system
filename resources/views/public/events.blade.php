@@ -109,8 +109,8 @@
                         <!-- Status and Tickets -->
                         <div class="flex items-center justify-between mb-4">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
-                                @if($event->status === 'On Sale') bg-wwc-success text-white
-                                @elseif($event->status === 'Sold Out') bg-wwc-error text-white
+                                @if($event->status === 'on_sale') bg-wwc-success text-white
+                                @elseif($event->status === 'sold_out') bg-wwc-error text-white
                                 @else bg-wwc-neutral-400 text-white
                                 @endif">
                                 {{ $event->status }}
@@ -147,13 +147,13 @@
                         @endif
 
                         <!-- Action Button -->
-                        @if($event->status === 'On Sale' && $event->zones->where('available_seats', '>', 0)->count() > 0)
+                        @if($event->status === 'on_sale' && $event->zones->where('available_seats', '>', 0)->count() > 0)
                             <a href="{{ route('public.events.show', $event) }}" 
                                class="w-full inline-flex justify-center items-center px-4 py-3 border border-transparent shadow-sm text-sm font-semibold rounded-2xl text-white bg-wwc-primary hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
                                 <i class='bx bx-receipt text-sm mr-2'></i>
                                 Get Tickets
                             </a>
-                        @elseif($event->status === 'Sold Out' || $event->zones->where('available_seats', '>', 0)->count() === 0)
+                        @elseif($event->status === 'sold_out' || $event->zones->where('available_seats', '>', 0)->count() === 0)
                             <button disabled class="w-full inline-flex justify-center items-center px-4 py-3 border border-transparent shadow-sm text-sm font-semibold rounded-2xl text-white bg-wwc-neutral-400 cursor-not-allowed">
                                 <i class='bx bx-x text-sm mr-2'></i>
                                 Sold Out

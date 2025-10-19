@@ -74,7 +74,7 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ \App\Models\Event::where('status', 'On Sale')->count() }}</div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ \App\Models\Event::where('status', 'on_sale')->count() }}</div>
                             <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Active Events</div>
                             <div class="flex items-center">
                                 <div class="flex items-center text-xs text-wwc-accent font-semibold">
@@ -265,10 +265,10 @@
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center">
                                         <div class="flex-shrink-0 h-3 w-3 rounded-full
-                                            @if($role->role === 'Administrator') bg-red-400
-                                            @elseif($role->role === 'Gate Staff') bg-blue-400
-                                            @elseif($role->role === 'Counter Staff') bg-green-400
-                                            @elseif($role->role === 'Support Staff') bg-yellow-400
+                                            @if($role->role === 'administrator') bg-red-400
+                                            @elseif($role->role === 'gate_staff') bg-blue-400
+                                            @elseif($role->role === 'counter_staff') bg-green-400
+                                            @elseif($role->role === 'support_staff') bg-yellow-400
                                             @else bg-gray-400
                                             @endif">
                                         </div>

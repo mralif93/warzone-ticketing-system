@@ -108,7 +108,7 @@ class User extends Authenticatable
      */
     public function isAdmin()
     {
-        return $this->role === 'Administrator';
+        return $this->role === 'administrator';
     }
 
     /**
@@ -116,7 +116,7 @@ class User extends Authenticatable
      */
     public function isGateStaff()
     {
-        return $this->role === 'Gate Staff';
+        return $this->role === 'gate_staff';
     }
 
     /**
@@ -124,7 +124,7 @@ class User extends Authenticatable
      */
     public function isCounterStaff()
     {
-        return $this->role === 'Counter Staff';
+        return $this->role === 'counter_staff';
     }
 
     /**
@@ -132,7 +132,7 @@ class User extends Authenticatable
      */
     public function isSupportStaff()
     {
-        return $this->role === 'Support Staff';
+        return $this->role === 'support_staff';
     }
 
     /**
@@ -140,7 +140,7 @@ class User extends Authenticatable
      */
     public function isCustomer()
     {
-        return $this->role === 'Customer';
+        return $this->role === 'customer';
     }
 
     /**
@@ -148,7 +148,7 @@ class User extends Authenticatable
      */
     public function isStaff()
     {
-        return in_array($this->role, ['Gate Staff', 'Counter Staff', 'Support Staff', 'Administrator']);
+        return in_array($this->role, ['gate_staff', 'counter_staff', 'support_staff', 'administrator']);
     }
 
     /**

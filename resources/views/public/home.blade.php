@@ -284,12 +284,12 @@
                             <i class='bx bx-ticket mr-1'></i>
                             {{ $ticket->name }}
                         </span>
-                        @if(($ticket->status === 'active' || $ticket->status === 'Active') && $ticket->available_seats > 0)
+                        @if($ticket->status === 'active' && $ticket->available_seats > 0)
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
                             <i class='bx bx-check-circle mr-1'></i>
                             Active
                         </span>
-                        @elseif($ticket->status === 'sold_out' || $ticket->status === 'Sold Out' || $ticket->available_seats <= 0)
+                        @elseif($ticket->status === 'sold_out' || $ticket->available_seats <= 0)
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">
                             <i class='bx bx-x-circle mr-1'></i>
                             Sold Out

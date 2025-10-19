@@ -286,8 +286,8 @@
                                 <div class="flex items-center justify-between py-2">
                                     <span class="text-sm font-semibold text-wwc-neutral-600">Event Status</span>
                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
-                                        @if($ticket->event->status === 'On Sale') bg-green-100 text-green-800
-                                        @elseif($ticket->event->status === 'Sold Out') bg-red-100 text-red-800
+                                        @if($ticket->event->status === 'on_sale') bg-green-100 text-green-800
+                                        @elseif($ticket->event->status === 'sold_out') bg-red-100 text-red-800
                                         @elseif($ticket->event->status === 'Cancelled') bg-gray-100 text-gray-800
                                         @else bg-yellow-100 text-yellow-800 @endif">
                                         {{ $ticket->event->status }}

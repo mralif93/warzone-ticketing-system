@@ -53,7 +53,7 @@ class EventController extends Controller
                 'venue' => $request->venue ?? 'Warzone Arena',
                 'max_tickets_per_order' => $request->max_tickets_per_order,
                 'total_seats' => $request->total_seats,
-                'status' => 'Draft',
+                'status' => 'draft',
             ]);
 
             // Log the event creation
@@ -126,7 +126,7 @@ class EventController extends Controller
             'venue' => 'nullable|string|max:255',
             'max_tickets_per_order' => 'required|integer|min:1|max:20',
             'total_seats' => 'required|integer|min:1|max:100000',
-            'status' => 'required|in:Draft,On Sale,Sold Out,Cancelled',
+            'status' => 'required|in:draft,on_sale,sold_out,cancelled',
         ]);
 
         $oldValues = $event->toArray();
@@ -211,7 +211,7 @@ class EventController extends Controller
     public function changeStatus(Request $request, Event $event)
     {
         $request->validate([
-            'status' => 'required|in:Draft,On Sale,Sold Out,Cancelled',
+            'status' => 'required|in:draft,on_sale,sold_out,cancelled',
         ]);
 
         $oldStatus = $event->status;

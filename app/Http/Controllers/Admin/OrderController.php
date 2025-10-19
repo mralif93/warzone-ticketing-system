@@ -57,7 +57,7 @@ class OrderController extends Controller
     public function create()
     {
         $users = \App\Models\User::all();
-        $events = \App\Models\Event::where('status', 'On Sale')->get()->map(function($event) {
+        $events = \App\Models\Event::where('status', 'on_sale')->get()->map(function($event) {
             $event->is_multi_day = $event->isMultiDay();
             $event->combo_discount_enabled = $event->combo_discount_enabled;
             $event->combo_discount_percentage = $event->combo_discount_percentage;
@@ -82,7 +82,7 @@ class OrderController extends Controller
                 'event_id' => 'required|exists:events,id',
                 'customer_email' => 'required|email|max:255',
                 'payment_method' => 'required|string|in:Bank Transfer,Online Banking,QR Code / E-Wallet,Debit / Credit Card,Others',
-                'status' => 'required|in:Pending,Paid,Cancelled,Refunded',
+                'status' => 'required|in:pending,paid,cancelled,refunded',
                 'purchase_type' => 'required|in:single_day,multi_day',
                 'ticket_type_id' => 'required_if:purchase_type,single_day|nullable|exists:tickets,id',
                 'day1_ticket_type' => 'required_if:purchase_type,multi_day|exists:tickets,id',
@@ -240,7 +240,7 @@ class OrderController extends Controller
                         'original_price' => $price,
                         'discount_amount' => $discountAmount > 0 ? $discountAmount / $totalQuantity : 0,
                         'qrcode' => \App\Models\PurchaseTicket::generateQRCode(),
-                        'status' => $request->status === 'Paid' ? 'Sold' : 'Pending',
+                        'status' => $request->status === 'paid' ? 'sold' : 'pending',
                         'price_paid' => $discountAmount > 0 ? ($subtotal / $totalQuantity) : $price,
                     ]);
                 }
@@ -249,7 +249,7 @@ class OrderController extends Controller
                 $ticket->update([
                     'sold_seats' => $ticket->sold_seats + $quantity,
                     'available_seats' => $ticket->available_seats - $quantity,
-                    'status' => $ticket->available_seats - $quantity <= 0 ? 'Sold Out' : 'Active',
+                    'status' => $ticket->available_seats - $quantity <= 0 ? 'sold_out' : 'active',
                 ]);
             }
 
@@ -299,7 +299,7 @@ class OrderController extends Controller
     {
         $order->load(['purchaseTickets.ticketType', 'user']);
         $users = \App\Models\User::all();
-        $events = \App\Models\Event::where('status', 'On Sale')->get();
+        $events = \App\Models\Event::where('status', 'on_sale')->get();
         
         return view('admin.orders.edit', compact('order', 'users', 'events'));
     }
@@ -313,7 +313,7 @@ class OrderController extends Controller
             'user_id' => 'required|exists:users,id',
             'customer_email' => 'required|email|max:255',
             'payment_method' => 'required|string|in:Bank Transfer,Online Banking,QR Code / E-Wallet,Debit / Credit Card,Others',
-            'status' => 'required|in:Pending,Paid,Cancelled,Refunded',
+            'status' => 'required|in:pending,paid,cancelled,refunded',
             'notes' => 'nullable|string|max:1000',
             'ticket_quantity' => 'nullable|integer|min:1|max:20',
             'ticket_type_id' => 'nullable|exists:tickets,id'
@@ -333,9 +333,9 @@ class OrderController extends Controller
             ]);
 
             // Update ticket statuses based on order status
-            $ticketStatus = $request->status === 'Paid' ? 'Sold' : 
-                           ($request->status === 'Cancelled' ? 'Cancelled' : 
-                           ($request->status === 'Refunded' ? 'Refunded' : 'Pending'));
+            $ticketStatus = $request->status === 'paid' ? 'sold' : 
+                           ($request->status === 'cancelled' ? 'cancelled' : 
+                           ($request->status === 'refunded' ? 'refunded' : 'pending'));
             
             $order->purchaseTickets()->update(['status' => $ticketStatus]);
 
@@ -365,7 +365,7 @@ class OrderController extends Controller
                                 $ticketType->update([
                                     'sold_seats' => $ticketType->sold_seats - 1,
                                     'available_seats' => $ticketType->available_seats + 1,
-                                    'status' => $ticketType->available_seats + 1 > 0 ? 'Active' : 'Sold Out'
+                                    'status' => $ticketType->available_seats + 1 > 0 ? 'active' : 'sold_out'
                                 ]);
                             }
                             $ticket->delete();
@@ -409,7 +409,7 @@ class OrderController extends Controller
                                 'original_price' => $ticketType->price,
                                 'discount_amount' => 0, // New tickets don't get combo discount
                                 'qrcode' => \App\Models\PurchaseTicket::generateQRCode(),
-                                'status' => 'Sold',
+                                'status' => 'sold',
                                 'price_paid' => $ticketType->price,
                             ]);
                         }
@@ -418,7 +418,7 @@ class OrderController extends Controller
                         $ticketType->update([
                             'sold_seats' => $ticketType->sold_seats + $additionalTickets,
                             'available_seats' => $ticketType->available_seats - $additionalTickets,
-                            'status' => $ticketType->available_seats - $additionalTickets <= 0 ? 'Sold Out' : 'Active'
+                            'status' => $ticketType->available_seats - $additionalTickets <= 0 ? 'sold_out' : 'active'
                         ]);
                         
                         // Recalculate order total
@@ -466,7 +466,7 @@ class OrderController extends Controller
      */
     public function destroy(Order $order)
     {
-        if ($order->status === 'Paid') {
+        if ($order->status === 'paid') {
             return back()->withErrors(['error' => 'Cannot delete a paid order.']);
         }
 
@@ -519,15 +519,15 @@ class OrderController extends Controller
      */
     public function cancel(Order $order)
     {
-        if ($order->status === 'Paid') {
+        if ($order->status === 'paid') {
             return back()->withErrors(['error' => 'Cannot cancel a paid order. Use refund instead.']);
         }
 
         $oldValues = $order->toArray();
-        $order->update(['status' => 'Cancelled']);
+        $order->update(['status' => 'cancelled']);
 
         // Cancel all tickets in this order
-        $order->tickets()->update(['status' => 'Cancelled']);
+        $order->tickets()->update(['status' => 'cancelled']);
 
         // Log the order cancellation
         AuditLog::create([
@@ -549,15 +549,15 @@ class OrderController extends Controller
      */
     public function refund(Order $order)
     {
-        if ($order->status !== 'Paid') {
+        if ($order->status !== 'paid') {
             return back()->withErrors(['error' => 'Only paid orders can be refunded.']);
         }
 
         $oldValues = $order->toArray();
-        $order->update(['status' => 'Refunded']);
+        $order->update(['status' => 'refunded']);
 
         // Cancel all tickets in this order
-        $order->tickets()->update(['status' => 'Cancelled']);
+        $order->tickets()->update(['status' => 'cancelled']);
 
         // Log the order refund
         AuditLog::create([
@@ -614,10 +614,10 @@ class OrderController extends Controller
     private function updateTicketAvailabilityForOrderStatus($order, $newStatus, $oldStatus)
     {
         // Handle availability changes based on status transitions
-        if ($newStatus === 'Cancelled' || $newStatus === 'Refunded') {
+        if ($newStatus === 'cancelled' || $newStatus === 'refunded') {
             // Order cancelled or refunded - restore availability
             $this->restoreTicketAvailability($order);
-        } elseif ($oldStatus === 'Cancelled' || $oldStatus === 'Refunded') {
+        } elseif ($oldStatus === 'cancelled' || $oldStatus === 'refunded') {
             // Order was cancelled/refunded but now active - reduce availability
             $this->reduceTicketAvailability($order);
         }
@@ -639,7 +639,7 @@ class OrderController extends Controller
                 $ticketType->update([
                     'sold_seats' => $ticketType->sold_seats + $count,
                     'available_seats' => $ticketType->available_seats - $count,
-                    'status' => $ticketType->available_seats - $count <= 0 ? 'Sold Out' : 'Active',
+                    'status' => $ticketType->available_seats - $count <= 0 ? 'sold_out' : 'active',
                 ]);
             }
         }
@@ -660,7 +660,7 @@ class OrderController extends Controller
                 $ticketType->update([
                     'sold_seats' => max(0, $ticketType->sold_seats - $count),
                     'available_seats' => $ticketType->available_seats + $count,
-                    'status' => 'Active', // Reset to Active when availability is restored
+                    'status' => 'active', // Reset to active when availability is restored
                 ]);
             }
         }

@@ -30,7 +30,7 @@ class CustomerController extends Controller
             ->get();
 
         // Get upcoming events
-        $upcomingEvents = Event::where('status', 'On Sale')
+        $upcomingEvents = Event::where('status', 'on_sale')
             ->where('date_time', '>', now())
             ->orderBy('date_time')
             ->take(3)

@@ -36,7 +36,7 @@ class TicketValidationService
             }
 
             // Check if ticket is valid for scanning
-            if ($ticket->status !== 'Sold') {
+            if ($ticket->status !== 'sold') {
                 return $this->createValidationResult('INVALID', 'Ticket not sold', $gateId, $staffUserId, $startTime, $ticket);
             }
 
@@ -111,7 +111,7 @@ class TicketValidationService
     {
         // For now, allow all sold tickets
         // In production, you might want to check event date/time
-        return $ticket->status === 'Sold';
+        return $ticket->status === 'sold';
     }
 
     /**
@@ -123,11 +123,11 @@ class TicketValidationService
             // Use raw SQL for atomic update
             DB::update("
                 UPDATE tickets 
-                SET status = 'Scanned',
+                SET status = 'scanned',
                     scanned_at = ?, 
                     updated_at = ?
                 WHERE id = ? 
-                AND status = 'Sold'
+                AND status = 'sold'
             ", [
                 now(),
                 now(),

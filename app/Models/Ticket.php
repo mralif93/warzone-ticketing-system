@@ -75,7 +75,7 @@ class Ticket extends Model
      */
     public function isActive(): bool
     {
-        return $this->status === 'Active';
+        return $this->status === 'active';
     }
 
     /**
@@ -102,7 +102,7 @@ class Ticket extends Model
             'sold_seats' => $soldCount,
             'scanned_seats' => $scannedCount,
             'available_seats' => $this->total_seats - $soldCount,
-            'status' => $this->total_seats - $soldCount <= 0 ? 'Sold Out' : 'Active',
+            'status' => $this->total_seats - $soldCount <= 0 ? 'sold_out' : 'active',
         ]);
     }
 
@@ -119,7 +119,7 @@ class Ticket extends Model
      */
     public function scopeSoldOut($query)
     {
-        return $query->where('status', 'Sold Out');
+        return $query->where('status', 'sold_out');
     }
 
     /**

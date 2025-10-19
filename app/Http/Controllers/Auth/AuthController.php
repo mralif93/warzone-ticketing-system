@@ -25,7 +25,7 @@ class AuthController extends Controller
             
             if ($user->hasRole('Administrator')) {
                 return redirect()->route('admin.dashboard');
-            } elseif ($user->hasRole('Gate Staff')) {
+            } elseif ($user->hasRole('gate_staff')) {
                 return redirect()->route('gate-staff.dashboard');
             } else {
                 return redirect()->route('customer.dashboard');
@@ -59,7 +59,7 @@ class AuthController extends Controller
             
             if ($user->hasRole('Administrator')) {
                 return redirect()->intended(route('admin.dashboard'))->with('success', 'Login successful!');
-            } elseif ($user->hasRole('Gate Staff')) {
+            } elseif ($user->hasRole('gate_staff')) {
                 return redirect()->intended(route('gate-staff.dashboard'))->with('success', 'Login successful!');
             } else {
                 // For customers, check if they were trying to access a specific page
@@ -85,7 +85,7 @@ class AuthController extends Controller
             
             if ($user->hasRole('Administrator')) {
                 return redirect()->route('admin.dashboard');
-            } elseif ($user->hasRole('Gate Staff')) {
+            } elseif ($user->hasRole('gate_staff')) {
                 return redirect()->route('gate-staff.dashboard');
             } else {
                 return redirect()->route('customer.dashboard');

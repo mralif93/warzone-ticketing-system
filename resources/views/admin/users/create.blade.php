@@ -111,11 +111,11 @@
                                     <select name="role" id="role" required
                                             class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('role') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
                                         <option value="">Select a role</option>
-                                        <option value="Administrator" {{ old('role') == 'Administrator' ? 'selected' : '' }}>Administrator</option>
-                                        <option value="Gate Staff" {{ old('role') == 'Gate Staff' ? 'selected' : '' }}>Gate Staff</option>
-                                        <option value="Counter Staff" {{ old('role') == 'Counter Staff' ? 'selected' : '' }}>Counter Staff</option>
-                                        <option value="Support Staff" {{ old('role') == 'Support Staff' ? 'selected' : '' }}>Support Staff</option>
-                                        <option value="Customer" {{ old('role') == 'Customer' ? 'selected' : '' }}>Customer</option>
+                                        <option value="administrator" {{ old('role') == 'administrator' ? 'selected' : '' }}>Administrator</option>
+                                        <option value="gate_staff" {{ old('role') == 'gate_staff' ? 'selected' : '' }}>Gate Staff</option>
+                                        <option value="counter_staff" {{ old('role') == 'counter_staff' ? 'selected' : '' }}>Counter Staff</option>
+                                        <option value="support_staff" {{ old('role') == 'support_staff' ? 'selected' : '' }}>Support Staff</option>
+                                        <option value="customer" {{ old('role') == 'customer' ? 'selected' : '' }}>Customer</option>
                                     </select>
                                     @error('role')
                                         <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>

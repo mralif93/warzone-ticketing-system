@@ -141,6 +141,24 @@
                                     @enderror
                                 </div>
 
+                                <!-- Event Status -->
+                                <div>
+                                    <label for="status" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                        Event Status <span class="text-wwc-error">*</span>
+                                    </label>
+                                    <select name="status" id="status" required
+                                            class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('status') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
+                                        <option value="">Select status</option>
+                                        <option value="draft" {{ old('status', 'draft') == 'draft' ? 'selected' : '' }}>Draft</option>
+                                        <option value="on_sale" {{ old('status') == 'on_sale' ? 'selected' : '' }}>On Sale</option>
+                                        <option value="sold_out" {{ old('status') == 'sold_out' ? 'selected' : '' }}>Sold Out</option>
+                                        <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                    </select>
+                                    @error('status')
+                                        <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
                                 <!-- Venue -->
                                 <div>
                                     <label for="venue" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->string('role')->default('Customer'); // Customer, Admin, Gate Staff
+            $table->string('role')->default('customer'); // customer, administrator, gate_staff, counter_staff, support_staff
             $table->string('phone')->nullable();
             $table->string('department')->nullable(); // For staff members
             $table->rememberToken();

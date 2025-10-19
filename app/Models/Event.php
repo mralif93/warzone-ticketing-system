@@ -82,7 +82,7 @@ class Event extends Model
      */
     public function isOnSale(): bool
     {
-        return $this->status === 'On Sale';
+        return $this->status === 'on_sale';
     }
 
     /**
@@ -90,7 +90,7 @@ class Event extends Model
      */
     public function isSoldOut(): bool
     {
-        return $this->status === 'Sold Out';
+        return $this->status === 'sold_out';
     }
 
     /**

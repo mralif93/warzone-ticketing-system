@@ -97,12 +97,12 @@
                                     <select name="method" id="method" required
                                             class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('method') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
                                         <option value="">Select Payment Method</option>
-                                        <option value="Credit Card" {{ old('method', $payment->method) == 'Credit Card' ? 'selected' : '' }}>Credit Card</option>
-                                        <option value="Debit Card" {{ old('method', $payment->method) == 'Debit Card' ? 'selected' : '' }}>Debit Card</option>
-                                        <option value="Bank Transfer" {{ old('method', $payment->method) == 'Bank Transfer' ? 'selected' : '' }}>Bank Transfer</option>
-                                        <option value="E-Wallet" {{ old('method', $payment->method) == 'E-Wallet' ? 'selected' : '' }}>E-Wallet</option>
-                                        <option value="Cash" {{ old('method', $payment->method) == 'Cash' ? 'selected' : '' }}>Cash</option>
-                                        <option value="Other" {{ old('method', $payment->method) == 'Other' ? 'selected' : '' }}>Other</option>
+                                        <option value="credit_card" {{ old('method', $payment->method) == 'credit_card' ? 'selected' : '' }}>Credit Card</option>
+                                        <option value="debit_card" {{ old('method', $payment->method) == 'debit_card' ? 'selected' : '' }}>Debit Card</option>
+                                        <option value="bank_transfer" {{ old('method', $payment->method) == 'bank_transfer' ? 'selected' : '' }}>Bank Transfer</option>
+                                        <option value="ewallet" {{ old('method', $payment->method) == 'ewallet' ? 'selected' : '' }}>E-Wallet</option>
+                                        <option value="cash" {{ old('method', $payment->method) == 'cash' ? 'selected' : '' }}>Cash</option>
+                                        <option value="other" {{ old('method', $payment->method) == 'other' ? 'selected' : '' }}>Other</option>
                                     </select>
                                     @error('method')
                                         <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>

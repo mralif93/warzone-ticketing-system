@@ -67,7 +67,7 @@ class TicketModuleSeeder extends Seeder
                     'available_seats' => $availableSeats,
                     'sold_seats' => $soldSeats,
                     'scanned_seats' => 0,
-                    'status' => 'Active',
+                    'status' => 'active',
                     'description' => $ticketTypeData['description'],
                     'is_combo' => $ticketTypeData['is_combo'] ?? false,
                 ]);

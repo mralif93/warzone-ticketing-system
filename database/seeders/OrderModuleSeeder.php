@@ -145,7 +145,7 @@ class OrderModuleSeeder extends Seeder
                         'original_price' => $originalPrice,
                         'discount_amount' => $discountAmount,
                         'qrcode' => PurchaseTicket::generateQRCode(),
-                        'status' => 'Sold',
+                        'status' => 'sold',
                         'price_paid' => $originalPrice - $discountAmount,
                     ]);
                     $ticketCount++;
@@ -195,7 +195,7 @@ class OrderModuleSeeder extends Seeder
      */
     private function getRandomStatus()
     {
-        $statuses = ['Paid', 'Paid', 'Paid', 'Paid', 'Pending', 'Cancelled']; // More likely to be Paid
+        $statuses = ['paid', 'paid', 'paid', 'paid', 'pending', 'cancelled']; // More likely to be paid
         return $statuses[array_rand($statuses)];
     }
 

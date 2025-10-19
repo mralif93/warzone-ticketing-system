@@ -52,7 +52,7 @@ class Payment extends Model
      */
     public function isSuccessful(): bool
     {
-        return $this->status === 'Succeeded';
+        return $this->status === 'succeeded';
     }
 
     /**
@@ -60,7 +60,7 @@ class Payment extends Model
      */
     public function isFailed(): bool
     {
-        return $this->status === 'Failed';
+        return $this->status === 'failed';
     }
 
     /**
@@ -68,7 +68,7 @@ class Payment extends Model
      */
     public function isPending(): bool
     {
-        return $this->status === 'Pending';
+        return $this->status === 'pending';
     }
 
     /**
@@ -76,7 +76,7 @@ class Payment extends Model
      */
     public function isRefunded(): bool
     {
-        return $this->status === 'Refunded';
+        return $this->status === 'refunded';
     }
 
     /**
@@ -173,7 +173,7 @@ class Payment extends Model
             'refund_reason' => $reason,
             'refund_method' => $method ?? $this->method,
             'refund_reference' => $reference,
-            'status' => $this->isFullyRefunded() ? 'Refunded' : 'Partially Refunded'
+            'status' => $this->isFullyRefunded() ? 'refunded' : 'partially_refunded'
         ]);
 
         return true;

@@ -133,7 +133,7 @@
                                             <div class="flex items-center space-x-3 mb-2">
                                                 <h4 class="text-lg font-semibold text-wwc-neutral-900 truncate">{{ $event->name }}</h4>
                                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold
-                                                    @if($event->status === 'On Sale') bg-wwc-success text-white
+                                                    @if($event->status === 'on_sale') bg-wwc-success text-white
                                                     @elseif($event->status === 'Draft') bg-wwc-neutral-200 text-wwc-neutral-800
                                                     @elseif($event->status === 'Cancelled') bg-wwc-error text-white
                                                     @else bg-wwc-warning text-white

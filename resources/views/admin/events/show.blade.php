@@ -406,17 +406,17 @@
                             @if($event->status === 'Draft')
                                 <form action="{{ route('admin.events.change-status', $event) }}" method="POST" class="w-full">
                                     @csrf
-                                    <input type="hidden" name="status" value="On Sale">
+                                    <input type="hidden" name="status" value="on_sale">
                                     <button type="submit" 
                                                 class="w-full bg-wwc-success hover:bg-wwc-success-dark text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 text-sm">
                                             <i class='bx bx-play text-sm mr-2'></i>
                                         Go On Sale
                                     </button>
                                 </form>
-                            @elseif($event->status === 'On Sale')
+                            @elseif($event->status === 'on_sale')
                                 <form action="{{ route('admin.events.change-status', $event) }}" method="POST" class="w-full">
                                     @csrf
-                                    <input type="hidden" name="status" value="Sold Out">
+                                    <input type="hidden" name="status" value="sold_out">
                                     <button type="submit" 
                                                 class="w-full bg-wwc-error hover:bg-wwc-error-dark text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 text-sm">
                                             <i class='bx bx-x text-sm mr-2'></i>

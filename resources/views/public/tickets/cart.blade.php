@@ -588,9 +588,9 @@
                                 <input type="radio" 
                                         id="payment_online_banking" 
                                         name="payment_method" 
-                                        value="Online Banking" 
+                                        value="online_banking" 
                                         class="sr-only peer"
-                                        {{ old('payment_method') == 'Online Banking' ? 'checked' : '' }}>
+                                        {{ old('payment_method') == 'online_banking' ? 'checked' : '' }}>
                                 <label for="payment_online_banking" 
                                         class="flex flex-col h-full justify-between p-4 border-2 border-gray-200 rounded-xl cursor-pointer peer-checked:border-wwc-primary peer-checked:bg-wwc-primary/5 hover:border-wwc-primary/50 hover:shadow-md transition-all duration-200">
                                     <div class="flex items-center mb-3">
@@ -652,9 +652,9 @@
                                 <input type="radio" 
                                         id="payment_bank_transfer" 
                                         name="payment_method" 
-                                        value="Bank Transfer" 
+                                        value="bank_transfer" 
                                         class="sr-only peer"
-                                        {{ old('payment_method') == 'Bank Transfer' ? 'checked' : '' }}>
+                                        {{ old('payment_method') == 'bank_transfer' ? 'checked' : '' }}>
                                 <label for="payment_bank_transfer" 
                                         class="flex flex-col h-full justify-between p-4 border-2 border-gray-200 rounded-xl cursor-pointer peer-checked:border-wwc-primary peer-checked:bg-wwc-primary/5 hover:border-wwc-primary/50 hover:shadow-md transition-all duration-200">
                                     <div class="flex items-center mb-3">

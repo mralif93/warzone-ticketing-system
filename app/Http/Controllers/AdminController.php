@@ -90,17 +90,17 @@ class AdminController extends Controller
         $stats = [
             'total_users' => User::count(),
             'total_events' => Event::count(),
-            'events_on_sale' => Event::where('status', 'On Sale')->count(),
-            'events_draft' => Event::where('status', 'Draft')->count(),
-            'events_sold_out' => Event::where('status', 'Sold Out')->count(),
+            'events_on_sale' => Event::where('status', 'on_sale')->count(),
+            'events_draft' => Event::where('status', 'draft')->count(),
+            'events_sold_out' => Event::where('status', 'sold_out')->count(),
             'total_orders' => Order::count(),
-            'total_tickets_sold' => PurchaseTicket::where('status', 'Sold')->count(),
-            'total_tickets_held' => PurchaseTicket::where('status', 'Held')->count(),
-            'total_revenue' => Payment::where('status', 'Completed')->sum('amount'),
-            'pending_orders' => Order::where('status', 'Pending')->count(),
-            'completed_orders' => Order::where('status', 'Paid')->count(),
+            'total_tickets_sold' => PurchaseTicket::where('status', 'sold')->count(),
+            'total_tickets_held' => PurchaseTicket::where('status', 'held')->count(),
+            'total_revenue' => Payment::where('status', 'completed')->sum('amount'),
+            'pending_orders' => Order::where('status', 'pending')->count(),
+            'completed_orders' => Order::where('status', 'paid')->count(),
             'total_tickets' => PurchaseTicket::count(),
-            'sold_tickets' => PurchaseTicket::where('status', 'Sold')->count(),
+            'sold_tickets' => PurchaseTicket::where('status', 'sold')->count(),
         ];
 
         // Get recent activity
@@ -212,7 +212,7 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|in:Administrator,Gate Staff,Counter Staff,Support Staff,Customer',
+            'role' => 'required|in:administrator,gate_staff,counter_staff,support_staff,customer',
             'phone_number' => 'nullable|string|max:20',
             'address_line_1' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:100',
@@ -267,7 +267,7 @@ class AdminController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
-            'role' => 'required|in:Administrator,Gate Staff,Counter Staff,Support Staff,Customer',
+            'role' => 'required|in:administrator,gate_staff,counter_staff,support_staff,customer',
             'phone_number' => 'nullable|string|max:20',
             'address_line_1' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:100',
@@ -623,7 +623,7 @@ class AdminController extends Controller
     public function changeEventStatus(Request $request, Event $event)
     {
         $request->validate([
-            'status' => 'required|in:Draft,On Sale,Sold Out,Cancelled'
+            'status' => 'required|in:draft,on_sale,sold_out,cancelled'
         ]);
 
         $event->update(['status' => $request->status]);

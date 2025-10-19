@@ -205,7 +205,7 @@ class TicketController extends Controller
                 'service_fee' => $serviceFee,
                 'tax_amount' => $taxAmount,
                 'total_amount' => $totalAmount,
-                'status' => 'Pending',
+                'status' => 'pending',
                 'payment_method' => $request->payment_method,
                 'notes' => $purchaseType === 'multi_day' ? 'Multi-day purchase with combo discount' : 'Single day purchase',
             ]);
@@ -232,7 +232,7 @@ class TicketController extends Controller
                         'original_price' => $price,
                         'discount_amount' => $discountAmount > 0 ? $discountAmount / $totalQuantity : 0,
                         'qrcode' => \App\Models\PurchaseTicket::generateQRCode(),
-                        'status' => 'Pending',
+                        'status' => 'pending',
                         'price_paid' => $discountAmount > 0 ? ($subtotal / $totalQuantity) : $price,
                     ]);
                 }
@@ -241,7 +241,7 @@ class TicketController extends Controller
                 $ticket->update([
                     'sold_seats' => $ticket->sold_seats + $quantity,
                     'available_seats' => $ticket->available_seats - $quantity,
-                    'status' => $ticket->available_seats - $quantity <= 0 ? 'Sold Out' : 'Active',
+                    'status' => $ticket->available_seats - $quantity <= 0 ? 'sold_out' : 'active',
                 ]);
             }
 

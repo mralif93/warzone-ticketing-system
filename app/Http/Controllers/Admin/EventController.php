@@ -70,6 +70,7 @@ class EventController extends Controller
             'description' => 'nullable|string',
             'max_tickets_per_order' => 'required|integer|min:1|max:20',
             'total_seats' => 'required|integer|min:1',
+            'status' => 'required|in:draft,on_sale,sold_out,cancelled',
             'combo_discount_percentage' => 'nullable|numeric|min:0|max:100',
             'combo_discount_enabled' => 'nullable|boolean',
             'default' => 'nullable|boolean',
@@ -77,9 +78,6 @@ class EventController extends Controller
 
         // Prepare data for creation
         $data = $request->all();
-        
-        // Set default status to Draft
-        $data['status'] = 'Draft';
         
         // Handle combo discount checkbox
         $data['combo_discount_enabled'] = $request->has('combo_discount_enabled');
@@ -168,6 +166,7 @@ class EventController extends Controller
             'description' => 'nullable|string',
             'max_tickets_per_order' => 'required|integer|min:1|max:20',
             'total_seats' => 'required|integer|min:1',
+            'status' => 'required|in:draft,on_sale,sold_out,cancelled',
             'combo_discount_percentage' => 'nullable|numeric|min:0|max:100',
             'combo_discount_enabled' => 'nullable|boolean',
             'default' => 'nullable|boolean',
@@ -257,7 +256,7 @@ class EventController extends Controller
     public function changeStatus(Request $request, Event $event)
     {
         $request->validate([
-            'status' => 'required|in:Draft,On Sale,Sold Out,Cancelled'
+            'status' => 'required|in:draft,on sale,sold out,cancelled'
         ]);
 
         $oldValues = $event->toArray();
@@ -299,7 +298,7 @@ class EventController extends Controller
                     $soldForDay = \App\Models\PurchaseTicket::where('event_id', $ticket->event_id)
                         ->where('ticket_type_id', $ticket->id)
                         ->whereDate('event_day', $day['date'])
-                        ->whereIn('status', ['Sold', 'Pending'])
+                        ->whereIn('status', ['sold', 'pending'])
                         ->count();
                     
                     $availableForDay = $ticket->total_seats - $soldForDay;

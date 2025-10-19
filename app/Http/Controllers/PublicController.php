@@ -15,7 +15,7 @@ class PublicController extends Controller
         // Get the default event or the first upcoming event
         $mainEvent = Event::where('default', true)
             ->orWhere(function($query) {
-                $query->where('status', 'On Sale')
+                $query->where('status', 'on_sale')
                       ->where('date_time', '>', now());
             })
             ->with(['tickets' => function($query) {
@@ -38,7 +38,7 @@ public function events(Request $request)
         $query = Event::query();
 
         // Only show events that are on sale or upcoming
-        $query->whereIn('status', ['On Sale', 'Sold Out']);
+        $query->whereIn('status', ['on_sale', 'sold_out']);
 
         // Search functionality
         if ($request->filled('search')) {

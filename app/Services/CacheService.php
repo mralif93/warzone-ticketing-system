@@ -32,9 +32,9 @@ class CacheService
             // Get ticket counts by status for zone-based system
             $ticketCounts = DB::select("
                 SELECT 
-                    COUNT(CASE WHEN status = 'Sold' THEN 1 END) as sold_count,
-                    COUNT(CASE WHEN status = 'Held' THEN 1 END) as held_count,
-                    COUNT(CASE WHEN status = 'Scanned' THEN 1 END) as scanned_count
+                    COUNT(CASE WHEN status = 'sold' THEN 1 END) as sold_count,
+                    COUNT(CASE WHEN status = 'held' THEN 1 END) as held_count,
+                    COUNT(CASE WHEN status = 'scanned' THEN 1 END) as scanned_count
                 FROM tickets 
                 WHERE event_id = ? AND deleted_at IS NULL
             ", [$eventId]);
@@ -81,9 +81,9 @@ class CacheService
             foreach ($zones as $zone => $totalSeats) {
                 $zoneStats = DB::select("
                     SELECT 
-                        COUNT(CASE WHEN status = 'Sold' THEN 1 END) as sold_count,
-                        COUNT(CASE WHEN status = 'Held' THEN 1 END) as held_count,
-                        COUNT(CASE WHEN status = 'Scanned' THEN 1 END) as scanned_count
+                        COUNT(CASE WHEN status = 'sold' THEN 1 END) as sold_count,
+                        COUNT(CASE WHEN status = 'held' THEN 1 END) as held_count,
+                        COUNT(CASE WHEN status = 'scanned' THEN 1 END) as scanned_count
                     FROM tickets 
                     WHERE event_id = ? AND zone = ? AND deleted_at IS NULL
                 ", [$eventId, $zone]);
@@ -113,7 +113,7 @@ class CacheService
         $cacheKey = 'active_events';
         
         return Cache::remember($cacheKey, self::CACHE_DURATION, function() {
-            return Event::where('status', 'On Sale')
+            return Event::where('status', 'on_sale')
                 ->where('date_time', '>', now())
                 ->orderBy('date_time')
                 ->get()
@@ -174,7 +174,7 @@ class CacheService
             // Use Eloquent models for better compatibility
             $totalUsers = \App\Models\User::count();
             $totalEvents = \App\Models\Event::count();
-            $activeEvents = \App\Models\Event::where('status', 'On Sale')->count();
+            $activeEvents = \App\Models\Event::where('status', 'on_sale')->count();
             $soldTickets = \App\Models\Ticket::where('status', 'Sold')->count();
             $heldTickets = \App\Models\Ticket::where('status', 'Held')->count();
             $completedOrders = \App\Models\Order::where('status', 'Completed')->count();

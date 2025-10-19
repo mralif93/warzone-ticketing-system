@@ -76,20 +76,20 @@ class PaymentController extends Controller
     public function updateStatus(Request $request, Payment $payment)
     {
         $request->validate([
-            'status' => 'required|in:Pending,Completed,Failed,Refunded'
+            'status' => 'required|in:pending,completed,failed,refunded'
         ]);
 
         $oldValues = $payment->toArray();
         $payment->update(['status' => $request->status]);
 
         // If payment is completed, update order status
-        if ($request->status === 'Completed' && $payment->order) {
-            $payment->order->update(['status' => 'Paid']);
+        if ($request->status === 'completed' && $payment->order) {
+            $payment->order->update(['status' => 'paid']);
         }
 
         // If payment is refunded, update order status
-        if ($request->status === 'Refunded' && $payment->order) {
-            $payment->order->update(['status' => 'Refunded']);
+        if ($request->status === 'refunded' && $payment->order) {
+            $payment->order->update(['status' => 'refunded']);
         }
 
         // Log the payment update
@@ -140,10 +140,10 @@ class PaymentController extends Controller
 
             // Update order status if fully refunded
             if ($payment->isFullyRefunded() && $payment->order) {
-                $payment->order->update(['status' => 'Refunded']);
+                $payment->order->update(['status' => 'refunded']);
                 
                 // Update all tickets to refunded status
-                $payment->order->purchaseTickets()->update(['status' => 'Refunded']);
+                $payment->order->purchaseTickets()->update(['status' => 'refunded']);
             }
 
             // Log the refund
@@ -279,7 +279,7 @@ class PaymentController extends Controller
             'amount' => 'required|numeric|min:0.01',
             'method' => 'required|string|max:255',
             'transaction_id' => 'nullable|string|max:255|unique:payments,transaction_id',
-            'status' => 'required|in:Pending,Completed,Failed,Refunded',
+            'status' => 'required|in:pending,completed,failed,refunded',
             'payment_date' => 'nullable|date',
             'notes' => 'nullable|string|max:1000'
         ]);
@@ -292,8 +292,8 @@ class PaymentController extends Controller
         $payment = Payment::create($request->all());
 
         // If payment is completed, update order status
-        if ($request->status === 'Completed' && $payment->order) {
-            $payment->order->update(['status' => 'Paid']);
+        if ($request->status === 'completed' && $payment->order) {
+            $payment->order->update(['status' => 'paid']);
         }
 
         // Log the payment creation
@@ -341,7 +341,7 @@ class PaymentController extends Controller
             'amount' => 'required|numeric|min:0.01',
             'method' => 'required|string|max:255',
             'transaction_id' => 'nullable|string|max:255|unique:payments,transaction_id,' . $payment->id,
-            'status' => 'required|in:Pending,Completed,Failed,Refunded',
+            'status' => 'required|in:pending,completed,failed,refunded',
             'payment_date' => 'nullable|date',
             'notes' => 'nullable|string|max:1000'
         ]);
@@ -350,13 +350,13 @@ class PaymentController extends Controller
         $payment->update($request->all());
 
         // If payment is completed, update order status
-        if ($request->status === 'Completed' && $payment->order) {
-            $payment->order->update(['status' => 'Paid']);
+        if ($request->status === 'completed' && $payment->order) {
+            $payment->order->update(['status' => 'paid']);
         }
 
         // If payment is refunded, update order status
-        if ($request->status === 'Refunded' && $payment->order) {
-            $payment->order->update(['status' => 'Refunded']);
+        if ($request->status === 'refunded' && $payment->order) {
+            $payment->order->update(['status' => 'refunded']);
         }
 
         // Log the payment update
@@ -379,7 +379,7 @@ class PaymentController extends Controller
      */
     public function destroy(Payment $payment)
     {
-        if ($payment->status === 'Completed') {
+        if ($payment->status === 'completed') {
             return back()->withErrors(['error' => 'Cannot delete a completed payment.']);
         }
 
@@ -407,7 +407,7 @@ class PaymentController extends Controller
     public function changeStatus(Request $request, Payment $payment)
     {
         $request->validate([
-            'status' => 'required|in:Pending,Succeeded,Failed,Cancelled,Refunded'
+            'status' => 'required|in:pending,succeeded,failed,cancelled,refunded'
         ]);
 
         $oldStatus = $payment->status;

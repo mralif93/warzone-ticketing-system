@@ -40,10 +40,10 @@
                             <label for="status" class="block text-sm font-medium text-wwc-neutral-700 mb-2">Status</label>
                             <select name="status" id="status" class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
                                 <option value="">All Status</option>
-                                <option value="Sold" {{ request('status') == 'Sold' ? 'selected' : '' }}>Sold</option>
-                                <option value="Held" {{ request('status') == 'Held' ? 'selected' : '' }}>Held</option>
-                                <option value="Cancelled" {{ request('status') == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                <option value="Used" {{ request('status') == 'Used' ? 'selected' : '' }}>Used</option>
+                                <option value="sold" {{ request('status') == 'sold' ? 'selected' : '' }}>Sold</option>
+                                <option value="held" {{ request('status') == 'held' ? 'selected' : '' }}>Held</option>
+                                <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                <option value="scanned" {{ request('status') == 'scanned' ? 'selected' : '' }}>Used</option>
                             </select>
                         </div>
                     </div>
@@ -115,9 +115,9 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                        @if($ticket->status === 'active' || $ticket->status === 'Active') bg-wwc-success text-white
-                                        @elseif($ticket->status === 'sold_out' || $ticket->status === 'Sold Out') bg-wwc-error text-white
-                                        @elseif($ticket->status === 'inactive' || $ticket->status === 'Inactive') bg-wwc-neutral-200 text-wwc-neutral-800
+                                        @if($ticket->status === 'active') bg-wwc-success text-white
+                                        @elseif($ticket->status === 'sold_out') bg-wwc-error text-white
+                                        @elseif($ticket->status === 'inactive') bg-wwc-neutral-200 text-wwc-neutral-800
                                         @else bg-wwc-neutral-200 text-wwc-neutral-800
                                         @endif">
                                         {{ ucfirst(str_replace('_', ' ', $ticket->status)) }}

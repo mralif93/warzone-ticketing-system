@@ -49,8 +49,8 @@
                         <label for="status" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Status</label>
                         <select name="status" id="status" class="block w-full px-4 py-3 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
                             <option value="">All Status</option>
-                            <option value="On Sale" {{ request('status') == 'On Sale' ? 'selected' : '' }}>On Sale</option>
-                            <option value="Sold Out" {{ request('status') == 'Sold Out' ? 'selected' : '' }}>Sold Out</option>
+                            <option value="on_sale" {{ request('status') == 'on_sale' ? 'selected' : '' }}>On Sale</option>
+                            <option value="sold_out" {{ request('status') == 'sold_out' ? 'selected' : '' }}>Sold Out</option>
                             <option value="Draft" {{ request('status') == 'Draft' ? 'selected' : '' }}>Draft</option>
                             <option value="Cancelled" {{ request('status') == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
                         </select>
@@ -125,8 +125,8 @@
                                 <!-- Status and Tickets -->
                                 <div class="flex items-center justify-between mb-4">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
-                                        @if($event->status === 'On Sale') bg-wwc-success text-white
-                                        @elseif($event->status === 'Sold Out') bg-wwc-error text-white
+                                        @if($event->status === 'on_sale') bg-wwc-success text-white
+                                        @elseif($event->status === 'sold_out') bg-wwc-error text-white
                                         @elseif($event->status === 'Cancelled') bg-wwc-neutral-400 text-white
                                         @else bg-wwc-warning text-white
                                         @endif">
@@ -140,7 +140,7 @@
 
                                 <!-- Action Button -->
                                 <div class="pt-4 border-t border-wwc-neutral-200">
-                                        @if($event->status === 'On Sale')
+                                        @if($event->status === 'on_sale')
                                             <a href="{{ route('public.events.show', $event) }}" 
                                                class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-semibold rounded-lg text-white bg-wwc-primary hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
                                             <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -148,7 +148,7 @@
                                             </svg>
                                             Get Tickets
                                         </a>
-                                    @elseif($event->status === 'Sold Out')
+                                    @elseif($event->status === 'sold_out')
                                         <button disabled class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-semibold rounded-lg text-white bg-wwc-neutral-400 cursor-not-allowed">
                                             <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>

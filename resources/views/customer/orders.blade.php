@@ -42,10 +42,10 @@
                             <label for="status" class="block text-sm font-medium text-wwc-neutral-700 mb-2">Status</label>
                             <select name="status" id="status" class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
                                 <option value="">All Status</option>
-                                <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
-                                <option value="Completed" {{ request('status') == 'Completed' ? 'selected' : '' }}>Completed</option>
-                                <option value="Cancelled" {{ request('status') == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                <option value="Refunded" {{ request('status') == 'Refunded' ? 'selected' : '' }}>Refunded</option>
+                                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>Completed</option>
+                                <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                <option value="refunded" {{ request('status') == 'refunded' ? 'selected' : '' }}>Refunded</option>
                             </select>
                         </div>
                     </div>
@@ -124,10 +124,10 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center">
                                         <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-semibold
-                                            @if($order->status === 'Completed') bg-green-100 text-green-800
-                                            @elseif($order->status === 'Pending') bg-yellow-100 text-yellow-800
-                                            @elseif($order->status === 'Cancelled') bg-red-100 text-red-800
-                                            @elseif($order->status === 'Refunded') bg-blue-100 text-blue-800
+                                            @if($order->status === 'paid') bg-green-100 text-green-800
+                                            @elseif($order->status === 'pending') bg-yellow-100 text-yellow-800
+                                            @elseif($order->status === 'cancelled') bg-red-100 text-red-800
+                                            @elseif($order->status === 'refunded') bg-blue-100 text-blue-800
                                             @else bg-gray-100 text-gray-800
                                         @endif">
                                         {{ $order->status }}

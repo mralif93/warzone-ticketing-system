@@ -92,7 +92,7 @@ class Order extends Model
      */
     public function isPaid(): bool
     {
-        return $this->status === 'Paid';
+        return $this->status === 'paid';
     }
 
     /**
@@ -100,7 +100,7 @@ class Order extends Model
      */
     public function isPending(): bool
     {
-        return $this->status === 'Pending';
+        return $this->status === 'pending';
     }
 
     /**
@@ -108,7 +108,7 @@ class Order extends Model
      */
     public function isRefunded(): bool
     {
-        return $this->status === 'Refunded';
+        return $this->status === 'refunded';
     }
 
     /**
@@ -116,7 +116,7 @@ class Order extends Model
      */
     public function isHeld(): bool
     {
-        return $this->status === 'Pending' && 
+        return $this->status === 'pending' && 
                $this->held_until && 
                $this->held_until->isFuture();
     }
@@ -126,7 +126,7 @@ class Order extends Model
      */
     public function isHoldExpired(): bool
     {
-        return $this->status === 'Pending' && 
+        return $this->status === 'pending' && 
                $this->held_until && 
                $this->held_until->isPast();
     }

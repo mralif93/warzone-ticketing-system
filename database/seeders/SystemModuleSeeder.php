@@ -70,7 +70,7 @@ class SystemModuleSeeder extends Seeder
         // Event-related audit logs
         foreach ($events->take(3) as $event) {
             $auditLogs[] = [
-                'user_id' => $users->where('role', 'Administrator')->first()->id,
+                'user_id' => $users->where('role', 'administrator')->first()->id,
                 'action' => 'CREATE',
                 'table_name' => 'events',
                 'record_id' => $event->id,
@@ -88,17 +88,17 @@ class SystemModuleSeeder extends Seeder
             ];
 
             // Event status updates
-            if ($event->status === 'On Sale') {
+            if ($event->status === 'on_sale') {
                 $auditLogs[] = [
-                    'user_id' => $users->where('role', 'Administrator')->first()->id,
+                    'user_id' => $users->where('role', 'administrator')->first()->id,
                     'action' => 'UPDATE',
                     'table_name' => 'events',
                     'record_id' => $event->id,
-                    'old_values' => json_encode(['status' => 'Draft']),
-                    'new_values' => json_encode(['status' => 'On Sale']),
+                    'old_values' => json_encode(['status' => 'draft']),
+                    'new_values' => json_encode(['status' => 'on_sale']),
                     'ip_address' => $this->getRandomIP(),
                     'user_agent' => $this->getRandomUserAgent(),
-                    'description' => "Event '{$event->name}' status changed from Draft to On Sale",
+                    'description' => "Event '{$event->name}' status changed from draft to on sale",
                     'created_at' => now()->subDays(rand(1, 15)),
                     'updated_at' => now()->subDays(rand(1, 15)),
                 ];
@@ -126,14 +126,14 @@ class SystemModuleSeeder extends Seeder
             ];
 
             // Order status updates
-            if ($order->status === 'Paid') {
+            if ($order->status === 'paid') {
                 $auditLogs[] = [
                     'user_id' => $order->user_id,
                     'action' => 'UPDATE',
                     'table_name' => 'orders',
                     'record_id' => $order->id,
-                    'old_values' => json_encode(['status' => 'Pending']),
-                    'new_values' => json_encode(['status' => 'Paid']),
+                    'old_values' => json_encode(['status' => 'pending']),
+                    'new_values' => json_encode(['status' => 'paid']),
                     'ip_address' => $this->getRandomIP(),
                     'user_agent' => $this->getRandomUserAgent(),
                     'description' => "Order {$order->order_number} payment completed",

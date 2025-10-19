@@ -34,7 +34,7 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $events->where('status', 'On Sale')->count() }}</div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $events->where('status', 'on_sale')->count() }}</div>
                             <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">On Sale</div>
                             <div class="flex items-center">
                                 <div class="flex items-center text-xs text-wwc-success font-semibold">
@@ -53,7 +53,7 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $events->where('status', 'Sold Out')->count() }}</div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $events->where('status', 'sold_out')->count() }}</div>
                             <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Sold Out</div>
                             <div class="flex items-center">
                                 <div class="flex items-center text-xs text-wwc-error font-semibold">
@@ -237,8 +237,8 @@
                                 </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center">
                                         <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-semibold
-                                            @if($event->status === 'On Sale') bg-green-100 text-green-800
-                                            @elseif($event->status === 'Sold Out') bg-orange-100 text-orange-800
+                                            @if($event->status === 'on_sale') bg-green-100 text-green-800
+                                            @elseif($event->status === 'sold_out') bg-orange-100 text-orange-800
                                             @elseif($event->status === 'Cancelled') bg-red-100 text-red-800
                                             @elseif($event->status === 'Draft') bg-gray-100 text-gray-800
                                             @else bg-yellow-100 text-yellow-800
@@ -299,17 +299,17 @@
                                                         @if($event->status === 'Draft')
                                                             <form action="{{ route('admin.events.change-status', $event) }}" method="POST" class="block">
                                                                 @csrf
-                                                                <input type="hidden" name="status" value="On Sale">
+                                                                <input type="hidden" name="status" value="on_sale">
                                                                 <button type="submit" 
                                                                         class="flex items-center w-full px-4 py-2 text-xs text-wwc-neutral-700 hover:bg-wwc-success hover:text-white transition-colors duration-200">
                                                                     <i class='bx bx-play text-xs mr-2'></i>
                                                                     Go On Sale
                                                                 </button>
                                                             </form>
-                                                        @elseif($event->status === 'On Sale')
+                                                        @elseif($event->status === 'on_sale')
                                                             <form action="{{ route('admin.events.change-status', $event) }}" method="POST" class="block">
                                                                 @csrf
-                                                                <input type="hidden" name="status" value="Sold Out">
+                                                                <input type="hidden" name="status" value="sold_out">
                                                                 <button type="submit" 
                                                                         class="flex items-center w-full px-4 py-2 text-xs text-wwc-neutral-700 hover:bg-wwc-warning hover:text-white transition-colors duration-200">
                                                                     <i class='bx bx-pause text-xs mr-2'></i>

@@ -122,9 +122,9 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                        @if($ticket->status === 'Sold') bg-wwc-success text-white
-                                        @elseif($ticket->status === 'Held') bg-wwc-warning text-white
-                                        @elseif($ticket->status === 'Scanned') bg-wwc-info text-white
+                                        @if($ticket->status === 'sold') bg-wwc-success text-white
+                                        @elseif($ticket->status === 'held') bg-wwc-warning text-white
+                                        @elseif($ticket->status === 'scanned') bg-wwc-info text-white
                                         @else bg-wwc-neutral-200 text-wwc-neutral-800
                                         @endif">
                                         {{ $ticket->status }}

@@ -211,7 +211,7 @@
                                     </div>
                                     <div>
                                         <h3 class="text-sm font-medium text-wwc-neutral-500 uppercase tracking-wide mb-1">Payment Method</h3>
-                                        <p class="text-lg font-semibold text-wwc-neutral-900">{{ $ticket->order->payment_method ?? 'Credit Card' }}</p>
+                                        <p class="text-lg font-semibold text-wwc-neutral-900">{{ $ticket->order->payment_method ? ucwords(str_replace('_', ' ', $ticket->order->payment_method)) : 'Credit Card' }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -237,20 +237,20 @@
                                     <div>
                                         <h3 class="text-sm font-medium text-wwc-neutral-500 uppercase tracking-wide mb-1">Ticket Status</h3>
                                         <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold
-                                            @if($ticket->status === 'Sold') bg-wwc-success/10 text-wwc-success border border-wwc-success/20
-                                            @elseif($ticket->status === 'Held') bg-wwc-warning/10 text-wwc-warning border border-wwc-warning/20
-                                            @elseif($ticket->status === 'Cancelled') bg-wwc-error/10 text-wwc-error border border-wwc-error/20
-                                            @elseif($ticket->status === 'Used') bg-wwc-info/10 text-wwc-info border border-wwc-info/20
+                                            @if($ticket->status === 'sold') bg-wwc-success/10 text-wwc-success border border-wwc-success/20
+                                            @elseif($ticket->status === 'held') bg-wwc-warning/10 text-wwc-warning border border-wwc-warning/20
+                                            @elseif($ticket->status === 'cancelled') bg-wwc-error/10 text-wwc-error border border-wwc-error/20
+                                            @elseif($ticket->status === 'scanned') bg-wwc-info/10 text-wwc-info border border-wwc-info/20
                                             @else bg-wwc-neutral-100 text-wwc-neutral-600 border border-wwc-neutral-200
                                             @endif">
                                             <i class='bx 
-                                                @if($ticket->status === 'Sold') bx-check-circle
-                                                @elseif($ticket->status === 'Held') bx-time
-                                                @elseif($ticket->status === 'Cancelled') bx-x-circle
-                                                @elseif($ticket->status === 'Used') bx-check-double
+                                                @if($ticket->status === 'sold') bx-check-circle
+                                                @elseif($ticket->status === 'held') bx-time
+                                                @elseif($ticket->status === 'cancelled') bx-x-circle
+                                                @elseif($ticket->status === 'scanned') bx-check-double
                                                 @else bx-question-mark
                                                 @endif mr-2'></i>
-                                            {{ $ticket->status }}
+                                            {{ ucwords($ticket->status) }}
                                         </span>
                                     </div>
                                 </div>

@@ -247,26 +247,26 @@
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm text-wwc-neutral-900">{{ $payment->method }}</div>
+                                            <div class="text-sm text-wwc-neutral-900">{{ ucwords(str_replace('_', ' ', $payment->method)) }}</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-center">
                                             @switch($payment->status)
-                                                @case('Succeeded')
+                                                @case('succeeded')
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                                         Succeeded
                                                     </span>
                                                     @break
-                                                @case('Pending')
+                                                @case('pending')
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                                         Pending
                                                     </span>
                                                     @break
-                                                @case('Failed')
+                                                @case('failed')
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                                                         Failed
                                                     </span>
                                                     @break
-                                                @case('Refunded')
+                                                @case('refunded')
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                                                         Refunded
                                                     </span>
@@ -309,7 +309,7 @@
                                                          class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-wwc-neutral-200 z-10"
                                                          style="display: none;">
                                                         <div class="py-1">
-                                                            @if($payment->status === 'Succeeded')
+                                                            @if($payment->status === 'succeeded')
                                                                 <form method="POST" action="{{ route('admin.payments.refund', $payment) }}" class="block">
                                                                     @csrf
                                                                     <button type="submit" 
@@ -319,7 +319,7 @@
                                                                     </button>
                                                                 </form>
                                                             @endif
-                                                            @if($payment->status === 'Pending')
+                                                            @if($payment->status === 'pending')
                                                                 <form method="POST" action="{{ route('admin.payments.change-status', $payment) }}" class="block">
                                                                     @csrf
                                                                     <input type="hidden" name="status" value="Succeeded">

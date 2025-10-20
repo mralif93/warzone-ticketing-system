@@ -26,7 +26,7 @@ class OrderModuleSeeder extends Seeder
 
         // Get events, ticket types, and users
         $events = Event::all();
-        $customers = User::where('role', 'Customer')->get();
+        $customers = User::where('role', 'customer')->get();
         
         if ($events->isEmpty()) {
             $this->command->error('No events found. Please run EventModuleSeeder first.');
@@ -145,7 +145,7 @@ class OrderModuleSeeder extends Seeder
                         'original_price' => $originalPrice,
                         'discount_amount' => $discountAmount,
                         'qrcode' => PurchaseTicket::generateQRCode(),
-                        'status' => 'sold',
+                        'status' => $this->getRandomPurchaseStatus(),
                         'price_paid' => $originalPrice - $discountAmount,
                     ]);
                     $ticketCount++;
@@ -204,8 +204,17 @@ class OrderModuleSeeder extends Seeder
      */
     private function getRandomPaymentMethod()
     {
-        $methods = ['Credit Card', 'Debit Card', 'Online Banking', 'E-Wallet', 'Cash'];
+        $methods = ['credit_card', 'debit_card', 'online_banking', 'e_wallet', 'cash'];
         return $methods[array_rand($methods)];
+    }
+
+    /**
+     * Get random purchase ticket status
+     */
+    private function getRandomPurchaseStatus()
+    {
+        $statuses = ['sold', 'scanned', 'held', 'invalid', 'refunded']; // More likely to be sold
+        return $statuses[array_rand($statuses)];
     }
 
     /**

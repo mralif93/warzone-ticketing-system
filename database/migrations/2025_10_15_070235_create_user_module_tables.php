@@ -21,6 +21,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('role')->default('customer'); // customer, administrator, gate_staff, counter_staff, support_staff
+            $table->boolean('is_active')->default(true); // User active status
             $table->string('phone')->nullable();
             $table->string('department')->nullable(); // For staff members
             $table->rememberToken();

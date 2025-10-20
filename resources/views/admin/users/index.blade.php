@@ -233,7 +233,7 @@
                                             @elseif($user->role === 'support_staff') bg-purple-100 text-purple-800
                                             @else bg-gray-100 text-gray-800
                                             @endif">
-                                            {{ $user->role }}
+                                            {{ ucwords(str_replace('_', ' ', $user->role)) }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center">

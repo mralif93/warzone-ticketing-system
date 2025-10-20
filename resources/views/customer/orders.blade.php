@@ -130,7 +130,7 @@
                                             @elseif($order->status === 'refunded') bg-blue-100 text-blue-800
                                             @else bg-gray-100 text-gray-800
                                         @endif">
-                                        {{ $order->status }}
+                                        {{ ucwords($order->status) }}
                                     </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">

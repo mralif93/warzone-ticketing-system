@@ -243,7 +243,7 @@
                                             @elseif($event->status === 'Draft') bg-gray-100 text-gray-800
                                             @else bg-yellow-100 text-yellow-800
                                         @endif">
-                                        {{ $event->status }}
+                                        {{ ucwords(str_replace('_', ' ', $event->status)) }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
@@ -257,11 +257,11 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-semibold text-wwc-neutral-900">{{ \App\Models\PurchaseTicket::where('event_id', $event->id)->where('status', 'Sold')->count() }}</div>
+                                        <div class="text-sm font-semibold text-wwc-neutral-900">{{ \App\Models\PurchaseTicket::where('event_id', $event->id)->where('status', 'sold')->count() }}</div>
                                         <div class="text-xs text-wwc-neutral-500">tickets sold</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-semibold text-wwc-neutral-900">RM{{ number_format($event->purchaseTickets()->where('status', 'Sold')->sum('price_paid'), 0) }}</div>
+                                        <div class="text-sm font-semibold text-wwc-neutral-900">RM{{ number_format($event->purchaseTickets()->where('status', 'sold')->sum('price_paid'), 0) }}</div>
                                         <div class="text-xs text-wwc-neutral-500">total revenue</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">

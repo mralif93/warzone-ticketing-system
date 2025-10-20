@@ -44,14 +44,14 @@
                                 <label class="text-sm font-semibold text-wwc-neutral-600">Status</label>
                                 <div class="mt-1">
                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold
-                                        @if($order->status === 'Paid') bg-green-100 text-green-800
-                                        @elseif($order->status === 'Pending') bg-yellow-100 text-yellow-800
-                                        @elseif($order->status === 'Cancelled') bg-red-100 text-red-800
-                                        @elseif($order->status === 'Refunded') bg-gray-100 text-gray-800
+                                        @if($order->status === 'paid') bg-green-100 text-green-800
+                                        @elseif($order->status === 'pending') bg-yellow-100 text-yellow-800
+                                        @elseif($order->status === 'cancelled') bg-red-100 text-red-800
+                                        @elseif($order->status === 'refunded') bg-gray-100 text-gray-800
                                         @else bg-gray-100 text-gray-800
                                         @endif">
                                         <i class='bx bx-check-circle text-sm mr-1'></i>
-                                        {{ $order->status }}
+                                        {{ ucwords($order->status) }}
                                     </span>
                                 </div>
                             </div>
@@ -104,14 +104,14 @@
                                             <div class="text-xl font-bold text-wwc-neutral-900 mb-1">RM{{ number_format($ticket->price_paid, 0) }}</div>
                                             <div class="text-sm text-wwc-neutral-500 mb-2">Ticket #{{ $ticket->id }}</div>
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
-                                                @if($ticket->status === 'Sold') bg-green-100 text-green-800
-                                                @elseif($ticket->status === 'Held') bg-yellow-100 text-yellow-800
-                                                @elseif($ticket->status === 'Cancelled') bg-red-100 text-red-800
-                                                @elseif($ticket->status === 'Scanned') bg-blue-100 text-blue-800
+                                                @if($ticket->status === 'sold') bg-green-100 text-green-800
+                                                @elseif($ticket->status === 'held') bg-yellow-100 text-yellow-800
+                                                @elseif($ticket->status === 'cancelled') bg-red-100 text-red-800
+                                                @elseif($ticket->status === 'scanned') bg-blue-100 text-blue-800
                                                 @else bg-gray-100 text-gray-800
                                                 @endif">
                                                 <i class='bx bx-check-circle text-xs mr-1'></i>
-                                                {{ $ticket->status }}
+                                                {{ ucwords($ticket->status) }}
                                             </span>
                                         </div>
                                         

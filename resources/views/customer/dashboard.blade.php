@@ -127,7 +127,7 @@
                                         @elseif($ticket->status === 'scanned') bg-wwc-info text-white
                                         @else bg-wwc-neutral-200 text-wwc-neutral-800
                                         @endif">
-                                        {{ $ticket->status }}
+                                        {{ ucwords($ticket->status) }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">

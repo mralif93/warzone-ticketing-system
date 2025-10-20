@@ -352,7 +352,7 @@
                                                         // For single-day tickets, calculate how many were sold/pending for this specific day
                                                         $daySold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
                                                             ->where('event_day_name', $day['day_name'])
-                                                            ->whereIn('status', ['Sold', 'Pending'])
+                                                            ->whereIn('status', ['sold', 'pending'])
                                                             ->count();
                                                         $dayAvailable = $ticket->total_seats - $daySold;
                                                     }
@@ -556,9 +556,9 @@
                                 <input type="radio" 
                                         id="payment_credit_card" 
                                         name="payment_method" 
-                                        value="Debit / Credit Card" 
+                                        value="credit_card" 
                                         class="sr-only peer"
-                                        {{ old('payment_method', 'Debit / Credit Card') == 'Debit / Credit Card' ? 'checked' : '' }}>
+                                        {{ old('payment_method', 'credit_card') == 'credit_card' ? 'checked' : '' }}>
                                 <label for="payment_credit_card" 
                                         class="flex flex-col h-full justify-between p-4 border-2 border-gray-200 rounded-xl cursor-pointer peer-checked:border-wwc-primary peer-checked:bg-wwc-primary/5 hover:border-wwc-primary/50 hover:shadow-md transition-all duration-200">
                                     <div class="flex items-center mb-3">
@@ -620,9 +620,9 @@
                                 <input type="radio" 
                                         id="payment_ewallet" 
                                         name="payment_method" 
-                                        value="QR Code / E-Wallet" 
+                                        value="e_wallet" 
                                         class="sr-only peer"
-                                        {{ old('payment_method') == 'QR Code / E-Wallet' ? 'checked' : '' }}>
+                                        {{ old('payment_method') == 'e_wallet' ? 'checked' : '' }}>
                                 <label for="payment_ewallet" 
                                         class="flex flex-col h-full justify-between p-4 border-2 border-gray-200 rounded-xl cursor-pointer peer-checked:border-wwc-primary peer-checked:bg-wwc-primary/5 hover:border-wwc-primary/50 hover:shadow-md transition-all duration-200">
                                     <div class="flex items-center mb-3">

@@ -165,7 +165,7 @@ class SystemModuleSeeder extends Seeder
         }
 
         // System maintenance logs
-        $adminUser = $users->where('role', 'Administrator')->first();
+        $adminUser = $users->where('role', 'administrator')->first();
         if ($adminUser) {
             $auditLogs[] = [
                 'user_id' => $adminUser->id,

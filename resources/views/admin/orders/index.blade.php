@@ -239,13 +239,13 @@
                                 </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center">
                                         <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-semibold
-                                            @if($order->status === 'Paid') bg-green-100 text-green-800
-                                            @elseif($order->status === 'Pending') bg-yellow-100 text-yellow-800
-                                            @elseif($order->status === 'Cancelled') bg-red-100 text-red-800
-                                            @elseif($order->status === 'Refunded') bg-gray-100 text-gray-800
+                                            @if($order->status === 'paid') bg-green-100 text-green-800
+                                            @elseif($order->status === 'pending') bg-yellow-100 text-yellow-800
+                                            @elseif($order->status === 'cancelled') bg-red-100 text-red-800
+                                            @elseif($order->status === 'refunded') bg-gray-100 text-gray-800
                                             @else bg-blue-100 text-blue-800
                                         @endif">
-                                        {{ $order->status }}
+                                        {{ ucwords($order->status) }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -284,7 +284,7 @@
                                                      class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-wwc-neutral-200 z-10"
                                                      style="display: none;">
                                                     <div class="py-1">
-                                                        @if($order->status === 'Pending')
+                                                        @if($order->status === 'pending')
                                                             <form action="{{ route('admin.orders.update-status', $order) }}" method="POST" class="block">
                                                                 @csrf
                                                                 <input type="hidden" name="status" value="Paid">
@@ -295,7 +295,7 @@
                                                                 </button>
                                                             </form>
                                                         @endif
-                                                        @if($order->status === 'Paid')
+                                                        @if($order->status === 'paid')
                                                             <a href="{{ route('admin.orders.refund', $order) }}" 
                                                                class="flex items-center px-4 py-2 text-xs text-wwc-neutral-700 hover:bg-wwc-warning hover:text-white transition-colors duration-200"
                                                                onclick="return confirm('Are you sure you want to refund this order?')">
@@ -303,7 +303,7 @@
                                                                 Refund Order
                                                             </a>
                                                         @endif
-                                                        @if($order->status !== 'Paid')
+                                                        @if($order->status !== 'paid')
                                                             <a href="{{ route('admin.orders.cancel', $order) }}" 
                                                                class="flex items-center px-4 py-2 text-xs text-wwc-neutral-700 hover:bg-wwc-warning hover:text-white transition-colors duration-200"
                                                                onclick="return confirm('Are you sure you want to cancel this order?')">
@@ -312,7 +312,7 @@
                                                             </a>
                                                         @endif
                                                         <div class="border-t border-wwc-neutral-100 my-1"></div>
-                                                        @if($order->status !== 'Paid')
+                                                        @if($order->status !== 'paid')
                                                             <form action="{{ route('admin.orders.destroy', $order) }}" method="POST" 
                                                                   onsubmit="return confirm('Are you sure you want to delete this order? This action cannot be undone.')" 
                                                                   class="block">

@@ -26,6 +26,7 @@ class UserModuleSeeder extends Seeder
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
             'role' => 'administrator',
+            'is_active' => true,
             'phone' => '+60123456789',
             'department' => 'it_department',
             'address_line_1' => '123 Admin Tower',
@@ -44,6 +45,7 @@ class UserModuleSeeder extends Seeder
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
             'role' => 'gate_staff',
+            'is_active' => true,
             'phone' => '+60123456790',
             'department' => 'Operations',
             'address_line_1' => '456 Gate House',
@@ -61,6 +63,7 @@ class UserModuleSeeder extends Seeder
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
             'role' => 'counter_staff',
+            'is_active' => true,
             'phone' => '+60123456791',
             'department' => 'customer_service',
             'address_line_1' => '789 Counter Plaza',
@@ -78,6 +81,7 @@ class UserModuleSeeder extends Seeder
             'password' => Hash::make('password123'),
             'email_verified_at' => now(),
             'role' => 'support_staff',
+            'is_active' => true,
             'phone' => '+60123456792',
             'department' => 'customer_support',
             'address_line_1' => '321 Support Center',
@@ -207,6 +211,7 @@ class UserModuleSeeder extends Seeder
                 'password' => Hash::make('password123'),
                 'email_verified_at' => now(),
                 'role' => 'customer',
+                'is_active' => true,
             ]));
         }
 
@@ -217,6 +222,7 @@ class UserModuleSeeder extends Seeder
             'password' => Hash::make('password123'),
             'email_verified_at' => null,
             'role' => 'customer',
+            'is_active' => false,
             'phone' => '+60123456803',
             'address_line_1' => '1100 Jalan Test',
             'city' => 'Kuala Lumpur',

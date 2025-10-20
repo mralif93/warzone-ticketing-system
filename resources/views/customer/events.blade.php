@@ -127,10 +127,10 @@
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
                                         @if($event->status === 'on_sale') bg-wwc-success text-white
                                         @elseif($event->status === 'sold_out') bg-wwc-error text-white
-                                        @elseif($event->status === 'Cancelled') bg-wwc-neutral-400 text-white
+                                        @elseif($event->status === 'cancelled') bg-wwc-neutral-400 text-white
                                         @else bg-wwc-warning text-white
                                         @endif">
-                                        {{ $event->status }}
+                                        {{ ucwords(str_replace('_', ' ', $event->status)) }}
                                     </span>
                                     <div class="text-right">
                                         <div class="text-sm font-semibold text-wwc-neutral-900">{{ $event->customer_tickets_count ?? 0 }} / 7,000</div>

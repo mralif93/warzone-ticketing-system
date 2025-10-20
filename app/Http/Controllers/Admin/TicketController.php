@@ -32,10 +32,8 @@ class TicketController extends Controller
         // Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
-        } else {
-            // Default filter: only show active tickets when no status filter is applied
-            $query->whereIn('status', ['active', 'Active']);
         }
+        // No default filter - show all tickets when no status filter is applied
 
         // Filter by zone name
         if ($request->filled('zone')) {

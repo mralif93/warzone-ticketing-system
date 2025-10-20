@@ -69,7 +69,7 @@
                                     </div>
                                     <div class="flex-1 flex items-center justify-between">
                                         <span class="text-sm font-semibold text-wwc-neutral-600">Role</span>
-                                        <span class="text-base font-medium text-wwc-neutral-900">{{ $user->role }}</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">{{ ucwords(str_replace('_', ' ', $user->role)) }}</span>
                                     </div>
                             </div>
 

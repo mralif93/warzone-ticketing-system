@@ -74,13 +74,13 @@
                                     <p class="text-sm font-medium text-gray-500">Status</p>
                                 </div>
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                    @if($order->status === 'Paid') bg-emerald-100 text-emerald-800
-                                    @elseif($order->status === 'Pending') bg-yellow-100 text-yellow-800
-                                    @elseif($order->status === 'Cancelled') bg-red-100 text-red-800
-                                    @elseif($order->status === 'Refunded') bg-blue-100 text-blue-800
+                                    @if($order->status === 'paid') bg-emerald-100 text-emerald-800
+                                    @elseif($order->status === 'pending') bg-yellow-100 text-yellow-800
+                                    @elseif($order->status === 'cancelled') bg-red-100 text-red-800
+                                    @elseif($order->status === 'refunded') bg-blue-100 text-blue-800
                                     @else bg-gray-100 text-gray-800
                                     @endif">
-                                    {{ $order->status }}
+                                    {{ ucwords($order->status) }}
                                 </span>
                             </div>
                             <div class="flex items-center justify-between">

@@ -346,20 +346,13 @@
 
                     <!-- Pagination -->
                     <div class="px-6 py-4 border-t border-wwc-neutral-100">
-                        <div class="flex items-center justify-between">
-                            <div class="text-sm text-wwc-neutral-500">
-                                Showing {{ $ticketTypes->firstItem() ?? 0 }} to {{ $ticketTypes->lastItem() ?? 0 }} of {{ $ticketTypes->total() }} ticket types
-                            </div>
-                            <div>
-                                {{ $ticketTypes->appends(request()->query())->links() }}
-                            </div>
-                        </div>
+                        {{ $ticketTypes->appends(request()->query())->links() }}
                     </div>
                 @else
                     <!-- Empty State -->
                     <div class="text-center py-12">
                         <div class="mx-auto h-24 w-24 rounded-full bg-wwc-neutral-100 flex items-center justify-center mb-4">
-                            <i class='bx bx-ticket text-6xl text-wwc-neutral-300'></i>
+                            <i class='bx bx-price-tag text-6xl text-wwc-neutral-300'></i>
                         </div>
                         <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-2">No ticket types found</h3>
                         <p class="text-wwc-neutral-600 mb-6">Get started by creating your first ticket type or adjust your search criteria.</p>

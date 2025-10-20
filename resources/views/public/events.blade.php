@@ -113,7 +113,7 @@
                                 @elseif($event->status === 'sold_out') bg-wwc-error text-white
                                 @else bg-wwc-neutral-400 text-white
                                 @endif">
-                                {{ $event->status }}
+                                {{ ucwords(str_replace('_', ' ', $event->status)) }}
                             </span>
                             <div class="text-sm text-wwc-neutral-500">
                                 {{ $event->zones->sum('sold_seats') ?? 0 }} tickets sold

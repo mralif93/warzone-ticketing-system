@@ -231,7 +231,7 @@
                                             <?php elseif($user->role === 'support_staff'): ?> bg-purple-100 text-purple-800
                                             <?php else: ?> bg-gray-100 text-gray-800
                                             <?php endif; ?>">
-                                            <?php echo e($user->role); ?>
+                                            <?php echo e(ucwords(str_replace('_', ' ', $user->role))); ?>
 
                                         </span>
                                     </td>

@@ -41,7 +41,7 @@
                         @else bg-wwc-neutral-100 text-wwc-neutral-600 border border-wwc-neutral-200
                         @endif">
                         <i class="bx bx-check-circle mr-2"></i>
-                        {{ $event->status }}
+                        {{ ucwords(str_replace('_', ' ', $event->status)) }}
                     </span>
                 </div>
             </div>

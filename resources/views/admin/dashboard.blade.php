@@ -148,11 +148,11 @@
                                                 </span>
                                                 <span class="flex items-center">
                                                     <i class='bx bx-receipt text-sm mr-2'></i>
-                                                    {{ \App\Models\PurchaseTicket::where('event_id', $event->id)->where('status', 'Sold')->count() }} sold
+                                                    {{ \App\Models\PurchaseTicket::where('event_id', $event->id)->where('status', 'sold')->count() }} sold
                                                 </span>
                                                 <span class="flex items-center">
                                                     <i class='bx bx-dollar text-sm mr-2'></i>
-                                                    RM{{ number_format($event->purchaseTickets()->where('status', 'Sold')->sum('price_paid'), 0) }} revenue
+                                                    RM{{ number_format($event->purchaseTickets()->where('status', 'sold')->sum('price_paid'), 0) }} revenue
                                                 </span>
                                             </div>
                                         </div>

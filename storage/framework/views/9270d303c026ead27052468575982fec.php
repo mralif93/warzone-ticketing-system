@@ -218,16 +218,6 @@
                                                 </div>
                                             </div>
 
-                                            <!-- Center: Combo Button -->
-                                            <?php if($ticketType->is_combo): ?>
-                                            <div class="flex-shrink-0">
-                                                <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-wwc-accent/20 text-wwc-accent">
-                                                    <i class='bx bx-discount text-xs mr-1'></i>
-                                                    Combo
-                                                </span>
-                                            </div>
-                                            <?php endif; ?>
-
                                             <!-- Right Side: Available, Sold, Total Statistics -->
                                             <div class="flex items-center space-x-8">
                                                 <div class="text-center min-w-[60px]">
@@ -243,6 +233,16 @@
                                                     <p class="text-xs text-wwc-neutral-500">Total</p>
                                                 </div>
                                             </div>
+
+                                            <!-- Far Right: Combo Button -->
+                                            <?php if($ticketType->is_combo): ?>
+                                            <div class="flex-shrink-0">
+                                                <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-wwc-accent/20 text-wwc-accent">
+                                                    <i class='bx bx-discount text-xs mr-1'></i>
+                                                    Combo
+                                                </span>
+                                            </div>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>

@@ -117,7 +117,7 @@
 
                                 <!-- Description -->
                                 @if($ticket->description)
-                                <div class="flex items-center py-3">
+                                <div class="flex items-center py-3 border-b border-wwc-neutral-100">
                                     <div class="flex-shrink-0 mr-4">
                                         <div class="h-8 w-8 rounded-lg bg-gray-100 flex items-center justify-center">
                                             <i class='bx bx-file text-sm text-gray-600'></i>
@@ -126,6 +126,27 @@
                                     <div class="flex-1">
                                         <span class="text-sm font-semibold text-wwc-neutral-600">Description</span>
                                         <p class="text-base font-medium text-wwc-neutral-900 mt-1">{{ $ticket->description }}</p>
+                                    </div>
+                                </div>
+                                @endif
+
+                                <!-- Seating Location Image -->
+                                @if($ticket->seating_image)
+                                <div class="py-3">
+                                    <div class="flex-shrink-0 mr-4 mb-3">
+                                        <div class="h-8 w-8 rounded-lg bg-indigo-100 flex items-center justify-center">
+                                            <i class='bx bx-image text-sm text-indigo-600'></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1">
+                                        <span class="text-sm font-semibold text-wwc-neutral-600 mb-2 block">Seating Location Layout</span>
+                                        <div class="mt-2">
+                                            <img src="{{ asset('storage/' . $ticket->seating_image) }}" 
+                                                 alt="Seating layout for {{ $ticket->name }}" 
+                                                 class="w-full h-64 object-cover rounded-lg border border-wwc-neutral-200 shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
+                                                 onclick="openImageModal('{{ asset('storage/' . $ticket->seating_image) }}', '{{ $ticket->name }} Seating Layout')">
+                                        </div>
+                                        <p class="text-xs text-wwc-neutral-500 mt-2">Click image to view full size</p>
                                     </div>
                                 </div>
                                 @endif
@@ -230,4 +251,40 @@
         </div>
     </div>
 </div>
+
+<!-- Image Modal -->
+<div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 w-11/12 max-w-4xl">
+        <div class="bg-white rounded-lg shadow-lg">
+            <div class="flex justify-between items-center p-4 border-b border-gray-200">
+                <h3 id="modalTitle" class="text-lg font-semibold text-gray-900">Seating Layout</h3>
+                <button onclick="closeImageModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class='bx bx-x text-2xl'></i>
+                </button>
+            </div>
+            <div class="p-4">
+                <img id="modalImage" src="" alt="Seating layout" class="w-full h-auto rounded-lg">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openImageModal(imageSrc, title) {
+    document.getElementById('modalImage').src = imageSrc;
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('imageModal').classList.remove('hidden');
+}
+
+function closeImageModal() {
+    document.getElementById('imageModal').classList.add('hidden');
+}
+
+// Close modal when clicking outside
+document.getElementById('imageModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeImageModal();
+    }
+});
+</script>
 @endsection

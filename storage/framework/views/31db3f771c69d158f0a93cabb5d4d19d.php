@@ -29,7 +29,7 @@
                     </div>
                 </div>
                 <div class="p-6">
-                    <form action="<?php echo e(route('admin.tickets.update', $ticket)); ?>" method="POST">
+                    <form action="<?php echo e(route('admin.tickets.update', $ticket)); ?>" method="POST" enctype="multipart/form-data">
                         <?php echo csrf_field(); ?>
                         <?php echo method_field('PUT'); ?>
                         
@@ -235,6 +235,49 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
                                 </div>
+
+                                <!-- Seating Location Image -->
+                                <div>
+                                    <label for="seating_image" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                        Seating Location Image
+                                    </label>
+                                    
+                                    <?php if($ticket->seating_image): ?>
+                                        <div class="mb-3">
+                                            <p class="text-sm text-wwc-neutral-600 mb-2">Current image:</p>
+                                            <img src="<?php echo e(asset('storage/' . $ticket->seating_image)); ?>" alt="Current seating layout" class="w-full h-48 object-cover rounded-lg border border-wwc-neutral-200">
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed border-wwc-neutral-300 rounded-lg hover:border-wwc-primary transition-colors duration-200">
+                                        <div class="space-y-1 text-center">
+                                            <i class='bx bx-image text-4xl text-wwc-neutral-400'></i>
+                                            <div class="flex text-sm text-wwc-neutral-600">
+                                                <label for="seating_image" class="relative cursor-pointer bg-white rounded-md font-medium text-wwc-primary hover:text-wwc-primary-dark focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-wwc-primary">
+                                                    <span><?php echo e($ticket->seating_image ? 'Change image' : 'Upload a file'); ?></span>
+                                                    <input id="seating_image" name="seating_image" type="file" accept="image/*" class="sr-only" onchange="previewImage(this)">
+                                                </label>
+                                                <p class="pl-1">or drag and drop</p>
+                                            </div>
+                                            <p class="text-xs text-wwc-neutral-500">PNG, JPG, GIF up to 10MB</p>
+                                        </div>
+                                    </div>
+                                    <div id="image-preview" class="mt-3 hidden">
+                                        <img id="preview-img" src="" alt="Seating preview" class="w-full h-48 object-cover rounded-lg border border-wwc-neutral-200">
+                                        <button type="button" onclick="removeImage()" class="mt-2 text-sm text-red-600 hover:text-red-800">Remove image</button>
+                                    </div>
+                                    <p class="text-xs text-wwc-neutral-500 mt-1">Optional seating layout image to help customers understand the location</p>
+                                    <?php $__errorArgs = ['seating_image'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                        <div class="text-wwc-error text-xs mt-1 font-medium"><?php echo e($message); ?></div>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                                </div>
                             </div>
 
                             <!-- Combo Ticket Settings -->
@@ -373,6 +416,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Image preview functions
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('preview-img').src = e.target.result;
+            document.getElementById('image-preview').classList.remove('hidden');
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function removeImage() {
+    document.getElementById('seating_image').value = '';
+    document.getElementById('image-preview').classList.add('hidden');
+    document.getElementById('preview-img').src = '';
+}
 </script>
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /Users/administrator/Desktop/Project/Github/warzone-ticketing-system/resources/views/admin/tickets/edit.blade.php ENDPATH**/ ?>

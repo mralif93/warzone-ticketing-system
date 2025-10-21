@@ -8,6 +8,7 @@ use App\Models\PurchaseTicket;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class TicketController extends Controller
 {
@@ -91,7 +92,7 @@ class TicketController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $rules = [
             'event_id' => 'required|exists:events,id',
             'name' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
@@ -99,7 +100,14 @@ class TicketController extends Controller
             'status' => 'required|in:active,inactive,sold_out',
             'description' => 'nullable|string|max:1000',
             'is_combo' => 'nullable|boolean',
-        ]);
+        ];
+
+        // Only validate seating_image if a file is actually uploaded
+        if ($request->hasFile('seating_image')) {
+            $rules['seating_image'] = 'image|mimes:jpeg,png,jpg,gif|max:10240';
+        }
+
+        $request->validate($rules);
 
         $event = \App\Models\Event::findOrFail($request->event_id);
 
@@ -114,6 +122,12 @@ class TicketController extends Controller
                            ->withInput();
         }
 
+        // Handle seating image upload
+        $seatingImagePath = null;
+        if ($request->hasFile('seating_image')) {
+            $seatingImagePath = $request->file('seating_image')->store('seating-images', 'public');
+        }
+
         // Prepare data for creation
         $data = [
             'event_id' => $request->event_id,
@@ -125,6 +139,7 @@ class TicketController extends Controller
             'scanned_seats' => 0,
             'status' => $request->status, // Admin-selected status
             'description' => $request->description,
+            'seating_image' => $seatingImagePath,
             'is_combo' => $request->has('is_combo'),
         ];
 
@@ -175,7 +190,7 @@ class TicketController extends Controller
      */
     public function update(Request $request, Ticket $ticket)
     {
-        $request->validate([
+        $rules = [
             'event_id' => 'required|exists:events,id',
             'name' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
@@ -183,9 +198,27 @@ class TicketController extends Controller
             'status' => 'required|in:active,inactive,sold_out',
             'description' => 'nullable|string|max:1000',
             'is_combo' => 'nullable|boolean'
-        ]);
+        ];
+
+        // Only validate seating_image if a file is actually uploaded
+        if ($request->hasFile('seating_image')) {
+            $rules['seating_image'] = 'image|mimes:jpeg,png,jpg,gif|max:10240';
+        }
+
+        $request->validate($rules);
 
         $oldValues = $ticket->toArray();
+        
+        // Handle seating image upload
+        $seatingImagePath = $ticket->seating_image; // Keep existing image by default
+        if ($request->hasFile('seating_image')) {
+            // Delete old image if exists
+            if ($ticket->seating_image && Storage::disk('public')->exists($ticket->seating_image)) {
+                Storage::disk('public')->delete($ticket->seating_image);
+            }
+            // Store new image
+            $seatingImagePath = $request->file('seating_image')->store('seating-images', 'public');
+        }
         
         // Calculate new available seats
         $newAvailableSeats = $request->total_seats - $ticket->sold_seats;
@@ -197,6 +230,7 @@ class TicketController extends Controller
             'total_seats' => $request->total_seats,
             'available_seats' => max(0, $newAvailableSeats),
             'description' => $request->description,
+            'seating_image' => $seatingImagePath,
             'is_combo' => $request->has('is_combo'),
             'status' => $request->status, // Admin-selected status
         ]);

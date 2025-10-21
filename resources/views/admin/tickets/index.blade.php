@@ -237,6 +237,9 @@
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider text-center">
                                         Occupancy
                                     </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider text-center">
+                                        Seating Image
+                                    </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-wwc-neutral-600 uppercase tracking-wider text-right">
                                         Actions
                                     </th>
@@ -307,6 +310,23 @@
                                                 <div class="bg-blue-600 h-2 rounded-full" style="width: {{ $ticketType->getOccupancyPercentage() }}%"></div>
                                             </div>
                                         </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                                            @if($ticketType->seating_image)
+                                                <div class="flex justify-center">
+                                                    <img src="{{ asset('storage/' . $ticketType->seating_image) }}" 
+                                                         alt="Seating layout" 
+                                                         class="w-12 h-12 object-cover rounded-lg border border-wwc-neutral-200 cursor-pointer hover:shadow-md transition-shadow duration-200"
+                                                         onclick="openImageModal('{{ asset('storage/' . $ticketType->seating_image) }}', '{{ $ticketType->name }} Seating Layout')"
+                                                         title="Click to view full size">
+                                                </div>
+                                            @else
+                                                <div class="flex justify-center">
+                                                    <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                                                        <i class='bx bx-image text-gray-400 text-lg'></i>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div class="flex items-center justify-end space-x-1">
                                                 <a href="{{ route('admin.tickets.show', $ticketType) }}" 
@@ -364,6 +384,23 @@
                     </div>
                 @endif
             </div>
+    </div>
+</div>
+</div>
+
+<!-- Image Modal -->
+<div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 w-11/12 max-w-4xl">
+        <div class="bg-white rounded-lg shadow-lg">
+            <div class="flex justify-between items-center p-4 border-b border-gray-200">
+                <h3 id="modalTitle" class="text-lg font-semibold text-gray-900">Seating Layout</h3>
+                <button onclick="closeImageModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class='bx bx-x text-2xl'></i>
+                </button>
+            </div>
+            <div class="p-4">
+                <img id="modalImage" src="" alt="Seating layout" class="w-full h-auto rounded-lg">
+            </div>
         </div>
     </div>
 </div>
@@ -417,6 +454,24 @@ function closeDeleteModal() {
 document.getElementById('deleteModal').addEventListener('click', function(e) {
     if (e.target === this) {
         closeDeleteModal();
+    }
+});
+
+// Image modal functions
+function openImageModal(imageSrc, title) {
+    document.getElementById('modalImage').src = imageSrc;
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('imageModal').classList.remove('hidden');
+}
+
+function closeImageModal() {
+    document.getElementById('imageModal').classList.add('hidden');
+}
+
+// Close image modal when clicking outside
+document.getElementById('imageModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeImageModal();
     }
 });
 </script>

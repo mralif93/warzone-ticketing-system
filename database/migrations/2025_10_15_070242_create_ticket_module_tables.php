@@ -25,6 +25,7 @@ return new class extends Migration
             $table->integer('scanned_seats')->default(0);
             $table->string('status')->default('active'); // Active, Sold Out, Inactive
             $table->text('description')->nullable();
+            $table->string('seating_image')->nullable(); // Seating location image path
             $table->boolean('is_combo')->default(false); // Is this a combo ticket type
             $table->timestamps();
             $table->softDeletes();

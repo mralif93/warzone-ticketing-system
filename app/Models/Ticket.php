@@ -20,6 +20,7 @@ class Ticket extends Model
         'scanned_seats',
         'status',
         'description',
+        'seating_image',
         'is_combo',
     ];
 

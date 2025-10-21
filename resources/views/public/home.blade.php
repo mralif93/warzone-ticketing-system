@@ -252,7 +252,8 @@
                                         data-day1-available="{{ $day1Available }}"
                                         data-day1-sold="{{ $day1Sold }}"
                                         data-day2-available="{{ $day2Available }}"
-                                        data-day2-sold="{{ $day2Sold }}">
+                                        data-day2-sold="{{ $day2Sold }}"
+                                        data-seating-image="{{ $ticket->seating_image ? asset('storage/' . $ticket->seating_image) : '' }}">
                                     <div class="flex items-center justify-center gap-2">
                                         <i class='bx bx-info-circle'></i>
                                         <span>View Details</span>
@@ -424,7 +425,8 @@
                                 data-day1-available=""
                                 data-day1-sold=""
                                 data-day2-available=""
-                                data-day2-sold="">
+                                data-day2-sold=""
+                                data-seating-image="{{ $ticket->seating_image ? asset('storage/' . $ticket->seating_image) : '' }}">
                             <i class='bx bx-info-circle mr-2'></i>
                             View Details
                         </button>
@@ -479,7 +481,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     
     // Function to show ticket details popup
-    function showTicketDetails(ticketName, ticketPrice, ticketAvailable, ticketDescription, ticketTotal, ticketSold, isCombo = false, day1Available = null, day1Sold = null, day2Available = null, day2Sold = null) {
+    function showTicketDetails(ticketName, ticketPrice, ticketAvailable, ticketDescription, ticketTotal, ticketSold, isCombo = false, day1Available = null, day1Sold = null, day2Available = null, day2Sold = null, seatingImage = null) {
         const ticketImage = ticketImages[ticketName] || 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800&h=600&fit=crop&crop=center';
         
         // Calculate availability percentage
@@ -489,50 +491,30 @@ document.addEventListener('DOMContentLoaded', function() {
         let dayBreakdownHtml = '';
         if (isCombo && day1Available !== null && day2Available !== null) {
             dayBreakdownHtml = `
-                <div class="space-y-4">
+                <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-5 border border-green-200">
                     <div class="flex items-center mb-3">
-                        <i class='bx bx-calendar text-blue-600 text-xl mr-2'></i>
+                        <i class='bx bx-calendar text-green-600 text-xl mr-2'></i>
                         <h4 class="font-bold text-gray-900 text-lg">Daily Availability</h4>
                     </div>
-                    <div class="space-y-3">
-                        <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200 hover:shadow-md transition-all duration-300">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center space-x-3">
-                                    <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                                        <span class="text-white font-bold text-sm">1</span>
-                                    </div>
-                                    <div class="text-sm font-bold text-gray-800">Day 1</div>
-                                </div>
-                                <div class="flex items-center gap-8">
-                                    <div class="text-center">
-                                        <div class="text-2xl font-bold text-green-600">${day1Available}</div>
-                                        <div class="text-xs text-gray-600 font-medium">Available</div>
-                                    </div>
-                                    <div class="text-center">
-                                        <div class="text-2xl font-bold text-red-600">${day1Sold}</div>
-                                        <div class="text-xs text-gray-600 font-medium">Sold</div>
-                                    </div>
-                                </div>
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between text-sm text-gray-700">
+                            <div class="flex items-center">
+                                <i class='bx bx-calendar-check text-green-500 mr-2'></i>
+                                <span>Day 1</span>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <span class="text-green-600 font-semibold">${day1Available} Available</span>
+                                <span class="text-red-600 font-semibold">${day1Sold} Sold</span>
                             </div>
                         </div>
-                        <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-4 border border-blue-200 hover:shadow-md transition-all duration-300">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center space-x-3">
-                                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                                        <span class="text-white font-bold text-sm">2</span>
-                                    </div>
-                                    <div class="text-sm font-bold text-gray-800">Day 2</div>
-                                </div>
-                                <div class="flex items-center gap-8">
-                                    <div class="text-center">
-                                        <div class="text-2xl font-bold text-green-600">${day2Available}</div>
-                                        <div class="text-xs text-gray-600 font-medium">Available</div>
-                                    </div>
-                                    <div class="text-center">
-                                        <div class="text-2xl font-bold text-red-600">${day2Sold}</div>
-                                        <div class="text-xs text-gray-600 font-medium">Sold</div>
-                                    </div>
-                                </div>
+                        <div class="flex items-center justify-between text-sm text-gray-700">
+                            <div class="flex items-center">
+                                <i class='bx bx-calendar-check text-blue-500 mr-2'></i>
+                                <span>Day 2</span>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <span class="text-green-600 font-semibold">${day2Available} Available</span>
+                                <span class="text-red-600 font-semibold">${day2Sold} Sold</span>
                             </div>
                         </div>
                     </div>
@@ -542,20 +524,34 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Show SweetAlert with ticket details
         Swal.fire({
-            title: `<div class="flex items-center justify-center space-x-2">
-                        <i class='bx bx-star text-yellow-500 text-xl'></i>
-                        <span>${ticketName}</span>
-                        <i class='bx bx-star text-yellow-500 text-xl'></i>
+            title: `<div class="flex items-center justify-between w-full">
+                        <div class="flex items-center space-x-2">
+                            <i class='bx bx-star text-yellow-500 text-lg'></i>
+                            <span class="text-lg font-semibold text-gray-800">${ticketName}</span>
+                            <i class='bx bx-star text-yellow-500 text-lg'></i>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-bold text-red-600">RM${parseFloat(ticketPrice).toLocaleString()}</div>
+                            <div class="text-xs text-gray-500">per ticket</div>
+                        </div>
                     </div>`,
             html: `
                 <div class="text-left">
-                    <div class="mb-6 relative">
-                        <img src="${ticketImage}" alt="${ticketName}" class="w-full h-56 object-cover rounded-xl mb-4 shadow-lg">
-                        <div class="absolute top-4 right-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
-                            <i class='bx bx-tag mr-1'></i>
-                            RM${parseFloat(ticketPrice).toLocaleString()}
+                    
+                    <!-- Seating Layout at Top -->
+                    ${seatingImage ? `
+                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-5 border border-green-200 mb-6">
+                        <div class="flex items-center mb-3">
+                            <i class='bx bx-image text-green-600 text-xl mr-2'></i>
+                            <h4 class="font-bold text-gray-900 text-lg">Seating Layout</h4>
+                        </div>
+                        <div class="mt-3">
+                            <img src="${seatingImage}" 
+                                 alt="Seating layout for ${ticketName}" 
+                                 class="w-full rounded-lg border border-green-200 shadow-sm">
                         </div>
                     </div>
+                    ` : ''}
                     
                     <div class="space-y-4">
                         <!-- Enhanced Description -->
@@ -632,10 +628,57 @@ document.addEventListener('DOMContentLoaded', function() {
             const day1Sold = this.dataset.day1Sold || null;
             const day2Available = this.dataset.day2Available || null;
             const day2Sold = this.dataset.day2Sold || null;
+            const seatingImage = this.dataset.seatingImage || null;
             
-            showTicketDetails(ticketName, ticketPrice, ticketAvailable, ticketDescription, ticketTotal, ticketSold, isCombo, day1Available, day1Sold, day2Available, day2Sold);
+            showTicketDetails(ticketName, ticketPrice, ticketAvailable, ticketDescription, ticketTotal, ticketSold, isCombo, day1Available, day1Sold, day2Available, day2Sold, seatingImage);
         });
     });
+});
+
+// Seating modal functions
+function openSeatingModal(imageSrc, title) {
+    // Create modal if it doesn't exist
+    let modal = document.getElementById('seatingModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'seatingModal';
+        modal.className = 'fixed inset-0 bg-black bg-opacity-75 overflow-y-auto h-full w-full hidden z-50';
+        modal.innerHTML = `
+            <div class="relative top-20 mx-auto p-5 w-11/12 max-w-4xl">
+                <div class="bg-white rounded-lg shadow-lg">
+                    <div class="flex justify-between items-center p-4 border-b border-gray-200">
+                        <h3 id="seatingModalTitle" class="text-lg font-semibold text-gray-900">Seating Layout</h3>
+                        <button onclick="closeSeatingModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class='bx bx-x text-2xl'></i>
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <img id="seatingModalImage" src="" alt="Seating layout" class="w-full h-auto rounded-lg">
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    document.getElementById('seatingModalImage').src = imageSrc;
+    document.getElementById('seatingModalTitle').textContent = title;
+    modal.classList.remove('hidden');
+}
+
+function closeSeatingModal() {
+    const modal = document.getElementById('seatingModal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}
+
+// Close seating modal when clicking outside
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('seatingModal');
+    if (modal && e.target === modal) {
+        closeSeatingModal();
+    }
 });
 </script>
 

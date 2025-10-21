@@ -524,19 +524,23 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Show SweetAlert with ticket details
         Swal.fire({
-            title: `<div class="flex items-center justify-between w-full">
-                        <div class="flex items-center space-x-2">
-                            <i class='bx bx-star text-yellow-500 text-lg'></i>
-                            <span class="text-lg font-semibold text-gray-800">${ticketName}</span>
-                            <i class='bx bx-star text-yellow-500 text-lg'></i>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-2xl font-bold text-red-600">RM${parseFloat(ticketPrice).toLocaleString()}</div>
-                            <div class="text-xs text-gray-500">per ticket</div>
-                        </div>
-                    </div>`,
+            title: `Ticket Details`,
             html: `
                 <div class="text-left">
+                    <!-- Ticket Header Info -->
+                    <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <i class='bx bx-star text-yellow-500 text-lg'></i>
+                                <span class="text-lg font-semibold text-gray-800">${ticketName}</span>
+                                <i class='bx bx-star text-yellow-500 text-lg'></i>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-2xl font-bold text-red-600">RM${parseFloat(ticketPrice).toLocaleString()}</div>
+                                <div class="text-xs text-gray-500">per ticket</div>
+                            </div>
+                        </div>
+                    </div>
                     
                     <!-- Seating Layout at Top -->
                     ${seatingImage ? `

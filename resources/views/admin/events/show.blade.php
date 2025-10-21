@@ -163,7 +163,7 @@
                                 <div class="flex items-center py-3 border-b border-wwc-neutral-100">
                                     <div class="flex-shrink-0 mr-4">
                                         <div class="h-8 w-8 rounded-lg bg-wwc-accent flex items-center justify-center">
-                                            <i class='bx bx-discount text-sm text-white'></i>
+                                            <i class='bx bx-gift text-sm text-white'></i>
                                         </div>
                                     </div>
                                     <div class="flex-1 flex items-center justify-between">
@@ -178,7 +178,7 @@
                                 <div class="flex items-center py-3">
                                     <div class="flex-shrink-0 mr-4">
                                         <div class="h-8 w-8 rounded-lg bg-wwc-accent/20 flex items-center justify-center">
-                                            <i class='bx bx-percentage text-sm text-wwc-accent'></i>
+                                            <i class='bx bx-tag text-sm text-wwc-accent'></i>
                                         </div>
                                     </div>
                                     <div class="flex-1 flex items-center justify-between">
@@ -219,8 +219,16 @@
                                                 </div>
                                             </div>
 
-                                            <!-- Right Side: Available, Sold, Total Statistics -->
-                                            <div class="flex items-center space-x-8">
+                                            <!-- Right Side: Combo Button and All Statistics -->
+                                            <div class="flex items-center space-x-6">
+                                                @if($ticketType->is_combo)
+                                                <div class="flex-shrink-0">
+                                                    <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-wwc-accent/20 text-wwc-accent">
+                                                        <i class='bx bx-discount text-xs mr-1'></i>
+                                                        Combo
+                                                    </span>
+                                                </div>
+                                                @endif
                                                 <div class="text-center min-w-[60px]">
                                                     <p class="text-lg font-bold text-wwc-neutral-900">{{ number_format($ticketType->available_seats) }}</p>
                                                     <p class="text-xs text-wwc-neutral-500">Available</p>
@@ -234,16 +242,6 @@
                                                     <p class="text-xs text-wwc-neutral-500">Total</p>
                                                 </div>
                                             </div>
-
-                                            <!-- Far Right: Combo Button -->
-                                            @if($ticketType->is_combo)
-                                            <div class="flex-shrink-0">
-                                                <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-wwc-accent/20 text-wwc-accent">
-                                                    <i class='bx bx-discount text-xs mr-1'></i>
-                                                    Combo
-                                                </span>
-                                            </div>
-                                            @endif
                                         </div>
                                     </div>
                                     @endforeach

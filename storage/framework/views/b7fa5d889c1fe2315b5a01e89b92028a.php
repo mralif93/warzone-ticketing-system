@@ -248,7 +248,12 @@
                                         data-available="<?php echo e($totalAvailable); ?>"
                                         data-description="<?php echo e($ticket->description); ?>"
                                         data-total="<?php echo e($totalSeats); ?>"
-                                        data-sold="<?php echo e($totalSold); ?>">
+                                        data-sold="<?php echo e($totalSold); ?>"
+                                        data-is-combo="<?php echo e($ticket->is_combo ? 'true' : 'false'); ?>"
+                                        data-day1-available="<?php echo e($day1Available); ?>"
+                                        data-day1-sold="<?php echo e($day1Sold); ?>"
+                                        data-day2-available="<?php echo e($day2Available); ?>"
+                                        data-day2-sold="<?php echo e($day2Sold); ?>">
                                     <div class="flex items-center justify-center gap-2">
                                         <i class='bx bx-info-circle'></i>
                                         <span>View Details</span>
@@ -416,7 +421,12 @@
                                 data-available="<?php echo e($ticket->available_seats); ?>"
                                 data-description="<?php echo e($ticket->description); ?>"
                                 data-total="<?php echo e($ticket->total_seats); ?>"
-                                data-sold="<?php echo e($ticket->sold_seats); ?>">
+                                data-sold="<?php echo e($ticket->sold_seats); ?>"
+                                data-is-combo="<?php echo e($ticket->is_combo ? 'true' : 'false'); ?>"
+                                data-day1-available=""
+                                data-day1-sold=""
+                                data-day2-available=""
+                                data-day2-sold="">
                             <i class='bx bx-info-circle mr-2'></i>
                             View Details
                         </button>
@@ -471,60 +481,127 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     
     // Function to show ticket details popup
-    function showTicketDetails(ticketName, ticketPrice, ticketAvailable, ticketDescription, ticketTotal, ticketSold) {
+    function showTicketDetails(ticketName, ticketPrice, ticketAvailable, ticketDescription, ticketTotal, ticketSold, isCombo = false, day1Available = null, day1Sold = null, day2Available = null, day2Sold = null) {
         const ticketImage = ticketImages[ticketName] || 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800&h=600&fit=crop&crop=center';
         
         // Calculate availability percentage
         const availabilityPercentage = ticketTotal > 0 ? Math.round((ticketAvailable / ticketTotal) * 100) : 0;
         
-        // Show SweetAlert with ticket details
-        Swal.fire({
-            title: ticketName,
-            html: `
-                <div class="text-left">
-                    <div class="mb-4">
-                        <img src="${ticketImage}" alt="${ticketName}" class="w-full h-48 object-cover rounded-lg mb-4">
+        // Generate day-by-day breakdown HTML if it's a combo ticket
+        let dayBreakdownHtml = '';
+        if (isCombo && day1Available !== null && day2Available !== null) {
+            dayBreakdownHtml = `
+                <div class="space-y-4">
+                    <div class="flex items-center mb-3">
+                        <i class='bx bx-calendar text-blue-600 text-xl mr-2'></i>
+                        <h4 class="font-bold text-gray-900 text-lg">Daily Availability</h4>
                     </div>
                     <div class="space-y-3">
-                        <div class="flex justify-between items-center">
-                            <span class="text-lg font-semibold text-gray-700">Price:</span>
-                            <span class="text-2xl font-bold text-red-600">RM${parseFloat(ticketPrice).toLocaleString()}</span>
+                        <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200 hover:shadow-md transition-all duration-300">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                                        <span class="text-white font-bold text-sm">1</span>
+                                    </div>
+                                    <div class="text-sm font-bold text-gray-800">Day 1</div>
+                                </div>
+                                <div class="flex items-center gap-8">
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-green-600">${day1Available}</div>
+                                        <div class="text-xs text-gray-600 font-medium">Available</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-red-600">${day1Sold}</div>
+                                        <div class="text-xs text-gray-600 font-medium">Sold</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-lg font-semibold text-gray-700">Available Seats:</span>
-                            <span class="text-lg font-semibold text-green-600">${ticketAvailable} seats</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-lg font-semibold text-gray-700">Total Seats:</span>
-                            <span class="text-lg font-semibold text-gray-600">${ticketTotal} seats</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-lg font-semibold text-gray-700">Sold:</span>
-                            <span class="text-lg font-semibold text-gray-600">${ticketSold} seats</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-lg font-semibold text-gray-700">Availability:</span>
-                            <span class="text-lg font-semibold text-blue-600">${availabilityPercentage}%</span>
-                        </div>
-                        <div class="bg-gray-50 rounded-lg p-4 mt-4">
-                            <h4 class="font-semibold text-gray-900 mb-2">Ticket Description</h4>
-                            <p class="text-gray-600 text-sm">${ticketDescription || 'Premium seating with excellent views and great value for money.'}</p>
+                        <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-4 border border-blue-200 hover:shadow-md transition-all duration-300">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                                        <span class="text-white font-bold text-sm">2</span>
+                                    </div>
+                                    <div class="text-sm font-bold text-gray-800">Day 2</div>
+                                </div>
+                                <div class="flex items-center gap-8">
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-green-600">${day2Available}</div>
+                                        <div class="text-xs text-gray-600 font-medium">Available</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-red-600">${day2Sold}</div>
+                                        <div class="text-xs text-gray-600 font-medium">Sold</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
+            `;
+        }
+        
+        // Show SweetAlert with ticket details
+        Swal.fire({
+            title: `<div class="flex items-center justify-center space-x-2">
+                        <i class='bx bx-star text-yellow-500 text-xl'></i>
+                        <span>${ticketName}</span>
+                        <i class='bx bx-star text-yellow-500 text-xl'></i>
+                    </div>`,
+            html: `
+                <div class="text-left">
+                    <div class="mb-6 relative">
+                        <img src="${ticketImage}" alt="${ticketName}" class="w-full h-56 object-cover rounded-xl mb-4 shadow-lg">
+                        <div class="absolute top-4 right-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
+                            <i class='bx bx-tag mr-1'></i>
+                            RM${parseFloat(ticketPrice).toLocaleString()}
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <!-- Enhanced Description -->
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-200">
+                            <div class="flex items-center mb-3">
+                                <i class='bx bx-info-circle text-blue-600 text-xl mr-2'></i>
+                                <h4 class="font-bold text-gray-900 text-lg">What's Included</h4>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex items-center text-sm text-gray-700">
+                                    <i class='bx bx-chair text-green-500 mr-2'></i>
+                                    <span>Premium Seating</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-700">
+                                    <i class='bx bx-key text-purple-500 mr-2'></i>
+                                    <span>Backstage Access</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-700">
+                                    <i class='bx bx-group text-orange-500 mr-2'></i>
+                                    <span>Meet & Greet with Players</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-700">
+                                    <i class='bx bx-gift text-red-500 mr-2'></i>
+                                    <span>Exclusive VIP Experience</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        ${dayBreakdownHtml}
+                    </div>
+                </div>
             `,
-            width: '600px',
+            width: '650px',
             showCloseButton: true,
             showCancelButton: true,
-            confirmButtonText: 'Get This Ticket',
-            cancelButtonText: 'Close',
+            confirmButtonText: '<i class="bx bx-shopping-cart mr-2"></i>Get This Ticket',
+            cancelButtonText: '<i class="bx bx-x mr-2"></i>Close',
             confirmButtonColor: '#dc2626',
             cancelButtonColor: '#6b7280',
             customClass: {
-                popup: 'rounded-2xl',
+                popup: 'rounded-2xl shadow-2xl',
                 title: 'text-2xl font-bold text-gray-900',
-                confirmButton: 'px-6 py-3 rounded-lg font-semibold',
-                cancelButton: 'px-6 py-3 rounded-lg font-semibold'
+                confirmButton: 'px-8 py-4 rounded-xl font-bold text-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105',
+                cancelButton: 'px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-md transition-all duration-300'
             },
             didOpen: () => {
                 // Add click handler to confirm button
@@ -552,8 +629,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const ticketDescription = this.dataset.description;
             const ticketTotal = this.dataset.total;
             const ticketSold = this.dataset.sold;
+            const isCombo = this.dataset.isCombo === 'true';
+            const day1Available = this.dataset.day1Available || null;
+            const day1Sold = this.dataset.day1Sold || null;
+            const day2Available = this.dataset.day2Available || null;
+            const day2Sold = this.dataset.day2Sold || null;
             
-            showTicketDetails(ticketName, ticketPrice, ticketAvailable, ticketDescription, ticketTotal, ticketSold);
+            showTicketDetails(ticketName, ticketPrice, ticketAvailable, ticketDescription, ticketTotal, ticketSold, isCombo, day1Available, day1Sold, day2Available, day2Sold);
         });
     });
 });

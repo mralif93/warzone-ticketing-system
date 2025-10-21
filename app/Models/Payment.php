@@ -198,4 +198,20 @@ class Payment extends Model
 
         return 'Unknown';
     }
+
+    /**
+     * Get formatted payment method name
+     */
+    public function getFormattedMethodAttribute(): string
+    {
+        $paymentMethods = [
+            'bank_transfer' => 'Bank Transfer',
+            'online_banking' => 'Online Banking',
+            'qr_code_ewallet' => 'QR Code / E-Wallet',
+            'debit_credit_card' => 'Debit / Credit Card',
+            'others' => 'Others',
+        ];
+
+        return $paymentMethods[$this->method] ?? ucwords(str_replace('_', ' ', $this->method));
+    }
 }

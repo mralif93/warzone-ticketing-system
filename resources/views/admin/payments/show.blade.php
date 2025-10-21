@@ -82,7 +82,7 @@
                                     </div>
                                     <div class="flex-1 flex items-center justify-between">
                                         <span class="text-sm font-semibold text-wwc-neutral-600">Payment Method</span>
-                                        <span class="text-base font-medium text-wwc-neutral-900">{{ ucwords(str_replace('_', ' ', $payment->method)) }}</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">{{ $payment->formatted_method ?? 'N/A' }}</span>
                                     </div>
                                 </div>
 

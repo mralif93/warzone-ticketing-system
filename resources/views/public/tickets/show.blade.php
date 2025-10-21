@@ -211,7 +211,7 @@
                                     </div>
                                     <div>
                                         <h3 class="text-sm font-medium text-wwc-neutral-500 uppercase tracking-wide mb-1">Payment Method</h3>
-                                        <p class="text-lg font-semibold text-wwc-neutral-900">{{ $ticket->order->payment_method ? ucwords(str_replace('_', ' ', $ticket->order->payment_method)) : 'Credit Card' }}</p>
+                                        <p class="text-lg font-semibold text-wwc-neutral-900">{{ $ticket->order->formatted_payment_method ?? 'Credit Card' }}</p>
                                     </div>
                                 </div>
                             </div>

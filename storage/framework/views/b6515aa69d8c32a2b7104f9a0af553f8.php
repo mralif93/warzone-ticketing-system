@@ -119,7 +119,7 @@
                                 <div class="flex items-center py-3">
                                     <div class="flex-shrink-0 mr-4">
                                         <div class="h-8 w-8 rounded-lg bg-gray-100 flex items-center justify-center">
-                                            <i class='bx bx-file-text text-sm text-gray-600'></i>
+                                            <i class='bx bx-file text-sm text-gray-600'></i>
                                         </div>
                                     </div>
                                     <div class="flex-1">

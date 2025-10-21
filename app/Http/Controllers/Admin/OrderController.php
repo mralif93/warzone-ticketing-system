@@ -81,7 +81,7 @@ class OrderController extends Controller
                 'user_id' => 'required|exists:users,id',
                 'event_id' => 'required|exists:events,id',
                 'customer_email' => 'required|email|max:255',
-                'payment_method' => 'required|string|in:credit_card,debit_card,online_banking,e_wallet,cash',
+                'payment_method' => 'required|string|in:bank_transfer,online_banking,qr_code_ewallet,debit_credit_card,others',
                 'status' => 'required|in:pending,paid,cancelled,refunded',
                 'purchase_type' => 'required|in:single_day,multi_day',
                 'ticket_type_id' => 'required_if:purchase_type,single_day|nullable|exists:tickets,id',
@@ -312,7 +312,7 @@ class OrderController extends Controller
         $request->validate([
             'user_id' => 'required|exists:users,id',
             'customer_email' => 'required|email|max:255',
-            'payment_method' => 'required|string|in:credit_card,debit_card,online_banking,e_wallet,cash',
+            'payment_method' => 'required|string|in:bank_transfer,online_banking,qr_code_ewallet,debit_credit_card,others',
             'status' => 'required|in:pending,paid,cancelled,refunded',
             'notes' => 'nullable|string|max:1000',
             'ticket_quantity' => 'nullable|integer|min:1|max:20',

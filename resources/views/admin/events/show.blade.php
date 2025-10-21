@@ -133,7 +133,7 @@
                                 <div class="flex items-center py-3">
                                     <div class="flex-shrink-0 mr-4">
                                         <div class="h-8 w-8 rounded-lg bg-gray-100 flex items-center justify-center">
-                                            <i class='bx bx-file-text text-sm text-gray-600'></i>
+                                            <i class='bx bx-file text-sm text-gray-600'></i>
                                         </div>
                                     </div>
                                     <div class="flex-1">
@@ -153,7 +153,7 @@
                             <div class="flex items-center justify-between">
                                 <h3 class="text-lg font-bold text-wwc-neutral-900">Combo Discount Settings</h3>
                                 <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
-                                    <i class='bx bx-gift text-sm'></i>
+                                    <i class='bx bx-discount text-sm'></i>
                                     <span>Multi-day benefits</span>
                                 </div>
                             </div>
@@ -163,7 +163,7 @@
                                 <div class="flex items-center py-3 border-b border-wwc-neutral-100">
                                     <div class="flex-shrink-0 mr-4">
                                         <div class="h-8 w-8 rounded-lg bg-wwc-accent flex items-center justify-center">
-                                            <i class='bx bx-gift text-sm text-white'></i>
+                                            <i class='bx bx-discount text-sm text-white'></i>
                                         </div>
                                     </div>
                                     <div class="flex-1 flex items-center justify-between">
@@ -197,46 +197,53 @@
                             <div class="flex items-center justify-between">
                                 <h3 class="text-lg font-bold text-wwc-neutral-900">Ticket Types Overview</h3>
                                 <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
-                                    <i class='bx bx-ticket text-sm'></i>
+                                    <i class='bx bx-purchase-tag text-sm'></i>
                                     <span>Available tickets</span>
                                 </div>
                             </div>
                         </div>
                         <div class="p-6">
                             @if($event->ticketTypes->count() > 0)
-                                <div class="space-y-4">
+                                <div class="space-y-1">
                                     @foreach($event->ticketTypes as $ticketType)
-                                    <div class="bg-wwc-neutral-50 rounded-lg p-4">
-                                        <div class="flex items-center justify-between mb-3">
+                                    <div class="bg-white border-b border-wwc-neutral-100 py-4 px-6 hover:bg-wwc-neutral-50 transition-colors duration-150">
+                                        <div class="flex items-center justify-between">
+                                            <!-- Left Side: Ticket Info -->
                                             <div class="flex items-center space-x-3">
-                                                <div class="h-8 w-8 rounded-lg bg-wwc-primary flex items-center justify-center">
-                                                    <i class='bx bx-ticket text-sm text-white'></i>
+                                                <div class="h-8 w-8 rounded bg-wwc-primary flex items-center justify-center flex-shrink-0">
+                                                    <i class='bx bx-purchase-tag text-sm text-white'></i>
                                                 </div>
                                                 <div>
-                                                    <h4 class="text-sm font-semibold text-wwc-neutral-900">{{ $ticketType->name }}</h4>
+                                                    <h4 class="text-sm font-bold text-wwc-neutral-900">{{ $ticketType->name }}</h4>
                                                     <p class="text-xs text-wwc-neutral-600">RM{{ number_format($ticketType->price, 0) }} per ticket</p>
                                                 </div>
                                             </div>
+
+                                            <!-- Right Side: Available, Sold, Total Statistics -->
+                                            <div class="flex items-center space-x-8">
+                                                <div class="text-center min-w-[60px]">
+                                                    <p class="text-lg font-bold text-wwc-neutral-900">{{ number_format($ticketType->available_seats) }}</p>
+                                                    <p class="text-xs text-wwc-neutral-500">Available</p>
+                                                </div>
+                                                <div class="text-center min-w-[60px]">
+                                                    <p class="text-lg font-bold text-wwc-accent">{{ number_format($ticketType->sold_seats) }}</p>
+                                                    <p class="text-xs text-wwc-neutral-500">Sold</p>
+                                                </div>
+                                                <div class="text-center min-w-[60px]">
+                                                    <p class="text-lg font-bold text-wwc-info">{{ number_format($ticketType->total_seats) }}</p>
+                                                    <p class="text-xs text-wwc-neutral-500">Total</p>
+                                                </div>
+                                            </div>
+
+                                            <!-- Far Right: Combo Button -->
                                             @if($ticketType->is_combo)
-                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-wwc-accent/20 text-wwc-accent border border-wwc-accent/30">
-                                                <i class='bx bx-gift text-xs mr-1'></i>
-                                                Combo
-                                            </span>
+                                            <div class="flex-shrink-0">
+                                                <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-wwc-accent/20 text-wwc-accent">
+                                                    <i class='bx bx-discount text-xs mr-1'></i>
+                                                    Combo
+                                                </span>
+                                            </div>
                                             @endif
-                                        </div>
-                                        <div class="grid grid-cols-3 gap-4 text-center">
-                                            <div>
-                                                <p class="text-lg font-bold text-wwc-neutral-900">{{ number_format($ticketType->available_seats) }}</p>
-                                                <p class="text-xs text-wwc-neutral-600">Available</p>
-                                            </div>
-                                            <div>
-                                                <p class="text-lg font-bold text-wwc-accent">{{ number_format($ticketType->sold_seats) }}</p>
-                                                <p class="text-xs text-wwc-neutral-600">Sold</p>
-                                            </div>
-                                            <div>
-                                                <p class="text-lg font-bold text-wwc-info">{{ number_format($ticketType->total_seats) }}</p>
-                                                <p class="text-xs text-wwc-neutral-600">Total</p>
-                                            </div>
                                         </div>
                                     </div>
                                     @endforeach
@@ -244,7 +251,7 @@
                             @else
                                 <div class="text-center py-8">
                                     <div class="h-12 w-12 rounded-full bg-wwc-neutral-100 flex items-center justify-center mx-auto mb-3">
-                                        <i class='bx bx-ticket text-xl text-wwc-neutral-400'></i>
+                                        <i class='bx bx-purchase-tag text-xl text-wwc-neutral-400'></i>
                                     </div>
                                     <h4 class="text-sm font-semibold text-wwc-neutral-900 mb-1">No Ticket Types</h4>
                                     <p class="text-xs text-wwc-neutral-600">This event doesn't have any ticket types configured yet.</p>

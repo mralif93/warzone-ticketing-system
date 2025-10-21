@@ -14,8 +14,8 @@
                         <i class='bx bx-arrow-back text-sm mr-2'></i>
                         Back to Orders
                     </a>
-                </div>
             </div>
+        </div>
 
             <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
                 <!-- Order Details -->
@@ -36,7 +36,7 @@
                                 <div class="flex items-center py-3 border-b border-wwc-neutral-100">
                                     <div class="flex-shrink-0 mr-4">
                                         <div class="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center">
-                                            <i class='bx bx-receipt text-sm text-blue-600'></i>
+                                            <i class='bx bx-file text-sm text-blue-600'></i>
                                         </div>
                                     </div>
                                     <div class="flex-1 flex items-center justify-between">
@@ -62,7 +62,7 @@
                                 <div class="flex items-center py-3 border-b border-wwc-neutral-100">
                                     <div class="flex-shrink-0 mr-4">
                                         <div class="h-8 w-8 rounded-lg bg-purple-100 flex items-center justify-center">
-                                            <i class='bx bx-check-circle text-sm text-purple-600'></i>
+                                            <i class='bx bx-time-five text-sm text-purple-600'></i>
                                         </div>
                                     </div>
                                     <div class="flex-1 flex items-center justify-between">
@@ -89,7 +89,7 @@
                                     </div>
                                     <div class="flex-1 flex items-center justify-between">
                                         <span class="text-sm font-semibold text-wwc-neutral-600">Payment Method</span>
-                                        <span class="text-base font-medium text-wwc-neutral-900"><?php echo e($order->payment_method ? ucwords(str_replace('_', ' ', $order->payment_method)) : 'N/A'); ?></span>
+                                        <span class="text-base font-medium text-wwc-neutral-900"><?php echo e($order->formatted_payment_method ?? 'N/A'); ?></span>
                                     </div>
                                 </div>
 
@@ -105,8 +105,8 @@
                                         <span class="text-base font-medium text-wwc-neutral-900"><?php echo e($order->created_at->format('M d, Y')); ?></span>
                                     </div>
                                 </div>
-
-                                <!-- Total Amount -->
+                                        
+                                        <!-- Total Amount -->
                                 <div class="flex items-center py-3 border-b border-wwc-neutral-100">
                                     <div class="flex-shrink-0 mr-4">
                                         <div class="h-8 w-8 rounded-lg bg-wwc-accent/20 flex items-center justify-center">
@@ -124,7 +124,7 @@
                                 <div class="flex items-center py-3">
                                     <div class="flex-shrink-0 mr-4">
                                         <div class="h-8 w-8 rounded-lg bg-gray-100 flex items-center justify-center">
-                                            <i class='bx bx-file-text text-sm text-gray-600'></i>
+                                            <i class='bx bx-edit text-sm text-gray-600'></i>
                                         </div>
                                     </div>
                                     <div class="flex-1">
@@ -143,7 +143,7 @@
                             <div class="flex items-center justify-between">
                                 <h3 class="text-lg font-bold text-wwc-neutral-900">Tickets</h3>
                                 <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
-                                    <i class='bx bx-ticket text-sm'></i>
+                                    <i class='bx bx-purchase-tag text-sm'></i>
                                     <span><?php echo e($order->purchaseTickets->count()); ?> tickets</span>
                                 </div>
                             </div>
@@ -156,9 +156,9 @@
                                         <div class="flex items-center justify-between mb-3">
                                             <div class="flex items-center space-x-3">
                                                 <div class="h-8 w-8 rounded-lg bg-wwc-primary flex items-center justify-center">
-                                                    <i class='bx bx-ticket text-sm text-white'></i>
-                                                </div>
-                                                <div>
+                                                    <i class='bx bx-purchase-tag text-sm text-white'></i>
+                                                    </div>
+                                                            <div>
                                                     <h4 class="text-sm font-semibold text-wwc-neutral-900"><?php echo e($ticket->ticketType->name ?? 'N/A'); ?></h4>
                                                     <p class="text-xs text-wwc-neutral-600"><?php echo e($ticket->event->name ?? 'N/A'); ?></p>
                                                     <p class="text-xs text-wwc-neutral-500"><?php echo e($ticket->event->getFormattedDateRange() ?? 'N/A'); ?></p>
@@ -181,7 +181,7 @@
                                         <?php if($ticket->is_combo_purchase): ?>
                                         <div class="flex items-center justify-center">
                                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-wwc-accent/20 text-wwc-accent border border-wwc-accent/30">
-                                                <i class='bx bx-gift text-xs mr-1'></i>
+                                                <i class='bx bx-cart text-xs mr-1'></i>
                                                 Combo Purchase
                                             </span>
                                         </div>
@@ -192,7 +192,7 @@
                             <?php else: ?>
                                 <div class="text-center py-8">
                                     <div class="h-12 w-12 rounded-full bg-wwc-neutral-100 flex items-center justify-center mx-auto mb-3">
-                                        <i class='bx bx-ticket text-xl text-wwc-neutral-400'></i>
+                                        <i class='bx bx-purchase-tag text-xl text-wwc-neutral-400'></i>
                                     </div>
                                     <h4 class="text-sm font-semibold text-wwc-neutral-900 mb-1">No Tickets</h4>
                                     <p class="text-xs text-wwc-neutral-600">This order doesn't have any tickets.</p>
@@ -206,10 +206,10 @@
                 <div class="space-y-6">
                     <!-- Order Summary -->
                     <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
-                        <div class="px-6 py-4 border-b border-wwc-neutral-100">
-                            <div class="flex items-center justify-between">
+                    <div class="px-6 py-4 border-b border-wwc-neutral-100">
+                        <div class="flex items-center justify-between">
                                 <h3 class="text-lg font-bold text-wwc-neutral-900">Order Summary</h3>
-                                <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
+                            <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
                                     <i class='bx bx-calculator text-sm'></i>
                                     <span>Price breakdown</span>
                                 </div>
@@ -227,12 +227,12 @@
                             <div class="flex items-center justify-between">
                                 <span class="text-sm font-semibold text-wwc-neutral-600">Tax</span>
                                 <span class="text-base font-medium text-wwc-neutral-900">RM<?php echo e(number_format($order->tax, 2)); ?></span>
-                            </div>
+                    </div>
                             <?php if($order->discount > 0): ?>
                             <div class="flex items-center justify-between">
                                 <span class="text-sm font-semibold text-wwc-neutral-600">Discount</span>
                                 <span class="text-base font-medium text-wwc-success">-RM<?php echo e(number_format($order->discount, 2)); ?></span>
-                            </div>
+                                </div>
                             <?php endif; ?>
                             <div class="border-t border-wwc-neutral-200 pt-4">
                                 <div class="flex items-center justify-between">
@@ -240,9 +240,9 @@
                                     <span class="text-xl font-bold text-wwc-neutral-900">RM<?php echo e(number_format($order->total_amount, 2)); ?></span>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
+                                </div>
+                            </div>
+                            
                     <!-- Customer Information -->
                     <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
                         <div class="px-6 py-4 border-b border-wwc-neutral-100">
@@ -259,7 +259,7 @@
                                 <div class="flex items-center space-x-3">
                                     <div class="h-8 w-8 rounded-lg bg-green-100 flex items-center justify-center">
                                         <i class='bx bx-user text-sm text-green-600'></i>
-                                    </div>
+                                </div>
                                     <span class="text-sm font-semibold text-wwc-neutral-600">Name</span>
                                 </div>
                                 <span class="text-base font-medium text-wwc-neutral-900"><?php echo e($order->user->name ?? 'N/A'); ?></span>
@@ -280,20 +280,20 @@
                                         <i class='bx bx-phone text-sm text-purple-600'></i>
                                     </div>
                                     <span class="text-sm font-semibold text-wwc-neutral-600">Phone</span>
-                                </div>
+                        </div>
                                 <span class="text-base font-medium text-wwc-neutral-900"><?php echo e($order->user->phone); ?></span>
                             </div>
                             <?php endif; ?>
-                        </div>
                     </div>
+                </div>
 
                     <!-- Actions -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
-                        <div class="px-6 py-4 border-b border-wwc-neutral-100">
-                            <div class="flex items-center justify-between">
+                <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
+                    <div class="px-6 py-4 border-b border-wwc-neutral-100">
+                        <div class="flex items-center justify-between">
                                 <h3 class="text-lg font-bold text-wwc-neutral-900">Actions</h3>
-                                <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
-                                    <i class='bx bx-cog text-sm'></i>
+                            <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
+                                <i class='bx bx-cog text-sm'></i>
                                     <span>Quick actions</span>
                                 </div>
                             </div>
@@ -301,7 +301,7 @@
                         <div class="p-6 space-y-3">
                             <a href="<?php echo e(route('admin.orders.edit', $order)); ?>" 
                                class="w-full inline-flex items-center justify-center px-4 py-2 bg-wwc-primary text-white text-sm font-semibold rounded-lg hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
-                                <i class='bx bx-edit text-sm mr-2'></i>
+                                    <i class='bx bx-edit text-sm mr-2'></i>
                                 Edit Order
                             </a>
                             
@@ -314,8 +314,8 @@
                     </div>
                 </div>
             </div>
+            </div>
         </div>
     </div>
-</div>
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /Users/administrator/Desktop/Project/Github/warzone-ticketing-system/resources/views/admin/orders/show.blade.php ENDPATH**/ ?>

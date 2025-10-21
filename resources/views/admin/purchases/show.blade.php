@@ -199,7 +199,7 @@
                                     </div>
                                     <span class="text-sm font-semibold text-wwc-neutral-600">Payment Method</span>
                                 </div>
-                                <span class="text-base font-medium text-wwc-neutral-900">{{ $purchase->order->payment_method ? ucwords(str_replace('_', ' ', $purchase->order->payment_method)) : 'N/A' }}</span>
+                                <span class="text-base font-medium text-wwc-neutral-900">{{ $purchase->order->formatted_payment_method ?? 'N/A' }}</span>
                             </div>
                         </div>
                     </div>

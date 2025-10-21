@@ -204,7 +204,7 @@ class OrderModuleSeeder extends Seeder
      */
     private function getRandomPaymentMethod()
     {
-        $methods = ['credit_card', 'debit_card', 'online_banking', 'e_wallet', 'cash'];
+        $methods = ['bank_transfer', 'online_banking', 'qr_code_ewallet', 'debit_credit_card', 'others'];
         return $methods[array_rand($methods)];
     }
 

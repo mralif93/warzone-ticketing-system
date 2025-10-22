@@ -87,6 +87,7 @@ class OrderModuleSeeder extends Seeder
                 // Create order
                 $order = Order::create([
                     'user_id' => $customer->id,
+                    'event_id' => $event->id,
                     'customer_email' => $customer->email,
                     'order_number' => $orderNumber,
                     'qrcode' => $qrcode,

@@ -1,0 +1,130 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: warzone_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: warzone_ticketing
+      POSTGRES_USER: warzone_user
+      POSTGRES_PASSWORD: warzone_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    networks:
+      - warzone_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U warzone_user -d warzone_ticketing"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: warzone_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - warzone_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PHP-FPM Application
+  app:
+    build:
+      context: .
+      dockerfile: php/Dockerfile
+    container_name: warzone_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+      - ./php/php.ini:/usr/local/etc/php/conf.d/custom.ini
+    environment:
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DATABASE=warzone_ticketing
+      - DB_USERNAME=warzone_user
+      - DB_PASSWORD=warzone_password
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - CACHE_DRIVER=redis
+      - SESSION_DRIVER=redis
+      - QUEUE_CONNECTION=redis
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - warzone_network
+    command: >
+      sh -c "
+        composer install --no-dev --optimize-autoloader &&
+        php artisan key:generate --force &&
+        php artisan config:cache &&
+        php artisan route:cache &&
+        php artisan view:cache &&
+        php artisan migrate --force &&
+        php artisan db:seed --force &&
+        php-fpm
+      "
+
+  # Nginx Web Server
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
+    container_name: warzone_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - .:/var/www/html
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl.conf:/etc/nginx/ssl.conf
+    depends_on:
+      - app
+    networks:
+      - warzone_network
+
+  # Node.js for Vite (Development)
+  node:
+    image: node:18-alpine
+    container_name: warzone_node
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    command: >
+      sh -c "
+        npm install &&
+        npm run build
+      "
+    networks:
+      - warzone_network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  warzone_network:
+    driver: bridge

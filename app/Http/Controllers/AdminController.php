@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\PurchaseTicket;
 use App\Models\Payment;
 use App\Models\AuditLog;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -636,17 +637,8 @@ class AdminController extends Controller
      */
     public function settings()
     {
-        // Default settings - in a real application, these would come from a database
-        $settings = [
-            'max_tickets_per_order' => 10,
-            'ticket_hold_duration_minutes' => 10,
-            'maintenance_mode' => '0',
-            'auto_release_holds' => '1',
-            'email_notifications' => '1',
-            'admin_email' => 'admin@warzone.com',
-            'session_timeout' => 120,
-            'max_login_attempts' => 5,
-        ];
+        // Get settings from database
+        $settings = Setting::getAll();
 
         return view('admin.settings.index', compact('settings'));
     }
@@ -657,16 +649,30 @@ class AdminController extends Controller
     public function updateSettings(Request $request)
     {
         $request->validate([
-            'site_name' => 'required|string|max:255',
-            'site_email' => 'required|email',
             'max_tickets_per_order' => 'required|integer|min:1|max:20',
-            'ticket_hold_duration' => 'required|integer|min:5|max:30',
+            'seat_hold_duration_minutes' => 'required|integer|min:1|max:30',
+            'maintenance_mode' => 'required|in:0,1',
+            'auto_release_holds' => 'required|in:0,1',
+            'email_notifications' => 'required|in:0,1',
+            'admin_email' => 'required|email|max:255',
+            'session_timeout' => 'required|integer|min:15|max:480',
+            'max_login_attempts' => 'required|integer|min:3|max:10',
             'service_fee_percentage' => 'required|numeric|min:0|max:100',
             'tax_percentage' => 'required|numeric|min:0|max:100',
         ]);
 
-        // Update settings (you would typically store these in a settings table or config)
-        // For now, we'll just show a success message
+        // Update settings in database
+        Setting::set('max_tickets_per_order', $request->max_tickets_per_order, 'integer');
+        Setting::set('seat_hold_duration_minutes', $request->seat_hold_duration_minutes, 'integer');
+        Setting::set('maintenance_mode', $request->maintenance_mode, 'boolean');
+        Setting::set('auto_release_holds', $request->auto_release_holds, 'boolean');
+        Setting::set('email_notifications', $request->email_notifications, 'boolean');
+        Setting::set('admin_email', $request->admin_email, 'string');
+        Setting::set('session_timeout', $request->session_timeout, 'integer');
+        Setting::set('max_login_attempts', $request->max_login_attempts, 'integer');
+        Setting::set('service_fee_percentage', $request->service_fee_percentage, 'string');
+        Setting::set('tax_percentage', $request->tax_percentage, 'string');
+
         return back()->with('success', 'Settings updated successfully!');
     }
 }

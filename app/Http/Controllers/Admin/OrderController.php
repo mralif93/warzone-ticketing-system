@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\AuditLog;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -65,7 +66,11 @@ class OrderController extends Controller
             return $event;
         });
         
-        return view('admin.orders.create', compact('users', 'events'));
+        // Get service fee and tax settings
+        $serviceFeePercentage = Setting::get('service_fee_percentage', 5.0);
+        $taxPercentage = Setting::get('tax_percentage', 6.0);
+        
+        return view('admin.orders.create', compact('users', 'events', 'serviceFeePercentage', 'taxPercentage'));
     }
 
     /**
@@ -83,12 +88,19 @@ class OrderController extends Controller
                 'customer_email' => 'required|email|max:255',
                 'payment_method' => 'required|string|in:bank_transfer,online_banking,qr_code_ewallet,debit_credit_card,others',
                 'status' => 'required|in:pending,paid,cancelled,refunded',
-                'purchase_type' => 'required|in:single_day,multi_day',
+                'purchase_type' => 'required|in:single_day,multi_day,day1_only,day2_only',
+                'single_day_type' => 'required_if:purchase_type,single_day|in:day1,day2',
+                'multi_day1_enabled' => 'boolean',
+                'multi_day2_enabled' => 'boolean',
                 'ticket_type_id' => 'required_if:purchase_type,single_day|nullable|exists:tickets,id',
-                'day1_ticket_type' => 'required_if:purchase_type,multi_day|exists:tickets,id',
-                'day2_ticket_type' => 'required_if:purchase_type,multi_day|exists:tickets,id',
-                'day1_quantity' => 'required_if:purchase_type,multi_day|integer|min:1|max:10',
-                'day2_quantity' => 'required_if:purchase_type,multi_day|integer|min:1|max:10',
+                'day1_ticket_type' => 'required_if:multi_day1_enabled,1|nullable|exists:tickets,id',
+                'day2_ticket_type' => 'required_if:multi_day2_enabled,1|nullable|exists:tickets,id',
+                'day1_only_ticket_type' => 'required_if:purchase_type,day1_only|exists:tickets,id',
+                'day2_only_ticket_type' => 'required_if:purchase_type,day2_only|exists:tickets,id',
+                'day1_quantity' => 'required_if:multi_day1_enabled,1|integer|min:1|max:10',
+                'day2_quantity' => 'required_if:multi_day2_enabled,1|integer|min:1|max:10',
+                'day1_only_quantity' => 'required_if:purchase_type,day1_only|integer|min:1|max:10',
+                'day2_only_quantity' => 'required_if:purchase_type,day2_only|integer|min:1|max:10',
                 'quantity' => 'required_if:purchase_type,single_day|integer|min:1|max:10',
                 'event_day' => 'nullable|date',
                 'event_day_name' => 'nullable|string|max:255',
@@ -102,12 +114,30 @@ class OrderController extends Controller
 
         // Additional validation for multi-day purchases
         if ($request->purchase_type === 'multi_day') {
-            $day1Quantity = $request->day1_quantity ?? 1;
-            $day2Quantity = $request->day2_quantity ?? 1;
+            $day1Enabled = $request->boolean('multi_day1_enabled');
+            $day2Enabled = $request->boolean('multi_day2_enabled');
             
-            if ($day1Quantity < 1 || $day1Quantity > 10 || $day2Quantity < 1 || $day2Quantity > 10) {
-                return back()->withErrors(['day1_quantity' => 'Each day must have between 1-10 tickets.'])
+            // Ensure at least one day is selected
+            if (!$day1Enabled && !$day2Enabled) {
+                return back()->withErrors(['multi_day1_enabled' => 'Please select at least one day to attend.'])
                     ->withInput();
+            }
+            
+            // Validate quantities only for enabled days
+            if ($day1Enabled) {
+                $day1Quantity = $request->day1_quantity ?? 1;
+                if ($day1Quantity < 1 || $day1Quantity > 10) {
+                    return back()->withErrors(['day1_quantity' => 'Day 1 quantity must be between 1-10 tickets.'])
+                        ->withInput();
+                }
+            }
+            
+            if ($day2Enabled) {
+                $day2Quantity = $request->day2_quantity ?? 1;
+                if ($day2Quantity < 1 || $day2Quantity > 10) {
+                    return back()->withErrors(['day2_quantity' => 'Day 2 quantity must be between 1-10 tickets.'])
+                        ->withInput();
+                }
             }
         }
 
@@ -124,48 +154,143 @@ class OrderController extends Controller
             $discountAmount = 0;
             
             // Handle different purchase types
-            if ($purchaseType === 'multi_day') {
-                // Multi-day purchase (Day 1 & Day 2) with individual quantities
-                $day1Ticket = \App\Models\Ticket::findOrFail($request->day1_ticket_type);
-                $day2Ticket = \App\Models\Ticket::findOrFail($request->day2_ticket_type);
-                $day1Quantity = $request->day1_quantity ?? 1;
-                $day2Quantity = $request->day2_quantity ?? 1;
+            if ($purchaseType === 'day1_only') {
+                // Day 1 Only purchase
+                $day1OnlyTicket = \App\Models\Ticket::findOrFail($request->day1_only_ticket_type);
+                $day1OnlyQuantity = $request->day1_only_quantity ?? 1;
                 
-                // Verify ticket types belong to selected event
-                if ($day1Ticket->event_id != $event->id || $day2Ticket->event_id != $event->id) {
-                    return back()->withErrors(['day1_ticket_type' => 'Selected ticket types do not belong to the selected event.'])
+                // Verify ticket type belongs to selected event
+                if ($day1OnlyTicket->event_id != $event->id) {
+                    return back()->withErrors(['day1_only_ticket_type' => 'Selected ticket type does not belong to the selected event.'])
                         ->withInput();
                 }
                 
                 // Check availability
-                if ($day1Ticket->available_seats < $day1Quantity || $day2Ticket->available_seats < $day2Quantity) {
-                    return back()->withErrors(['day1_ticket_type' => 'Insufficient tickets available for one or both days.'])
+                if ($day1OnlyTicket->available_seats < $day1OnlyQuantity) {
+                    return back()->withErrors(['day1_only_ticket_type' => 'Insufficient tickets available for Day 1.'])
                         ->withInput();
                 }
                 
                 // Calculate pricing
-                $day1Price = $day1Ticket->price;
-                $day2Price = $day2Ticket->price;
-                $day1Subtotal = $day1Price * $day1Quantity;
-                $day2Subtotal = $day2Price * $day2Quantity;
-                $subtotal = $day1Subtotal + $day2Subtotal;
+                $day1OnlyPrice = $day1OnlyTicket->price;
+                $subtotal = $day1OnlyPrice * $day1OnlyQuantity;
+                $totalQuantity = $day1OnlyQuantity;
                 
-                // Apply combo discount if enabled
-                $isCombo = $request->boolean('is_combo_purchase') && $event->isTwoDayEvent() && $event->combo_discount_enabled;
+                // Create purchase ticket for Day 1
+                $tickets[] = [
+                    'ticket_type_id' => $day1OnlyTicket->id,
+                    'quantity' => $day1OnlyQuantity,
+                    'price_paid' => $day1OnlyPrice,
+                    'event_day' => $event->getEventDays()[0] ?? $event->date_time,
+                    'event_day_name' => 'Day 1'
+                ];
+                
+            } elseif ($purchaseType === 'day2_only') {
+                // Day 2 Only purchase
+                $day2OnlyTicket = \App\Models\Ticket::findOrFail($request->day2_only_ticket_type);
+                $day2OnlyQuantity = $request->day2_only_quantity ?? 1;
+                
+                // Verify ticket type belongs to selected event
+                if ($day2OnlyTicket->event_id != $event->id) {
+                    return back()->withErrors(['day2_only_ticket_type' => 'Selected ticket type does not belong to the selected event.'])
+                        ->withInput();
+                }
+                
+                // Check availability
+                if ($day2OnlyTicket->available_seats < $day2OnlyQuantity) {
+                    return back()->withErrors(['day2_only_ticket_type' => 'Insufficient tickets available for Day 2.'])
+                        ->withInput();
+                }
+                
+                // Calculate pricing
+                $day2OnlyPrice = $day2OnlyTicket->price;
+                $subtotal = $day2OnlyPrice * $day2OnlyQuantity;
+                $totalQuantity = $day2OnlyQuantity;
+                
+                // Create purchase ticket for Day 2
+                $tickets[] = [
+                    'ticket_type_id' => $day2OnlyTicket->id,
+                    'quantity' => $day2OnlyQuantity,
+                    'price_paid' => $day2OnlyPrice,
+                    'event_day' => $event->getEventDays()[1] ?? $event->date_time,
+                    'event_day_name' => 'Day 2'
+                ];
+                
+            } elseif ($purchaseType === 'multi_day') {
+                // Multi-day purchase with flexible day selection
+                $day1Enabled = $request->boolean('multi_day1_enabled');
+                $day2Enabled = $request->boolean('multi_day2_enabled');
+                $subtotal = 0;
+                $totalQuantity = 0;
+                $tickets = [];
+                
+                if ($day1Enabled) {
+                    $day1Ticket = \App\Models\Ticket::findOrFail($request->day1_ticket_type);
+                    $day1Quantity = $request->day1_quantity ?? 1;
+                    
+                    // Verify ticket type belongs to selected event
+                    if ($day1Ticket->event_id != $event->id) {
+                        return back()->withErrors(['day1_ticket_type' => 'Selected Day 1 ticket type does not belong to the selected event.'])
+                            ->withInput();
+                    }
+                    
+                    // Check availability
+                    if ($day1Ticket->available_seats < $day1Quantity) {
+                        return back()->withErrors(['day1_ticket_type' => 'Insufficient tickets available for Day 1.'])
+                            ->withInput();
+                    }
+                    
+                    // Calculate pricing
+                    $day1Price = $day1Ticket->price;
+                    $subtotal += $day1Price * $day1Quantity;
+                    $totalQuantity += $day1Quantity;
+                    
+                    // Add to tickets array
+                    $tickets[] = ['ticket' => $day1Ticket, 'price' => $day1Price, 'quantity' => $day1Quantity, 'day' => 1];
+                }
+                
+                if ($day2Enabled) {
+                    $day2Ticket = \App\Models\Ticket::findOrFail($request->day2_ticket_type);
+                    $day2Quantity = $request->day2_quantity ?? 1;
+                    
+                    // Verify ticket type belongs to selected event
+                    if ($day2Ticket->event_id != $event->id) {
+                        return back()->withErrors(['day2_ticket_type' => 'Selected Day 2 ticket type does not belong to the selected event.'])
+                            ->withInput();
+                    }
+                    
+                    // Check availability
+                    if ($day2Ticket->available_seats < $day2Quantity) {
+                        return back()->withErrors(['day2_ticket_type' => 'Insufficient tickets available for Day 2.'])
+                            ->withInput();
+                    }
+                    
+                    // Calculate pricing
+                    $day2Price = $day2Ticket->price;
+                    $subtotal += $day2Price * $day2Quantity;
+                    $totalQuantity += $day2Quantity;
+                    
+                    // Add to tickets array
+                    $tickets[] = ['ticket' => $day2Ticket, 'price' => $day2Price, 'quantity' => $day2Quantity, 'day' => 2];
+                }
+                
+                // Ensure at least one day is selected
+                if (!$day1Enabled && !$day2Enabled) {
+                    return back()->withErrors(['multi_day1_enabled' => 'Please select at least one day to attend.'])
+                        ->withInput();
+                }
+                
+                // Apply combo discount if both days are selected and enabled
+                $isCombo = $request->boolean('is_combo_purchase') && $day1Enabled && $day2Enabled && $event->isTwoDayEvent() && $event->combo_discount_enabled;
                 if ($isCombo) {
                     $discountAmount = $event->calculateComboDiscount($subtotal);
                     $subtotal = $subtotal - $discountAmount;
                 }
                 
-                $tickets = [
-                    ['ticket' => $day1Ticket, 'price' => $day1Price, 'quantity' => $day1Quantity, 'day' => 1],
-                    ['ticket' => $day2Ticket, 'price' => $day2Price, 'quantity' => $day2Quantity, 'day' => 2]
-                ];
-                $totalQuantity = $day1Quantity + $day2Quantity;
-                
             } else {
-                // Single day or combo same ticket type
+                // Single day purchase with day type selection
                 $ticketType = \App\Models\Ticket::findOrFail($request->ticket_type_id);
+                $singleDayType = $request->single_day_type ?? 'day1';
                 
                 // Verify ticket type belongs to selected event
                 if ($ticketType->event_id != $event->id) {
@@ -184,15 +309,20 @@ class OrderController extends Controller
                 $basePrice = $ticketType->price;
                 $subtotal = $basePrice * $quantity;
                 
-                // Handle combo discount for same ticket type
-                $isCombo = $request->boolean('is_combo_purchase') && $quantity == 2 && $event->isTwoDayEvent() && $event->combo_discount_enabled;
-                if ($isCombo) {
-                    $discountAmount = $event->calculateComboDiscount($subtotal);
-                    $subtotal = $subtotal - $discountAmount;
-                }
+                // Determine event day based on single day type
+                $eventDays = $event->getEventDays();
+                $eventDay = $singleDayType === 'day1' ? 
+                    ($eventDays[0]['date'] ?? $event->date_time) : 
+                    ($eventDays[1]['date'] ?? $event->date_time);
+                $eventDayName = $singleDayType === 'day1' ? 'Day 1' : 'Day 2';
                 
-                $tickets = [
-                    ['ticket' => $ticketType, 'price' => $basePrice, 'quantity' => $quantity]
+                // Create purchase ticket with correct day assignment
+                $tickets[] = [
+                    'ticket_type_id' => $ticketType->id,
+                    'quantity' => $quantity,
+                    'price_paid' => $basePrice,
+                    'event_day' => $eventDay,
+                    'event_day_name' => $eventDayName
                 ];
                 $totalQuantity = $quantity;
             }
@@ -222,10 +352,28 @@ class OrderController extends Controller
             $comboGroupId = ($purchaseType === 'multi_day') ? 'COMBO_' . $order->id . '_' . time() : null;
             
             foreach ($tickets as $ticketData) {
-                $ticket = $ticketData['ticket'];
-                $price = $ticketData['price'];
-                $quantity = $ticketData['quantity'] ?? 1;
-                $day = $ticketData['day'] ?? null;
+                // Handle different ticket data structures
+                if (isset($ticketData['ticket'])) {
+                    // Multi-day structure
+                    $ticket = $ticketData['ticket'];
+                    $price = $ticketData['price'];
+                    $quantity = $ticketData['quantity'] ?? 1;
+                    $day = $ticketData['day'] ?? null;
+                    
+                    
+                    $eventDay = $day ? $event->getEventDays()[$day-1]['date'] : $request->event_day;
+                    $eventDayName = $day ? $event->getEventDays()[$day-1]['day_name'] : $request->event_day_name;
+                    
+                    // Ensure eventDay is a string
+                    $eventDay = is_array($eventDay) ? $eventDay['date'] ?? $eventDay[0] ?? $eventDay : $eventDay;
+                } else {
+                    // Direct structure (single day, day1_only, day2_only)
+                    $ticket = \App\Models\Ticket::findOrFail($ticketData['ticket_type_id']);
+                    $price = $ticketData['price_paid'];
+                    $quantity = $ticketData['quantity'] ?? 1;
+                    $eventDay = $ticketData['event_day'];
+                    $eventDayName = $ticketData['event_day_name'];
+                }
                 
                 for ($i = 0; $i < $quantity; $i++) {
                     \App\Models\PurchaseTicket::create([
@@ -233,8 +381,8 @@ class OrderController extends Controller
                         'event_id' => $event->id,
                         'ticket_type_id' => $ticket->id,
                         'zone' => $ticket->name,
-                        'event_day' => $day ? $event->getEventDays()[$day-1]['date'] : $request->event_day,
-                        'event_day_name' => $day ? $event->getEventDays()[$day-1]['day_name'] : $request->event_day_name,
+                        'event_day' => $eventDay,
+                        'event_day_name' => $eventDayName,
                         'is_combo_purchase' => $purchaseType === 'multi_day',
                         'combo_group_id' => $comboGroupId,
                         'original_price' => $price,
@@ -267,7 +415,7 @@ class OrderController extends Controller
             DB::commit();
 
             $purchaseTypeText = $purchaseType === 'multi_day' ? 'tickets (Day 1 & Day 2)' : 'tickets';
-            return redirect()->route('admin.orders.show', $order)
+            return redirect()->route('admin.orders.index')
                 ->with('success', 'Order created successfully with ' . $totalQuantity . ' ' . $purchaseTypeText . '.');
 
         } catch (\Exception $e) {
@@ -287,9 +435,13 @@ class OrderController extends Controller
      */
     public function show(Order $order)
     {
-        $order->load(['user', 'purchaseTickets.ticketType', 'purchaseTickets.event', 'payments']);
+        $order->load(['user', 'purchaseTickets.ticketType', 'purchaseTickets.event', 'payments', 'event']);
 
-        return view('admin.orders.show', compact('order'));
+        // Get service fee and tax settings
+        $serviceFeePercentage = Setting::get('service_fee_percentage', 0.0);
+        $taxPercentage = Setting::get('tax_percentage', 0.0);
+
+        return view('admin.orders.show', compact('order', 'serviceFeePercentage', 'taxPercentage'));
     }
 
     /**
@@ -301,7 +453,11 @@ class OrderController extends Controller
         $users = \App\Models\User::all();
         $events = \App\Models\Event::where('status', 'on_sale')->get();
         
-        return view('admin.orders.edit', compact('order', 'users', 'events'));
+        // Get service fee and tax settings
+        $serviceFeePercentage = Setting::get('service_fee_percentage', 5.0);
+        $taxPercentage = Setting::get('tax_percentage', 6.0);
+        
+        return view('admin.orders.edit', compact('order', 'users', 'events', 'serviceFeePercentage', 'taxPercentage'));
     }
 
     /**
@@ -593,19 +749,21 @@ class OrderController extends Controller
     }
 
     /**
-     * Calculate service fee (5% of subtotal)
+     * Calculate service fee based on settings
      */
     private function calculateServiceFee($subtotal)
     {
-        return round($subtotal * 0.05, 2);
+        $serviceFeePercentage = Setting::get('service_fee_percentage', 5.0);
+        return round($subtotal * ($serviceFeePercentage / 100), 2);
     }
 
     /**
-     * Calculate tax (6% of subtotal + service fee)
+     * Calculate tax based on settings
      */
     private function calculateTax($amount)
     {
-        return round($amount * 0.06, 2);
+        $taxPercentage = Setting::get('tax_percentage', 6.0);
+        return round($amount * ($taxPercentage / 100), 2);
     }
 
     /**

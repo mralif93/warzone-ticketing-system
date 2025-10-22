@@ -101,7 +101,7 @@
                                     <!-- Price and Actions -->
                                     <div class="flex items-center space-x-4">
                                         <div class="text-right">
-                                            <div class="text-xl font-bold text-wwc-neutral-900 mb-1">RM{{ number_format($ticket->price_paid, 0) }}</div>
+                                            <div class="text-xl font-bold text-wwc-neutral-900 mb-1">RM{{ number_format($ticket->price_paid, 2) }}</div>
                                             <div class="text-sm text-wwc-neutral-500 mb-2">Ticket #{{ $ticket->id }}</div>
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
                                                 @if($ticket->status === 'sold') bg-green-100 text-green-800
@@ -194,11 +194,11 @@
                                 <span class="text-sm font-semibold text-wwc-neutral-900">RM{{ number_format($order->subtotal, 2) }}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-sm text-wwc-neutral-600">Service Fee (5%)</span>
+                                <span class="text-sm text-wwc-neutral-600">Service Fee ({{ $order->service_fee > 0 ? number_format(($order->service_fee / $order->subtotal) * 100, 1) : 0 }}%)</span>
                                 <span class="text-sm font-semibold text-wwc-neutral-900">RM{{ number_format($order->service_fee, 2) }}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-sm text-wwc-neutral-600">Tax (6%)</span>
+                                <span class="text-sm text-wwc-neutral-600">Tax ({{ $order->tax_amount > 0 ? number_format(($order->tax_amount / ($order->subtotal + $order->service_fee)) * 100, 1) : 0 }}%)</span>
                                 <span class="text-sm font-semibold text-wwc-neutral-900">RM{{ number_format($order->tax_amount, 2) }}</span>
                             </div>
                             <div class="border-t border-wwc-neutral-200 pt-3">

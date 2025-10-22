@@ -119,7 +119,7 @@
                                         <div class="text-xs text-wwc-neutral-500">{{ $order->customer_email }}</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-semibold text-wwc-neutral-900">RM{{ number_format($order->total_amount, 0) }}</div>
+                                        <div class="text-sm font-semibold text-wwc-neutral-900">RM{{ number_format($order->total_amount, 2) }}</div>
                                         <div class="text-xs text-wwc-neutral-500">total amount</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center">

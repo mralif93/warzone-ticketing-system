@@ -86,7 +86,7 @@
                     <div class="h-48 bg-gradient-to-br from-wwc-primary-light to-wwc-accent-light flex items-center justify-center">
                         <div class="text-center">
                             <i class='bx bx-calendar-event text-6xl text-wwc-primary mx-auto mb-4'></i>
-                            <p class="text-lg font-semibold text-wwc-primary">{{ $event->name }}</p>
+                            <p class="text-2xl font-bold text-wwc-primary">{{ $event->name }}</p>
                         </div>
                     </div>
 

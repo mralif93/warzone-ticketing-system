@@ -41,7 +41,7 @@
                                 <p class="text-gray-500 text-sm mt-1">Order Information</p>
                             </div>
                             <div class="text-right">
-                                <div class="text-xl font-semibold text-gray-900">RM{{ number_format($order->total_amount, 0) }}</div>
+                                <div class="text-xl font-semibold text-gray-900">RM{{ number_format($order->total_amount, 2) }}</div>
                                 <div class="text-gray-500 text-sm">Total Amount</div>
                             </div>
                         </div>

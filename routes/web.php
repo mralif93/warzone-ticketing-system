@@ -76,6 +76,7 @@ Route::middleware(['auth', 'log.activity'])->group(function () {
         Route::get('/support', [CustomerController::class, 'support'])->name('support');
     });
     
+    
     // Admin routes (Administrator role required)
     Route::middleware(['role:administrator'])->prefix('admin')->name('admin.')->group(function () {
         // Dashboard
@@ -85,6 +86,7 @@ Route::middleware(['auth', 'log.activity'])->group(function () {
         Route::resource('events', AdminEventController::class);
         Route::post('/events/{event}/change-status', [AdminEventController::class, 'changeStatus'])->name('events.change-status');
         Route::get('/events/{event}/ticket-types', [AdminEventController::class, 'getTicketTypes'])->name('events.ticket-types');
+        Route::get('/events/{event}/ticket-types-test', [AdminEventController::class, 'getTicketTypes'])->name('events.ticket-types-test');
         
         // User management
         Route::resource('users', AdminUserController::class);
@@ -147,7 +149,11 @@ Route::get('/events/{event}', [PublicController::class, 'showEvent'])->name('pub
 
 // Public ticket management routes
 Route::get('/events/{event}/cart', [TicketController::class, 'cart'])->name('public.tickets.cart');
+Route::get('/events/{event}/checkout', [TicketController::class, 'checkout'])->name('public.tickets.checkout');
+Route::post('/events/{event}/checkout', [TicketController::class, 'checkout'])->name('public.tickets.checkout.post');
 Route::post('/events/{event}/purchase', [TicketController::class, 'purchase'])->name('public.tickets.purchase');
+Route::get('/tickets/success/{order}', [TicketController::class, 'success'])->name('public.tickets.success');
+Route::get('/tickets/failure/{event}', [TicketController::class, 'failure'])->name('public.tickets.failure');
 Route::get('/tickets/confirmation/{order}', [TicketController::class, 'confirmation'])->name('public.tickets.confirmation');
 Route::get('/tickets/my-tickets', [TicketController::class, 'myTickets'])->name('public.tickets.my-tickets');
 Route::get('/tickets/{ticket}', [TicketController::class, 'show'])->name('public.tickets.show');

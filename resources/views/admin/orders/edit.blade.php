@@ -90,10 +90,10 @@
                                     <select name="status" id="status" required
                                             class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('status') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
                                         <option value="">Select Status</option>
-                                        <option value="Pending" {{ old('status', $order->status) == 'Pending' ? 'selected' : '' }}>Pending</option>
-                                        <option value="Paid" {{ old('status', $order->status) == 'Paid' ? 'selected' : '' }}>Paid</option>
-                                        <option value="Cancelled" {{ old('status', $order->status) == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                        <option value="Refunded" {{ old('status', $order->status) == 'Refunded' ? 'selected' : '' }}>Refunded</option>
+                                        <option value="pending" {{ old('status', $order->status) == 'pending' ? 'selected' : '' }}>Pending</option>
+                                        <option value="paid" {{ old('status', $order->status) == 'paid' ? 'selected' : '' }}>Paid</option>
+                                        <option value="cancelled" {{ old('status', $order->status) == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                        <option value="refunded" {{ old('status', $order->status) == 'refunded' ? 'selected' : '' }}>Refunded</option>
                                     </select>
                                     @error('status')
                                         <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>
@@ -164,7 +164,7 @@
                                                         <p class="text-sm font-semibold text-wwc-neutral-900">{{ $ticket->ticketType->name ?? 'Unknown Type' }}</p>
                                                         <p class="text-xs text-wwc-neutral-600">
                                                             Zone: {{ $ticket->zone }} | 
-                                                            Price: RM{{ number_format($ticket->price_paid, 2) }} | 
+                                                            Price: RM{{ number_format($ticket->original_price, 2) }} | 
                                                             Status: {{ $ticket->status }}
                                                             @if($ticket->event_day)
                                                                 | Day: {{ $ticket->event_day_name ?? $ticket->event_day }}
@@ -173,7 +173,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="text-right">
-                                                    <p class="text-sm font-semibold text-wwc-neutral-900">RM{{ number_format($ticket->price_paid, 2) }}</p>
+                                                    <p class="text-sm font-semibold text-wwc-neutral-900">RM{{ number_format($ticket->original_price, 2) }}</p>
                                                     <p class="text-xs text-wwc-neutral-600">{{ $ticket->qrcode }}</p>
                                                 </div>
                                             </div>
@@ -193,35 +193,95 @@
                                     <h4 class="text-lg font-semibold text-wwc-neutral-900">Order Summary</h4>
                                 </div>
                                 
-                                <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                                @php
+                                    // Calculate combo discount logic like other templates
+                                    $comboDiscountAmount = 0;
+                                    $originalSubtotal = $order->subtotal;
+                                    
+                                    // Check if this was a combo purchase by checking if tickets span multiple days
+                                    $dayNumbers = [];
+                                    foreach ($order->purchaseTickets as $purchaseTicket) {
+                                        if ($purchaseTicket->event_day_name) {
+                                            preg_match('/Day (\d+)/', $purchaseTicket->event_day_name, $matches);
+                                            if (isset($matches[1])) {
+                                                $dayNumbers[] = (int)$matches[1];
+                                            }
+                                        }
+                                    }
+                                    $uniqueDays = array_unique($dayNumbers);
+                                    
+                                    // If we have tickets for multiple days and combo discount is enabled, calculate the discount
+                                    if (count($uniqueDays) > 1 && $order->event && $order->event->combo_discount_enabled) {
+                                        // Calculate original subtotal before discount using original_price
+                                        $originalSubtotal = $order->purchaseTickets->sum('original_price');
+                                        
+                                        // Calculate what the discount would have been
+                                        $comboDiscountAmount = $order->event->calculateComboDiscount($originalSubtotal);
+                                    }
+                                    
+                                    // Calculate the corrected total amount
+                                    $correctedTotal = $originalSubtotal - $comboDiscountAmount + ($serviceFeePercentage == 0 ? 0 : $order->service_fee) + ($taxPercentage == 0 ? 0 : $order->tax_amount);
+                                @endphp
+                                
+                                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                                     <div class="p-4 bg-wwc-neutral-50 rounded-lg border border-wwc-neutral-200">
                                         <div class="flex items-center">
-                                            <i class='bx bx-receipt text-wwc-primary text-xl mr-3'></i>
+                                            <div class="h-8 w-8 rounded-lg bg-wwc-primary/20 flex items-center justify-center mr-3">
+                                                <i class='bx bx-receipt text-wwc-primary text-sm'></i>
+                                            </div>
                                             <div>
                                                 <p class="text-sm font-semibold text-wwc-neutral-900">Subtotal</p>
-                                                <p class="text-lg font-bold text-wwc-primary">RM{{ number_format($order->subtotal, 2) }}</p>
+                                                <p class="text-lg font-bold text-wwc-neutral-900">RM{{ number_format($originalSubtotal, 2) }}</p>
                                             </div>
                                         </div>
                                     </div>
                                     
                                     <div class="p-4 bg-wwc-neutral-50 rounded-lg border border-wwc-neutral-200">
                                         <div class="flex items-center">
-                                            <i class='bx bx-credit-card text-wwc-primary text-xl mr-3'></i>
+                                            <div class="h-8 w-8 rounded-lg bg-wwc-primary/20 flex items-center justify-center mr-3">
+                                                <i class='bx bx-gift text-wwc-primary text-sm'></i>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-semibold text-wwc-neutral-900">Combo Discount</p>
+                                                <p class="text-lg font-bold text-wwc-neutral-900">-RM{{ number_format($comboDiscountAmount, 2) }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="p-4 bg-wwc-neutral-50 rounded-lg border border-wwc-neutral-200">
+                                        <div class="flex items-center">
+                                            <div class="h-8 w-8 rounded-lg bg-wwc-primary/20 flex items-center justify-center mr-3">
+                                                <i class='bx bx-credit-card text-wwc-primary text-sm'></i>
+                                            </div>
                                             <div>
                                                 <p class="text-sm font-semibold text-wwc-neutral-900">Service Fee</p>
-                                                <p class="text-lg font-bold text-wwc-primary">RM{{ number_format($order->service_fee, 2) }}</p>
+                                                <p class="text-lg font-bold text-wwc-neutral-900">RM{{ number_format($serviceFeePercentage == 0 ? 0 : $order->service_fee, 2) }}</p>
                                             </div>
                                         </div>
                                     </div>
                                     
                                     <div class="p-4 bg-wwc-neutral-50 rounded-lg border border-wwc-neutral-200">
                                         <div class="flex items-center">
-                                            <i class='bx bx-calculator text-wwc-primary text-xl mr-3'></i>
+                                            <div class="h-8 w-8 rounded-lg bg-wwc-primary/20 flex items-center justify-center mr-3">
+                                                <i class='bx bx-calculator text-wwc-primary text-sm'></i>
+                                            </div>
                                             <div>
-                                                <p class="text-sm font-semibold text-wwc-neutral-900">Total Amount</p>
-                                                <p class="text-lg font-bold text-wwc-primary">RM{{ number_format($order->total_amount, 2) }}</p>
+                                                <p class="text-sm font-semibold text-wwc-neutral-900">Tax</p>
+                                                <p class="text-lg font-bold text-wwc-neutral-900">RM{{ number_format($taxPercentage == 0 ? 0 : $order->tax_amount, 2) }}</p>
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4 p-4 bg-wwc-neutral-50 rounded-lg border border-wwc-neutral-200">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center">
+                                            <div class="h-8 w-8 rounded-lg bg-wwc-primary/20 flex items-center justify-center mr-3">
+                                                <i class='bx bx-calculator text-wwc-primary text-sm'></i>
+                                            </div>
+                                            <span class="text-lg font-semibold text-wwc-neutral-900">Total Amount</span>
+                                        </div>
+                                        <span class="text-2xl font-bold text-wwc-neutral-900">RM{{ number_format($correctedTotal, 2) }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -246,7 +306,7 @@
                                         </div>
                                         <div>
                                             <span class="text-wwc-neutral-600">Order Total:</span>
-                                            <span class="font-semibold text-wwc-primary ml-2">RM{{ number_format($order->total_amount, 2) }}</span>
+                                            <span class="font-semibold text-wwc-primary ml-2">RM{{ number_format($correctedTotal, 2) }}</span>
                                         </div>
                                         <div>
                                             <span class="text-wwc-neutral-600">Status:</span>
@@ -408,7 +468,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const priceDifferenceSpan = document.getElementById('price-difference');
     
     const currentQuantity = {{ $order->purchaseTickets->count() }};
-    const currentTotal = {{ $order->total_amount }};
+    const currentTotal = {{ $correctedTotal }};
+    
+    // Settings
+    const serviceFeePercentage = {{ $serviceFeePercentage }};
+    const taxPercentage = {{ $taxPercentage }};
+    
+    // Combo discount info
+    const comboDiscountAmount = {{ $comboDiscountAmount }};
+    const originalSubtotal = {{ $originalSubtotal }};
     
     // Quantity control buttons
     decreaseBtn.addEventListener('click', function() {
@@ -450,7 +518,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ticketTypeSelection.classList.add('hidden');
         }
         
-        // Calculate new total
+        // Calculate new total using the same logic as other templates
         let newTotal = currentTotal;
         
         if (newQuantity > currentQuantity && selectedTicketType.value) {
@@ -458,19 +526,35 @@ document.addEventListener('DOMContentLoaded', function() {
             const ticketPrice = parseFloat(selectedTicketType.getAttribute('data-price'));
             const additionalCost = additionalTickets * ticketPrice;
             
-            // Add service fee and tax to additional cost
-            const serviceFee = additionalCost * 0.05;
-            const tax = (additionalCost + serviceFee) * 0.06;
+            // Calculate service fee and tax on additional cost
+            const serviceFee = additionalCost * (serviceFeePercentage / 100);
+            const tax = (additionalCost + serviceFee) * (taxPercentage / 100);
             const totalAdditional = additionalCost + serviceFee + tax;
             
             newTotal = currentTotal + totalAdditional;
         } else if (newQuantity < currentQuantity) {
-            // For reducing quantity, we'll need to calculate based on average ticket price
-            const averageTicketPrice = currentTotal / currentQuantity;
+            // For reducing quantity, calculate based on original ticket price
+            const averageTicketPrice = originalSubtotal / currentQuantity;
             const removedTickets = currentQuantity - newQuantity;
             const removedCost = removedTickets * averageTicketPrice;
             
-            newTotal = currentTotal - removedCost;
+            // Calculate new subtotal after removal
+            const newSubtotal = originalSubtotal - removedCost;
+            
+            // Calculate new combo discount if applicable
+            let newComboDiscount = 0;
+            if (comboDiscountAmount > 0) {
+                // Maintain the same discount percentage
+                const discountPercentage = comboDiscountAmount / originalSubtotal;
+                newComboDiscount = newSubtotal * discountPercentage;
+            }
+            
+            // Calculate service fee and tax on new subtotal
+            const newServiceFee = newSubtotal * (serviceFeePercentage / 100);
+            const newTax = (newSubtotal + newServiceFee) * (taxPercentage / 100);
+            
+            // Calculate new total
+            newTotal = newSubtotal - newComboDiscount + newServiceFee + newTax;
         }
         
         // Update pricing preview
@@ -511,3 +595,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endsection
+

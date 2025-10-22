@@ -4,6 +4,35 @@
 @section('page-title', 'Order Details')
 
 @section('content')
+@php
+    // Calculate combo discount logic like success page
+    $comboDiscountAmount = 0;
+    $originalSubtotal = $order->subtotal;
+    
+    // Check if this was a combo purchase by checking if tickets span multiple days
+    $dayNumbers = [];
+    foreach ($order->purchaseTickets as $purchaseTicket) {
+        if ($purchaseTicket->event_day_name) {
+            preg_match('/Day (\d+)/', $purchaseTicket->event_day_name, $matches);
+            if (isset($matches[1])) {
+                $dayNumbers[] = (int)$matches[1];
+            }
+        }
+    }
+    $uniqueDays = array_unique($dayNumbers);
+    
+    // If we have tickets for multiple days and combo discount is enabled, calculate the discount
+    if (count($uniqueDays) > 1 && $order->event && $order->event->combo_discount_enabled) {
+        // Calculate original subtotal before discount using original_price
+        $originalSubtotal = $order->purchaseTickets->sum('original_price');
+        
+        // Calculate what the discount would have been
+        $comboDiscountAmount = $order->event->calculateComboDiscount($originalSubtotal);
+    }
+    
+    // Calculate the corrected total amount
+    $correctedTotal = $originalSubtotal - $comboDiscountAmount + ($serviceFeePercentage == 0 ? 0 : $order->service_fee) + ($taxPercentage == 0 ? 0 : $order->tax_amount);
+@endphp
 <div class="min-h-screen bg-wwc-neutral-50">
     <!-- Main Content -->
     <div class="px-6 py-6">
@@ -116,7 +145,7 @@
                                     </div>
                                     <div class="flex-1 flex items-center justify-between">
                                         <span class="text-sm font-semibold text-wwc-neutral-600">Total Amount</span>
-                                        <span class="text-base font-medium text-wwc-neutral-900">RM{{ number_format($order->total_amount, 2) }}</span>
+                                        <span class="text-base font-medium text-wwc-neutral-900">RM{{ number_format($correctedTotal, 2) }}</span>
                                     </div>
                                 </div>
 
@@ -151,38 +180,80 @@
                         </div>
                         <div class="p-6">
                             @if($order->purchaseTickets->count() > 0)
+                                @php
+                                    // Group tickets by type and day for display like success page
+                                    $ticketGroups = [];
+                                    foreach ($order->purchaseTickets as $purchaseTicket) {
+                                        $key = $purchaseTicket->ticket_type_id . '_' . ($purchaseTicket->event_day_name ?? 'default');
+                                        if (!isset($ticketGroups[$key])) {
+                                            // Extract day number from event_day_name (e.g., "Day 1" -> 1)
+                                            $dayNumber = null;
+                                            if ($purchaseTicket->event_day_name) {
+                                                preg_match('/Day (\d+)/', $purchaseTicket->event_day_name, $matches);
+                                                $dayNumber = isset($matches[1]) ? (int)$matches[1] : null;
+                                            }
+                                            
+                                            $ticketGroups[$key] = [
+                                                'ticket' => $purchaseTicket->ticketType,
+                                                'quantity' => 0,
+                                                'price' => $purchaseTicket->original_price,
+                                                'day' => $dayNumber,
+                                                'day_name' => $purchaseTicket->event_day_name ?? null,
+                                                'event' => $purchaseTicket->event,
+                                                'status' => $purchaseTicket->status
+                                            ];
+                                        }
+                                        $ticketGroups[$key]['quantity']++;
+                                    }
+                                    
+                                    // Convert to array for view
+                                    $tickets = array_values($ticketGroups);
+                                @endphp
+                                
                                 <div class="space-y-4">
-                                    @foreach($order->purchaseTickets as $ticket)
+                                    @foreach($tickets as $ticketData)
                                     <div class="bg-wwc-neutral-50 rounded-lg p-4">
                                         <div class="flex items-center justify-between mb-3">
                                             <div class="flex items-center space-x-3">
                                                 <div class="h-8 w-8 rounded-lg bg-wwc-primary flex items-center justify-center">
                                                     <i class='bx bx-purchase-tag text-sm text-white'></i>
-                                                    </div>
-                                                            <div>
-                                                    <h4 class="text-sm font-semibold text-wwc-neutral-900">{{ $ticket->ticketType->name ?? 'N/A' }}</h4>
-                                                    <p class="text-xs text-wwc-neutral-600">{{ $ticket->event->name ?? 'N/A' }}</p>
-                                                    <p class="text-xs text-wwc-neutral-500">{{ $ticket->event->getFormattedDateRange() ?? 'N/A' }}</p>
+                                                </div>
+                                                <div>
+                                                    <h4 class="text-sm font-semibold text-wwc-neutral-900">
+                                                        {{ $ticketData['ticket']->name ?? 'N/A' }} 
+                                                        @if($ticketData['quantity'] > 1)
+                                                            <span class="text-xs text-wwc-neutral-600">x {{ $ticketData['quantity'] }}</span>
+                                                        @endif
+                                                    </h4>
+                                                    <p class="text-xs text-wwc-neutral-600">{{ $ticketData['event']->name ?? 'N/A' }}</p>
+                                                    @if($ticketData['day_name'])
+                                                        <p class="text-xs text-wwc-neutral-500">{{ $ticketData['day_name'] }} - {{ $ticketData['event']->getEventDays()[$ticketData['day']-1]['display'] ?? '' }}</p>
+                                                    @else
+                                                        <p class="text-xs text-wwc-neutral-500">{{ $ticketData['event']->getFormattedDateRange() ?? 'N/A' }}</p>
+                                                    @endif
                                                 </div>
                                             </div>
                                             <div class="text-right">
-                                                <p class="text-lg font-bold text-wwc-neutral-900">RM{{ number_format($ticket->price_paid, 0) }}</p>
+                                                <p class="text-lg font-bold text-wwc-neutral-900">RM{{ number_format($ticketData['price'] * $ticketData['quantity'], 2) }}</p>
+                                                @if($ticketData['quantity'] > 1)
+                                                    <p class="text-xs text-wwc-neutral-500">RM{{ number_format($ticketData['price'], 2) }} each</p>
+                                                @endif
                                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold
-                                                    @if($ticket->status === 'sold') bg-green-100 text-green-800
-                                                    @elseif($ticket->status === 'scanned') bg-blue-100 text-blue-800
-                                                    @elseif($ticket->status === 'pending') bg-yellow-100 text-yellow-800
-                                                    @elseif($ticket->status === 'cancelled') bg-red-100 text-red-800
+                                                    @if($ticketData['status'] === 'sold') bg-green-100 text-green-800
+                                                    @elseif($ticketData['status'] === 'scanned') bg-blue-100 text-blue-800
+                                                    @elseif($ticketData['status'] === 'pending') bg-yellow-100 text-yellow-800
+                                                    @elseif($ticketData['status'] === 'cancelled') bg-red-100 text-red-800
                                                     @else bg-gray-100 text-gray-800
                                                     @endif">
-                                                    {{ ucwords($ticket->status) }}
+                                                    {{ ucwords($ticketData['status']) }}
                                                 </span>
                                             </div>
                                         </div>
-                                        @if($ticket->is_combo_purchase)
+                                        @if($ticketData['day_name'] && $ticketData['day'])
                                         <div class="flex items-center justify-center">
                                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-wwc-accent/20 text-wwc-accent border border-wwc-accent/30">
                                                 <i class='bx bx-cart text-xs mr-1'></i>
-                                                Combo Purchase
+                                                Multi-Day Combo Purchase
                                             </span>
                                         </div>
                                         @endif
@@ -216,28 +287,29 @@
                             </div>
                         </div>
                         <div class="p-6 space-y-4">
+                            
                             <div class="flex items-center justify-between">
                                 <span class="text-sm font-semibold text-wwc-neutral-600">Subtotal</span>
-                                <span class="text-base font-medium text-wwc-neutral-900">RM{{ number_format($order->subtotal, 2) }}</span>
+                                <span class="text-base font-medium text-wwc-neutral-900">RM{{ number_format($originalSubtotal, 2) }}</span>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-semibold text-wwc-neutral-600">Combo Discount ({{ number_format($order->event->getComboDiscountPercentage(), 2) }}%)</span>
+                                <span class="text-base font-medium text-green-600">-RM{{ number_format($comboDiscountAmount, 2) }}</span>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-semibold text-wwc-neutral-600">Service Fee ({{ $serviceFeePercentage }}%)</span>
+                                <span class="text-base font-medium text-wwc-neutral-900">RM{{ number_format($serviceFeePercentage == 0 ? 0 : $order->service_fee, 2) }}</span>
                             </div>
                             <div class="flex items-center justify-between">
-                                <span class="text-sm font-semibold text-wwc-neutral-600">Service Fee</span>
-                                <span class="text-base font-medium text-wwc-neutral-900">RM{{ number_format($order->service_fee, 2) }}</span>
+                                <span class="text-sm font-semibold text-wwc-neutral-600">Tax ({{ $taxPercentage }}%)</span>
+                                <span class="text-base font-medium text-wwc-neutral-900">RM{{ number_format($taxPercentage == 0 ? 0 : $order->tax_amount, 2) }}</span>
                             </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm font-semibold text-wwc-neutral-600">Tax</span>
-                                <span class="text-base font-medium text-wwc-neutral-900">RM{{ number_format($order->tax, 2) }}</span>
-                    </div>
-                            @if($order->discount > 0)
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm font-semibold text-wwc-neutral-600">Discount</span>
-                                <span class="text-base font-medium text-wwc-success">-RM{{ number_format($order->discount, 2) }}</span>
-                                </div>
-                            @endif
                             <div class="border-t border-wwc-neutral-200 pt-4">
                                 <div class="flex items-center justify-between">
                                     <span class="text-lg font-bold text-wwc-neutral-900">Total</span>
-                                    <span class="text-xl font-bold text-wwc-neutral-900">RM{{ number_format($order->total_amount, 2) }}</span>
+                                    <span class="text-xl font-bold text-wwc-neutral-900">RM{{ number_format($correctedTotal, 2) }}</span>
                                 </div>
                             </div>
                                 </div>

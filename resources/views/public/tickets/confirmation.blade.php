@@ -118,7 +118,7 @@
                             </div>
                             <dt class="text-sm font-medium text-wwc-neutral-500 uppercase tracking-wide">Total Amount</dt>
                         </div>
-                        <dd class="text-3xl font-bold text-wwc-primary">RM{{ number_format($order->total_amount, 0) }}</dd>
+                        <dd class="text-3xl font-bold text-wwc-primary">RM{{ number_format($order->total_amount, 2) }}</dd>
                     </div>
                 </div>
             </div>
@@ -156,7 +156,7 @@
                                 </div>
                                 <div class="bg-white rounded-lg p-3">
                                     <p class="font-semibold text-wwc-neutral-700">Amount</p>
-                                    <p class="font-mono">RM{{ number_format($order->total_amount, 0) }}</p>
+                                    <p class="font-mono">RM{{ number_format($order->total_amount, 2) }}</p>
                                 </div>
                                 <div class="bg-white rounded-lg p-3">
                                     <p class="font-semibold text-wwc-neutral-700">Tickets</p>
@@ -235,7 +235,7 @@
                                     </div>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-2xl font-bold text-wwc-primary">RM{{ number_format($ticket->price_paid, 0) }}</div>
+                                    <div class="text-2xl font-bold text-wwc-primary">RM{{ number_format($ticket->price_paid, 2) }}</div>
                                     <div class="text-sm text-wwc-neutral-500 mt-1">Per Ticket</div>
                                 </div>
                             </div>

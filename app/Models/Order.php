@@ -12,6 +12,7 @@ class Order extends Model
 
     protected $fillable = [
         'user_id',
+        'event_id',
         'customer_email',
         'order_number',
         'qrcode',
@@ -39,6 +40,14 @@ class Order extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the event for this order
+     */
+    public function event()
+    {
+        return $this->belongsTo(Event::class);
     }
 
     /**

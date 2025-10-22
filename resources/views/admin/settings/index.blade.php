@@ -87,6 +87,47 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Additional Statistics Row -->
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 mb-6">
+                <!-- Service Fee -->
+                <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $settings['service_fee_percentage'] ?? '5.0' }}%</div>
+                            <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Service Fee</div>
+                            <div class="flex items-center">
+                                <div class="flex items-center text-xs text-wwc-info font-semibold">
+                                    <i class='bx bx-percentage text-xs mr-1'></i>
+                                    Per Order
+                                </div>
+                            </div>
+                        </div>
+                        <div class="h-12 w-12 rounded-lg bg-wwc-info-light flex items-center justify-center">
+                            <i class='bx bx-percentage text-2xl text-wwc-info'></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tax Rate -->
+                <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $settings['tax_percentage'] ?? '6.0' }}%</div>
+                            <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Tax Rate</div>
+                            <div class="flex items-center">
+                                <div class="flex items-center text-xs text-wwc-warning font-semibold">
+                                    <i class='bx bx-receipt text-xs mr-1'></i>
+                                    Government
+                                </div>
+                            </div>
+                        </div>
+                        <div class="h-12 w-12 rounded-lg bg-wwc-warning-light flex items-center justify-center">
+                            <i class='bx bx-receipt text-2xl text-wwc-warning'></i>
+                        </div>
+                    </div>
+                </div>
         </div>
 
         <!-- Settings Form -->
@@ -108,7 +149,8 @@
                             <i class='bx bx-receipt text-sm mr-2 text-wwc-primary'></i>
                             Ticket Settings
                         </h3>
-                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                        <p class="text-sm text-wwc-neutral-500 mb-4">Configure the settings for the ticket system</p>
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 mb-6">
                             <div>
                                 <label for="max_tickets_per_order" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
                                     Maximum Tickets per Order
@@ -133,6 +175,37 @@
                                        class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('seat_hold_duration_minutes') border-wwc-error @enderror">
                                 <p class="mt-2 text-sm text-wwc-neutral-500">How long to hold seats during the purchase process</p>
                                 @error('seat_hold_duration_minutes')
+                                    <p class="mt-2 text-sm text-wwc-error">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                        
+                        <!-- Additional Ticket Settings Row -->
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <div>
+                                <label for="service_fee_percentage" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                    Service Fee Percentage
+                                </label>
+                                <input type="number" name="service_fee_percentage" id="service_fee_percentage" 
+                                       value="{{ old('service_fee_percentage', $settings['service_fee_percentage'] ?? '5.0') }}" 
+                                       min="0" max="100" step="0.1" required
+                                       class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('service_fee_percentage') border-wwc-error @enderror">
+                                <p class="mt-2 text-sm text-wwc-neutral-500">Service fee percentage applied to each order (0-100%)</p>
+                                @error('service_fee_percentage')
+                                    <p class="mt-2 text-sm text-wwc-error">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="tax_percentage" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                    Tax Percentage
+                                </label>
+                                <input type="number" name="tax_percentage" id="tax_percentage" 
+                                       value="{{ old('tax_percentage', $settings['tax_percentage'] ?? '6.0') }}" 
+                                       min="0" max="100" step="0.1" required
+                                       class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('tax_percentage') border-wwc-error @enderror">
+                                <p class="mt-2 text-sm text-wwc-neutral-500">Tax percentage applied to each order (0-100%)</p>
+                                @error('tax_percentage')
                                     <p class="mt-2 text-sm text-wwc-error">{{ $message }}</p>
                                 @enderror
                             </div>
@@ -284,8 +357,8 @@
                         <div class="flex items-center space-x-3">
                             <div class="h-8 w-8 rounded-lg bg-wwc-success-light flex items-center justify-center">
                                 <i class='bx bx-code text-sm text-wwc-success'></i>
-                    </div>
-                    <div>
+                            </div>
+                            <div>
                                 <dt class="text-sm font-semibold text-wwc-neutral-900">PHP Version</dt>
                                 <dd class="text-sm text-wwc-neutral-600">{{ PHP_VERSION }}</dd>
                             </div>
@@ -293,8 +366,8 @@
                         <div class="flex items-center space-x-3">
                             <div class="h-8 w-8 rounded-lg bg-wwc-info-light flex items-center justify-center">
                                 <i class='bx bx-data text-sm text-wwc-info'></i>
-                    </div>
-                    <div>
+                            </div>
+                            <div>
                                 <dt class="text-sm font-semibold text-wwc-neutral-900">Database Driver</dt>
                                 <dd class="text-sm text-wwc-neutral-600">{{ config('database.default') }}</dd>
                             </div>
@@ -302,8 +375,8 @@
                         <div class="flex items-center space-x-3">
                             <div class="h-8 w-8 rounded-lg bg-wwc-warning-light flex items-center justify-center">
                                 <i class='bx bx-world text-sm text-wwc-warning'></i>
-                    </div>
-                    <div>
+                            </div>
+                            <div>
                                 <dt class="text-sm font-semibold text-wwc-neutral-900">Environment</dt>
                                 <dd class="text-sm text-wwc-neutral-600">{{ app()->environment() }}</dd>
                             </div>
@@ -311,8 +384,8 @@
                         <div class="flex items-center space-x-3">
                             <div class="h-8 w-8 rounded-lg bg-wwc-accent-light flex items-center justify-center">
                                 <i class='bx bx-link text-sm text-wwc-accent'></i>
-                    </div>
-                    <div>
+                            </div>
+                            <div>
                                 <dt class="text-sm font-semibold text-wwc-neutral-900">Application URL</dt>
                                 <dd class="text-sm text-wwc-neutral-600">{{ config('app.url') }}</dd>
                             </div>
@@ -320,15 +393,15 @@
                         <div class="flex items-center space-x-3">
                             <div class="h-8 w-8 rounded-lg {{ config('app.debug') ? 'bg-wwc-error-light' : 'bg-wwc-success-light' }} flex items-center justify-center">
                                 <i class='bx {{ config('app.debug') ? 'bx-error' : 'bx-check-circle' }} text-sm {{ config('app.debug') ? 'text-wwc-error' : 'text-wwc-success' }}'></i>
-                    </div>
-                    <div>
+                            </div>
+                            <div>
                                 <dt class="text-sm font-semibold text-wwc-neutral-900">Debug Mode</dt>
                                 <dd class="text-sm">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                         {{ config('app.debug') ? 'bg-wwc-error-light text-wwc-error' : 'bg-wwc-success-light text-wwc-success' }}">
-                                {{ config('app.debug') ? 'Enabled' : 'Disabled' }}
-                            </span>
-                        </dd>
+                                        {{ config('app.debug') ? 'Enabled' : 'Disabled' }}
+                                    </span>
+                                </dd>
                             </div>
                     </div>
                 </dl>

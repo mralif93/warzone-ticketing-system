@@ -24,7 +24,7 @@
                 
                 <!-- Event Details -->
                 <div class="text-center flex-1 mx-8">
-                    <h1 class="text-2xl font-bold text-wwc-neutral-900 font-display mb-1">{{ $event->name }}</h1>
+                    <h1 class="text-3xl font-bold text-wwc-neutral-900 font-display mb-1">{{ $event->name }}</h1>
                     <p class="text-sm text-wwc-neutral-600">
                         {{ $event->getFormattedDateRange() }}
                         @if($event->venue)

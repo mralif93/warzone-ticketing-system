@@ -215,8 +215,8 @@
                                                 <input type="radio" name="purchase_type" value="multi_day" id="multi_day" 
                                                        class="h-4 w-4 text-wwc-primary focus:ring-wwc-primary border-wwc-neutral-300 mt-1">
                                                 <label for="multi_day" class="ml-3 flex flex-col">
-                                                    <span class="text-sm font-semibold text-wwc-neutral-900">Multi-Day Purchase (Day 1 & Day 2)</span>
-                                                    <span class="text-xs text-wwc-neutral-600">Purchase tickets for both days with combo discount</span>
+                                                    <span class="text-sm font-semibold text-wwc-neutral-900">Multi-Day Purchase</span>
+                                                    <span class="text-xs text-wwc-neutral-600">Purchase tickets for Day 1, Day 2, or both days with combo discount</span>
                                                 </label>
                                             </div>
                                         </div>
@@ -236,7 +236,30 @@
                                             <div class="w-6 h-6 bg-wwc-primary text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">1</div>
                                             <h6 class="text-lg font-semibold text-wwc-neutral-900">Single Day Tickets</h6>
                                         </div>
-                                        <p class="text-sm text-wwc-neutral-600 mb-6">Choose your preferred ticket type and quantity for single day attendance.</p>
+                                        <p class="text-sm text-wwc-neutral-600 mb-6">Choose your preferred ticket type, quantity, and specific day for single day attendance.</p>
+                                        
+                                        <!-- Day Selection for Single Day -->
+                                        <div class="mb-6">
+                                            <label class="block text-sm font-semibold text-wwc-neutral-900 mb-3">Select Day</label>
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                <div class="flex items-center">
+                                                    <input type="radio" name="single_day_type" value="day1" id="single_day1" 
+                                                           class="h-4 w-4 text-wwc-primary focus:ring-wwc-primary border-wwc-neutral-300">
+                                                    <label for="single_day1" class="ml-3 flex flex-col">
+                                                        <span class="text-sm font-semibold text-wwc-neutral-900">Day 1</span>
+                                                        <span class="text-xs text-wwc-neutral-600">Attend Day 1 only</span>
+                                                    </label>
+                                                </div>
+                                                <div class="flex items-center">
+                                                    <input type="radio" name="single_day_type" value="day2" id="single_day2" 
+                                                           class="h-4 w-4 text-wwc-primary focus:ring-wwc-primary border-wwc-neutral-300">
+                                                    <label for="single_day2" class="ml-3 flex flex-col">
+                                                        <span class="text-sm font-semibold text-wwc-neutral-900">Day 2</span>
+                                                        <span class="text-xs text-wwc-neutral-600">Attend Day 2 only</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
                                         
                                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                             <!-- Ticket Type Selection -->
@@ -287,11 +310,34 @@
                                             <div class="w-6 h-6 bg-wwc-primary text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">2</div>
                                             <h6 class="text-lg font-semibold text-wwc-neutral-900">Multi-Day Tickets</h6>
                                         </div>
-                                        <p class="text-sm text-wwc-neutral-600 mb-6">Select different ticket types and quantities for each day. Save with combo discount!</p>
+                                        <p class="text-sm text-wwc-neutral-600 mb-6">Select which days you want to attend and choose your ticket types. You can attend Day 1, Day 2, or both days!</p>
+                                        
+                                        <!-- Day Selection Checkboxes -->
+                                        <div class="mb-6">
+                                            <label class="block text-sm font-semibold text-wwc-neutral-900 mb-3">Select Days to Attend</label>
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                <div class="flex items-center">
+                                                    <input type="checkbox" name="multi_day1_enabled" id="multi_day1_enabled" value="1" 
+                                                           class="h-4 w-4 text-wwc-primary focus:ring-wwc-primary border-wwc-neutral-300 rounded">
+                                                    <label for="multi_day1_enabled" class="ml-3 flex flex-col">
+                                                        <span class="text-sm font-semibold text-wwc-neutral-900">Day 1</span>
+                                                        <span class="text-xs text-wwc-neutral-600">Attend Day 1</span>
+                                                    </label>
+                                                </div>
+                                                <div class="flex items-center">
+                                                    <input type="checkbox" name="multi_day2_enabled" id="multi_day2_enabled" value="1" 
+                                                           class="h-4 w-4 text-wwc-primary focus:ring-wwc-primary border-wwc-neutral-300 rounded">
+                                                    <label for="multi_day2_enabled" class="ml-3 flex flex-col">
+                                                        <span class="text-sm font-semibold text-wwc-neutral-900">Day 2</span>
+                                                        <span class="text-xs text-wwc-neutral-600">Attend Day 2</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
                                         
                                         <div class="space-y-6">
                                             <!-- Day 1 Selection -->
-                                            <div class="bg-white p-6 rounded-lg border border-wwc-neutral-200">
+                                            <div id="multi-day1-section" class="hidden bg-white p-6 rounded-lg border border-wwc-neutral-200">
                                                 <div class="flex items-center mb-4">
                                                     <div class="w-8 h-8 bg-wwc-primary text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">1</div>
                                                     <h6 class="text-lg font-semibold text-wwc-neutral-900">Day 1 Tickets</h6>
@@ -327,7 +373,7 @@
                                             </div>
 
                                             <!-- Day 2 Selection -->
-                                            <div class="bg-white p-6 rounded-lg border border-wwc-neutral-200">
+                                            <div id="multi-day2-section" class="hidden bg-white p-6 rounded-lg border border-wwc-neutral-200">
                                                 <div class="flex items-center mb-4">
                                                     <div class="w-8 h-8 bg-wwc-primary text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">2</div>
                                                     <h6 class="text-lg font-semibold text-wwc-neutral-900">Day 2 Tickets</h6>
@@ -364,7 +410,7 @@
                                         </div>
 
                                         <!-- Combo Discount Option -->
-                                        <div class="mt-6 bg-wwc-primary/5 p-4 rounded-lg border border-wwc-primary/20">
+                                        <div id="combo-discount-section" class="hidden mt-6 bg-wwc-primary/5 p-4 rounded-lg border border-wwc-primary/20">
                                             <div class="flex items-center">
                                                 <input type="checkbox" name="is_combo_purchase" id="is_combo_purchase" value="1"
                                                        class="h-5 w-5 text-wwc-primary focus:ring-wwc-primary border-wwc-neutral-300 rounded">
@@ -379,6 +425,96 @@
                                                 Save money by purchasing tickets for both days together. Discount applies to the total price of all tickets.
                                             </p>
                                         </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Day 1 Only Ticket Selection -->
+                                    <div id="day1-only-section" class="hidden bg-wwc-neutral-50 p-6 rounded-lg border border-wwc-neutral-200">
+                                        <div class="flex items-center mb-4">
+                                            <div class="w-6 h-6 bg-wwc-primary text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">1</div>
+                                            <h6 class="text-lg font-semibold text-wwc-neutral-900">Day 1 Only Tickets</h6>
+                                        </div>
+                                        <p class="text-sm text-wwc-neutral-600 mb-6">Choose your preferred ticket type and quantity for Day 1 only.</p>
+                                        
+                                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                            <!-- Ticket Type Selection -->
+                                            <div>
+                                                <label for="day1_only_ticket_type" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                                    Ticket Type <span class="text-wwc-error">*</span>
+                                                </label>
+                                                <select name="day1_only_ticket_type" id="day1_only_ticket_type" required disabled
+                                                        class="block w-full px-4 py-3 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
+                                                    <option value="">Please select an event first</option>
+                                                </select>
+                                                <p class="text-xs text-wwc-neutral-500 mt-2">Choose your preferred ticket category for Day 1</p>
+                                            </div>
+
+                                            <!-- Quantity Selection -->
+                                            <div>
+                                                <label for="day1_only_quantity" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                                    Quantity <span class="text-wwc-error">*</span>
+                                                </label>
+                                                <div class="flex items-center space-x-4">
+                                                    <button type="button" id="day1-only-quantity-decrease" class="w-10 h-10 bg-wwc-neutral-200 hover:bg-wwc-neutral-300 rounded-lg flex items-center justify-center transition-colors">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                                                        </svg>
+                                                    </button>
+                                                    <input type="number" name="day1_only_quantity" id="day1_only_quantity" min="1" max="10" value="1" required disabled
+                                                           class="w-20 px-3 py-2 text-center border border-gray-300 bg-white text-gray-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                                    <button type="button" id="day1-only-quantity-increase" class="w-10 h-10 bg-wwc-neutral-200 hover:bg-wwc-neutral-300 rounded-lg flex items-center justify-center transition-colors">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                                <p class="text-xs text-wwc-neutral-500 mt-2">Maximum 10 tickets per order</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Day 2 Only Ticket Selection -->
+                                    <div id="day2-only-section" class="hidden bg-wwc-neutral-50 p-6 rounded-lg border border-wwc-neutral-200">
+                                        <div class="flex items-center mb-4">
+                                            <div class="w-6 h-6 bg-wwc-primary text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">2</div>
+                                            <h6 class="text-lg font-semibold text-wwc-neutral-900">Day 2 Only Tickets</h6>
+                                        </div>
+                                        <p class="text-sm text-wwc-neutral-600 mb-6">Choose your preferred ticket type and quantity for Day 2 only.</p>
+                                        
+                                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                            <!-- Ticket Type Selection -->
+                                            <div>
+                                                <label for="day2_only_ticket_type" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                                    Ticket Type <span class="text-wwc-error">*</span>
+                                                </label>
+                                                <select name="day2_only_ticket_type" id="day2_only_ticket_type" required disabled
+                                                        class="block w-full px-4 py-3 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
+                                                    <option value="">Please select an event first</option>
+                                                </select>
+                                                <p class="text-xs text-wwc-neutral-500 mt-2">Choose your preferred ticket category for Day 2</p>
+                                            </div>
+
+                                            <!-- Quantity Selection -->
+                                            <div>
+                                                <label for="day2_only_quantity" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                                    Quantity <span class="text-wwc-error">*</span>
+                                                </label>
+                                                <div class="flex items-center space-x-4">
+                                                    <button type="button" id="day2-only-quantity-decrease" class="w-10 h-10 bg-wwc-neutral-200 hover:bg-wwc-neutral-300 rounded-lg flex items-center justify-center transition-colors">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                                                        </svg>
+                                                    </button>
+                                                    <input type="number" name="day2_only_quantity" id="day2_only_quantity" min="1" max="10" value="1" required disabled
+                                                           class="w-20 px-3 py-2 text-center border border-gray-300 bg-white text-gray-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                                    <button type="button" id="day2-only-quantity-increase" class="w-10 h-10 bg-wwc-neutral-200 hover:bg-wwc-neutral-300 rounded-lg flex items-center justify-center transition-colors">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                                <p class="text-xs text-wwc-neutral-500 mt-2">Maximum 10 tickets per order</p>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -387,7 +523,7 @@
                                     <h4 class="text-sm font-semibold text-wwc-neutral-900 mb-2">Pricing Preview</h4>
                                     <div id="pricing-preview" class="text-sm text-wwc-neutral-600">
                                         <p>Select a ticket type and quantity to see pricing preview.</p>
-                                        <p class="mt-1">Service fee: 5% of subtotal | Tax: 6% of (subtotal + service fee)</p>
+                                        <p class="mt-1">Service fee: {{ $serviceFeePercentage }}% of subtotal | Tax: {{ $taxPercentage }}% of (subtotal + service fee)</p>
                                     </div>
                                 </div>
                             </div>
@@ -415,6 +551,10 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+            // Settings
+            const serviceFeePercentage = {{ $serviceFeePercentage }};
+            const taxPercentage = {{ $taxPercentage }};
+            
             const eventSelect = document.getElementById('event_id');
             const ticketTypeSelect = document.getElementById('ticket_type_id');
     const quantityInput = document.getElementById('quantity');
@@ -425,12 +565,24 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // New elements for different purchase types
             const purchaseTypeRadios = document.querySelectorAll('input[name="purchase_type"]');
+            const singleDayTypeRadios = document.querySelectorAll('input[name="single_day_type"]');
+            const multiDay1Checkbox = document.getElementById('multi_day1_enabled');
+            const multiDay2Checkbox = document.getElementById('multi_day2_enabled');
             const singleDaySection = document.getElementById('single-day-section');
             const multiDaySection = document.getElementById('multi-day-section');
+            const multiDay1Section = document.getElementById('multi-day1-section');
+            const multiDay2Section = document.getElementById('multi-day2-section');
+            const comboDiscountSection = document.getElementById('combo-discount-section');
+            const day1OnlySection = document.getElementById('day1-only-section');
+            const day2OnlySection = document.getElementById('day2-only-section');
             const day1TicketSelect = document.getElementById('day1_ticket_type');
             const day2TicketSelect = document.getElementById('day2_ticket_type');
+            const day1OnlyTicketSelect = document.getElementById('day1_only_ticket_type');
+            const day2OnlyTicketSelect = document.getElementById('day2_only_ticket_type');
             const day1QuantityInput = document.getElementById('day1_quantity');
             const day2QuantityInput = document.getElementById('day2_quantity');
+            const day1OnlyQuantityInput = document.getElementById('day1_only_quantity');
+            const day2OnlyQuantityInput = document.getElementById('day2_only_quantity');
     
     if (!eventSelect || !ticketTypeSelect || !quantityInput || !pricingPreview) {
         console.error('Required elements not found');
@@ -485,7 +637,22 @@ document.addEventListener('DOMContentLoaded', function() {
             }
     
     function fetchTicketTypes(eventId) {
-        console.log('Fetching ticket types for event:', eventId);
+        console.log('=== FETCH TICKET TYPES START ===');
+        console.log('Event ID:', eventId);
+        console.log('Event Select element:', eventSelect);
+        console.log('Ticket Type Select element:', ticketTypeSelect);
+        console.log('Day1 Ticket Select element:', day1TicketSelect);
+        console.log('Day2 Ticket Select element:', day2TicketSelect);
+        console.log('Day1 Only Ticket Select element:', day1OnlyTicketSelect);
+        console.log('Day2 Only Ticket Select element:', day2OnlyTicketSelect);
+        
+        // Check if user is authenticated by checking for a session or token
+        const isAuthenticated = document.querySelector('meta[name="csrf-token"]') !== null;
+        if (!isAuthenticated) {
+            console.error('User not authenticated, redirecting to login');
+            window.location.href = '/login';
+            return;
+        }
         
         fetch(`/admin/events/${eventId}/ticket-types`, {
             method: 'GET',
@@ -493,10 +660,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            }
+            },
+            credentials: 'same-origin'
         })
             .then(response => {
                 console.log('Response status:', response.status);
+                if (response.status === 401) {
+                    // Redirect to login page
+                    window.location.href = '/login';
+                    return;
+                }
+                if (response.status === 403) {
+                    throw new Error('Access denied. You do not have permission to access this resource.');
+                }
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -504,14 +680,22 @@ document.addEventListener('DOMContentLoaded', function() {
             })
                     .then(data => {
                         console.log('Received data:', data);
+                        
+                        // Clear all dropdowns
                         ticketTypeSelect.innerHTML = '<option value="">Select Ticket Type</option>';
-                        day1TicketSelect.innerHTML = '<option value="">Select Day 1 Ticket</option>';
-                        day2TicketSelect.innerHTML = '<option value="">Select Day 2 Ticket</option>';
+                        if (day1TicketSelect) day1TicketSelect.innerHTML = '<option value="">Select Day 1 Ticket</option>';
+                        if (day2TicketSelect) day2TicketSelect.innerHTML = '<option value="">Select Day 2 Ticket</option>';
+                        if (day1OnlyTicketSelect) day1OnlyTicketSelect.innerHTML = '<option value="">Select Day 1 Ticket</option>';
+                        if (day2OnlyTicketSelect) day2OnlyTicketSelect.innerHTML = '<option value="">Select Day 2 Ticket</option>';
                         
                         if (data.ticketTypes && data.ticketTypes.length > 0) {
                             console.log('Found', data.ticketTypes.length, 'ticket types');
+                            console.log('Event is multi-day:', data.event.is_multi_day);
+                            
                             data.ticketTypes.forEach(ticketType => {
-                                // Create option for main ticket type select (single day)
+                                console.log('Processing ticket type:', ticketType.name);
+                                
+                                // Create main option for single day purchase
                                 const mainOption = document.createElement('option');
                                 mainOption.value = ticketType.id;
                                 mainOption.setAttribute('data-price', ticketType.price);
@@ -519,85 +703,166 @@ document.addEventListener('DOMContentLoaded', function() {
                                 mainOption.textContent = `${ticketType.name} - RM${parseFloat(ticketType.price).toFixed(2)}${ticketType.available_seats > 0 ? ` (${ticketType.available_seats} available)` : ' (Sold Out)'}`;
                                 ticketTypeSelect.appendChild(mainOption);
                                 
-                                // For multi-day events, create day-specific options
+                                // For multi-day events with day availability data
                                 if (data.event.is_multi_day && ticketType.day_availability) {
-                                    // Day 1 option
+                                    console.log('Processing multi-day ticket with day availability:', ticketType.day_availability);
+                                    
+                                    // Calculate availability for both days
+                                    const day1Availability = ticketType.day_availability.find(day => day.day_name === 'Day 1');
+                                    const day2Availability = ticketType.day_availability.find(day => day.day_name === 'Day 2');
+                                    const day1Available = day1Availability ? day1Availability.available : ticketType.available_seats;
+                                    const day2Available = day2Availability ? day2Availability.available : ticketType.available_seats;
+                                    
+                                    // Day 1 option for multi-day
                                     if (day1TicketSelect) {
                                         const day1Option = document.createElement('option');
                                         day1Option.value = ticketType.id;
                                         day1Option.setAttribute('data-price', ticketType.price);
-                                        
-                                        const day1Availability = ticketType.day_availability.find(day => day.day_name === 'Day 1');
-                                        const day1Available = day1Availability ? day1Availability.available : ticketType.available_seats;
-                                        
                                         day1Option.setAttribute('data-available', day1Available);
                                         day1Option.textContent = `${ticketType.name} - RM${parseFloat(ticketType.price).toFixed(2)}${day1Available > 0 ? ` (${day1Available} available for Day 1)` : ' (Sold Out for Day 1)'}`;
                                         day1TicketSelect.appendChild(day1Option);
                                         console.log('Added Day 1 option:', ticketType.name, 'Available:', day1Available);
                                     }
                                     
-                                    // Day 2 option
+                                    // Day 2 option for multi-day
                                     if (day2TicketSelect) {
                                         const day2Option = document.createElement('option');
                                         day2Option.value = ticketType.id;
                                         day2Option.setAttribute('data-price', ticketType.price);
-                                        
-                                        const day2Availability = ticketType.day_availability.find(day => day.day_name === 'Day 2');
-                                        const day2Available = day2Availability ? day2Availability.available : ticketType.available_seats;
-                                        
                                         day2Option.setAttribute('data-available', day2Available);
                                         day2Option.textContent = `${ticketType.name} - RM${parseFloat(ticketType.price).toFixed(2)}${day2Available > 0 ? ` (${day2Available} available for Day 2)` : ' (Sold Out for Day 2)'}`;
                                         day2TicketSelect.appendChild(day2Option);
                                         console.log('Added Day 2 option:', ticketType.name, 'Available:', day2Available);
                                     }
+                                    
+                                    // Day 1 Only option (clone from day1Option)
+                                    if (day1OnlyTicketSelect) {
+                                        const day1OnlyOption = document.createElement('option');
+                                        day1OnlyOption.value = ticketType.id;
+                                        day1OnlyOption.setAttribute('data-price', ticketType.price);
+                                        day1OnlyOption.setAttribute('data-available', day1Available);
+                                        day1OnlyOption.textContent = `${ticketType.name} - RM${parseFloat(ticketType.price).toFixed(2)}${day1Available > 0 ? ` (${day1Available} available for Day 1)` : ' (Sold Out for Day 1)'}`;
+                                        day1OnlyTicketSelect.appendChild(day1OnlyOption);
+                                        console.log('Added Day 1 Only option:', ticketType.name, 'Available:', day1Available);
+                                    }
+                                    
+                                    // Day 2 Only option (clone from day2Option)
+                                    if (day2OnlyTicketSelect) {
+                                        const day2OnlyOption = document.createElement('option');
+                                        day2OnlyOption.value = ticketType.id;
+                                        day2OnlyOption.setAttribute('data-price', ticketType.price);
+                                        day2OnlyOption.setAttribute('data-available', day2Available);
+                                        day2OnlyOption.textContent = `${ticketType.name} - RM${parseFloat(ticketType.price).toFixed(2)}${day2Available > 0 ? ` (${day2Available} available for Day 2)` : ' (Sold Out for Day 2)'}`;
+                                        day2OnlyTicketSelect.appendChild(day2OnlyOption);
+                                        console.log('Added Day 2 Only option:', ticketType.name, 'Available:', day2Available);
+                                    }
                                 } else {
-                                    // For single-day events, add to both day selects
+                                    // For single-day events, add the same option to all dropdowns
+                                    console.log('Processing single-day ticket');
+                                    
                                     if (day1TicketSelect) {
-                                        day1TicketSelect.appendChild(mainOption.cloneNode(true));
+                                        const day1Option = mainOption.cloneNode(true);
+                                        day1TicketSelect.appendChild(day1Option);
                                         console.log('Added option to day1TicketSelect:', ticketType.name);
                                     }
+                                    
                                     if (day2TicketSelect) {
-                                        day2TicketSelect.appendChild(mainOption.cloneNode(true));
+                                        const day2Option = mainOption.cloneNode(true);
+                                        day2TicketSelect.appendChild(day2Option);
                                         console.log('Added option to day2TicketSelect:', ticketType.name);
+                                    }
+                                    
+                                    if (day1OnlyTicketSelect) {
+                                        const day1OnlyOption = mainOption.cloneNode(true);
+                                        day1OnlyTicketSelect.appendChild(day1OnlyOption);
+                                        console.log('Added option to day1OnlyTicketSelect:', ticketType.name);
+                                    }
+                                    
+                                    if (day2OnlyTicketSelect) {
+                                        const day2OnlyOption = mainOption.cloneNode(true);
+                                        day2OnlyTicketSelect.appendChild(day2OnlyOption);
+                                        console.log('Added option to day2OnlyTicketSelect:', ticketType.name);
                                     }
                                 }
                             });
                             
                             console.log('Day1 dropdown options count:', day1TicketSelect ? day1TicketSelect.options.length : 'null');
                             console.log('Day2 dropdown options count:', day2TicketSelect ? day2TicketSelect.options.length : 'null');
+                            
                             // Enable ticket selects based on current purchase type
                             const selectedType = document.querySelector('input[name="purchase_type"]:checked')?.value;
                             console.log('Selected purchase type:', selectedType);
+                            
                             if (selectedType === 'single_day') {
                                 ticketTypeSelect.disabled = false;
                                 console.log('Enabled single day ticket select');
                             } else if (selectedType === 'multi_day') {
-                                if (day1TicketSelect) {
-                                    day1TicketSelect.disabled = false;
-                                    console.log('Enabled day1TicketSelect, disabled:', day1TicketSelect.disabled);
+                                // Multi-day ticket selects will be enabled by updateMultiDaySections()
+                                updateMultiDaySections();
+                                console.log('Updated multi-day sections');
+                            } else if (selectedType === 'day1_only') {
+                                if (day1OnlyTicketSelect) {
+                                    day1OnlyTicketSelect.disabled = false;
+                                    console.log('Enabled day1OnlyTicketSelect');
                                 }
-                                if (day2TicketSelect) {
-                                    day2TicketSelect.disabled = false;
-                                    console.log('Enabled day2TicketSelect, disabled:', day2TicketSelect.disabled);
+                            } else if (selectedType === 'day2_only') {
+                                if (day2OnlyTicketSelect) {
+                                    day2OnlyTicketSelect.disabled = false;
+                                    console.log('Enabled day2OnlyTicketSelect');
                                 }
-                                console.log('Enabled multi-day ticket selects');
                             }
                         } else {
                             console.log('No ticket types found');
                             ticketTypeSelect.innerHTML = '<option value="">No ticket types available for this event</option>';
                             ticketTypeSelect.disabled = true;
-                            day1TicketSelect.innerHTML = '<option value="">No ticket types available for this event</option>';
-                            day1TicketSelect.disabled = true;
-                            day2TicketSelect.innerHTML = '<option value="">No ticket types available for this event</option>';
-                            day2TicketSelect.disabled = true;
+                            if (day1TicketSelect) {
+                                day1TicketSelect.innerHTML = '<option value="">No ticket types available for this event</option>';
+                                day1TicketSelect.disabled = true;
+                            }
+                            if (day2TicketSelect) {
+                                day2TicketSelect.innerHTML = '<option value="">No ticket types available for this event</option>';
+                                day2TicketSelect.disabled = true;
+                            }
+                            if (day1OnlyTicketSelect) {
+                                day1OnlyTicketSelect.innerHTML = '<option value="">No ticket types available for this event</option>';
+                                day1OnlyTicketSelect.disabled = true;
+                            }
+                            if (day2OnlyTicketSelect) {
+                                day2OnlyTicketSelect.innerHTML = '<option value="">No ticket types available for this event</option>';
+                                day2OnlyTicketSelect.disabled = true;
+                            }
                         }
+                        
+                        console.log('=== FETCH TICKET TYPES END ===');
+                        console.log('Final ticket type select options:', ticketTypeSelect.options.length);
+                        console.log('Final day1 select options:', day1TicketSelect ? day1TicketSelect.options.length : 'null');
+                        console.log('Final day2 select options:', day2TicketSelect ? day2TicketSelect.options.length : 'null');
                         
                         updatePricingPreview();
                     })
             .catch(error => {
                 console.error('Error fetching ticket types:', error);
-                ticketTypeSelect.innerHTML = '<option value="">Error loading ticket types</option>';
+                const errorMessage = error.message || 'Error loading ticket types';
+                ticketTypeSelect.innerHTML = `<option value="">${errorMessage}</option>`;
                 ticketTypeSelect.disabled = true;
+                
+                // Also update other selects
+                if (day1TicketSelect) {
+                    day1TicketSelect.innerHTML = `<option value="">${errorMessage}</option>`;
+                    day1TicketSelect.disabled = true;
+                }
+                if (day2TicketSelect) {
+                    day2TicketSelect.innerHTML = `<option value="">${errorMessage}</option>`;
+                    day2TicketSelect.disabled = true;
+                }
+                if (day1OnlyTicketSelect) {
+                    day1OnlyTicketSelect.innerHTML = `<option value="">${errorMessage}</option>`;
+                    day1OnlyTicketSelect.disabled = true;
+                }
+                if (day2OnlyTicketSelect) {
+                    day2OnlyTicketSelect.innerHTML = `<option value="">${errorMessage}</option>`;
+                    day2OnlyTicketSelect.disabled = true;
+                }
             });
     }
     
@@ -630,29 +895,50 @@ document.addEventListener('DOMContentLoaded', function() {
         // Hide all sections
         singleDaySection.classList.add('hidden');
         multiDaySection.classList.add('hidden');
+        day1OnlySection.classList.add('hidden');
+        day2OnlySection.classList.add('hidden');
         
-        // Show selected section
+        // Disable all fields first
+        ticketTypeSelect.disabled = true;
+        quantityInput.disabled = true;
+        if (day1TicketSelect) day1TicketSelect.disabled = true;
+        if (day2TicketSelect) day2TicketSelect.disabled = true;
+        if (day1QuantityInput) day1QuantityInput.disabled = true;
+        if (day2QuantityInput) day2QuantityInput.disabled = true;
+        if (day1OnlyTicketSelect) day1OnlyTicketSelect.disabled = true;
+        if (day2OnlyTicketSelect) day2OnlyTicketSelect.disabled = true;
+        if (day1OnlyQuantityInput) day1OnlyQuantityInput.disabled = true;
+        if (day2OnlyQuantityInput) day2OnlyQuantityInput.disabled = true;
+        
+        // Show selected section and enable appropriate fields
         switch(selectedType) {
             case 'single_day':
                 singleDaySection.classList.remove('hidden');
-                multiDaySection.classList.add('hidden');
-                // Enable single day fields
                 ticketTypeSelect.disabled = false;
                 quantityInput.disabled = false;
                 quantityInput.value = 1;
-                // Make ticket type required for single day
                 ticketTypeSelect.required = true;
                 if (quantityNote) quantityNote.classList.add('hidden');
                 break;
             case 'multi_day':
-                singleDaySection.classList.add('hidden');
                 multiDaySection.classList.remove('hidden');
-                // Enable multi-day fields
-                if (day1TicketSelect) day1TicketSelect.disabled = false;
-                if (day2TicketSelect) day2TicketSelect.disabled = false;
-                if (day1QuantityInput) day1QuantityInput.disabled = false;
-                if (day2QuantityInput) day2QuantityInput.disabled = false;
-                // Make ticket type not required for multi-day
+                updateMultiDaySections(); // Update day sections based on checkboxes
+                ticketTypeSelect.required = false;
+                if (quantityNote) quantityNote.classList.add('hidden');
+                break;
+            case 'day1_only':
+                day1OnlySection.classList.remove('hidden');
+                if (day1OnlyTicketSelect) day1OnlyTicketSelect.disabled = false;
+                if (day1OnlyQuantityInput) day1OnlyQuantityInput.disabled = false;
+                if (day1OnlyQuantityInput) day1OnlyQuantityInput.value = 1;
+                ticketTypeSelect.required = false;
+                if (quantityNote) quantityNote.classList.add('hidden');
+                break;
+            case 'day2_only':
+                day2OnlySection.classList.remove('hidden');
+                if (day2OnlyTicketSelect) day2OnlyTicketSelect.disabled = false;
+                if (day2OnlyQuantityInput) day2OnlyQuantityInput.disabled = false;
+                if (day2OnlyQuantityInput) day2OnlyQuantityInput.value = 1;
                 ticketTypeSelect.required = false;
                 if (quantityNote) quantityNote.classList.add('hidden');
                 break;
@@ -739,60 +1025,76 @@ document.addEventListener('DOMContentLoaded', function() {
         let pricingHTML = '';
         
         if (selectedType === 'multi_day') {
-            // Handle multi-day purchase (Day 1 & Day 2) with individual quantities
-            const day1Ticket = day1TicketSelect.options[day1TicketSelect.selectedIndex];
-            const day2Ticket = day2TicketSelect.options[day2TicketSelect.selectedIndex];
+            // Handle multi-day purchase with flexible day selection
+            const day1Enabled = multiDay1Checkbox ? multiDay1Checkbox.checked : false;
+            const day2Enabled = multiDay2Checkbox ? multiDay2Checkbox.checked : false;
+            const day1Ticket = day1TicketSelect ? day1TicketSelect.options[day1TicketSelect.selectedIndex] : null;
+            const day2Ticket = day2TicketSelect ? day2TicketSelect.options[day2TicketSelect.selectedIndex] : null;
             const day1Quantity = parseInt(day1QuantityInput ? day1QuantityInput.value : 1) || 1;
             const day2Quantity = parseInt(day2QuantityInput ? day2QuantityInput.value : 1) || 1;
             const isCombo = comboCheckbox ? comboCheckbox.checked : false;
             
-            if (day1Ticket && day1Ticket.value && day2Ticket && day2Ticket.value) {
-                const day1Price = parseFloat(day1Ticket.getAttribute('data-price')) || 0;
-                const day2Price = parseFloat(day2Ticket.getAttribute('data-price')) || 0;
-                const day1Available = parseInt(day1Ticket.getAttribute('data-available')) || 0;
-                const day2Available = parseInt(day2Ticket.getAttribute('data-available')) || 0;
+            if ((day1Enabled && day1Ticket && day1Ticket.value) || (day2Enabled && day2Ticket && day2Ticket.value)) {
+                const day1Price = day1Ticket ? parseFloat(day1Ticket.getAttribute('data-price')) || 0 : 0;
+                const day2Price = day2Ticket ? parseFloat(day2Ticket.getAttribute('data-price')) || 0 : 0;
+                const day1Available = day1Ticket ? parseInt(day1Ticket.getAttribute('data-available')) || 0 : 0;
+                const day2Available = day2Ticket ? parseInt(day2Ticket.getAttribute('data-available')) || 0 : 0;
                 
-                if (day1Available < day1Quantity || day2Available < day2Quantity) {
+                // Check availability for selected days only
+                let availabilityError = '';
+                if (day1Enabled && day1Available < day1Quantity) {
+                    availabilityError += `Day 1: ${day1Available} available (need ${day1Quantity})`;
+                }
+                if (day2Enabled && day2Available < day2Quantity) {
+                    if (availabilityError) availabilityError += ' | ';
+                    availabilityError += `Day 2: ${day2Available} available (need ${day2Quantity})`;
+                }
+                
+                if (availabilityError) {
                     pricingHTML = `
                         <div class="text-wwc-error">
                             <p class="font-semibold">Insufficient tickets available!</p>
-                            <p class="text-sm">Day 1: ${day1Available} available (need ${day1Quantity}) | Day 2: ${day2Available} available (need ${day2Quantity})</p>
+                            <p class="text-sm">${availabilityError}</p>
                         </div>
                     `;
                 } else {
-                    const day1Subtotal = day1Price * day1Quantity;
-                    const day2Subtotal = day2Price * day2Quantity;
-                    let subtotal = day1Subtotal + day2Subtotal;
+                    const day1Subtotal = day1Enabled ? day1Price * day1Quantity : 0;
+                    const day2Subtotal = day2Enabled ? day2Price * day2Quantity : 0;
+                    const originalSubtotal = day1Subtotal + day2Subtotal;
                     let discountAmount = 0;
                     
-                    // Apply combo discount if applicable
+                    // Apply combo discount if applicable (only when both days are selected)
                     const eventId = eventSelect.value;
                     const isMultiDayEvent = eventId && events[eventId] && events[eventId].is_multi_day;
-                    const isComboEligible = isMultiDayEvent && isCombo && events[eventId].combo_discount_enabled;
+                    const isComboEligible = isMultiDayEvent && isCombo && events[eventId].combo_discount_enabled && day1Enabled && day2Enabled;
                     
                     if (isComboEligible) {
                         const discountPercentage = events[eventId].combo_discount_percentage || 10;
-                        discountAmount = subtotal * (discountPercentage / 100);
-                        subtotal = subtotal - discountAmount;
+                        discountAmount = originalSubtotal * (discountPercentage / 100);
                     }
                     
-            const serviceFee = Math.round(subtotal * 0.05 * 100) / 100;
-            const taxAmount = Math.round((subtotal + serviceFee) * 0.06 * 100) / 100;
-            const total = subtotal + serviceFee + taxAmount;
+                    // Calculate service fee and tax on original subtotal (before discount)
+                    const serviceFee = Math.round(originalSubtotal * (serviceFeePercentage / 100) * 100) / 100;
+                    const taxAmount = Math.round((originalSubtotal + serviceFee) * (taxPercentage / 100) * 100) / 100;
+                    const total = originalSubtotal - discountAmount + serviceFee + taxAmount;
             
                     pricingHTML = `
                         <div class="space-y-1">
+                            ${day1Enabled ? `
                             <div class="flex justify-between">
                                 <span>Day 1 (${day1Ticket.textContent.split(' - ')[0]}) × ${day1Quantity}:</span>
                                 <span class="font-semibold">RM${day1Subtotal.toFixed(2)}</span>
                             </div>
+                            ` : ''}
+                            ${day2Enabled ? `
                             <div class="flex justify-between">
                                 <span>Day 2 (${day2Ticket.textContent.split(' - ')[0]}) × ${day2Quantity}:</span>
                                 <span class="font-semibold">RM${day2Subtotal.toFixed(2)}</span>
                             </div>
+                            ` : ''}
                             <div class="flex justify-between border-t border-wwc-neutral-300 pt-1">
                                 <span>Subtotal:</span>
-                                <span class="font-semibold">RM${(day1Subtotal + day2Subtotal).toFixed(2)}</span>
+                                <span class="font-semibold">RM${originalSubtotal.toFixed(2)}</span>
                             </div>
                             ${discountAmount > 0 ? `
                             <div class="flex justify-between text-wwc-success">
@@ -806,11 +1108,11 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                             ` : ''}
                             <div class="flex justify-between">
-                                <span>Service Fee (5%):</span>
+                                <span>Service Fee (${serviceFeePercentage}%):</span>
                                 <span class="font-semibold">RM${serviceFee.toFixed(2)}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span>Tax (6%):</span>
+                                <span>Tax (${taxPercentage}%):</span>
                                 <span class="font-semibold">RM${taxAmount.toFixed(2)}</span>
                             </div>
                             <div class="flex justify-between border-t border-wwc-neutral-300 pt-1">
@@ -828,14 +1130,114 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } else {
                 pricingHTML = `
-                    <p>Select ticket types and quantities for both days to see pricing preview.</p>
-                    <p class="mt-1">Service fee: 5% of subtotal | Tax: 6% of (subtotal + service fee)</p>
+                    <p>Select which days to attend and choose ticket types to see pricing preview.</p>
+                    <p class="mt-1">Service fee: {{ $serviceFeePercentage }}% of subtotal | Tax: {{ $taxPercentage }}% of (subtotal + service fee)</p>
+                `;
+            }
+        } else if (selectedType === 'day1_only') {
+            // Handle Day 1 Only purchase
+            const day1OnlyTicket = day1OnlyTicketSelect.options[day1OnlyTicketSelect.selectedIndex];
+            const day1OnlyQuantity = parseInt(day1OnlyQuantityInput ? day1OnlyQuantityInput.value : 1) || 1;
+            
+            if (day1OnlyTicket && day1OnlyTicket.value) {
+                const day1OnlyPrice = parseFloat(day1OnlyTicket.getAttribute('data-price')) || 0;
+                const day1OnlyAvailable = parseInt(day1OnlyTicket.getAttribute('data-available')) || 0;
+                
+                if (day1OnlyAvailable < day1OnlyQuantity) {
+                    pricingHTML = `
+                        <div class="text-wwc-error">
+                            <p class="font-semibold">Insufficient tickets available!</p>
+                            <p class="text-sm">Day 1: ${day1OnlyAvailable} available (need ${day1OnlyQuantity})</p>
+                        </div>
+                    `;
+                } else {
+                    let subtotal = day1OnlyPrice * day1OnlyQuantity;
+                    const serviceFee = Math.round(subtotal * (serviceFeePercentage / 100) * 100) / 100;
+                    const taxAmount = Math.round((subtotal + serviceFee) * (taxPercentage / 100) * 100) / 100;
+                    const total = subtotal + serviceFee + taxAmount;
+                    
+                    pricingHTML = `
+                        <div class="space-y-1">
+                            <div class="flex justify-between">
+                                <span>Day 1 (${day1OnlyTicket.textContent.split(' - ')[0]}) × ${day1OnlyQuantity}:</span>
+                                <span class="font-semibold">RM${subtotal.toFixed(2)}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Service Fee (${serviceFeePercentage}%):</span>
+                                <span class="font-semibold">RM${serviceFee.toFixed(2)}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Tax (${taxPercentage}%):</span>
+                                <span class="font-semibold">RM${taxAmount.toFixed(2)}</span>
+                            </div>
+                            <div class="flex justify-between border-t border-wwc-neutral-300 pt-1">
+                                <span class="font-semibold">Total:</span>
+                                <span class="font-bold text-wwc-primary">RM${total.toFixed(2)}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            } else {
+                pricingHTML = `
+                    <p>Select a ticket type and quantity for Day 1 to see pricing preview.</p>
+                    <p class="mt-1">Service fee: {{ $serviceFeePercentage }}% of subtotal | Tax: {{ $taxPercentage }}% of (subtotal + service fee)</p>
+                `;
+            }
+        } else if (selectedType === 'day2_only') {
+            // Handle Day 2 Only purchase
+            const day2OnlyTicket = day2OnlyTicketSelect.options[day2OnlyTicketSelect.selectedIndex];
+            const day2OnlyQuantity = parseInt(day2OnlyQuantityInput ? day2OnlyQuantityInput.value : 1) || 1;
+            
+            if (day2OnlyTicket && day2OnlyTicket.value) {
+                const day2OnlyPrice = parseFloat(day2OnlyTicket.getAttribute('data-price')) || 0;
+                const day2OnlyAvailable = parseInt(day2OnlyTicket.getAttribute('data-available')) || 0;
+                
+                if (day2OnlyAvailable < day2OnlyQuantity) {
+                    pricingHTML = `
+                        <div class="text-wwc-error">
+                            <p class="font-semibold">Insufficient tickets available!</p>
+                            <p class="text-sm">Day 2: ${day2OnlyAvailable} available (need ${day2OnlyQuantity})</p>
+                        </div>
+                    `;
+                } else {
+                    let subtotal = day2OnlyPrice * day2OnlyQuantity;
+                    const serviceFee = Math.round(subtotal * (serviceFeePercentage / 100) * 100) / 100;
+                    const taxAmount = Math.round((subtotal + serviceFee) * (taxPercentage / 100) * 100) / 100;
+                    const total = subtotal + serviceFee + taxAmount;
+                    
+                    pricingHTML = `
+                        <div class="space-y-1">
+                            <div class="flex justify-between">
+                                <span>Day 2 (${day2OnlyTicket.textContent.split(' - ')[0]}) × ${day2OnlyQuantity}:</span>
+                                <span class="font-semibold">RM${subtotal.toFixed(2)}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Service Fee (${serviceFeePercentage}%):</span>
+                                <span class="font-semibold">RM${serviceFee.toFixed(2)}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Tax (${taxPercentage}%):</span>
+                                <span class="font-semibold">RM${taxAmount.toFixed(2)}</span>
+                            </div>
+                            <div class="flex justify-between border-t border-wwc-neutral-300 pt-1">
+                                <span class="font-semibold">Total:</span>
+                                <span class="font-bold text-wwc-primary">RM${total.toFixed(2)}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            } else {
+                pricingHTML = `
+                    <p>Select a ticket type and quantity for Day 2 to see pricing preview.</p>
+                    <p class="mt-1">Service fee: {{ $serviceFeePercentage }}% of subtotal | Tax: {{ $taxPercentage }}% of (subtotal + service fee)</p>
                 `;
             }
         } else {
             // Handle single day purchase
             const selectedTicketType = ticketTypeSelect.options[ticketTypeSelect.selectedIndex];
             const quantity = parseInt(quantityInput.value) || 1;
+            const selectedDayType = document.querySelector('input[name="single_day_type"]:checked');
+            const dayType = selectedDayType ? selectedDayType.value : 'day1';
             
             if (selectedTicketType && selectedTicketType.value && quantity > 0) {
                 const basePrice = parseFloat(selectedTicketType.getAttribute('data-price')) || 0;
@@ -850,22 +1252,24 @@ document.addEventListener('DOMContentLoaded', function() {
                     `;
                 } else {
                     let subtotal = basePrice * quantity;
-                    const serviceFee = Math.round(subtotal * 0.05 * 100) / 100;
-                    const taxAmount = Math.round((subtotal + serviceFee) * 0.06 * 100) / 100;
+                    const serviceFee = Math.round(subtotal * (serviceFeePercentage / 100) * 100) / 100;
+                    const taxAmount = Math.round((subtotal + serviceFee) * (taxPercentage / 100) * 100) / 100;
                     const total = subtotal + serviceFee + taxAmount;
+                    
+                    const dayLabel = dayType === 'day1' ? 'Day 1' : 'Day 2';
                     
                     pricingHTML = `
                 <div class="space-y-1">
                     <div class="flex justify-between">
-                                <span>Subtotal (${quantity} × RM${basePrice.toFixed(2)}):</span>
+                                <span>${dayLabel} (${selectedTicketType.textContent.split(' - ')[0]}) × ${quantity}:</span>
                                 <span class="font-semibold">RM${(basePrice * quantity).toFixed(2)}</span>
                     </div>
                     <div class="flex justify-between">
-                        <span>Service Fee (5%):</span>
+                        <span>Service Fee (${serviceFeePercentage}%):</span>
                         <span class="font-semibold">RM${serviceFee.toFixed(2)}</span>
                     </div>
                     <div class="flex justify-between">
-                        <span>Tax (6%):</span>
+                        <span>Tax (${taxPercentage}%):</span>
                         <span class="font-semibold">RM${taxAmount.toFixed(2)}</span>
                     </div>
                     <div class="flex justify-between border-t border-wwc-neutral-300 pt-1">
@@ -877,13 +1281,84 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
         } else {
                 pricingHTML = `
-                    <p>Select a ticket type and quantity to see pricing preview.</p>
-                <p class="mt-1">Service fee: 5% of subtotal | Tax: 6% of (subtotal + service fee)</p>
+                    <p>Select a ticket type, quantity, and day to see pricing preview.</p>
+                <p class="mt-1">Service fee: {{ $serviceFeePercentage }}% of subtotal | Tax: {{ $taxPercentage }}% of (subtotal + service fee)</p>
             `;
         }
         }
         
         pricingPreview.innerHTML = pricingHTML;
+    }
+    
+    // Update multi-day sections based on day selection
+    function updateMultiDaySections() {
+        const day1Enabled = multiDay1Checkbox ? multiDay1Checkbox.checked : false;
+        const day2Enabled = multiDay2Checkbox ? multiDay2Checkbox.checked : false;
+        
+        console.log('updateMultiDaySections called - Day1:', day1Enabled, 'Day2:', day2Enabled);
+        
+        // Show/hide day sections
+        if (multiDay1Section) {
+            if (day1Enabled) {
+                multiDay1Section.classList.remove('hidden');
+                if (day1TicketSelect) {
+                    day1TicketSelect.disabled = false;
+                    console.log('Enabled day1TicketSelect');
+                }
+                if (day1QuantityInput) {
+                    day1QuantityInput.disabled = false;
+                    console.log('Enabled day1QuantityInput');
+                }
+            } else {
+                multiDay1Section.classList.add('hidden');
+                if (day1TicketSelect) {
+                    day1TicketSelect.disabled = true;
+                    console.log('Disabled day1TicketSelect');
+                }
+                if (day1QuantityInput) {
+                    day1QuantityInput.disabled = true;
+                    console.log('Disabled day1QuantityInput');
+                }
+            }
+        }
+        
+        if (multiDay2Section) {
+            if (day2Enabled) {
+                multiDay2Section.classList.remove('hidden');
+                if (day2TicketSelect) {
+                    day2TicketSelect.disabled = false;
+                    console.log('Enabled day2TicketSelect');
+                }
+                if (day2QuantityInput) {
+                    day2QuantityInput.disabled = false;
+                    console.log('Enabled day2QuantityInput');
+                }
+            } else {
+                multiDay2Section.classList.add('hidden');
+                if (day2TicketSelect) {
+                    day2TicketSelect.disabled = true;
+                    console.log('Disabled day2TicketSelect');
+                }
+                if (day2QuantityInput) {
+                    day2QuantityInput.disabled = true;
+                    console.log('Disabled day2QuantityInput');
+                }
+            }
+        }
+        
+        // Show/hide combo discount section (only when both days are selected)
+        if (comboDiscountSection) {
+            if (day1Enabled && day2Enabled) {
+                comboDiscountSection.classList.remove('hidden');
+                console.log('Showed combo discount section');
+            } else {
+                comboDiscountSection.classList.add('hidden');
+                if (comboCheckbox) comboCheckbox.checked = false;
+                console.log('Hid combo discount section');
+            }
+        }
+        
+        updatePricingPreview();
     }
     
     // Add event listeners
@@ -909,6 +1384,19 @@ document.addEventListener('DOMContentLoaded', function() {
         radio.addEventListener('change', updatePurchaseTypeSections);
     });
     
+    // Single day type radio buttons
+    singleDayTypeRadios.forEach(radio => {
+        radio.addEventListener('change', updatePricingPreview);
+    });
+    
+    // Multi-day day selection checkboxes
+    if (multiDay1Checkbox) {
+        multiDay1Checkbox.addEventListener('change', updateMultiDaySections);
+    }
+    if (multiDay2Checkbox) {
+        multiDay2Checkbox.addEventListener('change', updateMultiDaySections);
+    }
+    
     // Initialize purchase type sections on page load
     updatePurchaseTypeSections();
     
@@ -927,6 +1415,22 @@ document.addEventListener('DOMContentLoaded', function() {
     if (day2QuantityInput) {
         day2QuantityInput.addEventListener('input', updatePricingPreview);
     }
+    
+    // Day 1 Only and Day 2 Only quantity inputs
+    if (day1OnlyQuantityInput) {
+        day1OnlyQuantityInput.addEventListener('input', updatePricingPreview);
+    }
+    if (day2OnlyQuantityInput) {
+        day2OnlyQuantityInput.addEventListener('input', updatePricingPreview);
+    }
+    
+    // Day 1 Only and Day 2 Only ticket type selects
+    if (day1OnlyTicketSelect) {
+        day1OnlyTicketSelect.addEventListener('change', updatePricingPreview);
+    }
+    if (day2OnlyTicketSelect) {
+        day2OnlyTicketSelect.addEventListener('change', updatePricingPreview);
+    }
 
     // Quantity control buttons
     const quantityDecrease = document.getElementById('quantity-decrease');
@@ -935,6 +1439,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const day1QuantityIncrease = document.getElementById('day1-quantity-increase');
     const day2QuantityDecrease = document.getElementById('day2-quantity-decrease');
     const day2QuantityIncrease = document.getElementById('day2-quantity-increase');
+    const day1OnlyQuantityDecrease = document.getElementById('day1-only-quantity-decrease');
+    const day1OnlyQuantityIncrease = document.getElementById('day1-only-quantity-increase');
+    const day2OnlyQuantityDecrease = document.getElementById('day2-only-quantity-decrease');
+    const day2OnlyQuantityIncrease = document.getElementById('day2-only-quantity-increase');
 
     // Single day quantity controls
     if (quantityDecrease) {
@@ -985,6 +1493,42 @@ document.addEventListener('DOMContentLoaded', function() {
         day2QuantityIncrease.addEventListener('click', function() {
             if (day2QuantityInput.value < 10) {
                 day2QuantityInput.value = parseInt(day2QuantityInput.value) + 1;
+                updatePricingPreview();
+            }
+        });
+    }
+    
+    // Day 1 Only quantity controls
+    if (day1OnlyQuantityDecrease) {
+        day1OnlyQuantityDecrease.addEventListener('click', function() {
+            if (day1OnlyQuantityInput.value > 1) {
+                day1OnlyQuantityInput.value = parseInt(day1OnlyQuantityInput.value) - 1;
+                updatePricingPreview();
+            }
+        });
+    }
+    if (day1OnlyQuantityIncrease) {
+        day1OnlyQuantityIncrease.addEventListener('click', function() {
+            if (day1OnlyQuantityInput.value < 10) {
+                day1OnlyQuantityInput.value = parseInt(day1OnlyQuantityInput.value) + 1;
+                updatePricingPreview();
+            }
+        });
+    }
+    
+    // Day 2 Only quantity controls
+    if (day2OnlyQuantityDecrease) {
+        day2OnlyQuantityDecrease.addEventListener('click', function() {
+            if (day2OnlyQuantityInput.value > 1) {
+                day2OnlyQuantityInput.value = parseInt(day2OnlyQuantityInput.value) - 1;
+                updatePricingPreview();
+            }
+        });
+    }
+    if (day2OnlyQuantityIncrease) {
+        day2OnlyQuantityIncrease.addEventListener('click', function() {
+            if (day2OnlyQuantityInput.value < 10) {
+                day2OnlyQuantityInput.value = parseInt(day2OnlyQuantityInput.value) + 1;
                 updatePricingPreview();
             }
         });
@@ -1058,8 +1602,18 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Check if required fields are filled
             const selectedType = document.querySelector('input[name="purchase_type"]:checked')?.value;
+            console.log('Selected purchase type:', selectedType);
             console.log('Ticket type select disabled:', ticketTypeSelect.disabled);
             console.log('Ticket type select value:', ticketTypeSelect.value);
+            
+            // Debug multi-day checkboxes
+            if (selectedType === 'multi_day') {
+                const day1Enabled = multiDay1Checkbox ? multiDay1Checkbox.checked : false;
+                const day2Enabled = multiDay2Checkbox ? multiDay2Checkbox.checked : false;
+                console.log('Multi-day checkboxes - Day1:', day1Enabled, 'Day2:', day2Enabled);
+                console.log('Day1 quantity value:', document.getElementById('day1_quantity')?.value);
+                console.log('Day2 quantity value:', document.getElementById('day2_quantity')?.value);
+            }
             
             if (selectedType === 'single_day') {
                 if (ticketTypeSelect.disabled) {
@@ -1074,9 +1628,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             if (selectedType === 'multi_day') {
-                if (!day1TicketSelect?.value || !day2TicketSelect?.value) {
+                const day1Enabled = multiDay1Checkbox ? multiDay1Checkbox.checked : false;
+                const day2Enabled = multiDay2Checkbox ? multiDay2Checkbox.checked : false;
+                console.log('Multi-day validation - Day1 enabled:', day1Enabled, 'Day2 enabled:', day2Enabled);
+                
+                if (day1Enabled && (!day1TicketSelect?.value || day1TicketSelect.value === '')) {
                     e.preventDefault();
-                    alert('Please select ticket types for both Day 1 and Day 2.');
+                    alert('Please select a ticket type for Day 1.');
+                    return false;
+                }
+                
+                if (day2Enabled && (!day2TicketSelect?.value || day2TicketSelect.value === '')) {
+                    e.preventDefault();
+                    alert('Please select a ticket type for Day 2.');
+                    return false;
+                }
+                
+                if (!day1Enabled && !day2Enabled) {
+                    e.preventDefault();
+                    alert('Please select at least one day to attend.');
                     return false;
                 }
             }

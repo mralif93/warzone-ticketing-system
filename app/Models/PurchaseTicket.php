@@ -48,19 +48,19 @@ class PurchaseTicket extends Model
     }
 
     /**
-     * Get the event for this customer ticket
-     */
-    public function event()
-    {
-        return $this->belongsTo(Event::class);
-    }
-
-    /**
      * Get the ticket type for this purchase ticket
      */
     public function ticketType()
     {
         return $this->belongsTo(Ticket::class, 'ticket_type_id');
+    }
+
+    /**
+     * Get the event for this customer ticket
+     */
+    public function event()
+    {
+        return $this->belongsTo(Event::class);
     }
 
     /**

@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\PurchaseController as AdminPurchaseController;
 use App\Http\Controllers\Admin\AuditLogController as AdminAuditLogController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
+use App\Http\Controllers\MaintenanceController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,6 +29,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+
+// Maintenance routes (must be first to avoid middleware conflicts)
+Route::get('/maintenance', [MaintenanceController::class, 'index'])->name('maintenance');
+Route::post('/maintenance/toggle', [MaintenanceController::class, 'toggle'])->name('maintenance.toggle');
 
 // Authentication routes (guest only)
 Route::middleware('guest')->group(function () {

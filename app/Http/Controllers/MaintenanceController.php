@@ -19,7 +19,10 @@ class MaintenanceController extends Controller
             'message' => $message,
             'retryAfter' => $retryAfter
         ], 503)
-        ->header('Retry-After', $retryAfter);
+        ->header('Retry-After', $retryAfter)
+        ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+        ->header('Pragma', 'no-cache')
+        ->header('Expires', '0');
     }
     
     /**

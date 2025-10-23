@@ -47,7 +47,7 @@ Route::middleware('guest')->group(function () {
 });
 
 // Protected routes (require authentication)
-Route::middleware(['auth', 'log.activity'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     // Main dashboard redirect
     Route::get('/dashboard', function () {
         $user = auth()->user();

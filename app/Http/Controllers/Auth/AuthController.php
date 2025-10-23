@@ -23,7 +23,7 @@ class AuthController extends Controller
         if (Auth::check()) {
             $user = Auth::user();
             
-            if ($user->hasRole('Administrator')) {
+            if ($user->hasRole('administrator')) {
                 return redirect()->route('admin.dashboard');
             } elseif ($user->hasRole('gate_staff')) {
                 return redirect()->route('gate-staff.dashboard');
@@ -57,7 +57,7 @@ class AuthController extends Controller
             // Redirect based on user role to preserve session message
             $user = auth()->user();
             
-            if ($user->hasRole('Administrator')) {
+            if ($user->hasRole('administrator')) {
                 return redirect()->intended(route('admin.dashboard'))->with('success', 'Login successful!');
             } elseif ($user->hasRole('gate_staff')) {
                 return redirect()->intended(route('gate-staff.dashboard'))->with('success', 'Login successful!');
@@ -83,7 +83,7 @@ class AuthController extends Controller
         if (Auth::check()) {
             $user = Auth::user();
             
-            if ($user->hasRole('Administrator')) {
+            if ($user->hasRole('administrator')) {
                 return redirect()->route('admin.dashboard');
             } elseif ($user->hasRole('gate_staff')) {
                 return redirect()->route('gate-staff.dashboard');

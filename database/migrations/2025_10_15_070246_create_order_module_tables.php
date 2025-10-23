@@ -69,6 +69,12 @@ return new class extends Migration
             $table->index('transaction_id'); // Added: Index for transaction lookup
             $table->index('payment_date'); // Added: Index for payment date queries
         });
+
+        // Add foreign key constraint for purchase table's order_id
+        // This is done here because the orders table must exist first
+        Schema::table('purchase', function (Blueprint $table) {
+            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
+        });
     }
 
     /**
@@ -76,6 +82,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Drop foreign key constraint first
+        Schema::table('purchase', function (Blueprint $table) {
+            $table->dropForeign(['order_id']);
+        });
+        
         Schema::dropIfExists('payments');
         Schema::dropIfExists('orders');
     }

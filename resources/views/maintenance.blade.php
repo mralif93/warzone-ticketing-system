@@ -114,11 +114,11 @@
                 <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-8">
                     <div class="flex items-center space-x-3 bg-white bg-opacity-10 px-4 py-2 rounded-lg">
                         <i class='bx bx-envelope text-red-500 text-xl'></i>
-                        <span class="text-white font-medium">support@warzonechampionship.com</span>
+                        <span class="text-white font-medium">warzoneworldchampion@gmail.com</span>
                     </div>
                     <div class="flex items-center space-x-3 bg-white bg-opacity-10 px-4 py-2 rounded-lg">
                         <i class='bx bx-phone text-red-500 text-xl'></i>
-                        <span class="text-white font-medium">+1 (555) 123-4567</span>
+                        <span class="text-white font-medium">+60326941614</span>
                     </div>
                 </div>
             </div>

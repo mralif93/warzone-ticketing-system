@@ -39,7 +39,7 @@ return new class extends Migration
         // Create purchase table (individual customer tickets)
         Schema::create('purchase', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id')->nullable();
+            $table->foreignId('order_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('event_id')->constrained()->onDelete('cascade');
             $table->foreignId('ticket_type_id')->constrained('tickets')->onDelete('cascade');
             $table->string('zone'); // Keep for compatibility

@@ -47,6 +47,14 @@ return new class extends Migration
         // Ensure only one event can be default at a time
         // This constraint is enforced by application logic in the Event model
         // The constraint ensures data integrity for the default event functionality
+        
+        // Update any existing status values to lowercase for consistency
+        // This handles cases where data might have been inserted with title case status values
+        DB::table('events')->where('status', 'Draft')->update(['status' => 'draft']);
+        DB::table('events')->where('status', 'On Sale')->update(['status' => 'on_sale']);
+        DB::table('events')->where('status', 'Sold Out')->update(['status' => 'sold_out']);
+        DB::table('events')->where('status', 'Cancelled')->update(['status' => 'cancelled']);
+        DB::table('events')->where('status', 'Inactive')->update(['status' => 'inactive']);
     }
 
     /**

@@ -62,6 +62,16 @@ return new class extends Migration
             $table->longText('exception');
             $table->timestamp('failed_at')->useCurrent();
         });
+
+        // Create settings table (system configuration)
+        Schema::create('settings', function (Blueprint $table) {
+            $table->id();
+            $table->string('key')->unique();
+            $table->text('value');
+            $table->string('type')->default('string'); // string, integer, boolean, json
+            $table->text('description')->nullable();
+            $table->timestamps();
+        });
     }
 
     /**
@@ -69,6 +79,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('settings');
         Schema::dropIfExists('failed_jobs');
         Schema::dropIfExists('audit_logs');
         Schema::dropIfExists('admittance_logs');

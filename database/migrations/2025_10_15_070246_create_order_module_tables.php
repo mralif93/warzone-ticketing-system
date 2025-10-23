@@ -17,6 +17,7 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('event_id')->constrained()->onDelete('cascade');
             $table->string('customer_email');
             $table->string('order_number')->unique();
             $table->decimal('subtotal', 10, 2)->default(0);
@@ -33,6 +34,7 @@ return new class extends Migration
             
             // Indexes
             $table->index(['user_id', 'status']);
+            $table->index(['event_id', 'status']);
             $table->index('order_number');
             $table->index('customer_email');
         });

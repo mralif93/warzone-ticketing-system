@@ -466,6 +466,59 @@
 </div>
 <?php endif; ?>
 
+<?php if(!$mainEvent): ?>
+<!-- No Events Available Section -->
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+    <!-- Hero Section -->
+    <div class="relative overflow-hidden w-full">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <div class="text-center">
+                <!-- Animated Icon -->
+                <div class="mx-auto h-32 w-32 text-wwc-primary mb-8 animate-pulse">
+                    <i class='bx bx-calendar-star text-8xl'></i>
+                </div>
+                
+                <!-- Main Message -->
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                    Exciting Events Coming Soon!
+                </h1>
+                <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+                    We're preparing something amazing for you. Stay tuned for the best events and experiences!
+                </p>
+                
+                <!-- Features Grid -->
+                <div class="grid md:grid-cols-3 gap-8 mt-16 mb-16">
+                    <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+                        <div class="text-wwc-primary text-4xl mb-4">
+                            <i class='bx bx-calendar-check'></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Premium Events</h3>
+                        <p class="text-gray-600">Access to exclusive concerts, sports, and entertainment events</p>
+                    </div>
+                    
+                    <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+                        <div class="text-wwc-primary text-4xl mb-4">
+                            <i class='bx bx-shield-alt-2'></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Secure Booking</h3>
+                        <p class="text-gray-600">Safe and reliable ticket purchasing with instant confirmation</p>
+                    </div>
+                    
+                    <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+                        <div class="text-wwc-primary text-4xl mb-4">
+                            <i class='bx bx-support'></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">24/7 Support</h3>
+                        <p class="text-gray-600">Round-the-clock customer support for all your needs</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php if($mainEvent): ?>
 <?php $__env->startPush('scripts'); ?>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
@@ -609,7 +662,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (confirmButton) {
                     confirmButton.addEventListener('click', () => {
                         // Redirect to cart page
-                        window.location.href = '<?php echo e(route("public.tickets.cart", $mainEvent)); ?>';
+                        window.location.href = '<?php echo e($mainEvent ? route("public.tickets.cart", $mainEvent) : "#"); ?>';
                     });
                 }
             }
@@ -687,10 +740,8 @@ document.addEventListener('click', function(e) {
     }
 });
 </script>
-
-
-
 <?php $__env->stopPush(); ?>
+<?php endif; ?>
 <?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('layouts.public', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /Users/administrator/Desktop/Project/Github/warzone-ticketing-system/resources/views/public/home.blade.php ENDPATH**/ ?>

@@ -68,6 +68,25 @@
     <!-- Main Cart Content -->
     <div class="min-h-screen bg-gray-50 py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Timeout Message -->
+            @if(request('timeout') == '1' || session('timeout'))
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                            <i class="bx bx-time text-red-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-semibold text-red-800">Payment Timeout</h3>
+                            <p class="text-sm text-red-600">
+                                Your previous order @if(session('timeout_order_id'))(Order #{{ session('timeout_order_id') }})@elseif(request('order_id'))(Order #{{ request('order_id') }})@endif has expired due to payment timeout. 
+                                Please select your tickets again to proceed with a new order.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+
             <!-- Error Messages -->
             @if (session('error'))
                 <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded-r-lg">
@@ -108,10 +127,26 @@
                             </div>
                         </div>
                     </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="bx bx-map-pin mr-2 text-wwc-primary"></i>
+                                    <span>{{ $event->venue }}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    <i class="bx bx-check-circle mr-1"></i>
+                                    On Sale
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- Ticket Selection Form -->
-                <form action="{{ route('public.tickets.purchase', $event) }}" method="POST" id="ticket-form" class="space-y-6">
+                <form action="{{ route('public.tickets.checkout', $event) }}" method="POST" id="ticket-form" class="space-y-6">
                     @csrf
                     <input type="hidden" name="purchase_type" id="purchase_type_input" value="single_day">
                     <input type="hidden" name="multi_day1_enabled" id="day1_enabled_input" value="0">
@@ -150,7 +185,7 @@
                                            class="sr-only peer"
                                            {{ old('purchase_type', 'single_day') == 'single_day' ? 'checked' : '' }}>
                                     <label for="single_day" 
-                                           class="flex flex-col p-5 border-2 border-gray-200 rounded-xl cursor-pointer peer-checked:border-wwc-primary peer-checked:bg-wwc-primary/5 hover:border-wwc-primary/50 hover:shadow-md transition-all duration-200">
+                                           class="flex flex-col p-6 border-2 border-gray-200 rounded-xl cursor-pointer peer-checked:border-wwc-primary peer-checked:bg-wwc-primary/5 hover:border-wwc-primary/50 hover:shadow-md transition-all duration-200">
                                         <div class="flex items-center mb-3">
                                             <div class="w-6 h-6 rounded-full border-2 border-gray-300 peer-checked:border-wwc-primary peer-checked:bg-wwc-primary flex items-center justify-center transition-all duration-200" id="single_day_radio">
                                                 <div class="w-4 h-4 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200 shadow-lg" id="single_day_dot"></div>
@@ -186,7 +221,7 @@
                                            class="sr-only peer"
                                            {{ old('purchase_type') == 'multi_day' ? 'checked' : '' }}>
                                     <label for="multi_day" 
-                                           class="flex flex-col p-5 border-2 border-gray-200 rounded-xl cursor-pointer peer-checked:border-wwc-primary peer-checked:bg-wwc-primary/5 hover:border-wwc-primary/50 hover:shadow-md transition-all duration-200">
+                                           class="flex flex-col p-6 border-2 border-gray-200 rounded-xl cursor-pointer peer-checked:border-wwc-primary peer-checked:bg-wwc-primary/5 hover:border-wwc-primary/50 hover:shadow-md transition-all duration-200">
                                         <div class="flex items-center mb-3">
                                             <div class="w-6 h-6 rounded-full border-2 border-gray-300 peer-checked:border-wwc-primary peer-checked:bg-wwc-primary flex items-center justify-center transition-all duration-200" id="multi_day_radio">
                                                 <div class="w-4 h-4 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200 shadow-lg" id="multi_day_dot"></div>
@@ -245,7 +280,7 @@
                                                class="sr-only peer"
                                                {{ old('single_day_selection', 'day1') == 'day' . ($index + 1) ? 'checked' : '' }}>
                                         <label for="single_day{{ $index + 1 }}" 
-                                               class="flex flex-col p-5 border-2 border-gray-200 rounded-xl cursor-pointer peer-checked:border-wwc-primary peer-checked:bg-red-50 hover:border-wwc-primary/50 hover:shadow-md transition-all duration-200">
+                                               class="flex flex-col p-6 border-2 border-gray-200 rounded-xl cursor-pointer peer-checked:border-wwc-primary peer-checked:bg-red-50 hover:border-wwc-primary/50 hover:shadow-md transition-all duration-200">
                                             <div class="flex items-center">
                                                 <div class="w-6 h-6 rounded-full border-2 border-gray-300 peer-checked:border-wwc-primary peer-checked:bg-wwc-primary flex items-center justify-center transition-all duration-200" id="single_day{{ $index + 1 }}_radio">
                                                     <div class="w-4 h-4 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200 shadow-lg" id="single_day{{ $index + 1 }}_dot"></div>
@@ -260,16 +295,18 @@
                                     </div>
                                     @endforeach
                                 </div>
-                    </div>
+                            </div>
                             @endif
                             
                             <!-- Ticket Type Selection -->
                             <div class="space-y-3">
                                 <label for="ticket_type_id" class="block text-sm font-semibold text-gray-900">
                                     Select Ticket Type <span class="text-red-500">*</span>
-                            </label>
+                                </label>
                                 <div class="relative">
-                                    <select id="ticket_type_id" name="ticket_type_id" required
+                                    <select id="ticket_type_id" 
+                                            name="ticket_type_id" 
+                                            required
                                             class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary @error('ticket_type_id') border-red-500 @enderror text-sm bg-white shadow-sm transition-all duration-200 hover:border-gray-300">
                                         <option value="">Choose your preferred ticket type</option>
                                         @foreach($event->tickets->where('available_seats', '>', 0) as $ticket)
@@ -294,9 +331,9 @@
                                                 @else
                                                     ({{ $displayAvailable }}/{{ $ticket->total_seats }} available)
                                                 @endif
-                                    </option>
-                                @endforeach
-                            </select>
+                                            </option>
+                                        @endforeach
+                                    </select>
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                         <i class="bx bx-chevron-down text-gray-400 text-lg"></i>
                                     </div>
@@ -306,37 +343,43 @@
                                         <i class="bx bx-error-circle mr-1"></i>
                                         {{ $message }}
                                     </p>
-                            @enderror
-                        </div>
+                                @enderror
+                            </div>
                         
-                        <!-- Quantity Selection -->
+                            <!-- Quantity Selection -->
                             <div class="space-y-3">
                                 <label for="quantity" class="block text-sm font-semibold text-gray-900">
-                                Quantity <span class="text-red-500">*</span>
-                            </label>
+                                    Quantity <span class="text-red-500">*</span>
+                                </label>
                                 <div class="flex items-center justify-center space-x-3">
                                     <button type="button" 
                                             class="quantity-decrease w-10 h-10 rounded-full border-2 border-gray-200 flex items-center justify-center text-gray-500 hover:border-wwc-primary hover:text-wwc-primary hover:bg-wwc-primary/5 transition-all duration-200">
-                                    <i class="bx bx-minus text-lg"></i>
-                                </button>
-                                <input type="number" 
-                                       id="quantity" 
-                                       name="quantity" 
+                                        <i class="bx bx-minus text-lg"></i>
+                                    </button>
+                                    <input type="number" 
+                                           id="quantity" 
+                                           name="quantity" 
                                            value="1" 
-                                       min="1" 
-                                       max="10" 
+                                           min="1" 
+                                           max="10" 
                                            class="quantity w-20 px-2 py-2 text-center border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm font-semibold">
                                     <button type="button" 
                                             class="quantity-increase w-10 h-10 rounded-full border-2 border-gray-200 flex items-center justify-center text-gray-500 hover:border-wwc-primary hover:text-wwc-primary hover:bg-wwc-primary/5 transition-all duration-200">
-                                    <i class="bx bx-plus text-lg"></i>
-                                </button>
-                            </div>
+                                        <i class="bx bx-plus text-lg"></i>
+                                    </button>
+                                </div>
+                                @error('quantity')
+                                    <p class="text-red-500 text-sm mt-2 flex items-center">
+                                        <i class="bx bx-error-circle mr-1"></i>
+                                        {{ $message }}
+                                    </p>
+                                @enderror
                                 <p class="text-sm text-gray-500">Maximum 10 tickets per order</p>
+                            </div>
                         </div>
                     </div>
-                </div>
                 
-                    <!-- Step 3: Multi-Day Ticket Selection -->
+                    <!-- Step 2: Multi-Day Ticket Selection -->
                     <div id="multi_day_selection" class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hidden">
                         <div class="bg-red-600 px-8 py-6">
                             <div class="flex items-center">
@@ -365,7 +408,7 @@
                                                class="sr-only peer day-checkbox"
                                                data-day="{{ $index + 1 }}">
                                         <label for="multi_day{{ $index + 1 }}_enabled" 
-                                               class="flex flex-col p-5 border-2 border-gray-200 rounded-xl cursor-pointer peer-checked:border-wwc-primary peer-checked:bg-red-50 hover:border-wwc-primary/50 hover:shadow-md transition-all duration-200">
+                                               class="flex flex-col p-8 border-2 border-gray-200 rounded-xl cursor-pointer peer-checked:border-wwc-primary peer-checked:bg-red-50 hover:border-wwc-primary/50 hover:shadow-md transition-all duration-200">
                                             <div class="flex items-center">
                                                 <div class="w-6 h-6 rounded-full border-2 border-gray-300 peer-checked:border-wwc-primary peer-checked:bg-wwc-primary flex items-center justify-center transition-all duration-200" id="multi_day{{ $index + 1 }}_radio">
                                                     <div class="w-4 h-4 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200 shadow-lg" id="multi_day{{ $index + 1 }}_dot"></div>
@@ -374,106 +417,111 @@
                                                     <h4 class="text-base text-gray-900">
                                                         <span class="font-bold">{{ $day['day_name'] }}</span> | <span class="font-normal">{{ $day['display'] }}</span>
                                                     </h4>
-                    </div>
-                </div>
+                                                </div>
+                                            </div>
                                         </label>
                                     </div>
                                     @endforeach
-                    </div>
-                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                    <div class="flex items-start">
-                                        <i class="bx bx-info-circle text-blue-500 text-lg mr-2 mt-0.5"></i>
-                        <div>
-                                            <p class="text-sm text-blue-800 font-medium">Flexible Day Selection</p>
-                                            <p class="text-xs text-blue-600 mt-1">You can choose Day 1 only, Day 2 only, or both days. Combo discount applies only when both days are selected.</p>
-                                        </div>
-                                    </div>
                                 </div>
-                        </div>
-                        
-                            <!-- Day-specific Ticket Selection -->
-                            @foreach($event->getEventDays() as $index => $day)
-                            <div id="day{{ $index + 1 }}_ticket_section" class="border-2 border-gray-100 rounded-xl p-6 bg-gradient-to-br from-gray-50 to-white hover:shadow-md transition-all duration-200 hidden">
-                                <div class="flex items-center justify-between mb-6">
-                                    <div class="flex items-center">
-                                        <div class="w-8 h-8 bg-gradient-to-r from-wwc-primary to-wwc-primary-dark rounded-lg flex items-center justify-center mr-3">
-                                            <span class="text-white font-bold text-sm">{{ $index + 1 }}</span>
-                                        </div>
-                        <div>
-                                            <h3 class="text-lg font-bold text-gray-900">{{ $day['day_name'] }} : {{ $day['display'] }}</h3>
-                                        </div>
-                                    </div>
-                        </div>
-                                <div class="space-y-6">
-                                    <!-- Row 1: Ticket Type Selection for this day -->
-                                    <div class="space-y-3">
-                                        <label for="day{{ $index + 1 }}_ticket_type" class="block text-sm font-semibold text-gray-900">
-                                            Select Ticket Type <span class="text-red-500">*</span>
-                            </label>
-                                        <div class="relative">
-                                            <select id="day{{ $index + 1 }}_ticket_type" 
-                                                    name="day{{ $index + 1 }}_ticket_type" 
-                                                    class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary day-ticket-select text-sm bg-white shadow-sm transition-all duration-200 hover:border-gray-300">
-                                                <option value="">Choose your preferred ticket type</option>
-                                                @foreach($event->tickets->where('available_seats', '>', 0) as $ticket)
-                                                    @php
-                                                        // Calculate day-specific availability for single-day tickets
-                                                        $daySold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
-                                                            ->where('event_day_name', $day['day_name'])
-                                                            ->whereIn('status', ['sold', 'pending'])
-                                                            ->count();
-                                                        $dayAvailable = $ticket->total_seats - $daySold;
-                                                    @endphp
-                                                    <option value="{{ $ticket->id }}" 
-                                                            data-price="{{ $ticket->price }}"
-                                                            data-available="{{ $dayAvailable }}"
-                                                            data-total="{{ $ticket->total_seats }}"
-                                                            data-sold="{{ $daySold }}">
-                                                        {{ $ticket->name }} - RM{{ number_format($ticket->price, 2) }} 
-                                                        @if($ticket->is_combo)
-                                                            ({{ $dayAvailable }}/{{ $ticket->total_seats }} per day, {{ $ticket->total_seats * $event->getDurationInDays() }} total)
-                                                        @else
-                                                            ({{ $dayAvailable }}/{{ $ticket->total_seats }} per day)
-                                                        @endif
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                                <i class="bx bx-chevron-down text-gray-400 text-lg"></i>
-                        </div>
-                    </div>
-                </div>
-                
-                                    <!-- Row 2: Quantity Selection for this day -->
-                                    <div class="space-y-3">
-                                        <label for="day{{ $index + 1 }}_quantity" class="block text-sm font-semibold text-gray-900">
-                                            Quantity <span class="text-red-500">*</span>
-                                        </label>
-                                        <div class="flex items-center justify-center space-x-3">
-                                            <button type="button" 
-                                                    class="day-quantity-decrease w-10 h-10 rounded-full border-2 border-gray-200 flex items-center justify-center text-gray-500 hover:border-wwc-primary hover:text-wwc-primary hover:bg-wwc-primary/5 transition-all duration-200"
-                                                    data-day="{{ $index + 1 }}">
-                                                <i class="bx bx-minus text-lg"></i>
-                                            </button>
-                                            <input type="number" 
-                                                   id="day{{ $index + 1 }}_quantity" 
-                                                   name="day{{ $index + 1 }}_quantity" 
-                                                   value="1" 
-                                                   min="1" 
-                                                   max="10" 
-                                                   class="day-quantity w-20 px-2 py-2 text-center border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm font-semibold">
-                                            <button type="button" 
-                                                    class="day-quantity-increase w-10 h-10 rounded-full border-2 border-gray-200 flex items-center justify-center text-gray-500 hover:border-wwc-primary hover:text-wwc-primary hover:bg-wwc-primary/5 transition-all duration-200"
-                                                    data-day="{{ $index + 1 }}">
-                                                <i class="bx bx-plus text-lg"></i>
-                                            </button>
-                                        </div>
-                                        <p class="text-sm text-gray-500">Maximum 10 tickets per day</p>
+                            </div>
+                            
+                            <!-- Combo Discount Info -->
+                            @if($event->combo_discount_enabled && $event->combo_discount_percentage > 0)
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <div class="flex items-start">
+                                    <i class="bx bx-info-circle text-blue-500 text-lg mr-2 mt-0.5"></i>
+                                    <div>
+                                        <p class="text-sm text-blue-800 font-medium">Flexible Day Selection</p>
+                                        <p class="text-xs text-blue-600 mt-1">You can choose Day 1 only, Day 2 only, or both days. Combo discount applies only when both days are selected.</p>
                                     </div>
                                 </div>
                             </div>
-                            @endforeach
+                            @endif
                         </div>
+                        
+                        <!-- Day-specific Ticket Selection -->
+                        @foreach($event->getEventDays() as $index => $day)
+                        <div id="day{{ $index + 1 }}_ticket_section" class="border-2 border-gray-100 rounded-xl m-8 p-6 bg-gradient-to-br from-gray-50 to-white hover:shadow-md transition-all duration-200 hidden">
+                            <div class="flex items-center justify-between mb-6">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-gradient-to-r from-wwc-primary to-wwc-primary-dark rounded-lg flex items-center justify-center mr-3">
+                                        <span class="text-white font-bold text-sm">{{ $index + 1 }}</span>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-bold text-gray-900">{{ $day['day_name'] }} : {{ $day['display'] }}</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-6">
+                                <!-- Row 1: Ticket Type Selection for this day -->
+                                <div class="space-y-3">
+                                    <label for="day{{ $index + 1 }}_ticket_type" class="block text-sm font-semibold text-gray-900">
+                                        Select Ticket Type <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <select id="day{{ $index + 1 }}_ticket_type" 
+                                                name="day{{ $index + 1 }}_ticket_type" 
+                                                class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary day-ticket-select text-sm bg-white shadow-sm transition-all duration-200 hover:border-gray-300">
+                                            <option value="">Choose your preferred ticket type</option>
+                                            @foreach($event->tickets->where('available_seats', '>', 0) as $ticket)
+                                                @php
+                                                    // Calculate day-specific availability for single-day tickets
+                                                    $daySold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
+                                                        ->where('event_day_name', $day['day_name'])
+                                                        ->whereIn('status', ['sold', 'pending'])
+                                                        ->count();
+                                                    $dayAvailable = $ticket->total_seats - $daySold;
+                                                @endphp
+                                                <option value="{{ $ticket->id }}" 
+                                                        data-price="{{ $ticket->price }}"
+                                                        data-available="{{ $dayAvailable }}"
+                                                        data-total="{{ $ticket->total_seats }}"
+                                                        data-sold="{{ $daySold }}">
+                                                    {{ $ticket->name }} - RM{{ number_format($ticket->price, 2) }} 
+                                                    @if($ticket->is_combo)
+                                                        ({{ $dayAvailable }}/{{ $ticket->total_seats }} per day, {{ $ticket->total_seats * $event->getDurationInDays() }} total)
+                                                    @else
+                                                        ({{ $dayAvailable }}/{{ $ticket->total_seats }} per day)
+                                                    @endif
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            <i class="bx bx-chevron-down text-gray-400 text-lg"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Row 2: Quantity Selection for this day -->
+                                <div class="space-y-3">
+                                    <label for="day{{ $index + 1 }}_quantity" class="block text-sm font-semibold text-gray-900">
+                                        Quantity <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="flex items-center justify-center space-x-3">
+                                        <button type="button" 
+                                                class="day-quantity-decrease w-10 h-10 rounded-full border-2 border-gray-200 flex items-center justify-center text-gray-500 hover:border-wwc-primary hover:text-wwc-primary hover:bg-wwc-primary/5 transition-all duration-200"
+                                                data-day="{{ $index + 1 }}">
+                                            <i class="bx bx-minus text-lg"></i>
+                                        </button>
+                                        <input type="number" 
+                                               id="day{{ $index + 1 }}_quantity" 
+                                               name="day{{ $index + 1 }}_quantity" 
+                                               value="1" 
+                                               min="1" 
+                                               max="10" 
+                                               class="day-quantity w-20 px-2 py-2 text-center border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm font-semibold">
+                                        <button type="button" 
+                                                class="day-quantity-increase w-10 h-10 rounded-full border-2 border-gray-200 flex items-center justify-center text-gray-500 hover:border-wwc-primary hover:text-wwc-primary hover:bg-wwc-primary/5 transition-all duration-200"
+                                                data-day="{{ $index + 1 }}">
+                                            <i class="bx bx-plus text-lg"></i>
+                                        </button>
+                                    </div>
+                                    <p class="text-sm text-gray-500">Maximum 10 tickets per day</p>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
                     </div>
                     
                     <!-- Step 3: Order Summary -->
@@ -495,68 +543,71 @@
                                 <p class="text-gray-500 text-center py-8">Please select your tickets to see the order summary</p>
                             </div>
                             
-                            <div class="space-y-2 pt-4 border-t border-gray-300">
-                                <div class="flex items-center justify-between py-1">
+                            <div class="space-y-3 pt-4 border-t border-gray-300">
+                                <div class="flex items-center justify-between py-2">
                                     <div class="flex items-center">
-                                        <div class="w-6 h-6 bg-blue-100 rounded flex items-center justify-center mr-2">
-                                            <i class="bx bx-receipt text-blue-600 text-xs"></i>
+                                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                            <i class="bx bx-receipt text-blue-600 text-sm"></i>
                                         </div>
-                                        <span class="text-gray-700 font-medium text-sm">Subtotal</span>
+                                        <span class="text-gray-800 font-medium">Subtotal</span>
                                     </div>
-                                    <span class="font-bold text-gray-900 text-sm" id="subtotal">RM0</span>
+                                    <span class="font-semibold text-gray-800" id="subtotal">RM0.00</span>
                                 </div>
-                                <div class="flex items-center justify-between py-1">
+                                <div class="flex items-center justify-between py-2" id="combo-discount-row" style="display: none;">
                                     <div class="flex items-center">
-                                        <div class="w-6 h-6 bg-green-100 rounded flex items-center justify-center mr-2">
-                                            <i class="bx bx-gift text-green-600 text-xs"></i>
+                                        <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                            <i class="bx bx-gift text-green-600 text-sm"></i>
                                         </div>
-                                        <span class="text-gray-700 font-medium text-sm">Combo Discount ({{ $event->combo_discount_percentage }}%)</span>
+                                        <span class="text-gray-800 font-medium">Combo Discount ({{ $event->combo_discount_percentage ?? 10 }}%)</span>
                                     </div>
-                                    <span class="font-bold text-green-600 text-sm" id="combo-discount">RM0.00</span>
+                                    <span class="font-semibold text-green-600" id="combo-discount">RM0.00</span>
                                 </div>
-                                <div class="flex items-center justify-between py-1">
+                                <div class="flex items-center justify-between py-2">
                                     <div class="flex items-center">
-                                        <div class="w-6 h-6 bg-orange-100 rounded flex items-center justify-center mr-2">
-                                            <i class="bx bx-cog text-orange-600 text-xs"></i>
+                                        <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                                            <i class="bx bx-cog text-orange-600 text-sm"></i>
                                         </div>
-                                        <span class="text-gray-700 font-medium text-sm">Service Fee ({{ $serviceFeePercentage }}%)</span>
+                                        <span class="text-gray-800 font-medium">Service Fee ({{ $serviceFeePercentage }}%)</span>
                                     </div>
-                                    <span class="font-bold text-gray-900 text-sm" id="service-fee">RM0</span>
+                                    <span class="font-semibold text-gray-800" id="service-fee">RM0.00</span>
                                 </div>
-                                <div class="flex items-center justify-between py-1">
+                                <div class="flex items-center justify-between py-2">
                                     <div class="flex items-center">
-                                        <div class="w-6 h-6 bg-purple-100 rounded flex items-center justify-center mr-2">
-                                            <i class="bx bx-calculator text-purple-600 text-xs"></i>
+                                        <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                                            <i class="bx bx-calculator text-purple-600 text-sm"></i>
                                         </div>
-                                        <span class="text-gray-700 font-medium text-sm">Tax ({{ $taxPercentage }}%)</span>
+                                        <span class="text-gray-800 font-medium">Tax ({{ $taxPercentage }}%)</span>
                                     </div>
-                                    <span class="font-bold text-gray-900 text-sm" id="tax">RM0</span>
+                                    <span class="font-semibold text-gray-800" id="tax">RM0.00</span>
                                 </div>
-                                <div class="flex items-center justify-between pt-2 border-t border-gray-400">
-                                    <div class="flex items-center">
-                                        <div class="w-6 h-6 bg-red-100 rounded flex items-center justify-center mr-2">
-                                            <i class="bx bx-money text-red-600 text-xs"></i>
+                                <div class="border-t border-gray-400 pt-3 mt-3">
+                                    <div class="flex items-center justify-between py-2">
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center mr-3">
+                                                <i class="bx bx-money text-red-600 text-sm"></i>
+                                            </div>
+                                            <span class="font-bold text-gray-900 text-lg">Total Amount</span>
                                         </div>
-                                        <span class="font-bold text-gray-900 text-sm">Total Amount</span>
+                                        <span class="font-bold text-red-600 text-lg" id="total">RM0.00</span>
                                     </div>
-                                    <span class="font-bold text-red-600 text-sm" id="total">RM0</span>
                                 </div>
                             </div>
+                        </div>
                     </div>
-                </div>
                 
-                <!-- Submit Button -->
+                    <!-- Submit Button -->
                     <div class="w-full">
-                    <button type="submit" 
-                            id="purchase-button"
-                            form="ticket-form"
+                        <button type="submit" 
+                                id="purchase-button"
+                                form="ticket-form"
                                 class="w-full bg-wwc-primary text-white px-6 py-3 rounded-xl font-bold text-base hover:bg-wwc-primary-dark transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 group">
                             <i class="bx bx-arrow-right mr-2 text-xl group-hover:scale-110 transition-transform duration-200"></i>
                             <span>Proceed to Checkout</span>
                             <span class="ml-2 bg-white/20 px-3 py-1 rounded-lg font-bold" id="purchase-total">RM0</span>
                         </button>
-                </div>
-            </form>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
@@ -976,10 +1027,10 @@ function calculatePricing() {
         }
     }
     
-    // Calculate service fee and tax
-    const serviceFee = subtotal * (eventData.serviceFeePercentage / 100);
-    const tax = (subtotal + serviceFee) * (eventData.taxPercentage / 100);
-    const total = subtotal + serviceFee + tax;
+    // Calculate service fee and tax with proper rounding
+    const serviceFee = Math.round(subtotal * (eventData.serviceFeePercentage / 100) * 100) / 100;
+    const tax = Math.round((subtotal + serviceFee) * (eventData.taxPercentage / 100) * 100) / 100;
+    const total = Math.round((subtotal + serviceFee + tax) * 100) / 100;
     
     // Update display
     orderSummaryContent.innerHTML = orderSummary || '<p class="text-gray-500 text-center py-8">Please select your tickets to see the order summary</p>';
@@ -990,13 +1041,14 @@ function calculatePricing() {
     purchaseTotalElement.textContent = `RM${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
     
     // Update combo discount display
-    if (comboDiscountElement) {
+    const comboDiscountRow = document.getElementById('combo-discount-row');
+    if (comboDiscountElement && comboDiscountRow) {
         if (discountAmount > 0) {
             comboDiscountElement.textContent = `-RM${discountAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            comboDiscountElement.parentElement.parentElement.style.display = 'flex';
+            comboDiscountRow.style.display = 'flex';
         } else {
             comboDiscountElement.textContent = 'RM0.00';
-            comboDiscountElement.parentElement.parentElement.style.display = 'none';
+            comboDiscountRow.style.display = 'none';
         }
     }
     
@@ -1006,6 +1058,89 @@ function calculatePricing() {
         summarySection.style.display = 'block';
     }
 }
+
+// Form validation and submission
+function validateForm() {
+    const purchaseType = document.getElementById('purchase_type_input').value;
+    const errors = [];
+    
+    if (purchaseType === 'single_day') {
+        const ticketType = document.getElementById('ticket_type_id').value;
+        const quantity = parseInt(document.getElementById('quantity').value) || 0;
+        
+        if (!ticketType) {
+            errors.push('Please select a ticket type');
+        }
+        
+        if (quantity < 1) {
+            errors.push('Please select at least 1 ticket');
+        }
+        
+        if (quantity > 10) {
+            errors.push('Maximum 10 tickets per purchase');
+        }
+    } else if (purchaseType === 'multi_day') {
+        const day1Enabled = document.getElementById('day1_enabled_input').value === '1';
+        const day2Enabled = document.getElementById('day2_enabled_input').value === '1';
+        
+        if (!day1Enabled && !day2Enabled) {
+            errors.push('Please select at least one day to attend');
+        }
+        
+        if (day1Enabled) {
+            const day1TicketType = document.getElementById('day1_ticket_type_input').value;
+            const day1Quantity = parseInt(document.getElementById('day1_quantity_input').value) || 0;
+            
+            if (!day1TicketType) {
+                errors.push('Please select a ticket type for Day 1');
+            }
+            
+            if (day1Quantity < 1) {
+                errors.push('Please select at least 1 ticket for Day 1');
+            }
+        }
+        
+        if (day2Enabled) {
+            const day2TicketType = document.getElementById('day2_ticket_type_input').value;
+            const day2Quantity = parseInt(document.getElementById('day2_quantity_input').value) || 0;
+            
+            if (!day2TicketType) {
+                errors.push('Please select a ticket type for Day 2');
+            }
+            
+            if (day2Quantity < 1) {
+                errors.push('Please select at least 1 ticket for Day 2');
+            }
+        }
+    }
+    
+    return errors;
+}
+
+// Form submission handler
+document.getElementById('ticket-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Update form data before validation
+    updateFormData();
+    
+    // Validate form
+    const errors = validateForm();
+    
+    if (errors.length > 0) {
+        alert('Please fix the following errors:\n\n' + errors.join('\n'));
+        return;
+    }
+    
+    // Show loading state
+    const submitButton = document.getElementById('purchase-button');
+    const originalText = submitButton.innerHTML;
+    submitButton.innerHTML = '<i class="bx bx-loader-alt animate-spin mr-2"></i>Processing...';
+    submitButton.disabled = true;
+    
+    // Submit form
+    this.submit();
+});
 
 // Initialize visual states and pricing on page load
 updateRadioButtonStates();
@@ -1019,5 +1154,80 @@ if (summarySection) {
 }
 
 calculatePricing();
+
+// Show pending order popup if session data exists
+@if(session('pending_order'))
+document.addEventListener('DOMContentLoaded', function() {
+    Swal.fire({
+        title: 'Pending Order Detected',
+        html: `
+            <div class="text-center">
+                <div class="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="bx bx-credit-card text-red-600 text-4xl"></i>
+                </div>
+                <p class="text-gray-700 text-lg mb-6 leading-relaxed">
+                    You have a pending order <span class="font-semibold text-red-600">(Order #{{ session('pending_order_number') }})</span> that needs to be completed first. 
+                    Please complete your existing order before creating a new one.
+                </p>
+            </div>
+        `,
+        icon: false, // Disable default icon to use custom one
+        showCancelButton: true,
+        confirmButtonText: '<i class="bx bx-credit-card mr-2"></i> Complete Payment',
+        cancelButtonText: '<i class="bx bx-x mr-2"></i> Dismiss',
+        confirmButtonColor: '#dc2626', // Red-600 (project standard)
+        cancelButtonColor: '#6b7280', // Gray-500
+        reverseButtons: true,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showCloseButton: false,
+        width: '500px', // Make it wider
+        padding: '2rem', // Add more padding
+        customClass: {
+            popup: 'rounded-3xl shadow-2xl',
+            title: 'text-2xl font-bold text-gray-900 mb-2',
+            htmlContainer: 'text-gray-700 text-lg',
+            confirmButton: 'px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 hover:scale-105',
+            cancelButton: 'px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 hover:scale-105'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Check if order is still valid before redirecting
+            fetch('{{ route('public.tickets.check-order-status', session('pending_order_id')) }}', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.valid) {
+                    // Order is still valid, redirect to payment
+                    window.location.href = '{{ session('pending_payment_url') }}';
+                } else {
+                    // Order is no longer valid, show error and refresh page
+                    Swal.fire({
+                        title: 'Order Expired',
+                        text: 'This order has expired and is no longer available for payment. Please create a new order.',
+                        icon: 'error',
+                        confirmButtonText: 'Create New Order',
+                        confirmButtonColor: '#dc2626'
+                    }).then(() => {
+                        // Refresh the page to clear the pending order session
+                        window.location.reload();
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error checking order status:', error);
+                // If there's an error, still try to redirect (fallback)
+                window.location.href = '{{ session('pending_payment_url') }}';
+            });
+        }
+        // If dismissed, just close the alert (no action needed)
+    });
+});
+@endif
 </script>
 @endpush

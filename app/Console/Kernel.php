@@ -12,7 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Cancel pending orders every 5 minutes
+        $schedule->command('orders:cancel-pending')->everyFiveMinutes();
     }
 
     /**

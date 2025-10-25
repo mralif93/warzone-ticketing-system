@@ -95,13 +95,13 @@ class AdminController extends Controller
             'events_draft' => Event::where('status', 'draft')->count(),
             'events_sold_out' => Event::where('status', 'sold_out')->count(),
             'total_orders' => Order::count(),
-            'total_tickets_sold' => PurchaseTicket::where('status', 'sold')->count(),
+            'total_tickets_sold' => PurchaseTicket::where('status', 'active')->count(),
             'total_tickets_held' => PurchaseTicket::where('status', 'held')->count(),
             'total_revenue' => Payment::where('status', 'completed')->sum('amount'),
             'pending_orders' => Order::where('status', 'pending')->count(),
             'completed_orders' => Order::where('status', 'paid')->count(),
             'total_tickets' => PurchaseTicket::count(),
-            'sold_tickets' => PurchaseTicket::where('status', 'sold')->count(),
+            'sold_tickets' => PurchaseTicket::where('status', 'active')->count(),
         ];
 
         // Get recent activity
@@ -575,9 +575,9 @@ class AdminController extends Controller
         
         $ticketStats = [
             'total_capacity' => 7000,
-            'tickets_sold' => $event->purchaseTickets()->where('status', 'Sold')->count(),
+            'tickets_sold' => $event->purchaseTickets()->where('status', 'active')->count(),
             'tickets_held' => $event->purchaseTickets()->where('status', 'Held')->count(),
-            'tickets_available' => 7000 - $event->purchaseTickets()->whereIn('status', ['Sold', 'Held'])->count(),
+            'tickets_available' => 7000 - $event->purchaseTickets()->whereIn('status', ['active', 'Held'])->count(),
         ];
         
         $ticketStats['sold_percentage'] = $ticketStats['total_capacity'] > 0 

@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\PurchaseController as AdminPurchaseController;
 use App\Http\Controllers\Admin\AuditLogController as AdminAuditLogController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\MaintenanceController;
+use App\Http\Controllers\Payment\StripeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -68,19 +69,16 @@ Route::middleware(['auth'])->group(function () {
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     
-    // Customer routes
-    Route::prefix('customer')->name('customer.')->group(function () {
-        Route::get('/dashboard', [CustomerController::class, 'dashboard'])->name('dashboard');
-        Route::get('/profile', [CustomerController::class, 'profile'])->name('profile');
-        Route::post('/profile', [CustomerController::class, 'updateProfile'])->name('profile.update');
-        Route::post('/password', [CustomerController::class, 'updatePassword'])->name('password.update');
-        Route::get('/tickets', [CustomerController::class, 'tickets'])->name('tickets');
-        Route::get('/tickets/{ticket}', [CustomerController::class, 'showTicket'])->name('tickets.show');
-        Route::get('/orders', [CustomerController::class, 'orders'])->name('orders');
-        Route::get('/orders/{order}', [CustomerController::class, 'showOrder'])->name('orders.show');
-        Route::get('/support', [CustomerController::class, 'support'])->name('support');
+
+    // Payment routes
+    Route::prefix('payment')->name('payment.')->group(function () {
+        Route::post('/stripe/create-intent', [StripeController::class, 'createPaymentIntent'])->name('stripe.create-intent');
+        Route::post('/stripe/success', [StripeController::class, 'handlePaymentSuccess'])->name('stripe.success');
+        Route::post('/stripe/failure', [StripeController::class, 'handlePaymentFailure'])->name('stripe.failure');
+        Route::get('/stripe/status', [StripeController::class, 'getPaymentStatus'])->name('stripe.status');
+        Route::get('/stripe/methods', [StripeController::class, 'getPaymentMethods'])->name('stripe.methods');
+        Route::post('/stripe/methods', [StripeController::class, 'createPaymentMethod'])->name('stripe.create-method');
     });
-    
     
     // Admin routes (Administrator role required)
     Route::middleware(['role:administrator'])->prefix('admin')->name('admin.')->group(function () {
@@ -137,6 +135,19 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
         Route::post('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
     });
+
+    // Customer routes
+    Route::prefix('customer')->name('customer.')->group(function () {
+        Route::get('/dashboard', [CustomerController::class, 'dashboard'])->name('dashboard');
+        Route::get('/profile', [CustomerController::class, 'profile'])->name('profile');
+        Route::post('/profile', [CustomerController::class, 'updateProfile'])->name('profile.update');
+        Route::post('/password', [CustomerController::class, 'updatePassword'])->name('password.update');
+        Route::get('/tickets/{ticket}', [CustomerController::class, 'showTicket'])->name('tickets.show');
+        Route::get('/tickets/{ticket}/qr', [CustomerController::class, 'showTicketQR'])->name('tickets.qr');
+        Route::get('/orders', [CustomerController::class, 'orders'])->name('orders');
+        Route::get('/orders/{order}', [CustomerController::class, 'showOrder'])->name('orders.show');
+        Route::get('/support', [CustomerController::class, 'support'])->name('support');
+    });
 });
 
 // Gate Staff routes
@@ -157,6 +168,9 @@ Route::get('/events/{event}/cart', [TicketController::class, 'cart'])->name('pub
 Route::get('/events/{event}/checkout', [TicketController::class, 'checkout'])->name('public.tickets.checkout');
 Route::post('/events/{event}/checkout', [TicketController::class, 'checkout'])->name('public.tickets.checkout.post');
 Route::post('/events/{event}/purchase', [TicketController::class, 'purchase'])->name('public.tickets.purchase');
+Route::get('/tickets/loading/{order}', [TicketController::class, 'loading'])->name('public.tickets.loading');
+Route::get('/tickets/payment/{order}', [TicketController::class, 'payment'])->name('public.tickets.payment');
+Route::get('/tickets/check-order-status/{order}', [TicketController::class, 'checkOrderStatus'])->name('public.tickets.check-order-status');
 Route::get('/tickets/success/{order}', [TicketController::class, 'success'])->name('public.tickets.success');
 Route::get('/tickets/failure/{event}', [TicketController::class, 'failure'])->name('public.tickets.failure');
 Route::get('/tickets/confirmation/{order}', [TicketController::class, 'confirmation'])->name('public.tickets.confirmation');
@@ -171,3 +185,6 @@ Route::post('/contact', [PublicController::class, 'submitContact'])->name('publi
 Route::get('/faq', [PublicController::class, 'faq'])->name('public.faq');
 Route::get('/refund-policy', [PublicController::class, 'refundPolicy'])->name('public.refund-policy');
 Route::get('/terms-of-service', [PublicController::class, 'termsOfService'])->name('public.terms-of-service');
+
+// Stripe webhook (no auth required)
+Route::post('/stripe/webhook', [StripeController::class, 'handleWebhook'])->name('stripe.webhook');

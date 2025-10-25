@@ -125,11 +125,11 @@
                             // For single-day tickets, calculate total across both days
                             $day1Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
                                 ->where('event_day_name', $mainEvent->getEventDays()[0]['day_name'])
-                                ->whereIn('status', ['sold', 'pending'])
+                                ->whereIn('status', ['active', 'pending'])
                                 ->count();
                             $day2Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
                                 ->where('event_day_name', $mainEvent->getEventDays()[1]['day_name'])
-                                ->whereIn('status', ['sold', 'pending'])
+                                ->whereIn('status', ['active', 'pending'])
                                 ->count();
                             $totalSold = $day1Sold + $day2Sold;
                             $totalAvailable = $totalSeats - $totalSold;
@@ -175,11 +175,11 @@
                                         // Calculate day-specific sold tickets
                                         $day1Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
                                             ->where('event_day_name', $mainEvent->getEventDays()[0]['day_name'])
-                                            ->whereIn('status', ['sold', 'pending'])
+                                            ->whereIn('status', ['active', 'pending'])
                                             ->count();
                                         $day2Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
                                             ->where('event_day_name', $mainEvent->getEventDays()[1]['day_name'])
-                                            ->whereIn('status', ['sold', 'pending'])
+                                            ->whereIn('status', ['active', 'pending'])
                                             ->count();
                                         
                                         $day1Available = $totalSeats - $day1Sold;

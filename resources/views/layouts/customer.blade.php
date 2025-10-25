@@ -76,10 +76,6 @@
                            class="text-wwc-neutral-600 hover:text-wwc-primary px-3 py-2 text-sm font-medium transition-colors duration-200 {{ request()->routeIs('customer.dashboard') ? 'text-wwc-primary' : '' }}">
                             Dashboard
                         </a>
-                        <a href="{{ route('customer.tickets') }}" 
-                           class="text-wwc-neutral-600 hover:text-wwc-primary px-3 py-2 text-sm font-medium transition-colors duration-200 {{ request()->routeIs('customer.tickets*') ? 'text-wwc-primary' : '' }}">
-                            Tickets
-                        </a>
                         <a href="{{ route('customer.orders') }}" 
                            class="text-wwc-neutral-600 hover:text-wwc-primary px-3 py-2 text-sm font-medium transition-colors duration-200 {{ request()->routeIs('customer.orders*') ? 'text-wwc-primary' : '' }}">
                             Orders
@@ -107,10 +103,6 @@
                                 <a href="{{ route('customer.profile') }}" 
                                    class="block px-4 py-2 text-sm text-wwc-neutral-700 hover:bg-wwc-neutral-50">
                                     Profile
-                                </a>
-                                <a href="{{ route('customer.tickets') }}" 
-                                   class="block px-4 py-2 text-sm text-wwc-neutral-700 hover:bg-wwc-neutral-50">
-                                    My Tickets
                                 </a>
                                 <a href="{{ route('customer.orders') }}" 
                                    class="block px-4 py-2 text-sm text-wwc-neutral-700 hover:bg-wwc-neutral-50">
@@ -142,10 +134,6 @@
                         <a href="{{ route('customer.dashboard') }}" 
                            class="block px-3 py-2 text-base font-medium text-wwc-neutral-600 hover:text-wwc-primary">
                             Dashboard
-                        </a>
-                        <a href="{{ route('customer.tickets') }}" 
-                           class="block px-3 py-2 text-base font-medium text-wwc-neutral-600 hover:text-wwc-primary">
-                            Tickets
                         </a>
                         <a href="{{ route('customer.orders') }}" 
                            class="block px-3 py-2 text-base font-medium text-wwc-neutral-600 hover:text-wwc-primary">

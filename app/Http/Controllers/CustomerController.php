@@ -20,14 +20,13 @@ class CustomerController extends Controller
     {
         $user = Auth::user();
         
-        // Get recent tickets
+        // Get recent tickets with pagination
         $recentTickets = PurchaseTicket::whereHas('order', function($query) use ($user) {
                 $query->where('user_id', $user->id);
             })
             ->with(['event', 'ticketType'])
             ->latest()
-            ->take(5)
-            ->get();
+            ->paginate(10);
 
         // Get upcoming events
         $upcomingEvents = Event::where('status', 'on_sale')
@@ -115,49 +114,7 @@ class CustomerController extends Controller
     }
 
 
-    /**
-     * Show customer tickets
-     */
-    public function tickets(Request $request)
-    {
-        $user = Auth::user();
-        
-        // Get active ticket types (available for purchase)
-        $query = \App\Models\Ticket::whereIn('status', ['active', 'Active']);
 
-        // Search functionality
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('zone', 'like', "%{$search}%")
-                  ->orWhereHas('event', function($eventQuery) use ($search) {
-                      $eventQuery->where('name', 'like', "%{$search}%");
-                  });
-            });
-        }
-
-        // Filter by status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        // Filter by event
-        if ($request->filled('event')) {
-            $query->where('event_id', $request->event);
-        }
-
-        $tickets = $query->with(['event'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
-
-        $statuses = \App\Models\Ticket::select('status')->distinct()->pluck('status');
-        $events = Event::whereHas('tickets', function($q) {
-            $q->whereIn('status', ['active', 'Active']);
-        })->get();
-
-        return view('customer.tickets', compact('tickets', 'statuses', 'events'));
-    }
 
     /**
      * Show customer orders
@@ -219,6 +176,20 @@ class CustomerController extends Controller
         $ticket->load(['event', 'order.user', 'ticketType']);
         
         return view('customer.ticket-details', compact('ticket'));
+    }
+
+    /**
+     * Show ticket QR code
+     */
+    public function showTicketQR(PurchaseTicket $ticket)
+    {
+        if ($ticket->order->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized access to ticket.');
+        }
+
+        $ticket->load(['event', 'order.user', 'ticketType']);
+        
+        return view('customer.ticket-qr', compact('ticket'));
     }
 
     /**

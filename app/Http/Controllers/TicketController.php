@@ -71,9 +71,30 @@ class TicketController extends Controller
                     ->with('intended', route('public.tickets.cart', $event));
             }
 
+            // Check if user has any pending orders
+            $pendingOrder = Order::where('user_id', Auth::id())
+                ->where('status', 'pending')
+                ->first();
+
+            if ($pendingOrder) {
+                return redirect()->route('public.tickets.cart', $event)
+                    ->with('pending_order', true)
+                    ->with('pending_order_id', $pendingOrder->id)
+                    ->with('pending_order_number', $pendingOrder->order_number)
+                    ->with('pending_payment_url', route('public.tickets.payment', $pendingOrder));
+            }
+
             if (!$event->isOnSale()) {
                 return redirect()->route('public.events.show', $event)
                     ->with('error', 'This event is not currently on sale.');
+            }
+
+            // Handle POST request (form submission from cart)
+            if ($request->isMethod('post')) {
+                // Validate the form data
+                $request->validate([
+                    'purchase_type' => 'required|in:single_day,multi_day',
+                ]);
             }
 
         // Load tickets for this event
@@ -99,7 +120,13 @@ class TicketController extends Controller
                 $validationRules['single_day_selection'] = 'required|in:day1,day2';
             }
             
+            // Only validate if it's a POST request
+            if ($request->isMethod('post')) {
+                // Only validate if it's a POST request
+            if ($request->isMethod('post')) {
             $request->validate($validationRules);
+            }
+            }
         } else {
             $validationRules = [
                 'purchase_type' => 'required|in:multi_day',
@@ -127,7 +154,10 @@ class TicketController extends Controller
                 $validationRules['day2_quantity'] = 'required|integer|min:1|max:10';
             }
             
+            // Only validate if it's a POST request
+            if ($request->isMethod('post')) {
             $request->validate($validationRules);
+            }
         }
 
         // Calculate pricing
@@ -194,7 +224,61 @@ class TicketController extends Controller
         $serviceFeePercentage = Setting::get('service_fee_percentage', 5.0);
         $taxPercentage = Setting::get('tax_percentage', 6.0);
 
-        return view('public.tickets.checkout', compact('event', 'tickets', 'purchaseType', 'subtotal', 'discountAmount', 'serviceFee', 'taxAmount', 'totalAmount', 'totalQuantity', 'serviceFeePercentage', 'taxPercentage'));
+        // Handle POST request - create order and redirect to payment
+        if ($request->isMethod('post')) {
+            // Validate the form data
+            $validationRules = [
+                'customer_name' => 'required|string|max:255',
+                'customer_email' => 'required|email|max:255',
+                'customer_phone' => 'nullable|string|max:20',
+            ];
+            
+            if ($purchaseType === 'single_day') {
+                $validationRules['ticket_type_id'] = 'required|integer|exists:tickets,id';
+                $validationRules['quantity'] = 'required|integer|min:1|max:10';
+            } else {
+                $day1Enabled = $request->boolean('multi_day1_enabled');
+                $day2Enabled = $request->boolean('multi_day2_enabled');
+                
+                if ($day1Enabled) {
+                    $validationRules['day1_ticket_type'] = 'required|integer|exists:tickets,id';
+                    $validationRules['day1_quantity'] = 'required|integer|min:1|max:10';
+                }
+                if ($day2Enabled) {
+                    $validationRules['day2_ticket_type'] = 'required|integer|exists:tickets,id';
+                    $validationRules['day2_quantity'] = 'required|integer|min:1|max:10';
+                }
+            }
+            
+            $request->validate($validationRules);
+            
+            // Create the order using the purchase method logic
+            DB::beginTransaction();
+            try {
+                $order = $this->createOrderFromRequest($request, $event, $tickets, $purchaseType, $subtotal, $discountAmount, $serviceFee, $taxAmount, $totalAmount, $totalQuantity);
+                
+                DB::commit();
+                
+                // Redirect to payment page
+                return redirect()->route('public.tickets.payment', $order);
+                
+            } catch (\Exception $e) {
+                DB::rollBack();
+                Log::error('Order creation error in checkout', [
+                    'event_id' => $event->id,
+                    'user_id' => Auth::id(),
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                    'request_data' => $request->all()
+                ]);
+                
+                return redirect()->back()
+                    ->with('error', 'Failed to create order. Please try again.')
+                    ->withInput();
+            }
+        }
+        
+        return view('public.tickets.checkout-stripe', compact('event', 'tickets', 'purchaseType', 'subtotal', 'discountAmount', 'serviceFee', 'taxAmount', 'totalAmount', 'totalQuantity', 'serviceFeePercentage', 'taxPercentage'));
         
         } catch (\Exception $e) {
             // Log the error for debugging
@@ -213,6 +297,81 @@ class TicketController extends Controller
     }
 
     /**
+     * Create order from checkout form data
+     */
+    private function createOrderFromRequest($request, $event, $tickets, $purchaseType, $subtotal, $discountAmount, $serviceFee, $taxAmount, $totalAmount, $totalQuantity)
+    {
+        // Create the order
+        $order = \App\Models\Order::create([
+            'user_id' => Auth::id(),
+            'event_id' => $event->id,
+            'customer_name' => $request->customer_name,
+            'customer_email' => $request->customer_email,
+            'customer_phone' => $request->customer_phone,
+            'purchase_type' => $purchaseType,
+            'order_number' => \App\Models\Order::generateOrderNumber(),
+            'qrcode' => \App\Models\Order::generateQRCode(),
+            'subtotal' => $subtotal,
+            'discount_amount' => $discountAmount,
+            'service_fee' => $serviceFee,
+            'tax_amount' => $taxAmount,
+            'total_amount' => $totalAmount,
+            'status' => 'pending',
+            'payment_method' => 'stripe',
+        ]);
+        
+        // Create order items (purchase tickets)
+        $comboGroupId = ($purchaseType === 'multi_day') ? 'COMBO_' . $order->id . '_' . time() : null;
+        $eventDays = $event->getEventDays();
+        
+        foreach ($tickets as $ticketData) {
+            $ticket = $ticketData['ticket'];
+            $quantity = $ticketData['quantity'];
+            $price = $ticketData['price'];
+            $day = $ticketData['day'] ?? 1;
+            
+            // Determine event day information
+            $eventDay = null;
+            $eventDayName = null;
+            if ($event->isMultiDay() && isset($eventDays[$day - 1])) {
+                $eventDay = $eventDays[$day - 1]['date'];
+                $eventDayName = $eventDays[$day - 1]['day_name'];
+            } elseif (count($eventDays) > 0) {
+                $eventDay = $eventDays[0]['date'];
+                $eventDayName = $eventDays[0]['day_name'];
+            }
+            
+            // Create individual purchase tickets for each quantity
+            for ($i = 0; $i < $quantity; $i++) {
+                \App\Models\PurchaseTicket::create([
+                    'order_id' => $order->id,
+                    'event_id' => $event->id,
+                    'ticket_type_id' => $ticket->id,
+                    'zone' => $ticket->name,
+                    'event_day' => $eventDay,
+                    'event_day_name' => $eventDayName,
+                    'is_combo_purchase' => $purchaseType === 'multi_day' && count($tickets) > 1,
+                    'combo_group_id' => $comboGroupId,
+                    'original_price' => $price,
+                    'discount_amount' => $discountAmount > 0 ? $discountAmount / $totalQuantity : 0,
+                    'qrcode' => \App\Models\PurchaseTicket::generateQRCode(),
+                    'status' => 'pending',
+                    'price_paid' => $discountAmount > 0 ? ($subtotal / $totalQuantity) : $price,
+                ]);
+            }
+            
+            // Update ticket type availability
+            $ticket->update([
+                'sold_seats' => $ticket->sold_seats + $quantity,
+                'available_seats' => $ticket->available_seats - $quantity,
+                'status' => $ticket->available_seats - $quantity <= 0 ? 'sold_out' : 'active',
+            ]);
+        }
+        
+        return $order;
+    }
+
+    /**
      * Process ticket purchase using admin order creation logic
      */
     public function purchase(Request $request, Event $event)
@@ -222,6 +381,21 @@ class TicketController extends Controller
             return redirect()->route('login')
                 ->with('error', 'Please login to complete your ticket purchase.')
                 ->with('intended', route('public.tickets.cart', $event));
+        }
+
+        // Check if user has any pending orders
+        $pendingOrder = Order::where('user_id', Auth::id())
+            ->where('status', 'pending')
+            ->first();
+
+        if ($pendingOrder) {
+            return response()->json([
+                'success' => false,
+                'error' => 'You have a pending order that needs to be completed first.',
+                'pending_order_id' => $pendingOrder->id,
+                'pending_order_number' => $pendingOrder->order_number,
+                'redirect_url' => route('public.tickets.payment', $pendingOrder)
+            ], 400);
         }
 
         // Load tickets for this event
@@ -251,7 +425,10 @@ class TicketController extends Controller
                 $validationRules['single_day_selection'] = 'required|in:day1,day2';
             }
             
+            // Only validate if it's a POST request
+            if ($request->isMethod('post')) {
             $request->validate($validationRules);
+            }
         } else {
             $validationRules = [
                 'purchase_type' => 'required|in:multi_day',
@@ -283,7 +460,10 @@ class TicketController extends Controller
                 $validationRules['day2_quantity'] = 'required|integer|min:1|max:10';
             }
             
+            // Only validate if it's a POST request
+            if ($request->isMethod('post')) {
             $request->validate($validationRules);
+            }
         }
 
         if (!$event->isOnSale()) {
@@ -488,8 +668,12 @@ class TicketController extends Controller
 
             DB::commit();
 
-            // Redirect to success page
-            return redirect()->route('public.tickets.success', $order);
+            // Return JSON response for AJAX
+            return response()->json([
+                'success' => true,
+                'order_id' => $order->id,
+                'message' => 'Order created successfully'
+            ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -501,12 +685,126 @@ class TicketController extends Controller
                 'request_data' => $request->all()
             ]);
 
-            // Redirect to failure page with error details
-            return redirect()->route('public.tickets.failure', $event)
-                ->with('error_message', 'Failed to process purchase: ' . $e->getMessage())
-                ->with('error_code', 'PURCHASE_ERROR')
-                ->with('transaction_id', 'N/A');
+            // Return JSON error response
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to process purchase: ' . $e->getMessage(),
+                'error_code' => 'PURCHASE_ERROR'
+            ], 500);
         }
+    }
+
+    /**
+     * Show loading page before redirecting to payment
+     */
+    public function loading(Order $order)
+    {
+        // Check if user is authenticated and owns this order
+        if (!Auth::check() || $order->user_id !== Auth::id()) {
+            return redirect()->route('login')
+                ->with('error', 'Please login to access your order.');
+        }
+
+        // Check if order is in pending status
+        if ($order->status !== 'pending') {
+            if ($order->status === 'paid') {
+                return redirect()->route('public.tickets.success', $order)
+                    ->with('info', 'This order has already been paid.');
+            } else {
+                return redirect()->route('public.tickets.failure', $order->event)
+                    ->with('error', 'This order is no longer available for payment.');
+            }
+        }
+
+        return view('payment.loading', compact('order'));
+    }
+
+    /**
+     * Show payment page for Stripe integration
+     */
+    public function payment(Order $order)
+    {
+        // Check if user is authenticated and owns this order
+        if (!Auth::check() || $order->user_id !== Auth::id()) {
+            return redirect()->route('login')
+                ->with('error', 'Please login to access your order.');
+        }
+
+        // Check if order is in pending status
+        if ($order->status !== 'pending') {
+            if ($order->status === 'paid') {
+                return redirect()->route('public.tickets.success', $order)
+                    ->with('info', 'This order has already been paid.');
+            } else {
+                return redirect()->route('public.tickets.failure', $order->event)
+                    ->with('error', 'This order is no longer available for payment.');
+            }
+        }
+
+        // Check if order has timed out (15 minutes)
+        $timeoutMinutes = 15;
+        $timeoutThreshold = now()->subMinutes($timeoutMinutes);
+        
+        if ($order->created_at->lt($timeoutThreshold)) {
+            // Order has timed out - cancel it and redirect to cart with timeout message
+            try {
+                DB::beginTransaction();
+                
+                // Update order status to cancelled
+                $order->update([
+                    'status' => 'cancelled',
+                    'cancelled_at' => now(),
+                    'cancellation_reason' => 'Payment timeout - exceeded ' . $timeoutMinutes . ' minutes'
+                ]);
+                
+                // Update purchase ticket statuses to cancelled
+                $order->purchaseTickets()->update([
+                    'status' => 'cancelled',
+                    'cancelled_at' => now(),
+                    'cancellation_reason' => 'Payment timeout - exceeded ' . $timeoutMinutes . ' minutes'
+                ]);
+                
+                // Release the tickets back to available inventory
+                foreach ($order->purchaseTickets as $purchaseTicket) {
+                    $ticketType = $purchaseTicket->ticketType;
+                    if ($ticketType) {
+                        $ticketType->update([
+                            'sold_seats' => max(0, $ticketType->sold_seats - 1),
+                            'available_seats' => min($ticketType->total_seats, $ticketType->available_seats + 1),
+                            'status' => $ticketType->available_seats + 1 > 0 ? 'active' : $ticketType->status
+                        ]);
+                    }
+                }
+                
+                DB::commit();
+                
+                Log::info('Order cancelled due to payment timeout (user access)', [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'user_id' => $order->user_id,
+                    'created_at' => $order->created_at,
+                    'cancelled_at' => now()
+                ]);
+                
+            } catch (\Exception $e) {
+                DB::rollBack();
+                Log::error('Failed to cancel expired order', [
+                    'order_id' => $order->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+            
+            // Redirect to cart with timeout message
+            return redirect()->route('public.tickets.cart', $order->event)
+                ->with('timeout', true)
+                ->with('timeout_order_id', $order->id)
+                ->with('error', 'Your order has expired due to payment timeout. Please select your tickets again.');
+        }
+
+        // Load order with relationships
+        $order->load(['purchaseTickets.ticketType.event', 'user']);
+
+        return view('payment.stripe-checkout', compact('order'));
     }
 
     /**
@@ -518,11 +816,61 @@ class TicketController extends Controller
             abort(403, 'Unauthorized access to order.');
         }
 
-        $order->load(['tickets.ticketType', 'user', 'event']);
+        // Update order status to paid if it's still pending
+        if ($order->status === 'pending') {
+            DB::beginTransaction();
+            try {
+                // Update order status
+                $order->update([
+                    'status' => 'paid',
+                    'payment_method' => 'stripe',
+                    'paid_at' => now(),
+                ]);
+                
+                // Update all purchase ticket statuses to 'active'
+                $order->purchaseTickets()->update(['status' => 'active']);
+                
+                // Create payment record
+                \App\Models\Payment::create([
+                    'order_id' => $order->id,
+                    'method' => 'stripe',
+                    'amount' => $order->total_amount,
+                    'currency' => 'myr',
+                    'status' => 'completed',
+                    'processed_at' => now(),
+                    'payment_date' => now(),
+                    'transaction_id' => 'STRIPE_' . $order->id . '_' . time(),
+                    'notes' => 'Payment completed via Stripe payment gateway',
+                ]);
+                
+                DB::commit();
+                
+                // Log the payment
+                \Log::info('Order payment completed', [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'user_id' => $order->user_id,
+                    'total_amount' => $order->total_amount,
+                    'payment_method' => 'stripe'
+                ]);
+                
+            } catch (\Exception $e) {
+                DB::rollBack();
+                \Log::error('Payment processing error', [
+                    'order_id' => $order->id,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+                
+                // Still show success page but log the error
+            }
+        }
+
+        $order->load(['purchaseTickets.ticketType', 'user', 'event']);
         $event = $order->event;
         
         // Calculate totals for display
-        $totalQuantity = $order->tickets->count(); // Count of purchase tickets
+        $totalQuantity = $order->purchaseTickets->count(); // Count of purchase tickets
         
         // Use current system settings for percentage display
         // This ensures the success page shows the current settings, not historical ones
@@ -726,5 +1074,94 @@ class TicketController extends Controller
     {
         $taxPercentage = Setting::get('tax_percentage', 6.0);
         return round($subtotal * ($taxPercentage / 100), 2);
+    }
+
+    /**
+     * Check if an order is still valid for payment
+     */
+    public function checkOrderStatus(Order $order)
+    {
+        // Check if user is authenticated and owns this order
+        if (!Auth::check() || $order->user_id !== Auth::id()) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'Order not found or access denied'
+            ], 403);
+        }
+
+        // Check if order is still pending
+        if ($order->status !== 'pending') {
+            return response()->json([
+                'valid' => false,
+                'message' => 'Order is no longer pending',
+                'status' => $order->status
+            ]);
+        }
+
+        // Check if order has timed out (15 minutes)
+        $timeoutMinutes = 15;
+        $timeoutThreshold = now()->subMinutes($timeoutMinutes);
+        
+        if ($order->created_at->lt($timeoutThreshold)) {
+            // Order has timed out - cancel it
+            try {
+                DB::beginTransaction();
+                
+                // Update order status to cancelled
+                $order->update([
+                    'status' => 'cancelled',
+                    'cancelled_at' => now(),
+                    'cancellation_reason' => 'Payment timeout - exceeded ' . $timeoutMinutes . ' minutes'
+                ]);
+                
+                // Update purchase ticket statuses to cancelled
+                $order->purchaseTickets()->update([
+                    'status' => 'cancelled',
+                    'cancelled_at' => now(),
+                    'cancellation_reason' => 'Payment timeout - exceeded ' . $timeoutMinutes . ' minutes'
+                ]);
+                
+                // Release the tickets back to available inventory
+                foreach ($order->purchaseTickets as $purchaseTicket) {
+                    $ticketType = $purchaseTicket->ticketType;
+                    if ($ticketType) {
+                        $ticketType->update([
+                            'sold_seats' => max(0, $ticketType->sold_seats - 1),
+                            'available_seats' => min($ticketType->total_seats, $ticketType->available_seats + 1),
+                            'status' => $ticketType->available_seats + 1 > 0 ? 'active' : $ticketType->status
+                        ]);
+                    }
+                }
+                
+                DB::commit();
+                
+                return response()->json([
+                    'valid' => false,
+                    'message' => 'Order has expired due to payment timeout',
+                    'status' => 'cancelled'
+                ]);
+                
+            } catch (\Exception $e) {
+                DB::rollBack();
+                Log::error('Failed to cancel expired order during status check', [
+                    'order_id' => $order->id,
+                    'error' => $e->getMessage()
+                ]);
+                
+                return response()->json([
+                    'valid' => false,
+                    'message' => 'Order validation failed'
+                ], 500);
+            }
+        }
+
+        // Order is valid
+        return response()->json([
+            'valid' => true,
+            'message' => 'Order is valid for payment',
+            'status' => $order->status,
+            'created_at' => $order->created_at,
+            'timeout_at' => $order->created_at->addMinutes($timeoutMinutes)
+        ]);
     }
 }

@@ -13,7 +13,7 @@
             <div class="flex items-center justify-between">
                 <!-- Back Navigation -->
                 <div class="flex items-center">
-                    <a href="{{ route('customer.tickets') }}" 
+                    <a href="{{ route('customer.my-tickets') }}" 
                        class="flex items-center text-wwc-neutral-600 hover:text-wwc-primary transition-colors duration-200 group">
                         <div class="h-8 w-8 bg-wwc-neutral-100 rounded-lg flex items-center justify-center group-hover:bg-wwc-primary/10 transition-colors duration-200">
                             <i class="bx bx-chevron-left text-lg group-hover:-translate-x-1 transition-transform"></i>
@@ -285,7 +285,7 @@
 
         <!-- Action Buttons -->
         <div class="flex flex-col sm:flex-row justify-center gap-4">
-            <a href="{{ route('customer.tickets') }}" 
+            <a href="{{ route('customer.my-tickets') }}" 
                class="inline-flex items-center justify-center px-6 py-3 bg-wwc-primary text-white rounded-lg font-semibold hover:bg-wwc-primary-dark transition-colors duration-200">
                 <i class='bx bx-receipt mr-2'></i>
                 View My Tickets

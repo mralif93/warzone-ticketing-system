@@ -22,61 +22,99 @@
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-
-        <!-- Quick Actions -->
-        <div class="mb-8">
-            <h2 class="text-lg font-semibold text-wwc-neutral-900 mb-4">Quick Actions</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <a href="{{ route('customer.tickets') }}" 
-                   class="group bg-white rounded-xl border border-wwc-neutral-200 p-6 hover:border-wwc-accent hover:shadow-md transition-all duration-200">
-                    <div class="flex flex-col items-center text-center">
-                        <div class="w-12 h-12 bg-wwc-accent rounded-lg flex items-center justify-center mb-3 group-hover:bg-wwc-accent-dark transition-colors duration-200">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
-                            </svg>
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl border border-wwc-neutral-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-wwc-primary rounded-lg flex items-center justify-center">
+                            <i class='bx bx-receipt text-white text-sm'></i>
                         </div>
-                        <h3 class="text-sm font-semibold text-wwc-neutral-900 group-hover:text-wwc-accent">My Tickets</h3>
-                        <p class="text-xs text-wwc-neutral-500 mt-1">View your tickets</p>
                     </div>
-                </a>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-wwc-neutral-500">Total Orders</p>
+                        <p class="text-2xl font-bold text-wwc-neutral-900">{{ $orderStats['total_orders'] }}</p>
+                    </div>
+                </div>
+            </div>
 
-                <a href="{{ route('customer.orders') }}" 
-                   class="group bg-white rounded-xl border border-wwc-neutral-200 p-6 hover:border-wwc-success hover:shadow-md transition-all duration-200">
-                    <div class="flex flex-col items-center text-center">
-                        <div class="w-12 h-12 bg-wwc-success rounded-lg flex items-center justify-center mb-3 group-hover:bg-wwc-success-dark transition-colors duration-200">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
+            <div class="bg-white rounded-xl border border-wwc-neutral-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-wwc-accent rounded-lg flex items-center justify-center">
+                            <i class='bx bx-purchase-tag text-white text-sm'></i>
                         </div>
-                        <h3 class="text-sm font-semibold text-wwc-neutral-900 group-hover:text-wwc-success">Order History</h3>
-                        <p class="text-xs text-wwc-neutral-500 mt-1">View past orders</p>
                     </div>
-                </a>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-wwc-neutral-500">Total Tickets</p>
+                        <p class="text-2xl font-bold text-wwc-neutral-900">{{ $orderStats['total_tickets'] }}</p>
+                    </div>
+                </div>
+            </div>
 
-                <a href="{{ route('customer.support') }}" 
-                   class="group bg-white rounded-xl border border-wwc-neutral-200 p-6 hover:border-wwc-info hover:shadow-md transition-all duration-200">
-                    <div class="flex flex-col items-center text-center">
-                        <div class="w-12 h-12 bg-wwc-info rounded-lg flex items-center justify-center mb-3 group-hover:bg-wwc-info-dark transition-colors duration-200">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
+            <div class="bg-white rounded-xl border border-wwc-neutral-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-wwc-success rounded-lg flex items-center justify-center">
+                            <i class='bx bx-money text-white text-sm'></i>
                         </div>
-                        <h3 class="text-sm font-semibold text-wwc-neutral-900 group-hover:text-wwc-info">Get Help</h3>
-                        <p class="text-xs text-wwc-neutral-500 mt-1">Support & FAQ</p>
                     </div>
-                </a>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-wwc-neutral-500">Total Spent</p>
+                        <p class="text-2xl font-bold text-wwc-neutral-900">RM{{ number_format($orderStats['total_spent'], 0) }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-wwc-neutral-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-wwc-info rounded-lg flex items-center justify-center">
+                            <i class='bx bx-calendar text-white text-sm'></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-wwc-neutral-500">Upcoming Events</p>
+                        <p class="text-2xl font-bold text-wwc-neutral-900">{{ $orderStats['upcoming_events'] }}</p>
+                    </div>
+                </div>
             </div>
         </div>
+
+        <!-- Upcoming Events -->
+        @if($upcomingEvents->count() > 0)
+        <div class="mb-8">
+            <h2 class="text-lg font-semibold text-wwc-neutral-900 mb-4">Upcoming Events</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                @foreach($upcomingEvents as $event)
+                <div class="bg-white rounded-xl border border-wwc-neutral-200 overflow-hidden hover:shadow-md transition-all duration-200">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-wwc-primary rounded-lg flex items-center justify-center">
+                                <i class='bx bx-calendar text-white text-lg'></i>
+                            </div>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-wwc-success text-white">
+                                On Sale
+                            </span>
+                        </div>
+                        <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-2">{{ $event->name }}</h3>
+                        <p class="text-sm text-wwc-neutral-600 mb-4">{{ $event->venue }}</p>
+                        <div class="flex items-center text-sm text-wwc-neutral-500">
+                            <i class='bx bx-time-five mr-2'></i>
+                            {{ $event->date_time->format('M j, Y g:i A') }}
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
 
         <!-- My Tickets Table -->
         <div class="bg-white rounded-xl shadow-sm border border-wwc-neutral-200">
             <div class="px-6 py-4 border-b border-wwc-neutral-200">
                 <div class="flex items-center justify-between">
                     <h2 class="text-lg font-semibold text-wwc-neutral-900">My Tickets</h2>
-                    <a href="{{ route('customer.tickets') }}" 
-                       class="text-sm text-wwc-primary hover:text-wwc-primary-dark font-medium">
-                        View all →
-                    </a>
                 </div>
             </div>
             <div class="overflow-x-auto">
@@ -122,30 +160,46 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                        @if($ticket->status === 'sold') bg-wwc-success text-white
-                                        @elseif($ticket->status === 'held') bg-wwc-warning text-white
-                                        @elseif($ticket->status === 'scanned') bg-wwc-info text-white
-                                        @else bg-wwc-neutral-200 text-wwc-neutral-800
+                                        @if($ticket->status === 'sold') bg-green-100 text-green-800
+                                        @elseif($ticket->status === 'pending') bg-yellow-100 text-yellow-800
+                                        @elseif($ticket->status === 'scanned') bg-blue-100 text-blue-800
+                                        @elseif($ticket->status === 'cancelled') bg-red-100 text-red-800
+                                        @elseif($ticket->status === 'refunded') bg-purple-100 text-purple-800
+                                        @elseif($ticket->status === 'invalid') bg-gray-100 text-gray-800
+                                        @else bg-gray-100 text-gray-800
                                         @endif">
                                         {{ ucwords($ticket->status) }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <div class="flex items-center space-x-2">
                                     <a href="{{ route('customer.tickets.show', $ticket->id) }}" 
-                                       class="text-wwc-primary hover:text-wwc-primary-dark mr-3">
+                                           class="inline-flex items-center px-3 py-2 text-xs font-semibold text-white bg-wwc-primary hover:bg-wwc-primary-dark rounded-lg transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
+                                           title="View ticket details">
+                                            <i class='bx bx-show text-xs mr-1.5'></i>
                                         View
                                     </a>
-                                    @if($ticket->qr_code)
+                                        @if($ticket->qrcode)
                                         <a href="{{ route('customer.tickets.qr', $ticket->id) }}" 
-                                           class="text-wwc-accent hover:text-wwc-accent-dark">
+                                               class="inline-flex items-center px-3 py-2 text-xs font-semibold text-white bg-wwc-accent hover:bg-wwc-accent-dark rounded-lg transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
+                                               title="View QR code">
+                                                <i class='bx bx-qr-scan text-xs mr-1.5'></i>
                                             QR Code
                                         </a>
                                     @endif
+                                    </div>
                                 </td>
                             </tr>
                             @endforeach
                         </tbody>
                     </table>
+                    
+                    <!-- Pagination -->
+                    @if($recentTickets->hasPages())
+                        <div class="px-6 py-4 border-t border-wwc-neutral-200">
+                            {{ $recentTickets->links('vendor.pagination.tailwind') }}
+                        </div>
+                    @endif
                 @else
                     <div class="text-center py-12">
                         <div class="w-16 h-16 bg-wwc-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -155,10 +209,6 @@
                         </div>
                         <h3 class="text-lg font-medium text-wwc-neutral-900 mb-2">No tickets yet</h3>
                         <p class="text-wwc-neutral-500 mb-6">You haven't purchased any tickets yet. Start exploring our events!</p>
-                        <a href="{{ route('public.events') }}" 
-                           class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-wwc-primary hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary">
-                            Browse Events
-                        </a>
                     </div>
                 @endif
             </div>

@@ -55,8 +55,10 @@ return new class extends Migration
             $table->decimal('discount_amount', 10, 2)->default(0); // Discount amount applied
             
             $table->string('qrcode')->unique();
-            $table->string('status'); // sold, held, scanned, invalid, refunded
+            $table->string('status'); // sold, held, scanned, invalid, refunded, cancelled
             $table->datetime('scanned_at')->nullable();
+            $table->timestamp('cancelled_at')->nullable();
+            $table->text('cancellation_reason')->nullable();
             $table->decimal('price_paid', 10, 2);
             $table->timestamps();
             $table->softDeletes();

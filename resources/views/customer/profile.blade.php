@@ -51,6 +51,14 @@
                             <span class="text-sm font-semibold text-wwc-neutral-600">Last Updated</span>
                             <span class="text-sm text-wwc-neutral-900">{{ $user->updated_at->format('M j, Y') }}</span>
                         </div>
+                        <div class="flex justify-between items-center py-3 border-b border-wwc-neutral-100">
+                            <span class="text-sm font-semibold text-wwc-neutral-600">Total Orders</span>
+                            <span class="text-sm text-wwc-neutral-900">{{ $user->orders()->count() }}</span>
+                        </div>
+                        <div class="flex justify-between items-center py-3 border-b border-wwc-neutral-100">
+                            <span class="text-sm font-semibold text-wwc-neutral-600">Total Tickets</span>
+                            <span class="text-sm text-wwc-neutral-900">{{ $user->purchaseTickets()->count() }}</span>
+                        </div>
                         <div class="flex justify-between items-center py-3">
                             <span class="text-sm font-semibold text-wwc-neutral-600">Account Status</span>
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-wwc-success text-white">
@@ -69,12 +77,12 @@
                 </div>
                 <div class="p-6">
                     <div class="space-y-3">
-                        <a href="{{ route('customer.tickets') }}" 
+                        <a href="{{ route('customer.dashboard') }}" 
                            class="flex items-center p-3 text-sm text-wwc-neutral-700 hover:bg-wwc-neutral-50 rounded-lg transition-colors duration-200">
                             <svg class="w-5 h-5 mr-3 text-wwc-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
                             </svg>
-                            View My Tickets
+                            View Dashboard
                         </a>
                         <a href="{{ route('customer.orders') }}" 
                            class="flex items-center p-3 text-sm text-wwc-neutral-700 hover:bg-wwc-neutral-50 rounded-lg transition-colors duration-200">
@@ -82,13 +90,6 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>
                             Order History
-                        </a>
-                        <a href="{{ route('customer.events') }}" 
-                           class="flex items-center p-3 text-sm text-wwc-neutral-700 hover:bg-wwc-neutral-50 rounded-lg transition-colors duration-200">
-                            <svg class="w-5 h-5 mr-3 text-wwc-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                            Browse Events
                         </a>
                         <a href="{{ route('customer.support') }}" 
                            class="flex items-center p-3 text-sm text-wwc-neutral-700 hover:bg-wwc-neutral-50 rounded-lg transition-colors duration-200">
@@ -263,13 +264,27 @@
                     <form action="{{ route('customer.password.update') }}" method="POST">
                         @csrf
                         
-                        @if ($errors->has('current_password') || $errors->has('password'))
-                            <div class="mb-4 bg-wwc-error-light border border-wwc-error text-wwc-error px-3 py-2 rounded-lg text-xs">
-                                @if ($errors->has('current_password'))
-                                    {{ $errors->first('current_password') }}
-                                @elseif ($errors->has('password'))
-                                    {{ $errors->first('password') }}
-                                @endif
+                        @if ($errors->has('current_password') || $errors->has('password') || $errors->has('password_confirmation'))
+                            <div class="mb-6 bg-wwc-error-light border border-wwc-error text-wwc-error px-4 py-3 rounded-xl">
+                                <div class="flex items-start">
+                                    <svg class="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <div>
+                                        <h3 class="font-semibold">Please correct the following errors:</h3>
+                                        <ul class="list-disc list-inside text-sm mt-1">
+                                            @if ($errors->has('current_password'))
+                                                <li>{{ $errors->first('current_password') }}</li>
+                                            @endif
+                                            @if ($errors->has('password'))
+                                                <li>{{ $errors->first('password') }}</li>
+                                            @endif
+                                            @if ($errors->has('password_confirmation'))
+                                                <li>{{ $errors->first('password_confirmation') }}</li>
+                                            @endif
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
                         @endif
 
@@ -281,6 +296,9 @@
                                 </label>
                                 <input type="password" name="current_password" id="current_password" required
                                        class="block w-full px-4 py-3 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('current_password') border-wwc-error @enderror">
+                                @error('current_password')
+                                    <div class="text-wwc-error text-xs mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <!-- New Password -->
@@ -290,6 +308,9 @@
                                 </label>
                                 <input type="password" name="password" id="password" required
                                        class="block w-full px-4 py-3 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('password') border-wwc-error @enderror">
+                                @error('password')
+                                    <div class="text-wwc-error text-xs mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <!-- Confirm Password -->
@@ -298,7 +319,10 @@
                                     Confirm New Password *
                                 </label>
                                 <input type="password" name="password_confirmation" id="password_confirmation" required
-                                       class="block w-full px-4 py-3 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
+                                       class="block w-full px-4 py-3 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('password_confirmation') border-wwc-error @enderror">
+                                @error('password_confirmation')
+                                    <div class="text-wwc-error text-xs mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
 

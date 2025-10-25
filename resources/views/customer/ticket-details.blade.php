@@ -12,7 +12,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <a href="{{ route('customer.tickets') }}" 
+                    <a href="{{ route('customer.dashboard') }}" 
                        class="flex items-center text-gray-600 hover:text-blue-600 transition-colors duration-200">
                         <div class="h-9 w-9 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-blue-50">
                             <i class="bx bx-chevron-left text-lg"></i>
@@ -229,7 +229,7 @@
                                 </div>
                             </a>
                             
-                            <a href="{{ route('customer.tickets') }}" 
+                            <a href="{{ route('customer.dashboard') }}" 
                                class="flex items-center p-3 bg-gray-50 hover:bg-green-50 rounded-lg transition-colors duration-200 group">
                                 <div class="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center mr-3 group-hover:bg-green-200">
                                     <i class='bx bx-receipt text-green-600 text-lg'></i>

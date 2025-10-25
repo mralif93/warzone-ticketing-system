@@ -18,9 +18,13 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('event_id')->constrained()->onDelete('cascade');
+            $table->string('customer_name')->nullable();
             $table->string('customer_email');
+            $table->string('customer_phone')->nullable();
+            $table->string('purchase_type')->default('single_day');
             $table->string('order_number')->unique();
             $table->decimal('subtotal', 10, 2)->default(0);
+            $table->decimal('discount_amount', 10, 2)->default(0);
             $table->decimal('service_fee', 10, 2)->default(0);
             $table->decimal('tax_amount', 10, 2)->default(0);
             $table->decimal('total_amount', 10, 2);
@@ -29,6 +33,9 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->datetime('held_until')->nullable();
             $table->string('qrcode')->nullable();
+            $table->timestamp('paid_at')->nullable();
+            $table->timestamp('cancelled_at')->nullable();
+            $table->text('cancellation_reason')->nullable();
             $table->timestamps();
             $table->softDeletes();
             

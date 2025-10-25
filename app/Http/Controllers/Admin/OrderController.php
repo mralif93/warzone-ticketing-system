@@ -388,7 +388,7 @@ class OrderController extends Controller
                         'original_price' => $price,
                         'discount_amount' => $discountAmount > 0 ? $discountAmount / $totalQuantity : 0,
                         'qrcode' => \App\Models\PurchaseTicket::generateQRCode(),
-                        'status' => $request->status === 'paid' ? 'sold' : 'pending',
+                        'status' => $request->status === 'paid' ? 'active' : 'pending',
                         'price_paid' => $discountAmount > 0 ? ($subtotal / $totalQuantity) : $price,
                     ]);
                 }
@@ -489,7 +489,7 @@ class OrderController extends Controller
             ]);
 
             // Update ticket statuses based on order status
-            $ticketStatus = $request->status === 'paid' ? 'sold' : 
+            $ticketStatus = $request->status === 'paid' ? 'active' : 
                            ($request->status === 'cancelled' ? 'cancelled' : 
                            ($request->status === 'refunded' ? 'refunded' : 'pending'));
             
@@ -565,7 +565,7 @@ class OrderController extends Controller
                                 'original_price' => $ticketType->price,
                                 'discount_amount' => 0, // New tickets don't get combo discount
                                 'qrcode' => \App\Models\PurchaseTicket::generateQRCode(),
-                                'status' => 'sold',
+                                'status' => 'active',
                                 'price_paid' => $ticketType->price,
                             ]);
                         }

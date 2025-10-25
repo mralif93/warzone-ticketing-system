@@ -104,7 +104,7 @@
                                             <div class="text-xl font-bold text-wwc-neutral-900 mb-1">RM{{ number_format($ticket->price_paid, 2) }}</div>
                                             <div class="text-sm text-wwc-neutral-500 mb-2">Ticket #{{ $ticket->id }}</div>
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
-                                                @if($ticket->status === 'sold') bg-green-100 text-green-800
+                                                @if($ticket->status === 'active') bg-green-100 text-green-800
                                                 @elseif($ticket->status === 'held') bg-yellow-100 text-yellow-800
                                                 @elseif($ticket->status === 'cancelled') bg-red-100 text-red-800
                                                 @elseif($ticket->status === 'scanned') bg-blue-100 text-blue-800
@@ -218,11 +218,6 @@
                     </div>
                     <div class="p-6">
                         <div class="space-y-3">
-                            <a href="{{ route('customer.tickets') }}" 
-                               class="w-full inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-wwc-primary hover:bg-wwc-primary-light hover:text-wwc-primary-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
-                                <i class='bx bx-receipt text-sm mr-2'></i>
-                                View All Tickets
-                            </a>
                             <a href="{{ route('customer.orders') }}" 
                                class="w-full inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-wwc-neutral-600 hover:bg-wwc-neutral-100 hover:text-wwc-neutral-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-neutral transition-colors duration-200">
                                 <i class='bx bx-file text-sm mr-2'></i>

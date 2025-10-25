@@ -112,7 +112,6 @@
                                 <!-- Dropdown Menu -->
                                 <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-wwc-neutral-200">
                                     <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-sm text-wwc-neutral-700 hover:bg-wwc-primary-light hover:text-wwc-primary">Dashboard</a>
-                                    <a href="{{ route('customer.tickets') }}" class="block px-4 py-2 text-sm text-wwc-neutral-700 hover:bg-wwc-primary-light hover:text-wwc-primary">My Tickets</a>
                                     <a href="{{ route('customer.orders') }}" class="block px-4 py-2 text-sm text-wwc-neutral-700 hover:bg-wwc-primary-light hover:text-wwc-primary">My Orders</a>
                                     <div class="border-t border-wwc-neutral-200"></div>
                                     <form method="POST" action="{{ route('logout') }}" class="block">
@@ -178,7 +177,7 @@
                                        class="block px-3 py-2 rounded-md text-base font-medium text-wwc-neutral-600 hover:text-wwc-primary hover:bg-wwc-primary-light">
                                         Dashboard
                                     </a>
-                                    <a href="{{ route('customer.tickets') }}" 
+                                    <a href="{{ route('customer.dashboard') }}" 
                                        class="block px-3 py-2 rounded-md text-base font-medium text-wwc-neutral-600 hover:text-wwc-primary hover:bg-wwc-primary-light">
                                         My Tickets
                                     </a>

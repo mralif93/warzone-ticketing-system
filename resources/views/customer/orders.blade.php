@@ -123,28 +123,49 @@
                                         <div class="text-xs text-wwc-neutral-500">total amount</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center">
-                                        <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-semibold
-                                            @if($order->status === 'paid') bg-green-100 text-green-800
-                                            @elseif($order->status === 'pending') bg-yellow-100 text-yellow-800
-                                            @elseif($order->status === 'cancelled') bg-red-100 text-red-800
-                                            @elseif($order->status === 'refunded') bg-blue-100 text-blue-800
-                                            @else bg-gray-100 text-gray-800
-                                        @endif">
-                                        {{ ucwords($order->status) }}
-                                    </span>
+                                        <div class="flex flex-col items-center space-y-1">
+                                            <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-semibold
+                                                @if($order->status === 'paid') bg-green-100 text-green-800
+                                                @elseif($order->status === 'pending') bg-yellow-100 text-yellow-800
+                                                @elseif($order->status === 'cancelled') bg-red-100 text-red-800
+                                                @elseif($order->status === 'refunded') bg-blue-100 text-blue-800
+                                                @else bg-gray-100 text-gray-800
+                                            @endif">
+                                                {{ ucwords($order->status) }}
+                                            </span>
+                                            @if($order->status === 'pending')
+                                                <span class="inline-flex items-center text-xs text-wwc-accent font-medium">
+                                                    <i class='bx bx-time-five mr-1'></i>
+                                                    Payment Required
+                                                </span>
+                                            @elseif($order->status === 'cancelled')
+                                                <span class="inline-flex items-center text-xs text-red-600 font-medium">
+                                                    <i class='bx bx-x-circle mr-1'></i>
+                                                    Expired
+                                                </span>
+                                            @endif
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm text-wwc-neutral-900">{{ $order->created_at->format('M j, Y') }}</div>
                                         <div class="text-xs text-wwc-neutral-500">{{ $order->created_at->format('g:i A') }}</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div class="flex items-center justify-end space-x-1">
+                                        <div class="flex items-center justify-end space-x-2">
                                             <a href="{{ route('customer.orders.show', $order) }}" 
                                                class="inline-flex items-center px-3 py-2 text-xs font-semibold text-white bg-wwc-primary hover:bg-wwc-primary-dark rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
                                                title="View order details">
                                                 <i class='bx bx-show text-xs mr-1.5'></i>
                                                 View
                                             </a>
+                                            @if($order->status === 'pending')
+                                                <a href="{{ route('public.tickets.payment', $order) }}" 
+                                                   class="inline-flex items-center px-3 py-2 text-xs font-semibold text-white bg-wwc-accent hover:bg-wwc-accent-dark rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+                                                   title="Complete payment">
+                                                    <i class='bx bx-credit-card text-xs mr-1.5'></i>
+                                                    Pay Now
+                                                </a>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>
@@ -168,10 +189,6 @@
                     <h3 class="text-lg font-medium text-wwc-neutral-900 mb-2">No orders found</h3>
                     <p class="text-sm text-wwc-neutral-500 mb-6">You haven't placed any orders yet or no orders match your filters.</p>
                     <div>
-                        <a href="{{ route('public.events') }}" 
-                           class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-wwc-primary hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary">
-                            Browse Events
-                        </a>
                         @if(request()->hasAny(['search', 'status', 'date_from']))
                             <a href="{{ route('customer.orders') }}" 
                                class="inline-flex items-center px-4 py-2 border border-wwc-neutral-300 text-sm font-medium rounded-md text-wwc-neutral-700 bg-white hover:bg-wwc-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary ml-3">

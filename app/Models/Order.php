@@ -13,10 +13,14 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'event_id',
+        'customer_name',
         'customer_email',
+        'customer_phone',
+        'purchase_type',
         'order_number',
         'qrcode',
         'subtotal',
+        'discount_amount',
         'service_fee',
         'tax_amount',
         'total_amount',
@@ -24,14 +28,20 @@ class Order extends Model
         'payment_method',
         'notes',
         'held_until',
+        'paid_at',
+        'cancelled_at',
+        'cancellation_reason',
     ];
 
     protected $casts = [
         'subtotal' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
         'service_fee' => 'decimal:2',
         'tax_amount' => 'decimal:2',
         'total_amount' => 'decimal:2',
         'held_until' => 'datetime',
+        'paid_at' => 'datetime',
+        'cancelled_at' => 'datetime',
     ];
 
     /**

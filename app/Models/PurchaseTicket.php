@@ -27,11 +27,14 @@ class PurchaseTicket extends Model
         'qrcode',
         'status',
         'scanned_at',
+        'cancelled_at',
+        'cancellation_reason',
         'price_paid',
     ];
 
     protected $casts = [
         'scanned_at' => 'datetime',
+        'cancelled_at' => 'datetime',
         'price_paid' => 'decimal:2',
         'event_day' => 'date',
         'is_combo_purchase' => 'boolean',

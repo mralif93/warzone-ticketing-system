@@ -13,7 +13,7 @@
             <div class="flex items-center justify-between">
                 <!-- Back Navigation -->
                 <div class="flex items-center">
-                    <a href="{{ route('customer.tickets') }}" 
+                    <a href="{{ route('customer.my-tickets') }}" 
                        class="flex items-center text-wwc-neutral-600 hover:text-wwc-primary transition-colors duration-200 group">
                         <div class="h-8 w-8 bg-wwc-neutral-100 rounded-lg flex items-center justify-center group-hover:bg-wwc-primary/10 transition-colors duration-200">
                             <i class="bx bx-chevron-left text-lg group-hover:-translate-x-1 transition-transform"></i>
@@ -285,7 +285,7 @@
                                 </div>
                             </a>
                             
-                            <a href="{{ route('customer.tickets') }}" 
+                            <a href="{{ route('customer.my-tickets') }}" 
                                class="flex items-center p-4 bg-gradient-to-r from-wwc-accent/5 to-wwc-accent/10 hover:from-wwc-accent/10 hover:to-wwc-accent/20 rounded-xl transition-all duration-200 group border border-wwc-accent/20">
                                 <div class="h-12 w-12 bg-wwc-accent/20 rounded-xl flex items-center justify-center mr-4 group-hover:bg-wwc-accent/30 transition-colors duration-200">
                                     <i class='bx bx-receipt text-wwc-accent text-xl'></i>

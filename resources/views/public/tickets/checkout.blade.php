@@ -289,7 +289,7 @@
                         </div>
                     </div>
                     
-                    <form action="{{ route('public.tickets.purchase', $event) }}" method="POST" id="checkout-form" class="p-8 space-y-8">
+                    <form id="checkout-form" class="p-8 space-y-8">
                         @csrf
                         
                         <!-- Hidden fields for ticket data -->
@@ -324,146 +324,52 @@
                         <input type="hidden" name="customer_email" id="hidden_customer_email" value="">
                         <input type="hidden" name="customer_phone" id="hidden_customer_phone" value="">
                         
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Credit Card -->
-                            <div class="relative group">
-                                <input type="radio" 
-                                       id="payment_credit_card" 
-                                       name="payment_method" 
-                                       value="credit_card" 
-                                       class="sr-only peer"
-                                       {{ old('payment_method', 'credit_card') == 'credit_card' ? 'checked' : '' }}
-                                       checked>
-                                <label for="payment_credit_card" 
-                                       class="flex flex-col h-full p-6 border-2 border-gray-200 rounded-xl cursor-pointer peer-checked:border-wwc-primary peer-checked:bg-wwc-primary/5 hover:border-wwc-primary/50 hover:shadow-md transition-all duration-200">
-                                    <div class="flex items-center mb-3">
-                                        <div class="w-6 h-6 rounded-full border-2 border-gray-300 peer-checked:border-wwc-primary peer-checked:bg-wwc-primary flex items-center justify-center transition-all duration-200" id="payment_credit_card_radio">
-                                            <div class="w-4 h-4 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200 shadow-lg" id="payment_credit_card_dot"></div>
-                                        </div>
-                                        <div class="ml-3">
-                                            <div class="flex items-center">
-                                                <h3 class="text-sm font-bold text-gray-900 mr-2">Credit/Debit Card</h3>
-                                                <span class="text-sm text-gray-600">|</span>
-                                                <div class="flex items-center ml-2">
-                                                    <i class="bx bx-shield text-wwc-primary mr-1 text-sm"></i>
-                                                    <span class="text-sm text-gray-600">Secure payment</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <p class="text-gray-600 text-sm leading-relaxed flex-grow">Pay securely with your credit or debit card using our encrypted payment system.</p>
-                                    <div class="flex items-center justify-center text-xs text-white bg-wwc-primary px-3 py-2 rounded-lg w-full mt-4">
-                                        <i class="bx bx-lock mr-1"></i>
-                                        <span class="font-medium">SSL Encrypted</span>
-                                    </div>
+                        <!-- Stripe Payment Integration -->
+                        <div class="space-y-6">
+                            <!-- Payment Messages -->
+                            <div id="payment-error" style="display: none;"></div>
+                            <div id="payment-success" style="display: none;"></div>
+
+                            <!-- Stripe Payment Element -->
+                            <div class="space-y-4">
+                                <label class="block text-sm font-medium text-gray-900">
+                                    Payment Information
                                 </label>
+                                <div id="payment-element" class="border border-gray-300 rounded-lg p-4">
+                                    <!-- Stripe Elements will be inserted here -->
+                                </div>
                             </div>
 
-                            <!-- Online Banking -->
-                            <div class="relative group">
-                                <input type="radio" 
-                                       id="payment_online_banking" 
-                                       name="payment_method" 
-                                       value="online_banking" 
-                                       class="sr-only peer"
-                                       {{ old('payment_method') == 'online_banking' ? 'checked' : '' }}>
-                                <label for="payment_online_banking" 
-                                       class="flex flex-col h-full p-6 border-2 border-gray-200 rounded-xl cursor-pointer peer-checked:border-wwc-primary peer-checked:bg-wwc-primary/5 hover:border-wwc-primary/50 hover:shadow-md transition-all duration-200">
-                                    <div class="flex items-center mb-3">
-                                        <div class="w-6 h-6 rounded-full border-2 border-gray-300 peer-checked:border-wwc-primary peer-checked:bg-wwc-primary flex items-center justify-center transition-all duration-200" id="payment_online_banking_radio">
-                                            <div class="w-4 h-4 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200 shadow-lg" id="payment_online_banking_dot"></div>
-                                        </div>
-                                        <div class="ml-3">
-                                            <div class="flex items-center">
-                                                <h3 class="text-sm font-bold text-gray-900 mr-2">Online Banking</h3>
-                                                <span class="text-sm text-gray-600">|</span>
-                                                <div class="flex items-center ml-2">
-                                                    <i class="bx bx-building text-wwc-primary mr-1 text-sm"></i>
-                                                    <span class="text-sm text-gray-600">Direct transfer</span>
-                                                </div>
-                                            </div>
-                                        </div>
+                            <!-- Security Notice -->
+                            <div class="bg-wwc-primary-light border border-wwc-primary rounded-lg p-4">
+                                <div class="flex items-start">
+                                    <i class='bx bx-shield-check text-wwc-primary text-lg mr-3 mt-0.5'></i>
+                                    <div class="text-sm text-gray-700">
+                                        <h3 class="font-medium mb-2">Secure Payment</h3>
+                                        <p>Your payment information is encrypted and processed securely by Stripe. We never store your card details.</p>
                                     </div>
-                                    <p class="text-gray-600 text-sm leading-relaxed flex-grow">Transfer directly from your bank account using online banking services.</p>
-                                    <div class="flex items-center justify-center text-xs text-white bg-wwc-primary px-3 py-2 rounded-lg w-full mt-4">
-                                        <i class="bx bx-time mr-1"></i>
-                                        <span class="font-medium">Instant processing</span>
-                                    </div>
-                                </label>
+                                </div>
                             </div>
 
-                            <!-- E-Wallet -->
-                            <div class="relative group">
-                                <input type="radio" 
-                                       id="payment_ewallet" 
-                                       name="payment_method" 
-                                       value="e_wallet" 
-                                       class="sr-only peer"
-                                       {{ old('payment_method') == 'e_wallet' ? 'checked' : '' }}>
-                                <label for="payment_ewallet" 
-                                       class="flex flex-col h-full p-6 border-2 border-gray-200 rounded-xl cursor-pointer peer-checked:border-wwc-primary peer-checked:bg-wwc-primary/5 hover:border-wwc-primary/50 hover:shadow-md transition-all duration-200">
-                                    <div class="flex items-center mb-3">
-                                        <div class="w-6 h-6 rounded-full border-2 border-gray-300 peer-checked:border-wwc-primary peer-checked:bg-wwc-primary flex items-center justify-center transition-all duration-200" id="payment_ewallet_radio">
-                                            <div class="w-4 h-4 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200 shadow-lg" id="payment_ewallet_dot"></div>
-                                        </div>
-                                        <div class="ml-3">
-                                            <div class="flex items-center">
-                                                <h3 class="text-sm font-bold text-gray-900 mr-2">E-Wallet/QR Code</h3>
-                                                <span class="text-sm text-gray-600">|</span>
-                                                <div class="flex items-center ml-2">
-                                                    <i class="bx bx-qr text-wwc-primary mr-1 text-sm"></i>
-                                                    <span class="text-sm text-gray-600">Digital payment</span>
-                                                </div>
-                                            </div>
-                                        </div>
+                            <!-- Payment Methods -->
+                            <div class="text-center">
+                                <p class="text-sm text-gray-500 mb-4">We accept</p>
+                                <div class="flex justify-center space-x-4">
+                                    <div class="flex items-center space-x-2">
+                                        <i class='bx bxl-visa text-2xl text-blue-600'></i>
+                                        <span class="text-sm text-gray-600">Visa</span>
                                     </div>
-                                    <p class="text-gray-600 text-sm leading-relaxed flex-grow">Pay with popular e-wallets or scan QR code for quick and convenient payment.</p>
-                                    <div class="flex items-center justify-center text-xs text-white bg-wwc-primary px-3 py-2 rounded-lg w-full mt-4">
-                                        <i class="bx bx-mobile mr-1"></i>
-                                        <span class="font-medium">Mobile friendly</span>
+                                    <div class="flex items-center space-x-2">
+                                        <i class='bx bxl-mastercard text-2xl text-red-600'></i>
+                                        <span class="text-sm text-gray-600">Mastercard</span>
                                     </div>
-                                </label>
-                            </div>
-
-                            <!-- Bank Transfer -->
-                            <div class="relative group">
-                                <input type="radio" 
-                                       id="payment_bank_transfer" 
-                                       name="payment_method" 
-                                       value="bank_transfer" 
-                                       class="sr-only peer"
-                                       {{ old('payment_method') == 'bank_transfer' ? 'checked' : '' }}>
-                                <label for="payment_bank_transfer" 
-                                       class="flex flex-col h-full p-6 border-2 border-gray-200 rounded-xl cursor-pointer peer-checked:border-wwc-primary peer-checked:bg-wwc-primary/5 hover:border-wwc-primary/50 hover:shadow-md transition-all duration-200">
-                                    <div class="flex items-center mb-3">
-                                        <div class="w-6 h-6 rounded-full border-2 border-gray-300 peer-checked:border-wwc-primary peer-checked:bg-wwc-primary flex items-center justify-center transition-all duration-200" id="payment_bank_transfer_radio">
-                                            <div class="w-4 h-4 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200 shadow-lg" id="payment_bank_transfer_dot"></div>
-                                        </div>
-                                        <div class="ml-3">
-                                            <div class="flex items-center">
-                                                <h3 class="text-sm font-bold text-gray-900 mr-2">Bank Transfer</h3>
-                                                <span class="text-sm text-gray-600">|</span>
-                                                <div class="flex items-center ml-2">
-                                                    <i class="bx bx-transfer-alt text-wwc-primary mr-1 text-sm"></i>
-                                                    <span class="text-sm text-gray-600">Traditional transfer</span>
-                                                </div>
-                                            </div>
-                                        </div>
+                                    <div class="flex items-center space-x-2">
+                                        <i class='bx bxl-amex text-2xl text-blue-500'></i>
+                                        <span class="text-sm text-gray-600">American Express</span>
                                     </div>
-                                    <p class="text-gray-600 text-sm leading-relaxed flex-grow">Transfer funds directly from your bank account using traditional banking methods.</p>
-                                    <div class="flex items-center justify-center text-xs text-white bg-wwc-primary px-3 py-2 rounded-lg w-full mt-4">
-                                        <i class="bx bx-check-circle mr-1"></i>
-                                        <span class="font-medium">Reliable & secure</span>
-                                    </div>
-                                </label>
+                                </div>
                             </div>
                         </div>
-                        @error('payment_method')
-                            <p class="text-red-500 text-sm mt-4 flex items-center">
-                                <i class="bx bx-error-circle mr-1"></i>
-                                {{ $message }}
-                            </p>
-                        @enderror
                         
                         <!-- Terms and Conditions -->
                         <div class="mt-10 pt-6 border-t border-gray-200">

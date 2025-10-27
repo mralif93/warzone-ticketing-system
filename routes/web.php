@@ -7,6 +7,8 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\GateStaffController;
+use App\Http\Controllers\SupportStaffController;
+use App\Http\Controllers\CounterStaffController;
 use App\Http\Controllers\Admin\EventController as AdminEventController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
@@ -58,9 +60,9 @@ Route::middleware(['auth'])->group(function () {
         } elseif ($user->hasRole('gate_staff')) {
             return redirect()->route('gate-staff.dashboard');
         } elseif ($user->hasRole('counter_staff')) {
-            return redirect()->route('customer.dashboard'); // Counter staff can use customer dashboard for now
+            return redirect()->route('counter-staff.dashboard');
         } elseif ($user->hasRole('support_staff')) {
-            return redirect()->route('customer.dashboard'); // Support staff can use customer dashboard for now
+            return redirect()->route('support-staff.dashboard');
         } else {
             return redirect()->route('customer.dashboard');
         }
@@ -156,6 +158,23 @@ Route::middleware(['auth', 'gate.staff'])->prefix('gate-staff')->name('gate-staf
     Route::get('/scanner', [GateStaffController::class, 'scanner'])->name('scanner');
     Route::post('/scan-ticket', [GateStaffController::class, 'scanTicket'])->name('scan-ticket');
     Route::get('/scan-history', [GateStaffController::class, 'scanHistory'])->name('scan-history');
+});
+
+// Support Staff routes
+Route::middleware(['auth', 'support.staff'])->prefix('support-staff')->name('support-staff.')->group(function () {
+    Route::get('/dashboard', [SupportStaffController::class, 'dashboard'])->name('dashboard');
+    Route::get('/scanner', [SupportStaffController::class, 'scanner'])->name('scanner');
+    Route::post('/scan-ticket', [SupportStaffController::class, 'scanTicket'])->name('scan-ticket');
+    Route::post('/search-ticket', [SupportStaffController::class, 'searchTicket'])->name('search-ticket');
+    Route::get('/orders/{order}', [SupportStaffController::class, 'showOrder'])->name('orders.show');
+    Route::post('/tickets/{ticket}/cancel', [SupportStaffController::class, 'cancelTicket'])->name('tickets.cancel');
+    Route::post('/orders/{order}/refund', [SupportStaffController::class, 'processRefund'])->name('orders.refund');
+});
+
+// Counter Staff routes
+Route::middleware(['auth', 'counter.staff'])->prefix('counter-staff')->name('counter-staff.')->group(function () {
+    Route::get('/dashboard', [CounterStaffController::class, 'dashboard'])->name('dashboard');
+    Route::get('/scanner', [CounterStaffController::class, 'scanner'])->name('scanner');
 });
 
 // Public routes (must be at the end to override protected routes)

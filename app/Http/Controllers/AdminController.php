@@ -640,6 +640,46 @@ class AdminController extends Controller
         // Get settings from database
         $settings = Setting::getAll();
 
+        // Initialize default settings if they don't exist
+        $defaults = [
+            'max_tickets_per_order' => '10',
+            'seat_hold_duration_minutes' => '15',
+            'maintenance_mode' => '0',
+            'auto_release_holds' => '1',
+            'email_notifications' => '1',
+            'admin_email' => '',
+            'session_timeout' => '60',
+            'max_login_attempts' => '5',
+            'service_fee_percentage' => '5.0',
+            'tax_percentage' => '6.0',
+        ];
+
+        foreach ($defaults as $key => $defaultValue) {
+            if (!isset($settings[$key])) {
+                // Determine the type based on the setting key
+                $type = 'string';
+                if (in_array($key, ['max_tickets_per_order', 'seat_hold_duration_minutes', 'session_timeout', 'max_login_attempts'])) {
+                    $type = 'integer';
+                } elseif (in_array($key, ['maintenance_mode', 'auto_release_holds', 'email_notifications'])) {
+                    $type = 'boolean';
+                } elseif (in_array($key, ['service_fee_percentage', 'tax_percentage'])) {
+                    $type = 'string';
+                }
+                
+                Setting::set($key, $defaultValue, $type);
+                $settings[$key] = $defaultValue;
+            }
+        }
+        
+        // Ensure all boolean values are returned as strings for the view
+        $booleanKeys = ['maintenance_mode', 'auto_release_holds', 'email_notifications'];
+        foreach ($booleanKeys as $key) {
+            if (isset($settings[$key])) {
+                // Convert boolean values to string '0' or '1'
+                $settings[$key] = $settings[$key] ? '1' : '0';
+            }
+        }
+
         return view('admin.settings.index', compact('settings'));
     }
 
@@ -654,7 +694,7 @@ class AdminController extends Controller
             'maintenance_mode' => 'required|in:0,1',
             'auto_release_holds' => 'required|in:0,1',
             'email_notifications' => 'required|in:0,1',
-            'admin_email' => 'required|email|max:255',
+            'admin_email' => 'nullable|email|max:255',
             'session_timeout' => 'required|integer|min:15|max:480',
             'max_login_attempts' => 'required|integer|min:3|max:10',
             'service_fee_percentage' => 'required|numeric|min:0|max:100',
@@ -667,7 +707,12 @@ class AdminController extends Controller
         Setting::set('maintenance_mode', $request->maintenance_mode, 'boolean');
         Setting::set('auto_release_holds', $request->auto_release_holds, 'boolean');
         Setting::set('email_notifications', $request->email_notifications, 'boolean');
-        Setting::set('admin_email', $request->admin_email, 'string');
+        
+        // Only update admin_email if provided
+        if ($request->admin_email) {
+            Setting::set('admin_email', $request->admin_email, 'string');
+        }
+        
         Setting::set('session_timeout', $request->session_timeout, 'integer');
         Setting::set('max_login_attempts', $request->max_login_attempts, 'integer');
         Setting::set('service_fee_percentage', $request->service_fee_percentage, 'string');

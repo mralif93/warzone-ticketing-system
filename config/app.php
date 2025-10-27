@@ -84,7 +84,7 @@ return [
 
     'maintenance_mode' => (bool) env('MAINTENANCE_MODE', false),
     'maintenance_message' => env('MAINTENANCE_MESSAGE', 'We\'re currently performing scheduled maintenance. We\'ll be back online shortly!'),
-    'maintenance_allowed_ips' => env('MAINTENANCE_ALLOWED_IPS', '127.0.0.1,::1'),
+    'maintenance_allowed_ips' => env('MAINTENANCE_ALLOWED_IPS', ''),
     'maintenance_retry_after' => (int) env('MAINTENANCE_RETRY_AFTER', 3600),
 
     /*

@@ -16,17 +16,17 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $settings['maintenance_mode'] == '1' ? 'Offline' : 'Online' }}</div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ ($settings['maintenance_mode'] ?? '0') == '1' ? 'Offline' : 'Online' }}</div>
                             <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">System Status</div>
                             <div class="flex items-center">
-                                <div class="flex items-center text-xs {{ $settings['maintenance_mode'] == '1' ? 'text-wwc-warning' : 'text-wwc-success' }} font-semibold">
-                                    <i class='bx {{ $settings['maintenance_mode'] == '1' ? 'bx-error' : 'bx-check-circle' }} text-xs mr-1'></i>
-                                    {{ $settings['maintenance_mode'] == '1' ? 'Maintenance Mode' : 'Operational' }}
+                                <div class="flex items-center text-xs {{ ($settings['maintenance_mode'] ?? '0') == '1' ? 'text-wwc-warning' : 'text-wwc-success' }} font-semibold">
+                                    <i class='bx {{ ($settings['maintenance_mode'] ?? '0') == '1' ? 'bx-error' : 'bx-check-circle' }} text-xs mr-1'></i>
+                                    {{ ($settings['maintenance_mode'] ?? '0') == '1' ? 'Maintenance Mode' : 'Operational' }}
                                 </div>
                             </div>
                         </div>
-                        <div class="h-12 w-12 rounded-lg {{ $settings['maintenance_mode'] == '1' ? 'bg-wwc-warning-light' : 'bg-wwc-success-light' }} flex items-center justify-center">
-                            <i class='bx {{ $settings['maintenance_mode'] == '1' ? 'bx-error' : 'bx-check-circle' }} text-2xl {{ $settings['maintenance_mode'] == '1' ? 'text-wwc-warning' : 'text-wwc-success' }}'></i>
+                        <div class="h-12 w-12 rounded-lg {{ ($settings['maintenance_mode'] ?? '0') == '1' ? 'bg-wwc-warning-light' : 'bg-wwc-success-light' }} flex items-center justify-center">
+                            <i class='bx {{ ($settings['maintenance_mode'] ?? '0') == '1' ? 'bx-error' : 'bx-check-circle' }} text-2xl {{ ($settings['maintenance_mode'] ?? '0') == '1' ? 'text-wwc-warning' : 'text-wwc-success' }}'></i>
                         </div>
                     </div>
                 </div>
@@ -35,7 +35,7 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $settings['max_tickets_per_order'] }}</div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $settings['max_tickets_per_order'] ?? '10' }}</div>
                             <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Max Tickets/Order</div>
                             <div class="flex items-center">
                                 <div class="flex items-center text-xs text-wwc-info font-semibold">
@@ -54,7 +54,7 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $settings['seat_hold_duration_minutes'] }}m</div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $settings['seat_hold_duration_minutes'] ?? '15' }}m</div>
                             <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Seat Hold Time</div>
                             <div class="flex items-center">
                                 <div class="flex items-center text-xs text-wwc-warning font-semibold">
@@ -73,7 +73,7 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $settings['session_timeout'] }}m</div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $settings['session_timeout'] ?? '60' }}m</div>
                             <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Session Timeout</div>
                             <div class="flex items-center">
                                 <div class="flex items-center text-xs text-wwc-accent font-semibold">
@@ -156,7 +156,7 @@
                                     Maximum Tickets per Order
                                 </label>
                                 <input type="number" name="max_tickets_per_order" id="max_tickets_per_order" 
-                                       value="{{ old('max_tickets_per_order', $settings['max_tickets_per_order']) }}" 
+                                       value="{{ old('max_tickets_per_order', $settings['max_tickets_per_order'] ?? '10') }}" 
                                        min="1" max="20" required
                                        class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('max_tickets_per_order') border-wwc-error @enderror">
                                 <p class="mt-2 text-sm text-wwc-neutral-500">Maximum number of tickets a customer can purchase in a single order</p>
@@ -170,7 +170,7 @@
                                     Seat Hold Duration (Minutes)
                                 </label>
                                 <input type="number" name="seat_hold_duration_minutes" id="seat_hold_duration_minutes" 
-                                       value="{{ old('seat_hold_duration_minutes', $settings['seat_hold_duration_minutes']) }}" 
+                                       value="{{ old('seat_hold_duration_minutes', $settings['seat_hold_duration_minutes'] ?? '15') }}" 
                                        min="1" max="30" required
                                        class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('seat_hold_duration_minutes') border-wwc-error @enderror">
                                 <p class="mt-2 text-sm text-wwc-neutral-500">How long to hold seats during the purchase process</p>
@@ -225,8 +225,8 @@
                                 </label>
                                 <select name="maintenance_mode" id="maintenance_mode" 
                                         class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
-                                    <option value="0" {{ old('maintenance_mode', $settings['maintenance_mode']) == '0' ? 'selected' : '' }}>Disabled</option>
-                                    <option value="1" {{ old('maintenance_mode', $settings['maintenance_mode']) == '1' ? 'selected' : '' }}>Enabled</option>
+                                    <option value="0" {{ old('maintenance_mode', $settings['maintenance_mode'] ?? '0') == '0' ? 'selected' : '' }}>Disabled</option>
+                                    <option value="1" {{ old('maintenance_mode', $settings['maintenance_mode'] ?? '0') == '1' ? 'selected' : '' }}>Enabled</option>
                                 </select>
                                 <p class="mt-2 text-sm text-wwc-neutral-500">Enable maintenance mode to temporarily disable the system</p>
                             </div>
@@ -237,8 +237,8 @@
                                 </label>
                                 <select name="auto_release_holds" id="auto_release_holds" 
                                         class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
-                                    <option value="1" {{ old('auto_release_holds', $settings['auto_release_holds']) == '1' ? 'selected' : '' }}>Enabled</option>
-                                    <option value="0" {{ old('auto_release_holds', $settings['auto_release_holds']) == '0' ? 'selected' : '' }}>Disabled</option>
+                                    <option value="1" {{ old('auto_release_holds', $settings['auto_release_holds'] ?? '1') == '1' ? 'selected' : '' }}>Enabled</option>
+                                    <option value="0" {{ old('auto_release_holds', $settings['auto_release_holds'] ?? '1') == '0' ? 'selected' : '' }}>Disabled</option>
                                 </select>
                                 <p class="mt-2 text-sm text-wwc-neutral-500">Automatically release held seats when they expire</p>
                             </div>
@@ -258,8 +258,8 @@
                                 </label>
                                 <select name="email_notifications" id="email_notifications" 
                                         class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
-                                    <option value="1" {{ old('email_notifications', $settings['email_notifications']) == '1' ? 'selected' : '' }}>Enabled</option>
-                                    <option value="0" {{ old('email_notifications', $settings['email_notifications']) == '0' ? 'selected' : '' }}>Disabled</option>
+                                    <option value="1" {{ old('email_notifications', $settings['email_notifications'] ?? '1') == '1' ? 'selected' : '' }}>Enabled</option>
+                                    <option value="0" {{ old('email_notifications', $settings['email_notifications'] ?? '1') == '0' ? 'selected' : '' }}>Disabled</option>
                                 </select>
                                 <p class="mt-2 text-sm text-wwc-neutral-500">Send email notifications for orders and tickets</p>
                             </div>
@@ -269,7 +269,7 @@
                                     Admin Email
                                 </label>
                                 <input type="email" name="admin_email" id="admin_email" 
-                                       value="{{ old('admin_email', $settings['admin_email']) }}" 
+                                       value="{{ old('admin_email', $settings['admin_email'] ?? '') }}" 
                                        class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('admin_email') border-wwc-error @enderror">
                                 <p class="mt-2 text-sm text-wwc-neutral-500">Email address for system notifications</p>
                                 @error('admin_email')
@@ -291,7 +291,7 @@
                                     Session Timeout (Minutes)
                                 </label>
                                 <input type="number" name="session_timeout" id="session_timeout" 
-                                       value="{{ old('session_timeout', $settings['session_timeout']) }}" 
+                                       value="{{ old('session_timeout', $settings['session_timeout'] ?? '60') }}" 
                                        min="15" max="480" required
                                        class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('session_timeout') border-wwc-error @enderror">
                                 <p class="mt-2 text-sm text-wwc-neutral-500">How long before user sessions expire</p>
@@ -305,7 +305,7 @@
                                     Max Login Attempts
                                 </label>
                                 <input type="number" name="max_login_attempts" id="max_login_attempts" 
-                                       value="{{ old('max_login_attempts', $settings['max_login_attempts']) }}" 
+                                       value="{{ old('max_login_attempts', $settings['max_login_attempts'] ?? '5') }}" 
                                        min="3" max="10" required
                                        class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('max_login_attempts') border-wwc-error @enderror">
                                 <p class="mt-2 text-sm text-wwc-neutral-500">Maximum failed login attempts before account lockout</p>

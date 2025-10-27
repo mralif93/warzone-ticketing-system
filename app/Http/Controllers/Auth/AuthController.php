@@ -27,6 +27,10 @@ class AuthController extends Controller
                 return redirect()->route('admin.dashboard');
             } elseif ($user->hasRole('gate_staff')) {
                 return redirect()->route('gate-staff.dashboard');
+            } elseif ($user->hasRole('support_staff')) {
+                return redirect()->route('support-staff.dashboard');
+            } elseif ($user->hasRole('counter_staff')) {
+                return redirect()->route('counter-staff.dashboard');
             } else {
                 return redirect()->route('customer.dashboard');
             }
@@ -61,6 +65,10 @@ class AuthController extends Controller
                 return redirect()->intended(route('admin.dashboard'))->with('success', 'Login successful!');
             } elseif ($user->hasRole('gate_staff')) {
                 return redirect()->intended(route('gate-staff.dashboard'))->with('success', 'Login successful!');
+            } elseif ($user->hasRole('support_staff')) {
+                return redirect()->intended(route('support-staff.dashboard'))->with('success', 'Login successful!');
+            } elseif ($user->hasRole('counter_staff')) {
+                return redirect()->intended(route('counter-staff.dashboard'))->with('success', 'Login successful!');
             } else {
                 // For customers, check if they were trying to access a specific page
                 if ($intended && str_contains($intended, '/events/') && str_contains($intended, '/cart')) {
@@ -87,6 +95,10 @@ class AuthController extends Controller
                 return redirect()->route('admin.dashboard');
             } elseif ($user->hasRole('gate_staff')) {
                 return redirect()->route('gate-staff.dashboard');
+            } elseif ($user->hasRole('support_staff')) {
+                return redirect()->route('support-staff.dashboard');
+            } elseif ($user->hasRole('counter_staff')) {
+                return redirect()->route('counter-staff.dashboard');
             } else {
                 return redirect()->route('customer.dashboard');
             }

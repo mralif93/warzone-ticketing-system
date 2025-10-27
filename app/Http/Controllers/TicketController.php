@@ -252,11 +252,80 @@ class TicketController extends Controller
             
             $request->validate($validationRules);
             
-            // Create the order using the purchase method logic
+            // Create the order directly in the checkout method
             DB::beginTransaction();
             try {
-                $order = $this->createOrderFromRequest($request, $event, $tickets, $purchaseType, $subtotal, $discountAmount, $serviceFee, $taxAmount, $totalAmount, $totalQuantity);
+                // Create the order
+                $order = \App\Models\Order::create([
+                    'user_id' => Auth::id(),
+                    'event_id' => $event->id,
+                    'customer_name' => $request->customer_name,
+                    'customer_email' => $request->customer_email,
+                    'customer_phone' => $request->customer_phone,
+                    'purchase_type' => $purchaseType,
+                    'order_number' => \App\Models\Order::generateOrderNumber(),
+                    'qrcode' => \App\Models\Order::generateQRCode(),
+                    'subtotal' => $subtotal,
+                    'discount_amount' => $discountAmount,
+                    'service_fee' => $serviceFee,
+                    'tax_amount' => $taxAmount,
+                    'total_amount' => $totalAmount,
+                    'status' => 'pending',
+                    'payment_method' => 'stripe',
+                ]);
                 
+                // Create order items (purchase tickets)
+                $comboGroupId = ($purchaseType === 'multi_day') ? 'COMBO_' . $order->id . '_' . time() : null;
+                $eventDays = $event->getEventDays();
+                
+                foreach ($tickets as $ticketData) {
+                    $ticket = \App\Models\Ticket::find($ticketData['ticket_type_id']);
+                    $quantity = $ticketData['quantity'];
+                    $price = $ticketData['price_paid'];
+                    $eventDay = $ticketData['event_day'] ?? 1;
+                    $eventDayName = $ticketData['event_day_name'] ?? 'Day 1';
+                    
+                    for ($i = 0; $i < $quantity; $i++) {
+                        \App\Models\PurchaseTicket::create([
+                            'order_id' => $order->id,
+                            'event_id' => $event->id,
+                            'ticket_type_id' => $ticket->id,
+                            'zone' => $ticket->name,
+                            'event_day' => $eventDay,
+                            'event_day_name' => $eventDayName,
+                            'is_combo_purchase' => $purchaseType === 'multi_day',
+                            'combo_group_id' => $comboGroupId,
+                            'original_price' => $price,
+                            'discount_amount' => $discountAmount > 0 ? ($discountAmount / $quantity) : 0,
+                            'qrcode' => \App\Models\PurchaseTicket::generateQRCode(),
+                            'status' => 'pending',
+                            'price_paid' => $discountAmount > 0 ? ($subtotal / $quantity) : $price,
+                        ]);
+                    }
+                    
+                    // Update ticket type availability
+                    $ticket->update([
+                        'sold_seats' => $ticket->sold_seats + $quantity,
+                        'available_seats' => $ticket->available_seats - $quantity,
+                        'status' => $ticket->available_seats - $quantity <= 0 ? 'sold_out' : 'active',
+                    ]);
+                }
+
+                // Create audit log
+                \App\Models\AuditLog::create([
+                    'user_id' => Auth::id(),
+                    'action' => 'CREATE',
+                    'table_name' => 'orders',
+                    'record_id' => $order->id,
+                    'old_values' => null,
+                    'new_values' => $order->toArray(),
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ]);
+
+                // Clear session
+                session()->forget(['ticket_quantity', 'selected_ticket_type', 'hold_until']);
+
                 DB::commit();
                 
                 // Redirect to payment page

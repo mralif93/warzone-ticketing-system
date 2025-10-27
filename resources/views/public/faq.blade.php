@@ -28,7 +28,7 @@
                     When and where is the event?
                 </h3>
                 <p class="text-wwc-neutral-600 leading-relaxed">
-                    The event, Warzone 2025 Championship, will take place on 6th December 2025 at Arena 9, Nilai, starting at 6:05 PM.
+                    The event, Warzone 2025 Championship, will take place on 6th & 7th December 2025 at Arena 9, Nilai, starting at 6:05 PM.
                 </p>
             </div>
 

@@ -85,28 +85,34 @@
         @if($upcomingEvents->count() > 0)
         <div class="mb-8">
             <h2 class="text-lg font-semibold text-wwc-neutral-900 mb-4">Upcoming Events</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                @foreach($upcomingEvents as $event)
-                <div class="bg-white rounded-xl border border-wwc-neutral-200 overflow-hidden hover:shadow-md transition-all duration-200">
-                    <div class="p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="w-12 h-12 bg-wwc-primary rounded-lg flex items-center justify-center">
+            @foreach($upcomingEvents as $event)
+            <div class="bg-white rounded-xl border border-wwc-neutral-200 overflow-hidden hover:shadow-md transition-all duration-200 mb-4">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-wwc-primary rounded-lg flex items-center justify-center mr-4">
                                 <i class='bx bx-calendar text-white text-lg'></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-wwc-neutral-900">{{ $event->name }}</h3>
+                                <p class="text-sm text-wwc-neutral-600">{{ $event->venue }}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <div class="text-right">
+                                <div class="flex items-center text-sm text-wwc-neutral-500 mb-1">
+                                    <i class='bx bx-time-five mr-2'></i>
+                                    {{ $event->date_time->format('M j, Y g:i A') }}
+                                </div>
                             </div>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-wwc-success text-white">
                                 On Sale
                             </span>
                         </div>
-                        <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-2">{{ $event->name }}</h3>
-                        <p class="text-sm text-wwc-neutral-600 mb-4">{{ $event->venue }}</p>
-                        <div class="flex items-center text-sm text-wwc-neutral-500">
-                            <i class='bx bx-time-five mr-2'></i>
-                            {{ $event->date_time->format('M j, Y g:i A') }}
-                        </div>
                     </div>
                 </div>
-                @endforeach
             </div>
+            @endforeach
         </div>
         @endif
 

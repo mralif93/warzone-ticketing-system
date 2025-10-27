@@ -147,10 +147,6 @@
                                                  onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'text-center\'><i class=\'bx bx-qr-scan text-6xl text-wwc-neutral-400 mb-2\'></i><p class=\'text-sm text-wwc-neutral-500\'>QR Code</p><p class=\'text-xs text-wwc-neutral-400 mt-1\'>{{ $ticket->qrcode }}</p></div>';">
                                         </div>
                                     </div>
-                                    
-                                    <div class="mt-4">
-                                        <p class="text-xs text-wwc-neutral-500 break-all">QR Code ID: {{ $ticket->qrcode }}</p>
-                                    </div>
                                 </div>
                             @else
                                 <div class="text-center py-8">

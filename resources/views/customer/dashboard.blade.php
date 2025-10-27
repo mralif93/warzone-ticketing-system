@@ -126,7 +126,7 @@
                     <h2 class="text-lg font-semibold text-wwc-neutral-900">My Tickets</h2>
                 </div>
             </div>
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto rounded-b-xl">
                 @if($recentTickets->count() > 0)
                     <table class="min-w-full divide-y divide-wwc-neutral-200">
                         <thead class="bg-wwc-neutral-50">

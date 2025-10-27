@@ -86,15 +86,15 @@
         <div class="mb-8">
             <h2 class="text-lg font-semibold text-wwc-neutral-900 mb-4">Upcoming Events</h2>
             @foreach($upcomingEvents as $event)
-            <div class="bg-white rounded-xl border border-wwc-neutral-200 overflow-hidden hover:shadow-md transition-all duration-200 mb-4">
+            <a href="{{ route('public.events.show', $event) }}" class="block bg-white rounded-xl border border-wwc-neutral-200 overflow-hidden hover:shadow-md transition-all duration-200 mb-4 cursor-pointer group">
                 <div class="p-6">
-                    <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center justify-between">
                         <div class="flex items-center">
-                            <div class="w-12 h-12 bg-wwc-primary rounded-lg flex items-center justify-center mr-4">
+                            <div class="w-12 h-12 bg-wwc-primary rounded-lg flex items-center justify-center mr-4 group-hover:bg-wwc-primary-dark transition-colors duration-200">
                                 <i class='bx bx-calendar text-white text-lg'></i>
                             </div>
                             <div>
-                                <h3 class="text-lg font-semibold text-wwc-neutral-900">{{ $event->name }}</h3>
+                                <h3 class="text-lg font-semibold text-wwc-neutral-900 group-hover:text-wwc-primary transition-colors duration-200">{{ $event->name }}</h3>
                                 <p class="text-sm text-wwc-neutral-600">{{ $event->venue }}</p>
                             </div>
                         </div>
@@ -105,13 +105,16 @@
                                     {{ $event->date_time->format('M j, Y g:i A') }}
                                 </div>
                             </div>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-wwc-success text-white">
-                                On Sale
-                            </span>
+                            <div class="flex items-center space-x-2">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-wwc-success text-white">
+                                    On Sale
+                                </span>
+                                <i class='bx bx-chevron-right text-wwc-neutral-400 group-hover:text-wwc-primary transition-colors duration-200'></i>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </a>
             @endforeach
         </div>
         @endif

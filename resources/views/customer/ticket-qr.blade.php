@@ -110,22 +110,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Instructions -->
-                        <div class="bg-wwc-primary-light border border-wwc-primary rounded-lg p-6">
-                            <div class="flex items-start">
-                                <i class="bx bx-info-circle text-wwc-primary text-xl mr-3 mt-0.5"></i>
-                                <div>
-                                    <h3 class="text-sm font-medium text-wwc-primary mb-2">How to Use Your QR Code</h3>
-                                    <ul class="text-sm text-wwc-neutral-700 space-y-1">
-                                        <li>• Present this QR code at the event entrance</li>
-                                        <li>• Make sure your phone screen is bright and clear</li>
-                                        <li>• The QR code will be scanned by event staff</li>
-                                        <li>• Keep this page open or take a screenshot for offline access</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
                     <!-- Right Side: QR Code -->
@@ -155,6 +139,22 @@
                                     <p class="text-sm text-wwc-neutral-500">This ticket doesn't have a QR code generated yet.</p>
                                 </div>
                             @endif
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instructions - Full Width -->
+                <div class="mt-8 bg-wwc-primary-light border border-wwc-primary rounded-lg p-6">
+                    <div class="flex items-start">
+                        <i class="bx bx-info-circle text-wwc-primary text-xl mr-3 mt-0.5"></i>
+                        <div>
+                            <h3 class="text-sm font-medium text-wwc-primary mb-2">How to Use Your QR Code</h3>
+                            <ul class="text-sm text-wwc-neutral-700 space-y-1">
+                                <li>• Present this QR code at the event entrance</li>
+                                <li>• Make sure your phone screen is bright and clear</li>
+                                <li>• The QR code will be scanned by event staff</li>
+                                <li>• Keep this page open or take a screenshot for offline access</li>
+                            </ul>
                         </div>
                     </div>
                 </div>

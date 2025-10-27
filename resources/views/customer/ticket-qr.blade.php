@@ -48,7 +48,7 @@
                     <!-- Left Side: All Information -->
                     <div class="lg:col-span-2 space-y-6">
                         <!-- Event Information Section -->
-                        <div class="bg-white border border-wwc-neutral-200 rounded-lg p-6">
+                        <div>
                             <h2 class="text-xl font-bold text-wwc-neutral-900 mb-2">Event Information</h2>
                             <p class="text-sm text-wwc-neutral-600 mb-6">Complete event and ticket details</p>
                             

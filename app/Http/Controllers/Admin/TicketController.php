@@ -156,6 +156,7 @@ class TicketController extends Controller
             'new_values' => $ticketType->toArray(),
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
+            'description' => "Ticket type created: {$ticketType->name} - RM{$ticketType->price}"
         ]);
 
         $comboText = $request->has('is_combo') ? ' (Combo)' : '';
@@ -245,6 +246,7 @@ class TicketController extends Controller
             'new_values' => $ticket->toArray(),
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
+            'description' => "Ticket type updated: {$ticket->name}"
         ]);
 
         $comboText = $request->has('is_combo') ? ' (Combo)' : '';
@@ -274,6 +276,7 @@ class TicketController extends Controller
             'new_values' => null,
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
+            'description' => "Ticket type deleted: {$ticket->name}"
         ]);
 
         return redirect()->route('admin.tickets.index')

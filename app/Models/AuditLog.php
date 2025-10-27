@@ -26,6 +26,7 @@ class AuditLog extends Model
         'new_values' => 'array',
     ];
 
+
     /**
      * Get the user who performed the action
      */
@@ -57,6 +58,48 @@ class AuditLog extends Model
             'user_agent' => request()->userAgent(),
             'description' => $description,
         ]);
+    }
+
+    /**
+     * Sanitize array to remove sensitive fields
+     */
+    public static function sanitizeValues(array $values, string $tableName): array
+    {
+        $sensitiveFields = ['password', 'remember_token', 'api_token', 'api_secret'];
+        
+        foreach ($sensitiveFields as $field) {
+            if (isset($values[$field])) {
+                $values[$field] = '***REDACTED***';
+            }
+        }
+        
+        return $values;
+    }
+
+    /**
+     * Get changed values between old and new arrays
+     */
+    public static function getChangedValues(array $oldValues, array $newValues): array
+    {
+        $changedValues = [];
+        
+        foreach ($newValues as $key => $newValue) {
+            // Skip sensitive fields from comparison
+            if (in_array($key, ['password', 'remember_token', 'api_token', 'api_secret', 'created_at', 'updated_at'])) {
+                continue;
+            }
+            
+            $oldValue = $oldValues[$key] ?? null;
+            
+            if ($oldValue !== $newValue) {
+                $changedValues[$key] = [
+                    'old' => $oldValue,
+                    'new' => $newValue
+                ];
+            }
+        }
+        
+        return $changedValues;
     }
 
     /**

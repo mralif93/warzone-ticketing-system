@@ -163,7 +163,7 @@ class SupportStaffController extends Controller
             );
 
             // Create admittance log for support staff
-            AdmittanceLog::create([
+            $admittanceLog = AdmittanceLog::create([
                 'ticket_id' => $ticket->id,
                 'event_id' => $request->event_id,
                 'gate_id' => $request->gate_id ?? 'SUPPORT-1',
@@ -171,6 +171,20 @@ class SupportStaffController extends Controller
                 'scan_result' => $result['result'],
                 'scan_time' => now(),
                 'notes' => 'Scanned by Support Staff',
+            ]);
+
+            // Also log to audit trail
+            $gateId = $request->gate_id ?? 'SUPPORT-1';
+            \App\Models\AuditLog::create([
+                'user_id' => Auth::id(),
+                'action' => 'scan',
+                'table_name' => 'purchase_tickets',
+                'record_id' => $ticket->id,
+                'old_values' => ['status' => $ticket->status],
+                'new_values' => ['status' => $ticket->status, 'scanned_at' => now()],
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'description' => "Support staff scanned ticket: {$result['result']} at {$gateId}"
             ]);
 
             return response()->json([

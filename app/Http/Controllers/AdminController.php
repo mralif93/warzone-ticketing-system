@@ -257,6 +257,7 @@ class AdminController extends Controller
             'new_values' => $user->toArray(),
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
+            'description' => "User created: {$user->name} ({$user->email}) with role {$user->role}"
         ]);
 
         return redirect()->route('admin.users.show', $user)
@@ -288,7 +289,7 @@ class AdminController extends Controller
             'country' => 'nullable|string|max:100',
         ]);
 
-        $oldValues = $user->toArray();
+        $oldValues = AuditLog::sanitizeValues($user->toArray(), 'users');
 
         $user->update([
             'name' => $request->name,
@@ -302,6 +303,8 @@ class AdminController extends Controller
             'country' => $request->country,
         ]);
 
+        $newValues = AuditLog::sanitizeValues($user->toArray(), 'users');
+
         // Log the user update
         AuditLog::create([
             'user_id' => Auth::id(),
@@ -309,9 +312,10 @@ class AdminController extends Controller
             'table_name' => 'users',
             'record_id' => $user->id,
             'old_values' => $oldValues,
-            'new_values' => $user->toArray(),
+            'new_values' => $newValues,
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
+            'description' => "User updated: {$user->name} ({$user->email})"
         ]);
 
         return redirect()->route('admin.users.show', $user)
@@ -348,6 +352,7 @@ class AdminController extends Controller
             'new_values' => null,
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
+            'description' => "User deleted: {$user->name} ({$user->email}) with role {$user->role}"
         ]);
 
         return redirect()->route('admin.users')
@@ -712,6 +717,9 @@ class AdminController extends Controller
             'tax_percentage' => 'required|numeric|min:0|max:100',
         ]);
 
+        // Get old settings for audit
+        $oldSettings = Setting::getAll();
+        
         // Update settings in database
         Setting::set('max_tickets_per_order', $request->max_tickets_per_order, 'integer');
         Setting::set('seat_hold_duration_minutes', $request->seat_hold_duration_minutes, 'integer');
@@ -728,6 +736,22 @@ class AdminController extends Controller
         Setting::set('max_login_attempts', $request->max_login_attempts, 'integer');
         Setting::set('service_fee_percentage', $request->service_fee_percentage, 'string');
         Setting::set('tax_percentage', $request->tax_percentage, 'string');
+        
+        // Get new settings for audit
+        $newSettings = Setting::getAll();
+        
+        // Log settings update
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'UPDATE',
+            'table_name' => 'settings',
+            'record_id' => 0, // Settings table doesn't have a single record ID
+            'old_values' => $oldSettings,
+            'new_values' => $newSettings,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'description' => 'System settings updated'
+        ]);
 
         return back()->with('success', 'Settings updated successfully!');
     }

@@ -250,6 +250,23 @@
                         @endif
                     </a>
 
+                    <!-- Audit Trail -->
+                    <a href="{{ route('admin.audit-logs.index') }}" 
+                       class="group flex items-center px-4 py-4 text-sm font-semibold rounded-xl transition-all duration-300 {{ request()->routeIs('admin.audit-logs*') ? 'bg-gradient-to-r from-wwc-primary-light to-red-100 text-wwc-primary shadow-lg border border-red-200' : 'text-wwc-neutral-600 hover:bg-wwc-neutral-50 hover:text-wwc-neutral-900 hover:shadow-md' }}">
+                        <div class="flex-shrink-0 mr-4">
+                            <div class="h-10 w-10 rounded-xl flex items-center justify-center {{ request()->routeIs('admin.audit-logs*') ? 'bg-wwc-primary-light' : 'bg-wwc-neutral-100 group-hover:bg-wwc-neutral-200' }} transition-colors duration-300">
+                                <i class='bx bx-history text-lg {{ request()->routeIs('admin.audit-logs*') ? 'text-wwc-primary' : 'text-wwc-neutral-500 group-hover:text-wwc-neutral-700' }}'></i>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="font-semibold">Audit Trail</div>
+                            <div class="text-xs text-wwc-neutral-500 mt-0.5">Activity Logs</div>
+                        </div>
+                        @if(request()->routeIs('admin.audit-logs*'))
+                        <div class="h-2 w-2 bg-wwc-primary rounded-full"></div>
+                        @endif
+                    </a>
+
                     <!-- Settings -->
                     <a href="{{ route('admin.settings') }}" 
                        class="group flex items-center px-4 py-4 text-sm font-semibold rounded-xl transition-all duration-300 {{ request()->routeIs('admin.settings*') ? 'bg-gradient-to-r from-wwc-primary-light to-red-100 text-wwc-primary shadow-lg border border-red-200' : 'text-wwc-neutral-600 hover:bg-wwc-neutral-50 hover:text-wwc-neutral-900 hover:shadow-md' }}">
@@ -426,6 +443,7 @@
                         <a href="{{ route('admin.orders.index') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Orders</a>
                         <a href="{{ route('admin.payments.index') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Payments</a>
                         <a href="{{ route('admin.reports') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Reports</a>
+                        <a href="{{ route('admin.audit-logs.index') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Audit Trail</a>
                         <a href="{{ route('admin.settings') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Settings</a>
                     </div>
                 </div>

@@ -52,7 +52,25 @@ class AuditLogController extends Controller
 
         $auditLogs = $query->latest()->paginate(20);
         $actions = AuditLog::select('action')->distinct()->pluck('action');
-        $tables = AuditLog::select('table_name')->distinct()->pluck('table_name');
+        
+        // Get actual tables from database
+        $tablesFromDb = AuditLog::select('table_name')->distinct()->pluck('table_name');
+        
+        // Predefined list of all possible modules for complete coverage
+        $allModules = [
+            'events',
+            'orders',
+            'tickets',
+            'payments',
+            'users',
+            'settings',
+            'purchase',
+            'system'
+        ];
+        
+        // Merge actual tables with predefined modules (removes duplicates)
+        $tables = collect($allModules)->merge($tablesFromDb)->unique()->sort()->values();
+        
         $users = \App\Models\User::select('id', 'name')->get();
 
         return view('admin.audit-logs.index', compact('auditLogs', 'actions', 'tables', 'users'));
@@ -64,6 +82,19 @@ class AuditLogController extends Controller
     public function show(AuditLog $auditLog)
     {
         $auditLog->load('user');
+        
+        // Get raw attributes to bypass accessors
+        $oldValuesRaw = $auditLog->getRawOriginal('old_values');
+        $newValuesRaw = $auditLog->getRawOriginal('new_values');
+        
+        // Parse JSON strings if needed
+        if (is_string($oldValuesRaw) && !empty($oldValuesRaw)) {
+            $auditLog->old_values = json_decode($oldValuesRaw, true);
+        }
+        if (is_string($newValuesRaw) && !empty($newValuesRaw)) {
+            $auditLog->new_values = json_decode($newValuesRaw, true);
+        }
+        
         return view('admin.audit-logs.show', compact('auditLog'));
     }
 

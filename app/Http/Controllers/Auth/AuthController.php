@@ -61,6 +61,19 @@ class AuthController extends Controller
             // Redirect based on user role to preserve session message
             $user = auth()->user();
             
+            // Log the login
+            \App\Models\AuditLog::create([
+                'user_id' => $user->id,
+                'action' => 'login',
+                'table_name' => 'users',
+                'record_id' => $user->id,
+                'old_values' => ['last_login_at' => $user->last_login_at ?? null],
+                'new_values' => ['last_login_at' => now()],
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'description' => "User {$user->name} logged in"
+            ]);
+            
             if ($user->hasRole('administrator')) {
                 return redirect()->intended(route('admin.dashboard'))->with('success', 'Login successful!');
             } elseif ($user->hasRole('gate_staff')) {
@@ -127,6 +140,24 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'phone' => $request->phone,
             'role' => 'Customer', // Default role
+        ]);
+
+        // Log the user registration
+        \App\Models\AuditLog::create([
+            'user_id' => $user->id,
+            'action' => 'create',
+            'table_name' => 'users',
+            'record_id' => $user->id,
+            'old_values' => null,
+            'new_values' => [
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'phone' => $user->phone
+            ],
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'description' => "New customer registered: {$user->name}"
         ]);
 
         Auth::login($user);
@@ -207,8 +238,25 @@ class AuthController extends Controller
     /**
      * Handle logout request
      */
-    public function logout(Request $request)
+public function logout(Request $request)
     {
+        $user = Auth::user();
+        
+        // Log the logout before session is invalidated
+        if ($user) {
+            \App\Models\AuditLog::create([
+                'user_id' => $user->id,
+                'action' => 'logout',
+                'table_name' => 'users',
+                'record_id' => $user->id,
+                'old_values' => null,
+                'new_values' => ['last_logout_at' => now()],
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'description' => "User {$user->name} logged out"
+            ]);
+        }
+        
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

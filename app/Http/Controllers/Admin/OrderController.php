@@ -410,6 +410,7 @@ class OrderController extends Controller
                 'new_values' => $order->toArray(),
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
+                'description' => "Order created: #{$order->order_number} for {$order->customer_email} - {$totalQuantity} tickets (RM{$order->total_amount})"
             ]);
 
             DB::commit();

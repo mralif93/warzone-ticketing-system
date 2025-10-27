@@ -110,6 +110,7 @@ class EventController extends Controller
             'new_values' => $event->toArray(),
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
+            'description' => "Event created: {$event->name} at {$event->venue} on {$event->date_time}"
         ]);
 
         $message = 'Event created successfully!';
@@ -208,6 +209,7 @@ class EventController extends Controller
             'new_values' => $event->toArray(),
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
+            'description' => "Event updated: {$event->name}"
         ]);
 
         $message = 'Event updated successfully!';
@@ -244,6 +246,7 @@ class EventController extends Controller
             'new_values' => null,
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
+            'description' => "Event deleted: {$event->name}"
         ]);
 
         return redirect()->route('admin.events.index')
@@ -272,6 +275,7 @@ class EventController extends Controller
             'new_values' => $event->toArray(),
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
+            'description' => "Event status changed: {$event->name} to {$event->status}"
         ]);
 
         return back()->with('success', 'Event status updated successfully.');

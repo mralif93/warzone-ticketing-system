@@ -170,6 +170,19 @@ class StripeController extends Controller
                 }
             }
 
+            // Log payment to audit trail
+            \App\Models\AuditLog::create([
+                'user_id' => Auth::id(),
+                'action' => 'CREATE',
+                'table_name' => 'payments',
+                'record_id' => $payment->id,
+                'old_values' => null,
+                'new_values' => $payment->toArray(),
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'description' => "Payment created: Stripe payment #{$payment->transaction_id} for Order #{$order->order_number} - RM{$payment->amount}"
+            ]);
+
             DB::commit();
 
             return response()->json([

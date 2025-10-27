@@ -141,7 +141,7 @@ class TicketValidationService
      */
     private function logAdmittance(Ticket $ticket, string $result, string $gateId, int $staffUserId): void
     {
-        AdmittanceLog::create([
+        $admittanceLog = AdmittanceLog::create([
             'ticket_id' => $ticket->id,
             'scan_time' => now(),
             'scan_result' => $result,
@@ -149,6 +149,19 @@ class TicketValidationService
             'staff_user_id' => $staffUserId,
             'device_info' => request()->header('User-Agent'),
             'ip_address' => request()->ip(),
+        ]);
+
+        // Also log to audit trail for staff tracking
+        \App\Models\AuditLog::create([
+            'user_id' => $staffUserId,
+            'action' => 'scan',
+            'table_name' => 'tickets',
+            'record_id' => $ticket->id,
+            'old_values' => ['status' => $ticket->status],
+            'new_values' => ['status' => 'scanned'],
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'description' => "Ticket scanned: {$result} at {$gateId} - {$ticket->qrcode}"
         ]);
     }
 

@@ -86,7 +86,7 @@
         <div class="mb-8">
             <h2 class="text-lg font-semibold text-wwc-neutral-900 mb-4">Upcoming Events</h2>
             @foreach($upcomingEvents as $event)
-            <a href="{{ route('public.events.show', $event) }}" class="block bg-white rounded-xl border border-wwc-neutral-200 overflow-hidden hover:shadow-md transition-all duration-200 mb-4 cursor-pointer group">
+            <a href="{{ route('public.tickets.cart', $event) }}" class="block bg-white rounded-xl border border-wwc-neutral-200 overflow-hidden hover:shadow-md transition-all duration-200 mb-4 cursor-pointer group">
                 <div class="p-6">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center">

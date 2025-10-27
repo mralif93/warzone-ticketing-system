@@ -26,7 +26,7 @@
     </div>
 
     <!-- Main Content -->
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         <!-- QR Code Card -->
         <div class="bg-white rounded-xl shadow-sm border border-wwc-neutral-200 overflow-hidden">
@@ -114,12 +114,19 @@
                                 
                                 <!-- QR Code Image -->
                                 <div class="inline-block p-4 bg-white border border-wwc-neutral-300 rounded-lg">
-                                    <div class="w-64 h-64 bg-wwc-neutral-100 rounded-lg flex items-center justify-center">
-                                        <div class="text-center">
-                                            <i class="bx bx-qr-scan text-6xl text-wwc-neutral-400 mb-2"></i>
-                                            <p class="text-sm text-wwc-neutral-500">QR Code</p>
-                                            <p class="text-xs text-wwc-neutral-400 mt-1">{{ $ticket->qrcode }}</p>
-                                        </div>
+                                    <div class="w-64 h-64 bg-white rounded-lg flex items-center justify-center">
+                                        @if($ticket->qrcode)
+                                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=256x256&data={{ urlencode($ticket->qrcode) }}" 
+                                                 alt="QR Code" 
+                                                 class="w-full h-full object-contain"
+                                                 onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'text-center\'><i class=\'bx bx-qr-scan text-6xl text-wwc-neutral-400 mb-2\'></i><p class=\'text-sm text-wwc-neutral-500\'>QR Code</p><p class=\'text-xs text-wwc-neutral-400 mt-1\'>{{ $ticket->qrcode }}</p></div>';">
+                                        @else
+                                            <div class="text-center">
+                                                <i class="bx bx-qr-scan text-6xl text-wwc-neutral-400 mb-2"></i>
+                                                <p class="text-sm text-wwc-neutral-500">QR Code</p>
+                                                <p class="text-xs text-wwc-neutral-400 mt-1">Not available</p>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                                 

@@ -166,11 +166,11 @@
 
             <!-- Ticket Types List -->
             <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">
-                <div class="px-6 py-4 border-b border-wwc-neutral-100">
-                    <div class="flex items-center justify-between">
+                    <div class="px-6 py-4 border-b border-wwc-neutral-100">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <h3 class="text-lg font-bold text-wwc-neutral-900">Ticket Types Overview</h3>
-                        <div class="flex items-center space-x-4">
-                            <div class="flex items-center space-x-4 text-xs text-wwc-neutral-500">
+                        <div class="flex flex-wrap items-center gap-2 sm:gap-4">
+                            <div class="flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-wwc-neutral-500">
                                 <span class="flex items-center">
                                     <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
                                     {{ number_format($soldSeats) }} Sold
@@ -212,7 +212,7 @@
                 </div>
 
                 @if($ticketTypes->count() > 0)
-                    <div class="overflow-hidden">
+                    <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-wwc-neutral-100">
                             <thead class="bg-wwc-neutral-50">
                                 <tr>

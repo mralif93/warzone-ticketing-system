@@ -47,61 +47,66 @@
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <!-- Left Side: All Information -->
                     <div class="lg:col-span-2 space-y-6">
-                        <!-- Ticket Information -->
-                        <div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-4">Event Details</h3>
-                                    <div class="space-y-3">
-                                        <div>
-                                            <label class="block text-sm font-medium text-wwc-neutral-700">Event</label>
-                                            <p class="text-sm text-wwc-neutral-900">{{ $ticket->event->name }}</p>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-wwc-neutral-700">Venue</label>
-                                            <p class="text-sm text-wwc-neutral-900">{{ $ticket->event->venue }}</p>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-wwc-neutral-700">Date & Time</label>
-                                            <p class="text-sm text-wwc-neutral-900">
-                                                @if($ticket->event_day_name)
-                                                    {{ $ticket->event_day_name }} - {{ $ticket->event->date_time->format('M j, Y \a\t g:i A') }}
-                                                @else
-                                                    {{ $ticket->event->date_time->format('M j, Y \a\t g:i A') }}
-                                                @endif
-                                            </p>
-                                        </div>
-                                    </div>
+                        <!-- Event Information Section -->
+                        <div class="bg-white border border-wwc-neutral-200 rounded-lg p-6">
+                            <h2 class="text-xl font-bold text-wwc-neutral-900 mb-2">Event Information</h2>
+                            <p class="text-sm text-wwc-neutral-600 mb-6">Complete event and ticket details</p>
+                            
+                            <div class="space-y-4">
+                                <!-- Event Name -->
+                                <div class="border-b border-wwc-neutral-100 pb-4">
+                                    <label class="block text-xs font-semibold text-wwc-neutral-500 uppercase tracking-wide mb-1">Event</label>
+                                    <p class="text-base text-wwc-neutral-900 font-medium">{{ $ticket->event->name }}</p>
                                 </div>
                                 
-                                <div>
-                                    <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-4">Ticket Details</h3>
-                                    <div class="space-y-3">
-                                        <div>
-                                            <label class="block text-sm font-medium text-wwc-neutral-700">Ticket Type</label>
-                                            <p class="text-sm text-wwc-neutral-900">{{ $ticket->ticketType->name ?? 'General' }}</p>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-wwc-neutral-700">Zone</label>
-                                            <p class="text-sm text-wwc-neutral-900">{{ $ticket->zone }}</p>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-wwc-neutral-700">Price Paid</label>
-                                            <p class="text-sm text-wwc-neutral-900">RM{{ number_format($ticket->price_paid, 2) }}</p>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-wwc-neutral-700">Status</label>
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                                @if($ticket->status === 'active') bg-green-100 text-green-800
-                                                @elseif($ticket->status === 'pending') bg-yellow-100 text-yellow-800
-                                                @elseif($ticket->status === 'scanned') bg-blue-100 text-blue-800
-                                                @elseif($ticket->status === 'cancelled') bg-red-100 text-red-800
-                                                @else bg-gray-100 text-gray-800
-                                                @endif">
-                                                {{ ucwords($ticket->status) }}
-                                            </span>
-                                        </div>
-                                    </div>
+                                <!-- Date & Time -->
+                                <div class="border-b border-wwc-neutral-100 pb-4">
+                                    <label class="block text-xs font-semibold text-wwc-neutral-500 uppercase tracking-wide mb-1">Date & Time</label>
+                                    <p class="text-base text-wwc-neutral-900 font-medium">
+                                        @if($ticket->event_day_name)
+                                            {{ $ticket->event_day_name }} - {{ $ticket->event->date_time->format('M j, Y \a\t g:i A') }}
+                                        @else
+                                            {{ $ticket->event->date_time->format('M j, Y \a\t g:i A') }}
+                                        @endif
+                                    </p>
+                                </div>
+                                
+                                <!-- Venue -->
+                                <div class="border-b border-wwc-neutral-100 pb-4">
+                                    <label class="block text-xs font-semibold text-wwc-neutral-500 uppercase tracking-wide mb-1">Venue</label>
+                                    <p class="text-base text-wwc-neutral-900 font-medium">{{ $ticket->event->venue }}</p>
+                                </div>
+                                
+                                <!-- Ticket Type -->
+                                <div class="border-b border-wwc-neutral-100 pb-4">
+                                    <label class="block text-xs font-semibold text-wwc-neutral-500 uppercase tracking-wide mb-1">Ticket Type</label>
+                                    <p class="text-base text-wwc-neutral-900 font-medium">{{ $ticket->ticketType->name ?? 'General' }}</p>
+                                </div>
+                                
+                                <!-- Zone -->
+                                <div class="border-b border-wwc-neutral-100 pb-4">
+                                    <label class="block text-xs font-semibold text-wwc-neutral-500 uppercase tracking-wide mb-1">Zone</label>
+                                    <p class="text-base text-wwc-neutral-900 font-medium">{{ $ticket->zone }}</p>
+                                </div>
+                                
+                                <!-- Price Paid -->
+                                <div class="border-b border-wwc-neutral-100 pb-4">
+                                    <label class="block text-xs font-semibold text-wwc-neutral-500 uppercase tracking-wide mb-1">Price Paid</label>
+                                    <p class="text-base text-wwc-neutral-900 font-medium">RM{{ number_format($ticket->price_paid, 2) }}</p>
+                                </div>
+                                
+                                <!-- Status -->
+                                <div class="pb-2">
+                                    <label class="block text-xs font-semibold text-wwc-neutral-500 uppercase tracking-wide mb-2">Status</label>
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                                        @if($ticket->status === 'active') bg-green-100 text-green-800
+                                        @elseif($ticket->status === 'pending') bg-yellow-100 text-yellow-800
+                                        @elseif($ticket->status === 'scanned') bg-blue-100 text-blue-800
+                                        @elseif($ticket->status === 'cancelled') bg-red-100 text-red-800
+                                        @else bg-gray-100 text-gray-800
+                                        @endif">
+                                        {{ ucwords($ticket->status) }}
+                                    </span>
                                 </div>
                             </div>
                         </div>

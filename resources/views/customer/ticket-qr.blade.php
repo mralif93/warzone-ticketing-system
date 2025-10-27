@@ -43,119 +43,127 @@
             </div>
             
             <div class="p-8">
-                <!-- Ticket Information -->
-                <div class="mb-8">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Main Content Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Left Side: All Information -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Ticket Information -->
                         <div>
-                            <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-4">Event Details</h3>
-                            <div class="space-y-3">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-sm font-medium text-wwc-neutral-700">Event</label>
-                                    <p class="text-sm text-wwc-neutral-900">{{ $ticket->event->name }}</p>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-wwc-neutral-700">Venue</label>
-                                    <p class="text-sm text-wwc-neutral-900">{{ $ticket->event->venue }}</p>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-wwc-neutral-700">Date & Time</label>
-                                    <p class="text-sm text-wwc-neutral-900">
-                                        @if($ticket->event_day_name)
-                                            {{ $ticket->event_day_name }} - {{ $ticket->event->date_time->format('M j, Y \a\t g:i A') }}
-                                        @else
-                                            {{ $ticket->event->date_time->format('M j, Y \a\t g:i A') }}
-                                        @endif
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-4">Ticket Details</h3>
-                            <div class="space-y-3">
-                                <div>
-                                    <label class="block text-sm font-medium text-wwc-neutral-700">Ticket Type</label>
-                                    <p class="text-sm text-wwc-neutral-900">{{ $ticket->ticketType->name ?? 'General' }}</p>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-wwc-neutral-700">Zone</label>
-                                    <p class="text-sm text-wwc-neutral-900">{{ $ticket->zone }}</p>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-wwc-neutral-700">Price Paid</label>
-                                    <p class="text-sm text-wwc-neutral-900">RM{{ number_format($ticket->price_paid, 2) }}</p>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-wwc-neutral-700">Status</label>
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                        @if($ticket->status === 'active') bg-green-100 text-green-800
-                                        @elseif($ticket->status === 'pending') bg-yellow-100 text-yellow-800
-                                        @elseif($ticket->status === 'scanned') bg-blue-100 text-blue-800
-                                        @elseif($ticket->status === 'cancelled') bg-red-100 text-red-800
-                                        @else bg-gray-100 text-gray-800
-                                        @endif">
-                                        {{ ucwords($ticket->status) }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- QR Code Display -->
-                <div class="text-center">
-                    <div class="inline-block p-6 bg-white border-2 border-wwc-neutral-200 rounded-xl">
-                        @if($ticket->qrcode)
-                            <div class="text-center">
-                                <div class="mb-4">
-                                    <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-2">Your QR Code</h3>
-                                    <p class="text-sm text-wwc-neutral-600">Scan this code at the event entrance</p>
-                                </div>
-                                
-                                <!-- QR Code Image -->
-                                <div class="inline-block p-4 bg-white border border-wwc-neutral-300 rounded-lg">
-                                    <div class="w-64 h-64 bg-white rounded-lg flex items-center justify-center">
-                                        @if($ticket->qrcode)
-                                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=256x256&data={{ urlencode($ticket->qrcode) }}" 
-                                                 alt="QR Code" 
-                                                 class="w-full h-full object-contain"
-                                                 onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'text-center\'><i class=\'bx bx-qr-scan text-6xl text-wwc-neutral-400 mb-2\'></i><p class=\'text-sm text-wwc-neutral-500\'>QR Code</p><p class=\'text-xs text-wwc-neutral-400 mt-1\'>{{ $ticket->qrcode }}</p></div>';">
-                                        @else
-                                            <div class="text-center">
-                                                <i class="bx bx-qr-scan text-6xl text-wwc-neutral-400 mb-2"></i>
-                                                <p class="text-sm text-wwc-neutral-500">QR Code</p>
-                                                <p class="text-xs text-wwc-neutral-400 mt-1">Not available</p>
-                                            </div>
-                                        @endif
+                                    <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-4">Event Details</h3>
+                                    <div class="space-y-3">
+                                        <div>
+                                            <label class="block text-sm font-medium text-wwc-neutral-700">Event</label>
+                                            <p class="text-sm text-wwc-neutral-900">{{ $ticket->event->name }}</p>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-wwc-neutral-700">Venue</label>
+                                            <p class="text-sm text-wwc-neutral-900">{{ $ticket->event->venue }}</p>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-wwc-neutral-700">Date & Time</label>
+                                            <p class="text-sm text-wwc-neutral-900">
+                                                @if($ticket->event_day_name)
+                                                    {{ $ticket->event_day_name }} - {{ $ticket->event->date_time->format('M j, Y \a\t g:i A') }}
+                                                @else
+                                                    {{ $ticket->event->date_time->format('M j, Y \a\t g:i A') }}
+                                                @endif
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                                 
-                                <div class="mt-4">
-                                    <p class="text-xs text-wwc-neutral-500">QR Code ID: {{ $ticket->qrcode }}</p>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-4">Ticket Details</h3>
+                                    <div class="space-y-3">
+                                        <div>
+                                            <label class="block text-sm font-medium text-wwc-neutral-700">Ticket Type</label>
+                                            <p class="text-sm text-wwc-neutral-900">{{ $ticket->ticketType->name ?? 'General' }}</p>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-wwc-neutral-700">Zone</label>
+                                            <p class="text-sm text-wwc-neutral-900">{{ $ticket->zone }}</p>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-wwc-neutral-700">Price Paid</label>
+                                            <p class="text-sm text-wwc-neutral-900">RM{{ number_format($ticket->price_paid, 2) }}</p>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-wwc-neutral-700">Status</label>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                                @if($ticket->status === 'active') bg-green-100 text-green-800
+                                                @elseif($ticket->status === 'pending') bg-yellow-100 text-yellow-800
+                                                @elseif($ticket->status === 'scanned') bg-blue-100 text-blue-800
+                                                @elseif($ticket->status === 'cancelled') bg-red-100 text-red-800
+                                                @else bg-gray-100 text-gray-800
+                                                @endif">
+                                                {{ ucwords($ticket->status) }}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        @else
-                            <div class="text-center py-8">
-                                <i class="bx bx-error-circle text-4xl text-wwc-error mb-4"></i>
-                                <h3 class="text-lg font-medium text-wwc-neutral-900 mb-2">QR Code Not Available</h3>
-                                <p class="text-sm text-wwc-neutral-500">This ticket doesn't have a QR code generated yet.</p>
-                            </div>
-                        @endif
-                    </div>
-                </div>
+                        </div>
 
-                <!-- Instructions -->
-                <div class="mt-8 bg-wwc-primary-light border border-wwc-primary rounded-lg p-6">
-                    <div class="flex items-start">
-                        <i class="bx bx-info-circle text-wwc-primary text-xl mr-3 mt-0.5"></i>
-                        <div>
-                            <h3 class="text-sm font-medium text-wwc-primary mb-2">How to Use Your QR Code</h3>
-                            <ul class="text-sm text-wwc-neutral-700 space-y-1">
-                                <li>• Present this QR code at the event entrance</li>
-                                <li>• Make sure your phone screen is bright and clear</li>
-                                <li>• The QR code will be scanned by event staff</li>
-                                <li>• Keep this page open or take a screenshot for offline access</li>
-                            </ul>
+                        <!-- Instructions -->
+                        <div class="bg-wwc-primary-light border border-wwc-primary rounded-lg p-6">
+                            <div class="flex items-start">
+                                <i class="bx bx-info-circle text-wwc-primary text-xl mr-3 mt-0.5"></i>
+                                <div>
+                                    <h3 class="text-sm font-medium text-wwc-primary mb-2">How to Use Your QR Code</h3>
+                                    <ul class="text-sm text-wwc-neutral-700 space-y-1">
+                                        <li>• Present this QR code at the event entrance</li>
+                                        <li>• Make sure your phone screen is bright and clear</li>
+                                        <li>• The QR code will be scanned by event staff</li>
+                                        <li>• Keep this page open or take a screenshot for offline access</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Side: QR Code -->
+                    <div class="lg:col-span-1">
+                        <div class="sticky top-8">
+                            <div class="bg-white border-2 border-wwc-neutral-200 rounded-xl p-6">
+                                @if($ticket->qrcode)
+                                    <div class="text-center">
+                                        <div class="mb-4">
+                                            <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-2">Your QR Code</h3>
+                                            <p class="text-sm text-wwc-neutral-600">Scan this code at the event entrance</p>
+                                        </div>
+                                        
+                                        <!-- QR Code Image -->
+                                        <div class="inline-block p-4 bg-white border border-wwc-neutral-300 rounded-lg">
+                                            <div class="w-64 h-64 bg-white rounded-lg flex items-center justify-center">
+                                                @if($ticket->qrcode)
+                                                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=256x256&data={{ urlencode($ticket->qrcode) }}" 
+                                                         alt="QR Code" 
+                                                         class="w-full h-full object-contain"
+                                                         onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'text-center\'><i class=\'bx bx-qr-scan text-6xl text-wwc-neutral-400 mb-2\'></i><p class=\'text-sm text-wwc-neutral-500\'>QR Code</p><p class=\'text-xs text-wwc-neutral-400 mt-1\'>{{ $ticket->qrcode }}</p></div>';">
+                                                @else
+                                                    <div class="text-center">
+                                                        <i class="bx bx-qr-scan text-6xl text-wwc-neutral-400 mb-2"></i>
+                                                        <p class="text-sm text-wwc-neutral-500">QR Code</p>
+                                                        <p class="text-xs text-wwc-neutral-400 mt-1">Not available</p>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mt-4">
+                                            <p class="text-xs text-wwc-neutral-500 break-all">QR Code ID: {{ $ticket->qrcode }}</p>
+                                        </div>
+                                    </div>
+                                @else
+                                    <div class="text-center py-8">
+                                        <i class="bx bx-error-circle text-4xl text-wwc-error mb-4"></i>
+                                        <h3 class="text-lg font-medium text-wwc-neutral-900 mb-2">QR Code Not Available</h3>
+                                        <p class="text-sm text-wwc-neutral-500">This ticket doesn't have a QR code generated yet.</p>
+                                    </div>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>

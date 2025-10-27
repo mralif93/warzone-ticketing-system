@@ -279,11 +279,18 @@ class TicketController extends Controller
                 $eventDays = $event->getEventDays();
                 
                 foreach ($tickets as $ticketData) {
-                    $ticket = \App\Models\Ticket::find($ticketData['ticket_type_id']);
+                    $ticket = $ticketData['ticket'];
                     $quantity = $ticketData['quantity'];
-                    $price = $ticketData['price_paid'];
-                    $eventDay = $ticketData['event_day'] ?? 1;
-                    $eventDayName = $ticketData['event_day_name'] ?? 'Day 1';
+                    $price = $ticketData['price'];
+                    $eventDay = $ticketData['day'] ?? 1;
+                    $eventDayName = $ticketData['day'] ? 'Day ' . $ticketData['day'] : 'Day 1';
+                    
+                    // Calculate per-ticket price (after discount if applicable)
+                    $perTicketPrice = $price;
+                    if ($discountAmount > 0 && $totalQuantity > 0) {
+                        // Distribute discount proportionally based on quantity
+                        $perTicketPrice = ($subtotal / $totalQuantity) + $discountAmount / $totalQuantity;
+                    }
                     
                     for ($i = 0; $i < $quantity; $i++) {
                         \App\Models\PurchaseTicket::create([
@@ -296,10 +303,10 @@ class TicketController extends Controller
                             'is_combo_purchase' => $purchaseType === 'multi_day',
                             'combo_group_id' => $comboGroupId,
                             'original_price' => $price,
-                            'discount_amount' => $discountAmount > 0 ? ($discountAmount / $quantity) : 0,
+                            'discount_amount' => $discountAmount > 0 ? ($discountAmount / $totalQuantity) : 0,
                             'qrcode' => \App\Models\PurchaseTicket::generateQRCode(),
                             'status' => 'pending',
-                            'price_paid' => $discountAmount > 0 ? ($subtotal / $quantity) : $price,
+                            'price_paid' => $perTicketPrice,
                         ]);
                     }
                     

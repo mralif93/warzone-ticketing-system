@@ -98,14 +98,12 @@
                                 <p class="text-sm text-wwc-neutral-600">{{ $event->venue }}</p>
                             </div>
                         </div>
-                        <div class="flex items-center space-x-4">
-                            <div class="text-right">
-                                <div class="flex items-center text-sm text-wwc-neutral-500 mb-1">
-                                    <i class='bx bx-time-five mr-2'></i>
-                                    {{ $event->date_time->format('M j, Y g:i A') }}
-                                </div>
+                        <div class="text-right">
+                            <div class="flex items-center text-sm text-wwc-neutral-500 mb-2 justify-end">
+                                <i class='bx bx-time-five mr-2'></i>
+                                {{ $event->date_time->format('M j, Y g:i A') }}
                             </div>
-                            <div class="flex items-center space-x-2">
+                            <div class="flex items-center space-x-2 justify-end">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-wwc-success text-white">
                                     On Sale
                                 </span>

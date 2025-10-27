@@ -23,9 +23,15 @@ class AdminController extends Controller
     {
         $driver = config('database.default');
         
-        if ($driver === 'sqlite') {
+        // Get the actual driver name from the connection config
+        $driverName = config("database.connections.{$driver}.driver");
+        
+        if ($driverName === 'sqlite') {
             return DB::raw("strftime('%Y-%m', {$column}) as date_group");
+        } elseif ($driverName === 'pgsql') {
+            return DB::raw("TO_CHAR({$column}, 'YYYY-MM') as date_group");
         } else {
+            // MySQL or other databases that support DATE_FORMAT
             return DB::raw("DATE_FORMAT({$column}, '%Y-%m') as date_group");
         }
     }
@@ -37,8 +43,13 @@ class AdminController extends Controller
     {
         $driver = config('database.default');
         
-        if ($driver === 'sqlite') {
+        // Get the actual driver name from the connection config
+        $driverName = config("database.connections.{$driver}.driver");
+        
+        if ($driverName === 'sqlite') {
             return DB::raw("date({$column}) as date_group");
+        } elseif ($driverName === 'pgsql') {
+            return DB::raw("DATE({$column}) as date_group");
         } else {
             return DB::raw("DATE({$column}) as date_group");
         }

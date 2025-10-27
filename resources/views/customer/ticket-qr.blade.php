@@ -131,44 +131,34 @@
                     <!-- Right Side: QR Code -->
                     <div class="lg:col-span-1">
                         <div class="sticky top-8">
-                            <div class="bg-white border-2 border-wwc-neutral-200 rounded-xl p-6">
-                                @if($ticket->qrcode)
-                                    <div class="text-center">
-                                        <div class="mb-4">
-                                            <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-2">Your QR Code</h3>
-                                            <p class="text-sm text-wwc-neutral-600">Scan this code at the event entrance</p>
-                                        </div>
-                                        
-                                        <!-- QR Code Image -->
-                                        <div class="inline-block p-4 bg-white border border-wwc-neutral-300 rounded-lg">
-                                            <div class="w-64 h-64 bg-white rounded-lg flex items-center justify-center">
-                                                @if($ticket->qrcode)
-                                                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=256x256&data={{ urlencode($ticket->qrcode) }}" 
-                                                         alt="QR Code" 
-                                                         class="w-full h-full object-contain"
-                                                         onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'text-center\'><i class=\'bx bx-qr-scan text-6xl text-wwc-neutral-400 mb-2\'></i><p class=\'text-sm text-wwc-neutral-500\'>QR Code</p><p class=\'text-xs text-wwc-neutral-400 mt-1\'>{{ $ticket->qrcode }}</p></div>';">
-                                                @else
-                                                    <div class="text-center">
-                                                        <i class="bx bx-qr-scan text-6xl text-wwc-neutral-400 mb-2"></i>
-                                                        <p class="text-sm text-wwc-neutral-500">QR Code</p>
-                                                        <p class="text-xs text-wwc-neutral-400 mt-1">Not available</p>
-                                                    </div>
-                                                @endif
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="mt-4">
-                                            <p class="text-xs text-wwc-neutral-500 break-all">QR Code ID: {{ $ticket->qrcode }}</p>
+                            @if($ticket->qrcode)
+                                <div class="text-center">
+                                    <div class="mb-4">
+                                        <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-2">Your QR Code</h3>
+                                        <p class="text-sm text-wwc-neutral-600">Scan this code at the event entrance</p>
+                                    </div>
+                                    
+                                    <!-- QR Code Image -->
+                                    <div class="inline-block p-4 bg-white border border-wwc-neutral-300 rounded-lg">
+                                        <div class="w-64 h-64 bg-white rounded-lg flex items-center justify-center">
+                                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=256x256&data={{ urlencode($ticket->qrcode) }}" 
+                                                 alt="QR Code" 
+                                                 class="w-full h-full object-contain"
+                                                 onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'text-center\'><i class=\'bx bx-qr-scan text-6xl text-wwc-neutral-400 mb-2\'></i><p class=\'text-sm text-wwc-neutral-500\'>QR Code</p><p class=\'text-xs text-wwc-neutral-400 mt-1\'>{{ $ticket->qrcode }}</p></div>';">
                                         </div>
                                     </div>
-                                @else
-                                    <div class="text-center py-8">
-                                        <i class="bx bx-error-circle text-4xl text-wwc-error mb-4"></i>
-                                        <h3 class="text-lg font-medium text-wwc-neutral-900 mb-2">QR Code Not Available</h3>
-                                        <p class="text-sm text-wwc-neutral-500">This ticket doesn't have a QR code generated yet.</p>
+                                    
+                                    <div class="mt-4">
+                                        <p class="text-xs text-wwc-neutral-500 break-all">QR Code ID: {{ $ticket->qrcode }}</p>
                                     </div>
-                                @endif
-                            </div>
+                                </div>
+                            @else
+                                <div class="text-center py-8">
+                                    <i class="bx bx-error-circle text-4xl text-wwc-error mb-4"></i>
+                                    <h3 class="text-lg font-medium text-wwc-neutral-900 mb-2">QR Code Not Available</h3>
+                                    <p class="text-sm text-wwc-neutral-500">This ticket doesn't have a QR code generated yet.</p>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>

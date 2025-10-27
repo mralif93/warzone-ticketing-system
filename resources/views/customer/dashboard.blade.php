@@ -99,15 +99,15 @@
                             </div>
                         </div>
                         <div class="text-right">
-                            <div class="flex items-center text-sm text-wwc-neutral-500 mb-2 justify-end">
-                                <i class='bx bx-time-five mr-2'></i>
-                                {{ $event->date_time->format('M j, Y g:i A') }}
-                            </div>
-                            <div class="flex items-center space-x-2 justify-end">
+                            <div class="flex items-center space-x-2 justify-end mb-2">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-wwc-success text-white">
                                     On Sale
                                 </span>
                                 <i class='bx bx-chevron-right text-wwc-neutral-400 group-hover:text-wwc-primary transition-colors duration-200'></i>
+                            </div>
+                            <div class="flex items-center text-sm text-wwc-neutral-500 justify-end">
+                                <i class='bx bx-time-five mr-2'></i>
+                                {{ $event->date_time->format('M j, Y g:i A') }}
                             </div>
                         </div>
                     </div>

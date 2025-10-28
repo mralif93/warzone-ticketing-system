@@ -378,8 +378,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const scanButton = document.getElementById('scan_button');
     const clearButton = document.getElementById('clear_button');
     const scanResult = document.getElementById('scan_result');
-    const eventSelect = document.getElementById('event_id');
-    const gateSelect = document.getElementById('gate_id');
     
     // Camera scanner elements
     const cameraScanButton = document.getElementById('camera_scan_button');
@@ -398,52 +396,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Auto-focus on QR code input
     qrcodeInput.focus();
 
-    // Event and Gate selection validation
-    function validateEventAndGate() {
-        const eventId = eventSelect.value;
-        const gateId = gateSelect.value;
-        let isValid = true;
-        
-        if (!eventId) {
-            eventSelect.classList.remove('border-gray-300');
-            eventSelect.classList.add('border-red-300', 'ring-2', 'ring-red-200');
-            alert('Please select an event before scanning');
-            eventSelect.focus();
-            isValid = false;
-        } else {
-            eventSelect.classList.remove('border-red-300', 'ring-2', 'ring-red-200');
-            eventSelect.classList.add('border-gray-300');
-        }
-        
-        if (!gateId) {
-            gateSelect.classList.remove('border-gray-300');
-            gateSelect.classList.add('border-red-300', 'ring-2', 'ring-red-200');
-            alert('Please select a gate location before scanning');
-            gateSelect.focus();
-            isValid = false;
-        } else {
-            gateSelect.classList.remove('border-red-300', 'ring-2', 'ring-red-200');
-            gateSelect.classList.add('border-gray-300');
-        }
-        
-        return isValid;
-    }
-
-    // Update form validation on change
-    eventSelect.addEventListener('change', function() {
-        if (this.value) {
-            this.classList.remove('border-red-300');
-            this.classList.add('border-gray-300');
-        }
-    });
-
-    gateSelect.addEventListener('change', function() {
-        if (this.value) {
-            this.classList.remove('border-red-300');
-            this.classList.add('border-gray-300');
-        }
-    });
-
     // Handle scan button click
     scanButton.addEventListener('click', function() {
         const qrcode = qrcodeInput.value.trim();
@@ -454,12 +406,9 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        if (!validateEventAndGate()) {
-            return;
-        }
-
-        const eventId = eventSelect.value;
-        const gateId = gateSelect.value;
+        // Default values for event and gate
+        const eventId = null;
+        const gateId = 'GATE-1';
         scanTicket(qrcode, eventId, gateId);
     });
 
@@ -1082,12 +1031,8 @@ document.addEventListener('DOMContentLoaded', function() {
         cameraModal.classList.add('hidden');
         
         // Auto-scan the detected QR code
-        if (!validateEventAndGate()) {
-            return;
-        }
-        
-        const eventId = eventSelect.value;
-        const gateId = gateSelect.value;
+        const eventId = null;
+        const gateId = 'GATE-1';
         scanTicket(qrData, eventId, gateId);
     }
 

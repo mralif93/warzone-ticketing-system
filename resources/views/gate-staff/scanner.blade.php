@@ -1166,7 +1166,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 color = '#EF4444';
                 title = 'Already Scanned';
                 html = `
-                    <div class="text-left space-y-3">
+                    <div class="text-center space-y-3">
                         <p class="mb-4 text-base font-semibold text-red-600">This ticket has already been scanned!</p>
                         ${data.ticket ? `
                         <div class="bg-red-50 p-4 rounded-lg border border-red-200 space-y-2">
@@ -1190,7 +1190,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                         </div>
                         ` : ''}
-                        <p class="text-xs text-gray-500">Please check if this is a duplicate entry or contact support.</p>
+                        <p class="text-xs text-gray-500 text-center">Please check if this is a duplicate entry or contact support.</p>
                     </div>
                 `;
                 break;

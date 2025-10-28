@@ -1067,7 +1067,13 @@ class TicketController extends Controller
             abort(403, 'Unauthorized access to order.');
         }
 
-        $order->load(['tickets', 'user']);
+        $order->load([
+            'tickets',
+            'purchaseTickets.event',
+            'purchaseTickets.ticketType',
+            'user',
+            'event'
+        ]);
         
         return view('public.tickets.confirmation', compact('order'));
     }

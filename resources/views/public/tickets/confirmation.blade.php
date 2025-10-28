@@ -13,7 +13,7 @@
             <div class="flex items-center justify-between">
                 <!-- Back Navigation -->
                 <div class="flex items-center">
-                    <a href="{{ route('customer.my-tickets') }}" 
+                    <a href="{{ route('customer.dashboard') }}" 
                        class="flex items-center text-wwc-neutral-600 hover:text-wwc-primary transition-colors duration-200 group">
                         <div class="h-8 w-8 bg-wwc-neutral-100 rounded-lg flex items-center justify-center group-hover:bg-wwc-primary/10 transition-colors duration-200">
                             <i class="bx bx-chevron-left text-lg group-hover:-translate-x-1 transition-transform"></i>
@@ -107,7 +107,37 @@
                             </div>
                             <dt class="text-sm font-medium text-wwc-neutral-500 uppercase tracking-wide">Event</dt>
                         </div>
-                        <dd class="text-lg font-semibold text-wwc-neutral-900">{{ $order->tickets->first()->event->name }}</dd>
+                        <dd class="text-lg font-semibold text-wwc-neutral-900">
+                            @if($order->event)
+                                {{ $order->event->name }}
+                            @elseif($order->purchaseTickets && $order->purchaseTickets->count() > 0)
+                                {{ $order->purchaseTickets->first()->event->name }}
+                            @elseif($order->tickets && $order->tickets->count() > 0)
+                                {{ $order->tickets->first()->event->name }}
+                            @else
+                                N/A
+                            @endif
+                        </dd>
+                    </div>
+                    
+                    <!-- Event Date & Time -->
+                    <div class="flex items-center justify-between py-4 border-b border-wwc-neutral-100">
+                        <div class="flex items-center">
+                            <div class="h-12 w-12 bg-wwc-info/10 rounded-xl flex items-center justify-center mr-4">
+                                <i class='bx bx-calendar text-wwc-info text-xl'></i>
+                            </div>
+                            <dt class="text-sm font-medium text-wwc-neutral-500 uppercase tracking-wide">Event Date & Time</dt>
+                        </div>
+                        <dd class="text-lg font-semibold text-wwc-neutral-900">
+                            @php
+                                $event = $order->event ?? ($order->purchaseTickets && $order->purchaseTickets->count() > 0 ? $order->purchaseTickets->first()->event : ($order->tickets && $order->tickets->count() > 0 ? $order->tickets->first()->event : null));
+                            @endphp
+                            @if($event)
+                                {{ $event->date_time->format('M j, Y') }} ({{ $event->start_time }} - {{ $event->end_time }})
+                            @else
+                                N/A
+                            @endif
+                        </dd>
                     </div>
                     
                     <!-- Total Amount -->
@@ -285,7 +315,7 @@
 
         <!-- Action Buttons -->
         <div class="flex flex-col sm:flex-row justify-center gap-4">
-            <a href="{{ route('customer.my-tickets') }}" 
+            <a href="{{ route('customer.dashboard') }}" 
                class="inline-flex items-center justify-center px-6 py-3 bg-wwc-primary text-white rounded-lg font-semibold hover:bg-wwc-primary-dark transition-colors duration-200">
                 <i class='bx bx-receipt mr-2'></i>
                 View My Tickets

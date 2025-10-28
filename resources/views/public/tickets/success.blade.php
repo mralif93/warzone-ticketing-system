@@ -63,7 +63,7 @@
                                     @if($event->isMultiDay())
                                         {{ $event->getEventDays()[0]['display'] }} - {{ $event->getEventDays()[1]['display'] }}
                                     @else
-                                        {{ $event->getEventDays()[0]['display'] }}
+                                        {{ $event->date_time->format('M j, Y') }}
                                     @endif
                                 </span>
                             </div>
@@ -208,16 +208,19 @@
 
         <!-- Action Buttons -->
         <div class="flex flex-col sm:flex-row justify-center gap-4 px-2">
-            <a href="{{ route('public.tickets.confirmation', $order) }}" 
-               class="inline-flex items-center justify-center px-8 py-4 bg-green-600 text-white rounded-xl font-bold text-lg hover:bg-green-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex-1 sm:flex-none sm:w-1/2">
-                <i class="bx bx-receipt mr-3 text-xl"></i>
-                Details Confirmation
-            </a>
-            <a href="{{ route('public.tickets.my-tickets') }}" 
-               class="inline-flex items-center justify-center px-8 py-4 bg-gray-600 text-white rounded-xl font-bold text-lg hover:bg-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex-1 sm:flex-none sm:w-1/2">
-                <i class="bx bx-ticket mr-3 text-xl"></i>
-                My Tickets
-            </a>
+            @if($order->purchaseTickets && $order->purchaseTickets->count() > 0)
+                <a href="{{ route('customer.tickets.qr', $order->purchaseTickets->first()->id) }}" 
+                   class="w-full inline-flex items-center justify-center px-8 py-4 bg-green-600 text-white rounded-xl font-bold text-lg hover:bg-green-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                    <i class="bx bx-qr-scan mr-3 text-xl"></i>
+                    View Ticket
+                </a>
+            @else
+                <a href="{{ route('customer.dashboard') }}" 
+                   class="w-full inline-flex items-center justify-center px-8 py-4 bg-green-600 text-white rounded-xl font-bold text-lg hover:bg-green-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                    <i class="bx bx-ticket mr-3 text-xl"></i>
+                    My Tickets
+                </a>
+            @endif
         </div>
     </div>
 </div>

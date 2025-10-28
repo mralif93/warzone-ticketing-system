@@ -434,6 +434,27 @@ class Event extends Model
     }
 
     /**
+     * Get start time from date_time
+     */
+    public function getStartTimeAttribute()
+    {
+        return $this->date_time ? $this->date_time->format('g:i A') : null;
+    }
+
+    /**
+     * Get end time (calculated from date_time with default duration of 4 hours)
+     */
+    public function getEndTimeAttribute()
+    {
+        if (!$this->date_time) {
+            return null;
+        }
+        
+        // Add 4 hours to date_time as default event duration
+        return $this->date_time->copy()->addHours(4)->format('g:i A');
+    }
+
+    /**
      * Boot method to ensure single default event
      */
     protected static function boot()

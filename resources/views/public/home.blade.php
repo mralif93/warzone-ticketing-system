@@ -82,15 +82,18 @@
                         @if(file_exists(public_path('images/all-layout.jpeg')))
                             <img src="{{ asset('images/all-layout.jpeg') }}" 
                                  alt="N9 Arena Layout" 
-                                 class="w-full h-auto rounded-lg shadow-lg">
+                                 onclick="openArenaLayoutModal()"
+                                 class="w-full h-auto rounded-lg shadow-lg cursor-pointer hover:opacity-90 transition-opacity">
                         @elseif(file_exists(public_path('images/arena-layout.png')))
                             <img src="{{ asset('images/arena-layout.png') }}" 
                                  alt="N9 Arena Layout" 
-                                 class="w-full h-auto rounded-lg shadow-lg">
+                                 onclick="openArenaLayoutModal()"
+                                 class="w-full h-auto rounded-lg shadow-lg cursor-pointer hover:opacity-90 transition-opacity">
                         @elseif(file_exists(public_path('images/arena-layout.svg')))
                             <img src="{{ asset('images/arena-layout.svg') }}" 
                                  alt="N9 Arena Layout" 
-                                 class="w-full h-auto rounded-lg shadow-lg">
+                                 onclick="openArenaLayoutModal()"
+                                 class="w-full h-auto rounded-lg shadow-lg cursor-pointer hover:opacity-90 transition-opacity">
                         @else
                             <div class="text-center py-12">
                                 <i class='bx bx-image text-6xl text-wwc-neutral-600 mb-4'></i>
@@ -749,6 +752,59 @@ document.addEventListener('click', function(e) {
     const modal = document.getElementById('seatingModal');
     if (modal && e.target === modal) {
         closeSeatingModal();
+    }
+});
+
+// Arena Layout Modal
+function openArenaLayoutModal() {
+    // Get the image source
+    let imageSrc = "{{ asset('images/all-layout.jpeg') }}";
+    
+    // Check if modal exists, if not create it
+    let modal = document.getElementById('arenaLayoutModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'arenaLayoutModal';
+        modal.className = 'fixed inset-0 bg-black bg-opacity-75 z-50 hidden flex items-center justify-center p-4';
+        modal.innerHTML = `
+            <div class="relative bg-white rounded-lg shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden">
+                <div class="flex justify-between items-center p-4 border-b border-gray-200">
+                    <h3 class="text-xl font-semibold text-gray-900">N9 Arena Layout</h3>
+                    <button onclick="closeArenaLayoutModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <i class='bx bx-x text-3xl'></i>
+                    </button>
+                </div>
+                <div class="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+                    <img id="arenaModalImage" src="" alt="Arena Layout" class="w-full h-auto rounded-lg">
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    document.getElementById('arenaModalImage').src = imageSrc;
+    modal.classList.remove('hidden');
+}
+
+function closeArenaLayoutModal() {
+    const modal = document.getElementById('arenaLayoutModal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}
+
+// Close arena modal when clicking outside
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('arenaLayoutModal');
+    if (modal && e.target === modal) {
+        closeArenaLayoutModal();
+    }
+});
+
+// Close arena modal with ESC key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeArenaLayoutModal();
     }
 });
 </script>

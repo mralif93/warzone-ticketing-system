@@ -1090,15 +1090,6 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             displayScanResult(data);
-            
-            // Clear input and focus for next scan
-            qrcodeInput.value = '';
-            qrcodeInput.focus();
-            
-            // Auto-clear result after 5 seconds
-            clearTimeout = setTimeout(() => {
-                scanResult.classList.add('hidden');
-            }, 5000);
         })
         .catch(error => {
             console.error('Error:', error);
@@ -1116,80 +1107,73 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function displayScanResult(data) {
-        const resultIcon = document.getElementById('result_icon');
-        const resultTitle = document.getElementById('result_title');
-        const resultMessage = document.getElementById('result_message');
-        const ticketDetails = document.getElementById('ticket_details');
-        const performanceTime = document.getElementById('performance_time');
-
-        // Clear previous timeout
-        if (clearTimeout) {
-            clearTimeout();
-        }
-
-        // Set result styling based on status
-        let iconClass, titleClass, messageClass, borderClass;
-
+        // Determine icon and color based on status
+        let icon, color, title, html;
+        
         switch(data.status) {
             case 'SUCCESS':
-                iconClass = 'bx-check-circle bg-green-100 text-green-600';
-                titleClass = 'text-green-600';
-                messageClass = 'text-green-700';
-                borderClass = 'border-green-200 bg-green-50';
+                icon = 'success';
+                color = '#10B981';
+                title = 'Ticket Validated';
+                html = `
+                    <div class="text-left">
+                        <p class="mb-3">${data.message}</p>
+                        ${data.ticket ? `
+                        <div class="bg-gray-50 p-4 rounded-lg space-y-2">
+                            <p class="text-sm"><strong>Event:</strong> ${data.ticket.event_name || 'N/A'}</p>
+                            <p class="text-sm"><strong>Ticket:</strong> ${data.ticket.ticket_identifier || 'N/A'}</p>
+                            <p class="text-sm"><strong>Price:</strong> RM${data.ticket.price_paid || '0'}</p>
+                        </div>
+                        ` : ''}
+                        <p class="text-xs text-gray-500 mt-3">Scan completed in ${data.performance_time || 0}ms</p>
+                    </div>
+                `;
                 break;
             case 'DUPLICATE':
-                iconClass = 'bx-x-circle bg-red-100 text-red-600';
-                titleClass = 'text-red-600';
-                messageClass = 'text-red-700';
-                borderClass = 'border-red-200 bg-red-50';
+                icon = 'error';
+                color = '#EF4444';
+                title = 'Duplicate Scan';
+                html = `<p>${data.message}</p>`;
                 break;
             case 'INVALID':
-            case 'ERROR':
-                iconClass = 'bx-error bg-red-100 text-red-600';
-                titleClass = 'text-red-600';
-                messageClass = 'text-red-700';
-                borderClass = 'border-red-200 bg-red-50';
+                icon = 'error';
+                color = '#EF4444';
+                title = 'Invalid Ticket';
+                html = `<p>${data.message}</p>`;
                 break;
             case 'WRONG_GATE':
+                icon = 'warning';
+                color = '#F59E0B';
+                title = 'Wrong Gate';
+                html = `<p>${data.message}</p>`;
+                break;
             case 'WRONG_EVENT':
-                iconClass = 'bx-error-circle bg-yellow-100 text-yellow-600';
-                titleClass = 'text-yellow-600';
-                messageClass = 'text-yellow-700';
-                borderClass = 'border-yellow-200 bg-yellow-50';
+                icon = 'warning';
+                color = '#F59E0B';
+                title = 'Wrong Event';
+                html = `<p>${data.message}</p>`;
                 break;
             default:
-                iconClass = 'bx-question-mark bg-gray-100 text-gray-600';
-                titleClass = 'text-gray-600';
-                messageClass = 'text-gray-700';
-                borderClass = 'border-gray-200 bg-gray-50';
+                icon = 'error';
+                color = '#EF4444';
+                title = 'Error';
+                html = `<p>${data.message}</p>`;
         }
 
-        // Update result display
-        resultIcon.className = `w-16 h-16 rounded-full flex items-center justify-center text-3xl ${iconClass}`;
-        resultTitle.className = `text-xl font-bold text-center mb-2 ${titleClass}`;
-        resultMessage.className = `text-center mb-4 ${messageClass}`;
-        
-        // Update content
-        resultTitle.textContent = data.status;
-        resultMessage.textContent = data.message;
-        performanceTime.textContent = `Scan completed in ${data.performance_time || 0}ms`;
-
-        // Show ticket details for successful scans
-        if (data.status === 'SUCCESS' && data.ticket) {
-            document.getElementById('ticket_event').textContent = data.ticket.event_name || 'N/A';
-            document.getElementById('ticket_zone').textContent = data.ticket.ticket_identifier || 'N/A';
-            document.getElementById('ticket_price').textContent = `RM${data.ticket.price_paid || '0'}`;
-            ticketDetails.classList.remove('hidden');
-        } else {
-            ticketDetails.classList.add('hidden');
-        }
-
-        // Update border styling
-        const resultContainer = scanResult.querySelector('.p-6');
-        resultContainer.className = `p-6 rounded-lg border-2 ${borderClass}`;
-
-        // Show result
-        scanResult.classList.remove('hidden');
+        // Show SweetAlert popup
+        Swal.fire({
+            icon: icon,
+            title: title,
+            html: html,
+            confirmButtonColor: color,
+            confirmButtonText: 'OK',
+            allowOutsideClick: false,
+            didClose: () => {
+                // Clear input and focus for next scan
+                qrcodeInput.value = '';
+                qrcodeInput.focus();
+            }
+        });
     }
 });
 

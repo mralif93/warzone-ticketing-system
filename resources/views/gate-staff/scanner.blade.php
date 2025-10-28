@@ -1164,8 +1164,35 @@ document.addEventListener('DOMContentLoaded', function() {
             case 'DUPLICATE':
                 icon = 'error';
                 color = '#EF4444';
-                title = 'Duplicate Scan';
-                html = `<p>${data.message}</p>`;
+                title = 'Already Scanned';
+                html = `
+                    <div class="text-left space-y-3">
+                        <p class="mb-4 text-base font-semibold text-red-600">This ticket has already been scanned!</p>
+                        ${data.ticket ? `
+                        <div class="bg-red-50 p-4 rounded-lg border border-red-200 space-y-2">
+                            <div class="flex justify-between items-start pb-2 border-b border-red-300">
+                                <span class="text-sm font-semibold text-gray-600">Event:</span>
+                                <span class="text-sm text-gray-900 text-right">${data.ticket.event_name || 'N/A'}</span>
+                            </div>
+                            <div class="flex justify-between items-start py-2 border-b border-red-300">
+                                <span class="text-sm font-semibold text-gray-600">Ticket Type:</span>
+                                <span class="text-sm text-gray-900 text-right">${data.ticket.ticket_identifier || 'N/A'}</span>
+                            </div>
+                            ${data.ticket.scanned_at ? `
+                            <div class="flex justify-between items-start py-2 border-b border-red-300">
+                                <span class="text-sm font-semibold text-gray-600">Scanned At:</span>
+                                <span class="text-sm text-gray-900 text-right">${data.ticket.scanned_at}</span>
+                            </div>
+                            ` : ''}
+                            <div class="flex justify-between items-center pt-2">
+                                <span class="text-sm font-semibold text-gray-600">Status:</span>
+                                <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold uppercase">Already Scanned</span>
+                            </div>
+                        </div>
+                        ` : ''}
+                        <p class="text-xs text-gray-500">Please check if this is a duplicate entry or contact support.</p>
+                    </div>
+                `;
                 break;
             case 'INVALID':
                 icon = 'error';

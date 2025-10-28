@@ -78,7 +78,7 @@ class TicketValidationService
             'length' => strlen($qrcode)
         ]);
         
-        // Use raw SQL for maximum performance with proper indexing
+            // Use raw SQL for maximum performance with proper indexing
         $result = DB::selectOne("
             SELECT pt.id, pt.event_id, pt.qrcode, pt.status, pt.scanned_at, 
                    pt.price_paid, pt.created_at, pt.ticket_type_id, pt.zone,
@@ -89,7 +89,6 @@ class TicketValidationService
             LEFT JOIN tickets t ON pt.ticket_type_id = t.id
             WHERE pt.qrcode = ? 
             AND pt.deleted_at IS NULL
-            AND pt.status IN ('sold', 'active', 'pending')
         ", [$qrcode]);
         
         if (!$result) {
@@ -111,7 +110,7 @@ class TicketValidationService
             'event_name' => $result->event_name
         ]);
 
-        // Convert to PurchaseTicket model for consistency
+            // Convert to PurchaseTicket model for consistency
         $ticket = PurchaseTicket::find($result->id);
         if ($ticket) {
             // Add event and ticket type information to the ticket object
@@ -121,6 +120,7 @@ class TicketValidationService
             $ticket->zone = $result->zone ?? 'N/A';
             $ticket->ticket_type_name = $result->ticket_type_name ?? 'N/A';
             $ticket->status = $result->status ?? 'N/A';
+            $ticket->scanned_at = $result->scanned_at ?? null;
         }
 
         return $ticket;
@@ -210,6 +210,7 @@ class TicketValidationService
                 'zone' => $ticket->zone ?? 'N/A',
                 'price_paid' => $ticket->price_paid ?? 0,
                 'status' => $ticket->status ?? 'N/A',
+                'scanned_at' => $ticket->scanned_at ? $ticket->scanned_at->format('Y-m-d H:i:s') : null,
             ];
         }
 

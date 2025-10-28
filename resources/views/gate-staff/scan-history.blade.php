@@ -195,7 +195,7 @@
         </div>
     </div>
 
-    <div class="py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
         <!-- Filters -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-6 sm:mb-8">
             <div class="px-4 sm:px-6 py-4 border-b border-gray-200">

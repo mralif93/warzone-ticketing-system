@@ -1151,10 +1151,10 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div class="text-right flex flex-col items-end">
                                     ${data.ticket.original_price && parseFloat(data.ticket.original_price || 0) > parseFloat(data.ticket.price_paid || 0) ? `
                                     <span class="text-sm text-gray-400 line-through">RM${parseFloat(data.ticket.original_price || 0).toFixed(2)}</span>
-                                    <span class="text-sm font-semibold text-green-600">RM${parseFloat(data.ticket.price_paid || 0).toFixed(2)}</span>
-                                    <span class="text-xs text-green-600 font-semibold">Discount: RM${parseFloat((data.ticket.original_price || 0) - (data.ticket.price_paid || 0)).toFixed(2)}</span>
+                                    <span class="text-sm text-green-600">RM${parseFloat(data.ticket.price_paid || 0).toFixed(2)}</span>
+                                    <span class="text-xs text-green-600">Discount: RM${parseFloat((data.ticket.original_price || 0) - (data.ticket.price_paid || 0)).toFixed(2)}</span>
                                     ` : `
-                                    <span class="text-sm font-semibold text-gray-900">RM${parseFloat(data.ticket.price_paid || 0).toFixed(2)}</span>
+                                    <span class="text-sm text-gray-900">RM${parseFloat(data.ticket.price_paid || 0).toFixed(2)}</span>
                                     `}
                                 </div>
                             </div>

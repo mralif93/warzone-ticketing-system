@@ -195,65 +195,46 @@
         </div>
     </div>
 
-    <div class="max-w-7xl mx-auto py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
+    <div class="py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
         <!-- Filters -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-6 sm:mb-8">
             <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-900">Filters</h3>
-                <p class="text-sm text-gray-500">Filter scan history by date, result, and event</p>
+                <p class="text-sm text-gray-500">Filter scan history by result and event</p>
             </div>
             <div class="p-4 sm:p-6">
-                
                 <form method="GET" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div>
-                        <label for="date_from" class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="bx bx-calendar mr-1"></i>
-                            From Date
-                        </label>
-                        <input type="date" id="date_from" name="date_from" 
-                               value="{{ request('date_from') }}"
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors text-base">
-                    </div>
-                    <div>
-                        <label for="date_to" class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="bx bx-calendar mr-1"></i>
-                            To Date
-                        </label>
-                        <input type="date" id="date_to" name="date_to" 
-                               value="{{ request('date_to') }}"
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors text-base">
-                    </div>
-                    <div>
-                        <label for="result" class="block text-sm font-medium text-gray-700 mb-2">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="result" class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="bx bx-check-circle mr-1"></i>
-                            Result
-                        </label>
-                        <select id="result" name="result" 
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors text-base">
-                            <option value="">All Results</option>
-                            @foreach($results as $result)
-                                <option value="{{ $result }}" {{ request('result') == $result ? 'selected' : '' }}>
-                                    {{ $result }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label for="event_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                Result
+                            </label>
+                            <select id="result" name="result" 
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors text-base">
+                                <option value="">All Results</option>
+                                @foreach($results as $result)
+                                    <option value="{{ $result }}" {{ request('result') == $result ? 'selected' : '' }}>
+                                        {{ $result }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label for="event_id" class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="bx bx-calendar-event mr-1"></i>
-                            Event
-                        </label>
-                        <select id="event_id" name="event_id" 
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors text-base">
-                            <option value="">All Events</option>
-                            @foreach($events as $event)
-                                <option value="{{ $event->id }}" {{ request('event_id') == $event->id ? 'selected' : '' }}>
-                                    {{ $event->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
+                                Event
+                            </label>
+                            <select id="event_id" name="event_id" 
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors text-base">
+                                <option value="">All Events</option>
+                                @foreach($events as $event)
+                                    <option value="{{ $event->id }}" {{ request('event_id') == $event->id ? 'selected' : '' }}>
+                                        {{ $event->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
                     
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0 sm:space-x-4">
@@ -262,16 +243,16 @@
                             <span>Use filters to narrow down your scan history</span>
                         </div>
                         <div class="flex space-x-3">
-                        <a href="{{ route('gate-staff.scan-history') }}" 
+                            <a href="{{ route('gate-staff.scan-history') }}" 
                                class="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
                                 <i class="bx bx-x mr-2"></i>
-                            Clear Filters
-                        </a>
-                        <button type="submit" 
+                                Clear Filters
+                            </a>
+                            <button type="submit" 
                                     class="flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
                                 <i class="bx bx-search mr-2"></i>
-                            Apply Filters
-                        </button>
+                                Apply Filters
+                            </button>
                         </div>
                     </div>
                 </form>

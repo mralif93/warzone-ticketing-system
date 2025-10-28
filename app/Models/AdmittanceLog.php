@@ -10,7 +10,7 @@ class AdmittanceLog extends Model
     use HasFactory;
 
     protected $fillable = [
-        'ticket_id',
+        'purchase_ticket_id',
         'scan_time',
         'scan_result',
         'gate_id',
@@ -29,7 +29,7 @@ class AdmittanceLog extends Model
      */
     public function purchaseTicket()
     {
-        return $this->belongsTo(PurchaseTicket::class, 'ticket_id');
+        return $this->belongsTo(PurchaseTicket::class, 'purchase_ticket_id');
     }
 
     /**

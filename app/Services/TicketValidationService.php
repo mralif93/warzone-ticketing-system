@@ -70,6 +70,14 @@ class TicketValidationService
      */
     private function getTicketForValidation(string $qrcode): ?PurchaseTicket
     {
+        // Trim and clean the QR code
+        $qrcode = trim($qrcode);
+        
+        Log::info('Searching for ticket with QR code', [
+            'qrcode' => $qrcode,
+            'length' => strlen($qrcode)
+        ]);
+        
         // Use raw SQL for maximum performance with proper indexing
         $result = DB::selectOne("
             SELECT pt.id, pt.event_id, pt.qrcode, pt.status, pt.scanned_at, 
@@ -81,10 +89,25 @@ class TicketValidationService
             AND pt.deleted_at IS NULL
             AND pt.status IN ('sold', 'active', 'pending')
         ", [$qrcode]);
-
+        
         if (!$result) {
+            // Log for debugging
+            $allTickets = DB::select("SELECT COUNT(*) as count FROM purchase WHERE qrcode = ?", [$qrcode]);
+            $count = $allTickets[0]->count ?? 0;
+            
+            Log::warning('Ticket not found', [
+                'qrcode' => $qrcode,
+                'exists_in_db' => $count > 0
+            ]);
+            
             return null;
         }
+        
+        Log::info('Ticket found', [
+            'id' => $result->id,
+            'status' => $result->status,
+            'event_name' => $result->event_name
+        ]);
 
         // Convert to PurchaseTicket model for consistency
         $ticket = PurchaseTicket::find($result->id);
@@ -113,19 +136,16 @@ class TicketValidationService
     private function markTicketAsScanned(PurchaseTicket $ticket, string $gateId, int $staffUserId): void
     {
         DB::transaction(function() use ($ticket, $gateId, $staffUserId) {
-            // Use raw SQL for atomic update
-            DB::update("
-                UPDATE purchase 
-                SET status = 'scanned',
-                    scanned_at = ?, 
-                    updated_at = ?
-                WHERE id = ? 
-                AND status IN ('sold', 'active', 'pending')
-            ", [
-                now(),
-                now(),
-                $ticket->id
-            ]);
+            // Use Eloquent for reliable timestamp handling
+            $ticket = PurchaseTicket::where('id', $ticket->id)
+                ->whereIn('status', ['sold', 'active', 'pending'])
+                ->first();
+            
+            if ($ticket) {
+                $ticket->status = 'scanned';
+                $ticket->scanned_at = now();
+                $ticket->save();
+            }
         });
     }
 
@@ -135,7 +155,7 @@ class TicketValidationService
     private function logAdmittance(PurchaseTicket $ticket, string $result, string $gateId, int $staffUserId): void
     {
         $admittanceLog = AdmittanceLog::create([
-            'ticket_id' => $ticket->id,
+            'purchase_ticket_id' => $ticket->id,
             'scan_time' => now(),
             'scan_result' => $result,
             'gate_id' => $gateId,

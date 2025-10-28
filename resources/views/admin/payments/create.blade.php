@@ -116,11 +116,12 @@
                                     <select name="status" id="status" required
                                             class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('status') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
                                         <option value="">Select Status</option>
-                                        <option value="Pending" {{ old('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
-                                        <option value="Succeeded" {{ old('status') == 'Succeeded' ? 'selected' : '' }}>Succeeded</option>
-                                        <option value="Failed" {{ old('status') == 'Failed' ? 'selected' : '' }}>Failed</option>
-                                        <option value="Cancelled" {{ old('status') == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                        <option value="Refunded" {{ old('status') == 'Refunded' ? 'selected' : '' }}>Refunded</option>
+                                        <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                        <option value="succeeded" {{ old('status') == 'succeeded' ? 'selected' : '' }}>Succeeded</option>
+                                        <option value="failed" {{ old('status') == 'failed' ? 'selected' : '' }}>Failed</option>
+                                        <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                        <option value="refunded" {{ old('status') == 'refunded' ? 'selected' : '' }}>Refunded</option>
+                                        <option value="partially_refunded" {{ old('status') == 'partially_refunded' ? 'selected' : '' }}>Partially Refunded</option>
                                     </select>
                                     @error('status')
                                         <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>

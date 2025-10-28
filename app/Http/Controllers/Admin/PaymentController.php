@@ -76,14 +76,14 @@ class PaymentController extends Controller
     public function updateStatus(Request $request, Payment $payment)
     {
         $request->validate([
-            'status' => 'required|in:pending,completed,failed,refunded'
+            'status' => 'required|in:pending,succeeded,failed,refunded,cancelled,partially_refunded'
         ]);
 
         $oldValues = $payment->toArray();
         $payment->update(['status' => $request->status]);
 
-        // If payment is completed, update order status
-        if ($request->status === 'completed' && $payment->order) {
+        // If payment is succeeded, update order status
+        if ($request->status === 'succeeded' && $payment->order) {
             $payment->order->update(['status' => 'paid']);
         }
 
@@ -279,7 +279,7 @@ class PaymentController extends Controller
             'amount' => 'required|numeric|min:0.01',
             'method' => 'required|string|max:255',
             'transaction_id' => 'nullable|string|max:255|unique:payments,transaction_id',
-            'status' => 'required|in:pending,completed,failed,refunded',
+            'status' => 'required|in:pending,succeeded,failed,refunded,cancelled,partially_refunded',
             'payment_date' => 'nullable|date',
             'notes' => 'nullable|string|max:1000'
         ]);
@@ -291,8 +291,8 @@ class PaymentController extends Controller
 
         $payment = Payment::create($request->all());
 
-        // If payment is completed, update order status
-        if ($request->status === 'completed' && $payment->order) {
+        // If payment is succeeded, update order status
+        if ($request->status === 'succeeded' && $payment->order) {
             $payment->order->update(['status' => 'paid']);
         }
 
@@ -341,7 +341,7 @@ class PaymentController extends Controller
             'amount' => 'required|numeric|min:0.01',
             'method' => 'required|string|max:255',
             'transaction_id' => 'nullable|string|max:255|unique:payments,transaction_id,' . $payment->id,
-            'status' => 'required|in:pending,completed,failed,refunded',
+            'status' => 'required|in:pending,succeeded,failed,refunded,cancelled,partially_refunded',
             'payment_date' => 'nullable|date',
             'notes' => 'nullable|string|max:1000'
         ]);
@@ -349,8 +349,8 @@ class PaymentController extends Controller
         $oldValues = $payment->toArray();
         $payment->update($request->all());
 
-        // If payment is completed, update order status
-        if ($request->status === 'completed' && $payment->order) {
+        // If payment is succeeded, update order status
+        if ($request->status === 'succeeded' && $payment->order) {
             $payment->order->update(['status' => 'paid']);
         }
 
@@ -379,8 +379,8 @@ class PaymentController extends Controller
      */
     public function destroy(Payment $payment)
     {
-        if ($payment->status === 'completed') {
-            return back()->withErrors(['error' => 'Cannot delete a completed payment.']);
+        if ($payment->status === 'succeeded') {
+            return back()->withErrors(['error' => 'Cannot delete a succeeded payment.']);
         }
 
         $oldValues = $payment->toArray();

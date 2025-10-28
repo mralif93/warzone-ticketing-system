@@ -446,7 +446,7 @@
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 class="text-3xl font-bold mb-4">Ready to Get Your Tickets?</h2>
         <p class="text-lg mb-8 text-wwc-neutral-100">
-            Join thousands of satisfied customers who trust Warzone Ticketing for the {{ $mainEvent->name }} experience
+            Secure your seats now to experience the battles unfold live in the arena!
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="{{ route('public.tickets.cart', $mainEvent) }}" 

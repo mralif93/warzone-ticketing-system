@@ -140,7 +140,7 @@ class StripeController extends Controller
                 'transaction_id' => $paymentIntent->id,
                 'amount' => $paymentIntent->amount / 100, // Convert back from cents
                 'currency' => $paymentIntent->currency,
-                'status' => 'completed',
+                'status' => 'succeeded',
                 'payment_details' => json_encode([
                     'stripe_payment_intent_id' => $paymentIntent->id,
                     'payment_method_id' => $paymentIntent->payment_method,
@@ -441,7 +441,7 @@ class StripeController extends Controller
                     'transaction_id' => $paymentIntent->id,
                     'amount' => $paymentIntent->amount / 100,
                     'currency' => $paymentIntent->currency,
-                    'status' => 'completed',
+                    'status' => 'succeeded',
                     'payment_details' => json_encode($paymentIntent),
                 ]);
 

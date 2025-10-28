@@ -40,6 +40,22 @@ class Payment extends Model
     ];
 
     /**
+     * Automatically convert status to lowercase when setting
+     */
+    public function setStatusAttribute($value)
+    {
+        $this->attributes['status'] = $value ? strtolower($value) : null;
+    }
+
+    /**
+     * Automatically get status in lowercase
+     */
+    public function getStatusAttribute($value)
+    {
+        return $value ? strtolower($value) : $value;
+    }
+
+    /**
      * Get the order for this payment
      */
     public function order()

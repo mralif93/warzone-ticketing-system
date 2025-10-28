@@ -914,7 +914,7 @@ class TicketController extends Controller
                     'method' => 'stripe',
                     'amount' => $order->total_amount,
                     'currency' => 'myr',
-                    'status' => 'completed',
+                    'status' => 'succeeded',
                     'processed_at' => now(),
                     'payment_date' => now(),
                     'transaction_id' => 'STRIPE_' . $order->id . '_' . time(),

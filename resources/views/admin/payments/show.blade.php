@@ -95,8 +95,15 @@
                                     </div>
                                     <div class="flex-1 flex items-center justify-between">
                                         <span class="text-sm font-semibold text-wwc-neutral-600">Status</span>
+                                        @php
+                                            $status = strtolower($payment->status);
+                                            // Map 'completed' to 'succeeded' for display
+                                            if ($status === 'completed') {
+                                                $status = 'succeeded';
+                                            }
+                                        @endphp
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                            @switch($payment->status)
+                                            @switch($status)
                                                 @case('succeeded')
                                                     bg-green-100 text-green-800
                                                     @break
@@ -112,10 +119,13 @@
                                                 @case('refunded')
                                                     bg-blue-100 text-blue-800
                                                     @break
+                                                @case('partially_refunded')
+                                                    bg-purple-100 text-purple-800
+                                                    @break
                                                 @default
                                                     bg-gray-100 text-gray-800
                                             @endswitch">
-                                            @switch($payment->status)
+                                            @switch($status)
                                                 @case('succeeded')
                                                     Succeeded
                                                     @break
@@ -131,8 +141,11 @@
                                                 @case('refunded')
                                                     Refunded
                                                     @break
+                                                @case('partially_refunded')
+                                                    Partially Refunded
+                                                    @break
                                                 @default
-                                                    Unknown
+                                                    {{ ucwords(str_replace('_', ' ', $payment->status)) }}
                                             @endswitch
                                         </span>
                                     </div>

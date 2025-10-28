@@ -114,14 +114,22 @@
                                     <label for="status" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
                                         Status <span class="text-wwc-error">*</span>
                                     </label>
+                                    @php
+                                        $currentStatus = strtolower($payment->status);
+                                        // Map 'completed' to 'succeeded' for selection
+                                        if ($currentStatus === 'completed') {
+                                            $currentStatus = 'succeeded';
+                                        }
+                                    @endphp
                                     <select name="status" id="status" required
                                             class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('status') border-wwc-error focus:ring-wwc-error focus:border-wwc-error @enderror">
                                         <option value="">Select Status</option>
-                                        <option value="Pending" {{ old('status', $payment->status) == 'Pending' ? 'selected' : '' }}>Pending</option>
-                                        <option value="Succeeded" {{ old('status', $payment->status) == 'Succeeded' ? 'selected' : '' }}>Succeeded</option>
-                                        <option value="Failed" {{ old('status', $payment->status) == 'Failed' ? 'selected' : '' }}>Failed</option>
-                                        <option value="Cancelled" {{ old('status', $payment->status) == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                        <option value="Refunded" {{ old('status', $payment->status) == 'Refunded' ? 'selected' : '' }}>Refunded</option>
+                                        <option value="pending" {{ old('status', $currentStatus) == 'pending' ? 'selected' : '' }}>Pending</option>
+                                        <option value="succeeded" {{ old('status', $currentStatus) == 'succeeded' ? 'selected' : '' }}>Succeeded</option>
+                                        <option value="failed" {{ old('status', $currentStatus) == 'failed' ? 'selected' : '' }}>Failed</option>
+                                        <option value="cancelled" {{ old('status', $currentStatus) == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                        <option value="refunded" {{ old('status', $currentStatus) == 'refunded' ? 'selected' : '' }}>Refunded</option>
+                                        <option value="partially_refunded" {{ old('status', $currentStatus) == 'partially_refunded' ? 'selected' : '' }}>Partially Refunded</option>
                                     </select>
                                     @error('status')
                                         <div class="text-wwc-error text-xs mt-1 font-medium">{{ $message }}</div>

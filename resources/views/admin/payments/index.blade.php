@@ -22,7 +22,7 @@
                                     <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
                                     </svg>
-                                    {{ $payments->where('status', 'Succeeded')->count() }} Succeeded
+                                    {{ $payments->whereIn('status', ['succeeded', 'Succeeded', 'completed', 'Completed'])->count() }} Succeeded
                                 </div>
                             </div>
                         </div>
@@ -36,7 +36,7 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $payments->where('status', 'Succeeded')->count() }}</div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $payments->whereIn('status', ['succeeded', 'Succeeded', 'completed', 'Completed'])->count() }}</div>
                             <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Succeeded</div>
                             <div class="flex items-center">
                                 <div class="flex items-center text-xs text-wwc-success font-semibold">
@@ -55,12 +55,12 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $payments->where('status', 'Pending')->count() }}</div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $payments->whereIn('status', ['pending', 'Pending'])->count() }}</div>
                             <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Pending</div>
                             <div class="flex items-center">
                                 <div class="flex items-center text-xs text-wwc-warning font-semibold">
                                     <i class='bx bx-time text-xs mr-1'></i>
-                                    {{ $payments->where('status', 'Failed')->count() }} Failed
+                                    {{ $payments->whereIn('status', ['failed', 'Failed'])->count() }} Failed
                                 </div>
                             </div>
                         </div>
@@ -74,12 +74,12 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">RM{{ number_format($payments->where('status', 'Succeeded')->sum('amount'), 0) }}</div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">RM{{ number_format($payments->whereIn('status', ['succeeded', 'Succeeded', 'completed', 'Completed'])->sum('amount'), 0) }}</div>
                             <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Total Revenue</div>
                             <div class="flex items-center">
                                 <div class="flex items-center text-xs text-wwc-success font-semibold">
                                     <i class='bx bx-trending-up text-xs mr-1'></i>
-                                    RM{{ number_format($payments->where('status', 'Refunded')->sum('refund_amount') ?? 0, 0) }} Refunded
+                                    RM{{ number_format($payments->whereIn('status', ['refunded', 'Refunded'])->sum('refund_amount') ?? 0, 0) }} Refunded
                                 </div>
                             </div>
                         </div>
@@ -175,19 +175,19 @@
                             <div class="flex items-center space-x-4 text-sm text-wwc-neutral-500">
                                 <span class="flex items-center">
                                     <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                                    {{ $payments->where('status', 'Succeeded')->count() }} Succeeded
+                                    {{ $payments->whereIn('status', ['succeeded', 'Succeeded', 'completed', 'Completed'])->count() }} Succeeded
                                 </span>
                                 <span class="flex items-center">
                                     <span class="w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
-                                    {{ $payments->where('status', 'Pending')->count() }} Pending
+                                    {{ $payments->whereIn('status', ['pending', 'Pending'])->count() }} Pending
                                 </span>
                                 <span class="flex items-center">
                                     <span class="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
-                                    {{ $payments->where('status', 'Failed')->count() }} Failed
+                                    {{ $payments->whereIn('status', ['failed', 'Failed'])->count() }} Failed
                                 </span>
                                 <span class="flex items-center">
                                     <span class="w-2 h-2 bg-gray-500 rounded-full mr-2"></span>
-                                    {{ $payments->where('status', 'Refunded')->count() }} Refunded
+                                    {{ $payments->whereIn('status', ['refunded', 'Refunded'])->count() }} Refunded
                                 </span>
                             </div>
                             <form method="GET" class="flex items-center space-x-2">
@@ -250,7 +250,14 @@
                                             <div class="text-sm text-wwc-neutral-900">{{ ucwords(str_replace('_', ' ', $payment->method)) }}</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-center">
-                                            @switch($payment->status)
+                                            @php
+                                                $status = strtolower($payment->status);
+                                                // Map 'completed' to 'succeeded' for display
+                                                if ($status === 'completed') {
+                                                    $status = 'succeeded';
+                                                }
+                                            @endphp
+                                            @switch($status)
                                                 @case('succeeded')
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                                         Succeeded
@@ -271,6 +278,20 @@
                                                         Refunded
                                                     </span>
                                                     @break
+                                                @case('cancelled')
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                                        Cancelled
+                                                    </span>
+                                                    @break
+                                                @case('partially_refunded')
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                                        Partially Refunded
+                                                    </span>
+                                                    @break
+                                                @default
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                        {{ ucwords(str_replace('_', ' ', $payment->status)) }}
+                                                    </span>
                                             @endswitch
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">

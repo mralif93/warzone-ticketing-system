@@ -92,7 +92,17 @@
                                 <!-- Price Paid -->
                                 <div class="flex justify-between items-start border-b border-wwc-neutral-100 pb-3">
                                     <label class="text-sm font-medium text-wwc-neutral-700">Price Paid</label>
-                                    <p class="text-sm text-wwc-neutral-900 font-medium text-right">RM{{ number_format($ticket->price_paid, 2) }}</p>
+                                    <div class="text-right">
+                                        @if($ticket->discount_amount > 0)
+                                            <div class="flex flex-col items-end">
+                                                <span class="line-through text-gray-400 text-sm">RM{{ number_format($ticket->original_price ?? 0, 2) }}</span>
+                                                <span class="text-green-600 font-medium">RM{{ number_format($ticket->price_paid ?? 0, 2) }}</span>
+                                                <span class="text-xs text-green-600 font-semibold">Discount: RM{{ number_format($ticket->discount_amount, 2) }}</span>
+                                            </div>
+                                        @else
+                                            <span class="text-sm text-wwc-neutral-900 font-medium">RM{{ number_format($ticket->original_price ?? $ticket->price_paid ?? 0, 2) }}</span>
+                                        @endif
+                                    </div>
                                 </div>
                                 
                                 <!-- Status -->

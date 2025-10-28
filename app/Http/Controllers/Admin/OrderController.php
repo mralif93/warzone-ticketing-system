@@ -280,11 +280,16 @@ class OrderController extends Controller
                         ->withInput();
                 }
                 
+                // Store original subtotal before applying discount
+                $originalSubtotal = $subtotal;
+                
                 // Apply combo discount if both days are selected and enabled
                 $isCombo = $request->boolean('is_combo_purchase') && $day1Enabled && $day2Enabled && $event->isTwoDayEvent() && $event->combo_discount_enabled;
                 if ($isCombo) {
                     $discountAmount = $event->calculateComboDiscount($subtotal);
                     $subtotal = $subtotal - $discountAmount;
+                } else {
+                    $discountAmount = 0;
                 }
                 
             } else {
@@ -308,6 +313,10 @@ class OrderController extends Controller
                 // Calculate pricing
                 $basePrice = $ticketType->price;
                 $subtotal = $basePrice * $quantity;
+                
+                // Store original subtotal (for single-day, no discount)
+                $originalSubtotal = $subtotal;
+                $discountAmount = 0;
                 
                 // Determine event day based on single day type
                 $eventDays = $event->getEventDays();
@@ -339,7 +348,8 @@ class OrderController extends Controller
                 'customer_email' => $request->customer_email,
                 'order_number' => Order::generateOrderNumber(),
                 'qrcode' => Order::generateQRCode(),
-                'subtotal' => $subtotal,
+                'subtotal' => isset($originalSubtotal) ? $originalSubtotal : $subtotal,
+                'discount_amount' => isset($discountAmount) ? $discountAmount : 0,
                 'service_fee' => $serviceFee,
                 'tax_amount' => $taxAmount,
                 'total_amount' => $totalAmount,
@@ -375,6 +385,19 @@ class OrderController extends Controller
                     $eventDayName = $ticketData['event_day_name'];
                 }
                 
+                // Calculate per-ticket price with proportional discount
+                $perTicketPrice = $price;
+                $perTicketDiscount = 0;
+                
+                if ($discountAmount > 0 && $totalQuantity > 0 && $purchaseType === 'multi_day' && isset($originalSubtotal)) {
+                    // Distribute discount proportionally based on ticket price share
+                    $ticketTotalValue = $price * $quantity;
+                    $priceShare = $ticketTotalValue / $originalSubtotal;
+                    $ticketDiscount = $discountAmount * $priceShare;
+                    $perTicketDiscount = $ticketDiscount / $quantity;
+                    $perTicketPrice = $price - $perTicketDiscount;
+                }
+                
                 for ($i = 0; $i < $quantity; $i++) {
                     \App\Models\PurchaseTicket::create([
                         'order_id' => $order->id,
@@ -386,10 +409,10 @@ class OrderController extends Controller
                         'is_combo_purchase' => $purchaseType === 'multi_day',
                         'combo_group_id' => $comboGroupId,
                         'original_price' => $price,
-                        'discount_amount' => $discountAmount > 0 ? $discountAmount / $totalQuantity : 0,
+                        'discount_amount' => $perTicketDiscount,
                         'qrcode' => \App\Models\PurchaseTicket::generateQRCode(),
                         'status' => $request->status === 'paid' ? 'active' : 'pending',
-                        'price_paid' => $discountAmount > 0 ? ($subtotal / $totalQuantity) : $price,
+                        'price_paid' => $perTicketPrice,
                     ]);
                 }
                 

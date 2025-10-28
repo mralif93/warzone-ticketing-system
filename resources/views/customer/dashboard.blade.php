@@ -178,7 +178,17 @@
                                     <div class="text-sm text-wwc-neutral-500">{{ $ticket->event->date_time->format('g:i A') }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-wwc-neutral-900">RM{{ number_format($ticket->price_paid, 0) }}</div>
+                                    <div class="text-sm font-medium text-wwc-neutral-900">
+                                        @if($ticket->discount_amount > 0)
+                                            <div class="flex flex-col">
+                                                <span class="line-through text-gray-400">RM{{ number_format($ticket->original_price ?? 0, 2) }}</span>
+                                                <span class="text-wwc-success">RM{{ number_format($ticket->price_paid ?? 0, 2) }}</span>
+                                                <span class="text-xs text-green-600 font-semibold">Discount: RM{{ number_format($ticket->discount_amount, 2) }}</span>
+                                            </div>
+                                        @else
+                                            RM{{ number_format($ticket->original_price ?? $ticket->price_paid ?? 0, 2) }}
+                                        @endif
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium

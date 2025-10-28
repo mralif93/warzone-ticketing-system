@@ -177,46 +177,6 @@
     </div>
 
     <div class="max-w-7xl mx-auto py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
-        <!-- Event Selection Card -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-6 sm:mb-8">
-            <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-900">Event & Gate Selection</h3>
-                <p class="text-sm text-gray-500">Configure your scanning environment</p>
-            </div>
-            <div class="p-4 sm:p-6">
-                <form id="event-form" class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                    <div>
-                        <label for="event_id" class="block text-sm font-medium text-gray-700 mb-2">
-                            Select Event
-                        </label>
-                        <select id="event_id" name="event_id" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors text-base">
-                            <option value="">Choose an event...</option>
-                            @foreach($todayEvents as $eventOption)
-                                <option value="{{ $eventOption->id }}" 
-                                        {{ $event && $event->id == $eventOption->id ? 'selected' : '' }}>
-                                    {{ $eventOption->name }} - {{ \Carbon\Carbon::parse($eventOption->event_date)->format('M j, Y g:i A') }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label for="gate_id" class="block text-sm font-medium text-gray-700 mb-2">
-                            Gate Location
-                        </label>
-                        <select id="gate_id" name="gate_id" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors text-base">
-                            <option value="">Select gate...</option>
-                            <option value="GATE-1" {{ $gateId == 'GATE-1' ? 'selected' : '' }}>Gate 1 (Main Entrance)</option>
-                            <option value="GATE-2" {{ $gateId == 'GATE-2' ? 'selected' : '' }}>Gate 2 (VIP Entrance)</option>
-                            <option value="GATE-3" {{ $gateId == 'GATE-3' ? 'selected' : '' }}>Gate 3 (Side Entrance)</option>
-                            <option value="GATE-4" {{ $gateId == 'GATE-4' ? 'selected' : '' }}>Gate 4 (Emergency Exit)</option>
-                        </select>
-                    </div>
-                </form>
-            </div>
-        </div>
-
         <!-- Scanner Interface Card -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200">
             <div class="px-4 sm:px-6 py-4 border-b border-gray-200">

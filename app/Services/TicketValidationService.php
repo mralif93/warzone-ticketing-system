@@ -36,8 +36,8 @@ class TicketValidationService
             }
 
             // Check if ticket is valid for scanning
-            if (!in_array($ticket->status, ['active', 'pending'])) {
-                return $this->createValidationResult('INVALID', 'Ticket not active', $gateId, $staffUserId, $startTime, $ticket);
+            if (!in_array($ticket->status, ['sold', 'active', 'pending'])) {
+                return $this->createValidationResult('INVALID', 'Ticket not ready for scanning', $gateId, $staffUserId, $startTime, $ticket);
             }
 
             // Check if ticket is for the correct event (if event is happening today)
@@ -79,7 +79,7 @@ class TicketValidationService
             LEFT JOIN events e ON pt.event_id = e.id
             WHERE pt.qrcode = ? 
             AND pt.deleted_at IS NULL
-            AND pt.status IN ('active', 'pending')
+            AND pt.status IN ('sold', 'active', 'pending')
         ", [$qrcode]);
 
         if (!$result) {
@@ -102,9 +102,9 @@ class TicketValidationService
      */
     private function isValidForCurrentEvent(PurchaseTicket $ticket): bool
     {
-        // For now, allow all active/pending tickets
+        // For now, allow all sold/active/pending tickets
         // In production, you might want to check event date/time
-        return in_array($ticket->status, ['active', 'pending']);
+        return in_array($ticket->status, ['sold', 'active', 'pending']);
     }
 
     /**
@@ -120,7 +120,7 @@ class TicketValidationService
                     scanned_at = ?, 
                     updated_at = ?
                 WHERE id = ? 
-                AND status IN ('active', 'pending')
+                AND status IN ('sold', 'active', 'pending')
             ", [
                 now(),
                 now(),

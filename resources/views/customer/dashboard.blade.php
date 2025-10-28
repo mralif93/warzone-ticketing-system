@@ -180,12 +180,6 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex items-center space-x-2">
-                                    <a href="{{ route('customer.tickets.show', $ticket->id) }}" 
-                                           class="inline-flex items-center px-3 py-2 text-xs font-semibold text-white bg-wwc-primary hover:bg-wwc-primary-dark rounded-lg transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
-                                           title="View ticket details">
-                                            <i class='bx bx-show text-xs mr-1.5'></i>
-                                        View
-                                    </a>
                                         @if($ticket->order->status === 'paid' && $ticket->status === 'active' && $ticket->qrcode)
                                         <a href="{{ route('customer.tickets.qr', $ticket->id) }}" 
                                                class="inline-flex items-center px-3 py-2 text-xs font-semibold text-white bg-wwc-accent hover:bg-wwc-accent-dark rounded-lg transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"

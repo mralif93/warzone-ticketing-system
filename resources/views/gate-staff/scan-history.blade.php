@@ -338,7 +338,12 @@
                                         @if($scan->ticket)
                                             <div>
                                                 <div class="font-medium text-gray-900">Ticket #{{ $scan->ticket->ticket_identifier ?? 'N/A' }}</div>
-                                                <div class="text-sm text-gray-500">RM{{ number_format($scan->ticket->price_paid ?? 0, 0) }}</div>
+                                                @if($scan->ticket->discount_amount > 0)
+                                                    <div class="text-xs text-gray-400 line-through">RM{{ number_format($scan->ticket->original_price ?? 0, 2) }}</div>
+                                                    <div class="text-sm font-semibold text-green-600">RM{{ number_format($scan->ticket->price_paid ?? 0, 2) }}</div>
+                                                @else
+                                                    <div class="text-sm text-gray-500">RM{{ number_format($scan->ticket->original_price ?? $scan->ticket->price_paid ?? 0, 2) }}</div>
+                                                @endif
                                             </div>
                                         @else
                                             <span class="text-gray-500">No ticket data</span>
@@ -357,7 +362,7 @@
                                         </span>
                                     </td>
                                     <td class="px-6 py-5 whitespace-nowrap text-sm font-medium">
-                                        <button onclick="showScanDetails({{ $scan->id }}, '{{ addslashes($scan->ticket->event->name ?? 'Unknown Event') }}', '{{ $scan->scan_time->format('M j, Y g:i A') }}', '{{ $scan->gate_id }}', '{{ $scan->scan_result }}', {{ json_encode($scan->ticket->ticketType->name ?? 'N/A') }}, '{{ $scan->ticket->ticket_identifier ?? 'N/A' }}', {{ number_format($scan->ticket->price_paid ?? 0, 2) }})" 
+                                        <button onclick="showScanDetails({{ $scan->id }}, '{{ addslashes($scan->ticket->event->name ?? 'Unknown Event') }}', '{{ $scan->scan_time->format('M j, Y g:i A') }}', '{{ $scan->gate_id }}', '{{ $scan->scan_result }}', {{ json_encode($scan->ticket->ticketType->name ?? 'N/A') }}, '{{ $scan->ticket->ticket_identifier ?? 'N/A' }}', {{ number_format($scan->ticket->original_price ?? $scan->ticket->price_paid ?? 0, 2) }}, {{ number_format($scan->ticket->discount_amount ?? 0, 2) }}, {{ number_format($scan->ticket->price_paid ?? 0, 2) }})" 
                                                 class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
                                             <i class="bx bx-show mr-1.5"></i>
                                             View
@@ -437,9 +442,12 @@
 </div>
 
 <script>
-function showScanDetails(scanId, eventName, scanTime, gateId, scanResult, ticketType, ticketIdentifier, pricePaid) {
-    // Format the price
-    const price = parseFloat(pricePaid).toFixed(2);
+function showScanDetails(scanId, eventName, scanTime, gateId, scanResult, ticketType, ticketIdentifier, originalPrice, discountAmount, pricePaid) {
+    // Format the prices
+    const origPrice = parseFloat(originalPrice).toFixed(2);
+    const discount = parseFloat(discountAmount).toFixed(2);
+    const finalPrice = parseFloat(pricePaid).toFixed(2);
+    const hasDiscount = discount > 0;
     
     // Get result badge color
     const resultColor = scanResult === 'SUCCESS' ? 'bg-green-100 text-green-800' : 
@@ -498,7 +506,15 @@ function showScanDetails(scanId, eventName, scanTime, gateId, scanResult, ticket
                     </div>
                     <div>
                         <label class="text-xs text-gray-500">Price Paid</label>
-                        <p class="text-sm font-medium text-gray-900">RM${price}</p>
+                        ${hasDiscount ? `
+                            <div class="space-y-1">
+                                <p class="text-xs text-gray-400 line-through">RM${origPrice}</p>
+                                <p class="text-sm font-semibold text-green-600">RM${finalPrice}</p>
+                                <p class="text-xs text-green-600 font-semibold">Discount: RM${discount}</p>
+                            </div>
+                        ` : `
+                            <p class="text-sm font-medium text-gray-900">RM${finalPrice}</p>
+                        `}
                     </div>
                 </div>
             </div>

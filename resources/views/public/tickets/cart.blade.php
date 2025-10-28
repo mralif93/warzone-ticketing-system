@@ -600,7 +600,7 @@
                         <button type="submit" 
                                 id="purchase-button"
                                 form="ticket-form"
-                                class="w-full bg-wwc-primary text-white px-6 py-3 rounded-xl font-bold text-base hover:bg-wwc-primary-dark transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 group">
+                                class="w-full bg-green-600 text-white px-6 py-3 rounded-xl font-bold text-base hover:bg-green-700 transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 group">
                             <i class="bx bx-arrow-right mr-2 text-xl group-hover:scale-110 transition-transform duration-200"></i>
                             <span>Proceed to Checkout</span>
                             <span class="ml-2 bg-white/20 px-3 py-1 rounded-lg font-bold" id="purchase-total">RM0</span>

@@ -452,7 +452,7 @@
             <a href="{{ route('public.tickets.cart', $mainEvent) }}" 
                class="inline-flex items-center justify-center px-8 py-4 bg-white text-wwc-primary font-semibold rounded-lg hover:bg-wwc-neutral-100 transition-colors duration-200 shadow-lg">
                 <i class='bx bx-ticket mr-2'></i>
-                Get {{ $mainEvent->name }} Tickets
+                Get Tickets Now
             </a>
             <a href="{{ route('public.about') }}" 
                class="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-wwc-primary transition-colors duration-200">

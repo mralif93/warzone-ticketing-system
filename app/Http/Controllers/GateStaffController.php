@@ -75,7 +75,7 @@ class GateStaffController extends Controller
     {
         $request->validate([
             'qrcode' => 'required|string',
-            'event_id' => 'required|exists:events,id',
+            'event_id' => 'nullable|exists:events,id',
             'gate_id' => 'required|string',
         ]);
 
@@ -88,8 +88,8 @@ class GateStaffController extends Controller
             // Validate the ticket
             $result = $this->ticketValidationService->validateTicket($qrcode, $gateId, $user->id);
 
-            // Add event validation
-            if ($result['status'] === 'SUCCESS' && $result['ticket']) {
+            // Add event validation (only if event_id is provided)
+            if ($result['status'] === 'SUCCESS' && $result['ticket'] && $eventId) {
                 if ($result['ticket']->event_id != $eventId) {
                     $result = [
                         'status' => 'WRONG_EVENT',

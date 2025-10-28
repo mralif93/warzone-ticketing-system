@@ -396,8 +396,8 @@
                         <div class="p-8 space-y-6">
                             <!-- Day Selection Checkboxes -->
                             <div class="space-y-4">
-                                <h3 class="text-lg font-semibold text-gray-900">Select Days to Attend</h3>
-                                <p class="text-sm text-gray-600">Choose Day 1 only, Day 2 only, or both days for maximum savings!</p>
+                                <h3 class="text-lg font-semibold text-gray-900">Select Days to Attend <span class="text-red-600">*</span></h3>
+                                <p class="text-sm text-gray-600">Both Day 1 and Day 2 are required for multi-day purchase!</p>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     @foreach($event->getEventDays() as $index => $day)
                                     <div class="relative group">
@@ -431,8 +431,8 @@
                                 <div class="flex items-start">
                                     <i class="bx bx-info-circle text-blue-500 text-lg mr-2 mt-0.5"></i>
                                     <div>
-                                        <p class="text-sm text-blue-800 font-medium">Flexible Day Selection</p>
-                                        <p class="text-xs text-blue-600 mt-1">You can choose Day 1 only, Day 2 only, or both days. Combo discount applies only when both days are selected.</p>
+                                        <p class="text-sm text-blue-800 font-medium">Required: Both Days</p>
+                                        <p class="text-xs text-blue-600 mt-1">Multi-day purchase requires selecting both Day 1 and Day 2 tickets to proceed to checkout. You must select tickets for both days to get the {{ number_format($event->combo_discount_percentage, 0) }}% combo discount!</p>
                                     </div>
                                 </div>
                             </div>
@@ -708,7 +708,7 @@ singleDayRadios.forEach(radio => {
     });
 });
 
-// Day selection handlers for multi-day
+// Day selection handlers for multi-day - BOTH DAYS REQUIRED
 dayCheckboxes.forEach(checkbox => {
     checkbox.addEventListener('change', function() {
         const day = this.dataset.day;
@@ -1083,8 +1083,9 @@ function validateForm() {
         const day1Enabled = document.getElementById('day1_enabled_input').value === '1';
         const day2Enabled = document.getElementById('day2_enabled_input').value === '1';
         
-        if (!day1Enabled && !day2Enabled) {
-            errors.push('Please select at least one day to attend');
+        // BOTH DAYS REQUIRED FOR MULTI-DAY PURCHASE
+        if (!day1Enabled || !day2Enabled) {
+            errors.push('Multi-day purchase requires selecting both Day 1 and Day 2. Please select both days to proceed.');
         }
         
         if (day1Enabled) {
@@ -1128,7 +1129,16 @@ document.getElementById('ticket-form').addEventListener('submit', function(e) {
     const errors = validateForm();
     
     if (errors.length > 0) {
-        alert('Please fix the following errors:\n\n' + errors.join('\n'));
+        Swal.fire({
+            icon: 'error',
+            title: 'Missing Required Information',
+            html: errors.map(error => `<p>${error}</p>`).join(''),
+            confirmButtonText: 'I understand',
+            confirmButtonColor: '#dc2626',
+            showCancelButton: false,
+            allowOutsideClick: false,
+            allowEscapeKey: true
+        });
         return;
     }
     

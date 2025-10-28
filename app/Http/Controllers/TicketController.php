@@ -183,25 +183,27 @@ class TicketController extends Controller
             ];
             $totalQuantity = $quantity;
         } else {
-            // Multi-day purchase with flexible day selection
+            // Multi-day purchase - BOTH DAYS MUST BE SELECTED
             $day1Enabled = $request->boolean('multi_day1_enabled');
             $day2Enabled = $request->boolean('multi_day2_enabled');
             
-            // Process Day 1 if enabled
-            if ($day1Enabled) {
-                $day1Ticket = \App\Models\Ticket::findOrFail($request->day1_ticket_type);
-                $day1Quantity = $request->day1_quantity ?? 1;
-                $tickets[] = ['ticket' => $day1Ticket, 'price' => $day1Ticket->price, 'quantity' => $day1Quantity, 'day' => 1];
-                $totalQuantity += $day1Quantity;
+            // Validate that both days are selected for multi-day purchase
+            if (!$day1Enabled || !$day2Enabled) {
+                return redirect()->back()
+                    ->with('error', 'Multi-day purchase requires selecting both Day 1 and Day 2 tickets.')
+                    ->withInput();
             }
             
-            // Process Day 2 if enabled
-            if ($day2Enabled) {
-                $day2Ticket = \App\Models\Ticket::findOrFail($request->day2_ticket_type);
-                $day2Quantity = $request->day2_quantity ?? 1;
-                $tickets[] = ['ticket' => $day2Ticket, 'price' => $day2Ticket->price, 'quantity' => $day2Quantity, 'day' => 2];
-                $totalQuantity += $day2Quantity;
-            }
+            // Both days are required
+            $day1Ticket = \App\Models\Ticket::findOrFail($request->day1_ticket_type);
+            $day1Quantity = $request->day1_quantity ?? 1;
+            $tickets[] = ['ticket' => $day1Ticket, 'price' => $day1Ticket->price, 'quantity' => $day1Quantity, 'day' => 1];
+            $totalQuantity += $day1Quantity;
+            
+            $day2Ticket = \App\Models\Ticket::findOrFail($request->day2_ticket_type);
+            $day2Quantity = $request->day2_quantity ?? 1;
+            $tickets[] = ['ticket' => $day2Ticket, 'price' => $day2Ticket->price, 'quantity' => $day2Quantity, 'day' => 2];
+            $totalQuantity += $day2Quantity;
             
             // Calculate subtotal
             foreach ($tickets as $ticketData) {
@@ -209,7 +211,7 @@ class TicketController extends Controller
             }
             
             // Apply combo discount if both days are enabled and have tickets
-            if ($day1Enabled && $day2Enabled && $event->combo_discount_enabled) {
+            if ($event->combo_discount_enabled) {
                 $discountAmount = $event->calculateComboDiscount($subtotal);
                 $subtotal = $subtotal - $discountAmount;
             }

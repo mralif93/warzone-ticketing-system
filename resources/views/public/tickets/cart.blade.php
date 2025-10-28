@@ -321,16 +321,7 @@
                                                     data-total="{{ $ticket->total_seats }}"
                                                     data-sold="{{ $displaySold }}"
                                                     {{ old('ticket_type_id') == $ticket->id ? 'selected' : '' }}>
-                                                {{ $ticket->name }} - RM{{ number_format($ticket->price, 2) }} 
-                                                @if($event->isMultiDay())
-                                                    @if($ticket->is_combo)
-                                                        ({{ $displayAvailable }}/{{ $ticket->total_seats }} per day, {{ $ticket->total_seats * $event->getDurationInDays() }} total)
-                                                    @else
-                                                        ({{ $displayAvailable }}/{{ $ticket->total_seats }} per day)
-                                                    @endif
-                                                @else
-                                                    ({{ $displayAvailable }}/{{ $ticket->total_seats }} available)
-                                                @endif
+                                                {{ $ticket->name }} - RM{{ number_format($ticket->price, 2) }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -478,12 +469,7 @@
                                                         data-available="{{ $dayAvailable }}"
                                                         data-total="{{ $ticket->total_seats }}"
                                                         data-sold="{{ $daySold }}">
-                                                    {{ $ticket->name }} - RM{{ number_format($ticket->price, 2) }} 
-                                                    @if($ticket->is_combo)
-                                                        ({{ $dayAvailable }}/{{ $ticket->total_seats }} per day, {{ $ticket->total_seats * $event->getDurationInDays() }} total)
-                                                    @else
-                                                        ({{ $dayAvailable }}/{{ $ticket->total_seats }} per day)
-                                                    @endif
+                                                    {{ $ticket->name }} - RM{{ number_format($ticket->price, 2) }}
                                                 </option>
                                             @endforeach
                                         </select>

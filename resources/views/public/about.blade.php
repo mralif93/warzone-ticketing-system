@@ -22,33 +22,34 @@
 <!-- Our Story Section -->
 <div class="py-16 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-                <h2 class="text-3xl font-bold text-wwc-neutral-900 font-display mb-6">
-                    Our Story
-                </h2>
-                <div class="space-y-4 text-wwc-neutral-600 text-justify">
-                    <p>
-                        Warzone 2025, taking place on December 6th and 7th at N9 Arena, Negeri Sembilan, will feature 
-                        54 fighters representing Malaysia, Indonesia, and select international guests from India, China, 
-                        and Thailand. Each bout is designed to ignite national pride and push every contender to their limits.
-                    </p>
-                    <p>
-                        This isn't just a fight, it's a battle of national pride, where experience meets ambition, 
-                        and only one will emerge victorious. Expect high-octane exchanges, raw emotion, and championship-level 
-                        intensity as these warriors go head-to-head at the Warzone World Championship 2025.
-                    </p>
-                    <p>
-                        Secure your seats today and witness history in the making as 54 elite fighters showcase their skills 
-                        in an electrifying display of martial arts excellence.
-                    </p>
-                </div>
+        <!-- Description Row -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-wwc-neutral-900 font-display mb-6 text-center">
+                Our Story
+            </h2>
+            <div class="space-y-4 text-wwc-neutral-600 text-justify max-w-4xl mx-auto">
+                <p>
+                    Warzone 2025, taking place on December 6th and 7th at N9 Arena, Negeri Sembilan, will feature 
+                    54 fighters representing Malaysia, Indonesia, and select international guests from India, China, 
+                    and Thailand. Each bout is designed to ignite national pride and push every contender to their limits.
+                </p>
+                <p>
+                    This isn't just a fight, it's a battle of national pride, where experience meets ambition, 
+                    and only one will emerge victorious. Expect high-octane exchanges, raw emotion, and championship-level 
+                    intensity as these warriors go head-to-head at the Warzone World Championship 2025.
+                </p>
+                <p>
+                    Secure your seats today and witness history in the making as 54 elite fighters showcase their skills 
+                    in an electrifying display of martial arts excellence.
+                </p>
             </div>
-            <div class="bg-wwc-primary-light rounded-2xl p-8 overflow-hidden">
-                <img src="{{ asset('images/warzone poster sand.jpg') }}" 
-                     alt="Warzone Championship 2025" 
-                     class="w-full h-auto rounded-lg object-cover">
-            </div>
+        </div>
+        
+        <!-- Image Row -->
+        <div class="rounded-2xl p-8 overflow-hidden max-w-4xl mx-auto">
+            <img src="{{ asset('images/warzone poster sand.jpg') }}" 
+                 alt="Warzone Championship 2025" 
+                 class="w-full h-auto rounded-lg object-cover">
         </div>
     </div>
 </div>

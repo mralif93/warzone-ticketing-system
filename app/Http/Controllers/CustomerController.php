@@ -20,11 +20,11 @@ class CustomerController extends Controller
     {
         $user = Auth::user();
         
-        // Get recent tickets with pagination
+        // Get recent tickets with pagination - SHOW ALL TICKETS
         $recentTickets = PurchaseTicket::whereHas('order', function($query) use ($user) {
                 $query->where('user_id', $user->id);
             })
-            ->with(['event', 'ticketType'])
+            ->with(['event', 'ticketType', 'order']) // Include order relationship
             ->latest()
             ->paginate(10);
 

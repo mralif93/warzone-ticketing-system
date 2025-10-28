@@ -166,7 +166,8 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                        @if($ticket->status === 'sold') bg-green-100 text-green-800
+                                        @if($ticket->status === 'active') bg-green-100 text-green-800
+                                        @elseif($ticket->status === 'sold') bg-green-100 text-green-800
                                         @elseif($ticket->status === 'pending') bg-yellow-100 text-yellow-800
                                         @elseif($ticket->status === 'scanned') bg-blue-100 text-blue-800
                                         @elseif($ticket->status === 'cancelled') bg-red-100 text-red-800
@@ -185,12 +186,19 @@
                                             <i class='bx bx-show text-xs mr-1.5'></i>
                                         View
                                     </a>
-                                        @if($ticket->qrcode)
+                                        @if($ticket->order->status === 'paid' && $ticket->status === 'active' && $ticket->qrcode)
                                         <a href="{{ route('customer.tickets.qr', $ticket->id) }}" 
                                                class="inline-flex items-center px-3 py-2 text-xs font-semibold text-white bg-wwc-accent hover:bg-wwc-accent-dark rounded-lg transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
                                                title="View QR code">
                                                 <i class='bx bx-qr-scan text-xs mr-1.5'></i>
                                             QR Code
+                                        </a>
+                                        @elseif($ticket->order->status === 'pending')
+                                        <a href="{{ route('public.tickets.payment', $ticket->order) }}" 
+                                               class="inline-flex items-center px-3 py-2 text-xs font-semibold text-white bg-wwc-success hover:bg-green-700 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
+                                               title="Complete payment for this order">
+                                                <i class='bx bx-credit-card text-xs mr-1.5'></i>
+                                            Pay Now
                                         </a>
                                     @endif
                                     </div>

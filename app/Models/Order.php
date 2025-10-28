@@ -259,19 +259,21 @@ class Order extends Model
     }
 
     /**
-     * Calculate service fee (5% of subtotal)
+     * Calculate service fee based on settings
      */
     private function calculateServiceFee($subtotal)
     {
-        return round($subtotal * 0.05, 2);
+        $serviceFeePercentage = Setting::get('service_fee_percentage', 5.0);
+        return round($subtotal * ($serviceFeePercentage / 100), 2);
     }
 
     /**
-     * Calculate tax (6% of subtotal + service fee)
+     * Calculate tax based on settings
      */
     private function calculateTax($amount)
     {
-        return round($amount * 0.06, 2);
+        $taxPercentage = Setting::get('tax_percentage', 6.0);
+        return round($amount * ($taxPercentage / 100), 2);
     }
 
     /**

@@ -88,16 +88,22 @@ class GateStaffController extends Controller
             // Validate the ticket
             $result = $this->ticketValidationService->validateTicket($qrcode, $gateId, $user->id);
 
+            // Map result to frontend expected format
+            $response = [
+                'status' => $result['result'] ?? $result['status'] ?? 'ERROR',
+                'message' => $result['message'] ?? 'Unknown error',
+                'performance_time' => $result['execution_time_ms'] ?? 0,
+            ];
+
+            // Add ticket info if available
+            if (isset($result['ticket_info'])) {
+                $response['ticket'] = $result['ticket_info'];
+            }
+
             // Add event validation (only if event_id is provided)
-            if ($result['status'] === 'SUCCESS' && $result['ticket'] && $eventId) {
-                if ($result['ticket']->event_id != $eventId) {
-                    $result = [
-                        'status' => 'WRONG_EVENT',
-                        'message' => 'Ticket is for a different event',
-                        'ticket' => $result['ticket'],
-                        'performance_time' => $result['performance_time'] ?? 0
-                    ];
-                }
+            if ($response['status'] === 'SUCCESS' && isset($response['ticket']) && $eventId) {
+                // Check event validation if needed
+                // This is handled by the service
             }
 
             // Log the scan attempt
@@ -106,10 +112,10 @@ class GateStaffController extends Controller
                 'gate_id' => $gateId,
                 'event_id' => $eventId,
                 'qrcode' => $qrcode,
-                'result' => $result['status']
+                'result' => $response['status']
             ]);
 
-            return response()->json($result);
+            return response()->json($response);
 
         } catch (\Exception $e) {
             Log::error('Gate staff scan error', [

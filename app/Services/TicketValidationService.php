@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Ticket;
+use App\Models\PurchaseTicket;
 use App\Models\AdmittanceLog;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -31,13 +31,13 @@ class TicketValidationService
             }
 
             // Check if ticket is already scanned
-            if ($ticket->isScanned()) {
+            if ($ticket->status === 'scanned' || !is_null($ticket->scanned_at)) {
                 return $this->createValidationResult('DUPLICATE', 'Ticket already scanned', $gateId, $staffUserId, $startTime, $ticket);
             }
 
             // Check if ticket is valid for scanning
-            if ($ticket->status !== 'sold') {
-                return $this->createValidationResult('INVALID', 'Ticket not sold', $gateId, $staffUserId, $startTime, $ticket);
+            if (!in_array($ticket->status, ['active', 'pending'])) {
+                return $this->createValidationResult('INVALID', 'Ticket not active', $gateId, $staffUserId, $startTime, $ticket);
             }
 
             // Check if ticket is for the correct event (if event is happening today)
@@ -68,38 +68,31 @@ class TicketValidationService
     /**
      * Get ticket for validation with optimized query
      */
-    private function getTicketForValidation(string $qrcode): ?Ticket
+    private function getTicketForValidation(string $qrcode): ?PurchaseTicket
     {
         // Use raw SQL for maximum performance with proper indexing
         $result = DB::selectOne("
-            SELECT t.id, t.event_id, t.qrcode, t.status, t.scanned_at, 
-                   t.price_paid, t.created_at, t.zone,
+            SELECT pt.id, pt.event_id, pt.qrcode, pt.status, pt.scanned_at, 
+                   pt.price_paid, pt.created_at,
                    e.name as event_name, e.date_time as event_date
-            FROM tickets t
-            LEFT JOIN events e ON t.event_id = e.id
-            WHERE t.qrcode = ? 
-            AND t.deleted_at IS NULL
-            AND t.status IN ('Sold', 'Held')
+            FROM purchase_tickets pt
+            LEFT JOIN events e ON pt.event_id = e.id
+            WHERE pt.qrcode = ? 
+            AND pt.deleted_at IS NULL
+            AND pt.status IN ('active', 'pending')
         ", [$qrcode]);
 
         if (!$result) {
             return null;
         }
 
-        // Convert to Ticket model for consistency
-        $ticket = new Ticket();
-        $ticket->id = $result->id;
-        $ticket->event_id = $result->event_id;
-        $ticket->qrcode = $result->qrcode;
-        $ticket->status = $result->status;
-        $ticket->scanned_at = $result->scanned_at;
-        $ticket->price_paid = $result->price_paid;
-        $ticket->created_at = $result->created_at;
-        $ticket->zone = $result->zone;
-
-        // Add event information
-        $ticket->event_name = $result->event_name;
-        $ticket->event_date = $result->event_date;
+        // Convert to PurchaseTicket model for consistency
+        $ticket = PurchaseTicket::find($result->id);
+        if ($ticket) {
+            // Add event information to the ticket object
+            $ticket->event_name = $result->event_name;
+            $ticket->event_date = $result->event_date;
+        }
 
         return $ticket;
     }
@@ -107,27 +100,27 @@ class TicketValidationService
     /**
      * Check if ticket is valid for current event
      */
-    private function isValidForCurrentEvent(Ticket $ticket): bool
+    private function isValidForCurrentEvent(PurchaseTicket $ticket): bool
     {
-        // For now, allow all sold tickets
+        // For now, allow all active/pending tickets
         // In production, you might want to check event date/time
-        return $ticket->status === 'sold';
+        return in_array($ticket->status, ['active', 'pending']);
     }
 
     /**
      * Mark ticket as scanned atomically
      */
-    private function markTicketAsScanned(Ticket $ticket, string $gateId, int $staffUserId): void
+    private function markTicketAsScanned(PurchaseTicket $ticket, string $gateId, int $staffUserId): void
     {
         DB::transaction(function() use ($ticket, $gateId, $staffUserId) {
             // Use raw SQL for atomic update
             DB::update("
-                UPDATE tickets 
+                UPDATE purchase_tickets 
                 SET status = 'scanned',
                     scanned_at = ?, 
                     updated_at = ?
                 WHERE id = ? 
-                AND status = 'sold'
+                AND status IN ('active', 'pending')
             ", [
                 now(),
                 now(),
@@ -139,7 +132,7 @@ class TicketValidationService
     /**
      * Log admittance event
      */
-    private function logAdmittance(Ticket $ticket, string $result, string $gateId, int $staffUserId): void
+    private function logAdmittance(PurchaseTicket $ticket, string $result, string $gateId, int $staffUserId): void
     {
         $admittanceLog = AdmittanceLog::create([
             'ticket_id' => $ticket->id,
@@ -168,7 +161,7 @@ class TicketValidationService
     /**
      * Create validation result with performance metrics
      */
-    private function createValidationResult(string $result, string $message, string $gateId, int $staffUserId, float $startTime, ?Ticket $ticket = null): array
+    private function createValidationResult(string $result, string $message, string $gateId, int $staffUserId, float $startTime, ?PurchaseTicket $ticket = null): array
     {
         $executionTime = round((microtime(true) - $startTime) * 1000, 2); // Convert to milliseconds
 

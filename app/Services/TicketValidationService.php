@@ -75,7 +75,7 @@ class TicketValidationService
             SELECT pt.id, pt.event_id, pt.qrcode, pt.status, pt.scanned_at, 
                    pt.price_paid, pt.created_at,
                    e.name as event_name, e.date_time as event_date
-            FROM purchase_tickets pt
+            FROM purchase pt
             LEFT JOIN events e ON pt.event_id = e.id
             WHERE pt.qrcode = ? 
             AND pt.deleted_at IS NULL
@@ -115,7 +115,7 @@ class TicketValidationService
         DB::transaction(function() use ($ticket, $gateId, $staffUserId) {
             // Use raw SQL for atomic update
             DB::update("
-                UPDATE purchase_tickets 
+                UPDATE purchase 
                 SET status = 'scanned',
                     scanned_at = ?, 
                     updated_at = ?

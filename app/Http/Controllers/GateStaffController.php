@@ -124,12 +124,14 @@ class GateStaffController extends Controller
                 'event_id' => $eventId,
                 'qrcode' => $qrcode,
                 'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
                 'status' => 'ERROR',
-                'message' => 'An error occurred during scanning: ' . $e->getMessage(),
+                'message' => 'Validation error occurred: ' . $e->getMessage(),
                 'performance_time' => 0
             ], 500);
         }

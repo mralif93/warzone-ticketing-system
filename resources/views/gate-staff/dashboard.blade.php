@@ -281,53 +281,18 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-            <!-- Today's Events -->
-            <div class="bg-white rounded-lg shadow">
-                <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-lg font-medium text-gray-900">Today's Events</h3>
-                </div>
-                <div class="p-4 sm:p-6">
-                    @if($todayEvents->count() > 0)
-                        <div class="space-y-3 sm:space-y-4">
-                            @foreach($todayEvents as $event)
-                                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-gray-50 rounded-lg space-y-3 sm:space-y-0">
-                                    <div class="flex-1 min-w-0">
-                                        <h4 class="font-medium text-gray-900 truncate">{{ $event->name }}</h4>
-                                        <p class="text-sm text-gray-600">
-                                            <i class="bx bx-time mr-1"></i>
-                                            {{ \Carbon\Carbon::parse($event->event_date)->format('g:i A') }}
-                                        </p>
-                                    </div>
-                                    <a href="{{ route('gate-staff.scanner', ['event_id' => $event->id]) }}" 
-                                       class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center w-full sm:w-auto">
-                                        <i class="bx bx-qr-scan mr-1.5 text-sm"></i>
-                                        Scan Tickets
-                                    </a>
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <div class="text-center py-6 sm:py-8">
-                            <i class="bx bx-calendar-x text-3xl sm:text-4xl text-gray-400 mb-3 sm:mb-4"></i>
-                            <p class="text-gray-500 text-sm sm:text-base">No events scheduled for today</p>
-                        </div>
-                    @endif
-                </div>
+        <!-- Recent Scans -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Recent Scans</h3>
             </div>
-
-            <!-- Recent Scans -->
-            <div class="bg-white rounded-lg shadow">
-                <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-lg font-medium text-gray-900">Recent Scans</h3>
-                </div>
-                <div class="p-4 sm:p-6">
-                    @if($recentScans->count() > 0)
-                        <div class="space-y-3">
-                            @foreach($recentScans as $scan)
-                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                    <div class="flex items-center min-w-0 flex-1">
-                                        <div class="w-8 h-8 rounded-full flex items-center justify-center mr-3 flex-shrink-0
+            <div class="p-4 sm:p-6">
+                @if($recentScans->count() > 0)
+                    <div class="space-y-3">
+                        @foreach($recentScans as $scan)
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center min-w-0 flex-1">
+                                    <div class="w-8 h-8 rounded-full flex items-center justify-center mr-3 flex-shrink-0
                                             @if($scan->scan_result === 'SUCCESS') bg-green-100 text-green-600
                                             @elseif($scan->scan_result === 'DUPLICATE') bg-red-100 text-red-600
                                             @elseif($scan->scan_result === 'INVALID') bg-red-100 text-red-600
@@ -340,41 +305,40 @@
                                             @else
                                                 <i class="bx bx-error text-sm"></i>
                                             @endif
-                                        </div>
-                                        <div class="min-w-0 flex-1">
-                                            <p class="text-sm font-medium text-gray-900 truncate">
-                                                {{ $scan->ticket->event->name ?? 'Unknown Event' }}
-                                            </p>
-                                            <p class="text-xs text-gray-500">
-                                                {{ $scan->scan_time->format('g:i A') }} • {{ $scan->gate_id }}
-                                            </p>
-                                        </div>
                                     </div>
-                                    <span class="text-xs font-medium px-2 py-1 rounded-full flex-shrink-0 ml-2
-                                        @if($scan->scan_result === 'SUCCESS') bg-green-100 text-green-800
-                                        @elseif($scan->scan_result === 'DUPLICATE') bg-red-100 text-red-800
-                                        @elseif($scan->scan_result === 'INVALID') bg-red-100 text-red-800
-                                        @else bg-yellow-100 text-yellow-800
-                                        @endif">
-                                        {{ $scan->scan_result }}
-                                    </span>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm font-medium text-gray-900 truncate">
+                                            {{ $scan->ticket->event->name ?? 'Unknown Event' }}
+                                        </p>
+                                        <p class="text-xs text-gray-500">
+                                            {{ $scan->scan_time->format('g:i A') }} • {{ $scan->gate_id }}
+                                        </p>
+                                    </div>
                                 </div>
-                            @endforeach
-                        </div>
-                        <div class="mt-4 text-center">
-                            <a href="{{ route('gate-staff.scan-history') }}" 
-                               class="inline-flex items-center px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
-                                <i class="bx bx-history mr-2"></i>
-                                View All Scans
-                            </a>
-                        </div>
-                    @else
-                        <div class="text-center py-6 sm:py-8">
-                            <i class="bx bx-qr-scan text-3xl sm:text-4xl text-gray-400 mb-3 sm:mb-4"></i>
-                            <p class="text-gray-500 text-sm sm:text-base">No scans yet today</p>
-                        </div>
-                    @endif
-                </div>
+                                <span class="text-xs font-medium px-2 py-1 rounded-full flex-shrink-0 ml-2
+                                    @if($scan->scan_result === 'SUCCESS') bg-green-100 text-green-800
+                                    @elseif($scan->scan_result === 'DUPLICATE') bg-red-100 text-red-800
+                                    @elseif($scan->scan_result === 'INVALID') bg-red-100 text-red-800
+                                    @else bg-yellow-100 text-yellow-800
+                                    @endif">
+                                    {{ $scan->scan_result }}
+                                </span>
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="mt-4 text-center">
+                        <a href="{{ route('gate-staff.scan-history') }}" 
+                           class="inline-flex items-center px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
+                            <i class="bx bx-history mr-2"></i>
+                            View All Scans
+                        </a>
+                    </div>
+                @else
+                    <div class="text-center py-6 sm:py-8">
+                        <i class="bx bx-qr-scan text-3xl sm:text-4xl text-gray-400 mb-3 sm:mb-4"></i>
+                        <p class="text-gray-500 text-sm sm:text-base">No scans yet today</p>
+                    </div>
+                @endif
             </div>
         </div>
     </div>

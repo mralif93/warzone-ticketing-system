@@ -332,45 +332,25 @@
                             @foreach($scans as $scan)
                                 <tr class="hover:bg-gray-50 transition-colors duration-150">
                                     <td class="px-6 py-5 whitespace-nowrap">
-                                        <div class="flex items-center space-x-3">
-                                            <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                                                <i class="bx bx-time text-gray-600"></i>
-                                            </div>
                                         <div>
-                                                <div class="font-semibold text-gray-900">{{ $scan->scan_time->format('M j, Y') }}</div>
-                                                <div class="text-sm text-gray-500">{{ $scan->scan_time->format('g:i A') }}</div>
-                                            </div>
+                                            <div class="font-semibold text-gray-900">{{ $scan->scan_time->format('M j, Y') }}</div>
+                                            <div class="text-sm text-gray-500">{{ $scan->scan_time->format('g:i A') }}</div>
                                         </div>
                                     </td>
                                     <td class="px-6 py-5 whitespace-nowrap">
-                                        <div class="flex items-center space-x-3">
-                                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                                <i class="bx bx-calendar-event text-blue-600"></i>
-                                            </div>
-                                            <div>
-                                                <div class="font-medium text-gray-900">{{ $scan->ticket->event->name ?? 'Unknown Event' }}</div>
-                                                <div class="text-sm text-gray-500">Event ID: {{ $scan->ticket->event->id ?? 'N/A' }}</div>
-                                            </div>
+                                        <div>
+                                            <div class="font-medium text-gray-900">{{ $scan->ticket->event->name ?? 'Unknown Event' }}</div>
+                                            <div class="text-sm text-gray-500">Event ID: {{ $scan->ticket->event->id ?? 'N/A' }}</div>
                                         </div>
                                     </td>
                                     <td class="px-6 py-5 whitespace-nowrap">
                                         @if($scan->ticket)
-                                            <div class="flex items-center space-x-3">
-                                                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                                                    <i class="bx bx-qr text-green-600"></i>
-                                                </div>
                                             <div>
-                                                    <div class="font-medium text-gray-900">Ticket #{{ $scan->ticket->ticket_identifier ?? 'N/A' }}</div>
-                                                    <div class="text-sm text-gray-500">RM{{ number_format($scan->ticket->price_paid ?? 0, 0) }}</div>
-                                                </div>
+                                                <div class="font-medium text-gray-900">Ticket #{{ $scan->ticket->ticket_identifier ?? 'N/A' }}</div>
+                                                <div class="text-sm text-gray-500">RM{{ number_format($scan->ticket->price_paid ?? 0, 0) }}</div>
                                             </div>
                                         @else
-                                            <div class="flex items-center space-x-3">
-                                                <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                                                    <i class="bx bx-x text-gray-500"></i>
-                                                </div>
                                             <span class="text-gray-500">No ticket data</span>
-                                            </div>
                                         @endif
                                     </td>
                                     <td class="px-6 py-5 whitespace-nowrap">
@@ -382,25 +362,11 @@
                                             @elseif($scan->scan_result === 'WRONG_EVENT') bg-yellow-100 text-yellow-800
                                             @else bg-gray-100 text-gray-800
                                             @endif">
-                                            @if($scan->scan_result === 'SUCCESS')
-                                                <i class="bx bx-check-circle mr-1.5"></i>
-                                            @elseif($scan->scan_result === 'DUPLICATE')
-                                                <i class="bx bx-x-circle mr-1.5"></i>
-                                            @elseif($scan->scan_result === 'INVALID')
-                                                <i class="bx bx-error mr-1.5"></i>
-                                            @else
-                                                <i class="bx bx-error-circle mr-1.5"></i>
-                                            @endif
                                             {{ $scan->scan_result }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-5 whitespace-nowrap">
-                                        <div class="flex items-center space-x-2">
-                                            <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                                <i class="bx bx-door-open text-purple-600 text-sm"></i>
-                                            </div>
-                                            <span class="font-medium text-gray-900">Gate {{ $scan->gate_id }}</span>
-                                        </div>
+                                        <span class="font-medium text-gray-900">Gate {{ $scan->gate_id }}</span>
                                     </td>
                                     <td class="px-6 py-5 whitespace-nowrap text-sm font-medium">
                                         <button onclick="showScanDetails({{ $scan->id }})" 

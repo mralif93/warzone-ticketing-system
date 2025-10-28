@@ -215,6 +215,7 @@ class TicketValidationService
                 'ticket_identifier' => $ticket->ticket_type_name ?? $ticket->qrcode ?? "TKT-{$ticket->id}",
                 'zone' => $ticket->zone ?? 'N/A',
                 'price_paid' => $ticket->price_paid ?? 0,
+                'original_price' => $ticket->original_price ?? 0,
                 'status' => $ticket->status ?? 'N/A',
                 'scanned_at' => $ticket->scanned_at ? $ticket->scanned_at->format('Y-m-d H:i:s') : null,
             ];

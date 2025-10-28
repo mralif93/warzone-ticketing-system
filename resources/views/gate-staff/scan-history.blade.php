@@ -357,7 +357,7 @@
                                         </span>
                                     </td>
                                     <td class="px-6 py-5 whitespace-nowrap text-sm font-medium">
-                                        <button onclick="showScanDetails({{ $scan->id }})" 
+                                        <button onclick="showScanDetails({{ $scan->id }}, '{{ addslashes($scan->ticket->event->name ?? 'Unknown Event') }}', '{{ $scan->scan_time->format('M j, Y g:i A') }}', '{{ $scan->gate_id }}', '{{ $scan->scan_result }}', {{ json_encode($scan->ticket->ticketType->name ?? 'N/A') }}, '{{ $scan->ticket->ticket_identifier ?? 'N/A' }}', {{ number_format($scan->ticket->price_paid ?? 0, 2) }})" 
                                                 class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
                                             <i class="bx bx-show mr-1.5"></i>
                                             View
@@ -437,13 +437,71 @@
 </div>
 
 <script>
-function showScanDetails(scanId) {
-    // This would typically make an AJAX call to get scan details
-    // For now, we'll show a placeholder
+function showScanDetails(scanId, eventName, scanTime, gateId, scanResult, ticketType, ticketIdentifier, pricePaid) {
+    // Format the price
+    const price = parseFloat(pricePaid).toFixed(2);
+    
+    // Get result badge color
+    const resultColor = scanResult === 'SUCCESS' ? 'bg-green-100 text-green-800' : 
+                       (scanResult === 'DUPLICATE' ? 'bg-red-100 text-red-800' : 
+                       (scanResult === 'INVALID' ? 'bg-red-100 text-red-800' : 
+                       (scanResult === 'WRONG_GATE' ? 'bg-yellow-100 text-yellow-800' : 
+                       (scanResult === 'WRONG_EVENT' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'))));
+    
     document.getElementById('scan-details-content').innerHTML = `
-        <div class="text-center py-4">
-            <p class="text-gray-500">Scan details for ID: ${scanId}</p>
-            <p class="text-sm text-gray-400 mt-2">Detailed scan information would be loaded here.</p>
+        <div class="space-y-6">
+            <!-- Scan Information -->
+            <div class="border-b border-gray-200 pb-4">
+                <h4 class="text-sm font-semibold text-gray-600 mb-3">SCAN INFORMATION</h4>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs text-gray-500">Scan ID</label>
+                        <p class="text-sm font-medium text-gray-900">#${scanId}</p>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500">Scan Time</label>
+                        <p class="text-sm font-medium text-gray-900">${scanTime}</p>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500">Gate</label>
+                        <p class="text-sm font-medium text-gray-900">${gateId}</p>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500">Result</label>
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${resultColor}">
+                            ${scanResult}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Event Information -->
+            <div class="border-b border-gray-200 pb-4">
+                <h4 class="text-sm font-semibold text-gray-600 mb-3">EVENT INFORMATION</h4>
+                <div>
+                    <label class="text-xs text-gray-500">Event Name</label>
+                    <p class="text-sm font-medium text-gray-900">${eventName}</p>
+                </div>
+            </div>
+            
+            <!-- Ticket Information -->
+            <div>
+                <h4 class="text-sm font-semibold text-gray-600 mb-3">TICKET INFORMATION</h4>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs text-gray-500">Ticket Type</label>
+                        <p class="text-sm font-medium text-gray-900">${ticketType}</p>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500">Ticket Identifier</label>
+                        <p class="text-sm font-medium text-gray-900">#${ticketIdentifier}</p>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500">Price Paid</label>
+                        <p class="text-sm font-medium text-gray-900">RM${price}</p>
+                    </div>
+                </div>
+            </div>
         </div>
     `;
     document.getElementById('scan-details-modal').classList.remove('hidden');

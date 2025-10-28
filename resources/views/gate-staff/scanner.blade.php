@@ -1116,7 +1116,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 color = '#10B981';
                 title = 'Ticket Validated';
                 html = `
-                    <div class="text-left space-y-3">
+                    <div class="text-center space-y-3">
                         <p class="mb-4 text-base font-semibold text-green-600">${data.message}</p>
                         ${data.ticket ? `
                         <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-2">
@@ -1157,7 +1157,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                             ` : ''}
                         </div>
-                        ` : ''}
+                        ` : ''}/
                     </div>
                 `;
                 break;
@@ -1198,25 +1198,74 @@ document.addEventListener('DOMContentLoaded', function() {
                 icon = 'error';
                 color = '#EF4444';
                 title = 'Invalid Ticket';
-                html = `<p>${data.message}</p>`;
+                html = `
+                    <div class="text-center space-y-3">
+                        <p class="mb-4 text-base font-semibold text-red-600">${data.message}</p>
+                        ${data.ticket ? `
+                        <div class="bg-red-50 p-4 rounded-lg border border-red-200">
+                            <p class="text-sm text-gray-600">This ticket could not be validated. Please check the QR code and try again.</p>
+                        </div>
+                        ` : '<p class="text-sm text-gray-600">The ticket was not found in the system. Please verify the QR code.</p>'}
+                    </div>
+                `;
                 break;
             case 'WRONG_GATE':
                 icon = 'warning';
                 color = '#F59E0B';
                 title = 'Wrong Gate';
-                html = `<p>${data.message}</p>`;
+                html = `
+                    <div class="text-center space-y-3">
+                        <p class="mb-4 text-base font-semibold text-yellow-600">${data.message}</p>
+                        ${data.ticket ? `
+                        <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200 space-y-2">
+                            <div class="flex justify-between items-start pb-2 border-b border-yellow-300">
+                                <span class="text-sm font-semibold text-gray-600">Event:</span>
+                                <span class="text-sm text-gray-900 text-right">${data.ticket.event_name || 'N/A'}</span>
+                            </div>
+                            <div class="flex justify-between items-start py-2">
+                                <span class="text-sm font-semibold text-gray-600">Ticket Type:</span>
+                                <span class="text-sm text-gray-900 text-right">${data.ticket.ticket_identifier || 'N/A'}</span>
+                            </div>
+                        </div>
+                        ` : ''}
+                        <p class="text-xs text-gray-500 text-center">Please direct the customer to the correct gate.</p>
+                    </div>
+                `;
                 break;
             case 'WRONG_EVENT':
                 icon = 'warning';
                 color = '#F59E0B';
                 title = 'Wrong Event';
-                html = `<p>${data.message}</p>`;
+                html = `
+                    <div class="text-center space-y-3">
+                        <p class="mb-4 text-base font-semibold text-yellow-600">${data.message}</p>
+                        ${data.ticket ? `
+                        <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200 space-y-2">
+                            <div class="flex justify-between items-start pb-2 border-b border-yellow-300">
+                                <span class="text-sm font-semibold text-gray-600">Event:</span>
+                                <span class="text-sm text-gray-900 text-right">${data.ticket.event_name || 'N/A'}</span>
+                            </div>
+                            <div class="flex justify-between items-start py-2">
+                                <span class="text-sm font-semibold text-gray-600">Ticket Type:</span>
+                                <span class="text-sm text-gray-900 text-right">${data.ticket.ticket_identifier || 'N/A'}</span>
+                            </div>
+                        </div>
+                        ` : ''}
+                        <p class="text-xs text-gray-500 text-center">This ticket is for a different event.</p>
+                    </div>
+                `;
                 break;
             default:
                 icon = 'error';
                 color = '#EF4444';
                 title = 'Error';
-                html = `<p>${data.message}</p>`;
+                html = `
+                    <div class="text-center space-y-3">
+                        <p class="mb-4 text-base font-semibold text-red-600">${data.message}</p>
+                        <p class="text-sm text-gray-600">An unexpected error occurred during validation.</p>
+                        <p class="text-xs text-gray-500 text-center">Please contact system administrator.</p>
+                    </div>
+                `;
         }
 
         // Show SweetAlert popup

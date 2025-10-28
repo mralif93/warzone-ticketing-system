@@ -81,7 +81,7 @@ class TicketValidationService
             // Use raw SQL for maximum performance with proper indexing
         $result = DB::selectOne("
             SELECT pt.id, pt.event_id, pt.qrcode, pt.status, pt.scanned_at, 
-                   pt.price_paid, pt.created_at, pt.ticket_type_id, pt.zone,
+                   pt.price_paid, pt.created_at, pt.ticket_type_id, pt.zone, pt.event_day_name,
                    e.name as event_name, e.date_time as event_date, e.venue,
                    t.name as ticket_type_name
             FROM purchase pt
@@ -115,12 +115,18 @@ class TicketValidationService
         if ($ticket) {
             // Add event and ticket type information to the ticket object
             $ticket->event_name = $result->event_name;
-            $ticket->event_date = $result->event_date;
             $ticket->venue = $result->venue ?? 'N/A';
             $ticket->zone = $result->zone ?? 'N/A';
             $ticket->ticket_type_name = $result->ticket_type_name ?? 'N/A';
             $ticket->status = $result->status ?? 'N/A';
             $ticket->scanned_at = $result->scanned_at ?? null;
+            
+            // Format event date with day name
+            if ($result->event_date) {
+                $date = \Carbon\Carbon::parse($result->event_date);
+                $dayName = $result->event_day_name ?? 'Day'; // Get day name from result
+                $ticket->event_date = $dayName . ' - ' . $date->format('M j, Y') . ' at ' . $date->format('g:i A');
+            }
         }
 
         return $ticket;

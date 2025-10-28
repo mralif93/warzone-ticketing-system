@@ -1116,14 +1116,46 @@ document.addEventListener('DOMContentLoaded', function() {
                 color = '#10B981';
                 title = 'Ticket Validated';
                 html = `
-                    <div class="text-left">
-                        <p class="mb-3 text-base font-semibold">${data.message}</p>
+                    <div class="text-left space-y-3">
+                        <p class="mb-4 text-base font-semibold text-green-600">${data.message}</p>
                         ${data.ticket ? `
-                        <div class="bg-gray-50 p-4 rounded-lg border border-green-200">
-                            <p class="text-sm font-semibold text-gray-700 mb-1">Event:</p>
-                            <p class="text-base text-gray-900 mb-3">${data.ticket.event_name || 'N/A'}</p>
-                            <p class="text-sm font-semibold text-gray-700 mb-1">Ticket:</p>
-                            <p class="text-base text-gray-900">${data.ticket.ticket_identifier || 'N/A'}</p>
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-2">
+                            <div class="flex justify-between items-start pb-2 border-b border-gray-300">
+                                <span class="text-sm font-semibold text-gray-600">Event:</span>
+                                <span class="text-sm text-gray-900 text-right">${data.ticket.event_name || 'N/A'}</span>
+                            </div>
+                            ${data.ticket.event_date ? `
+                            <div class="flex justify-between items-start py-2 border-b border-gray-300">
+                                <span class="text-sm font-semibold text-gray-600">Date & Time:</span>
+                                <span class="text-sm text-gray-900 text-right">${data.ticket.event_date || 'N/A'}</span>
+                            </div>
+                            ` : ''}
+                            ${data.ticket.venue && data.ticket.venue !== 'N/A' ? `
+                            <div class="flex justify-between items-start py-2 border-b border-gray-300">
+                                <span class="text-sm font-semibold text-gray-600">Venue:</span>
+                                <span class="text-sm text-gray-900 text-right">${data.ticket.venue}</span>
+                            </div>
+                            ` : ''}
+                            <div class="flex justify-between items-start py-2 border-b border-gray-300">
+                                <span class="text-sm font-semibold text-gray-600">Ticket Type:</span>
+                                <span class="text-sm text-gray-900 text-right">${data.ticket.ticket_identifier || 'N/A'}</span>
+                            </div>
+                            ${data.ticket.zone && data.ticket.zone !== 'N/A' ? `
+                            <div class="flex justify-between items-start py-2 border-b border-gray-300">
+                                <span class="text-sm font-semibold text-gray-600">Zone:</span>
+                                <span class="text-sm text-gray-900 text-right">${data.ticket.zone}</span>
+                            </div>
+                            ` : ''}
+                            <div class="flex justify-between items-start py-2 border-b border-gray-300">
+                                <span class="text-sm font-semibold text-gray-600">Price Paid:</span>
+                                <span class="text-sm font-semibold text-gray-900 text-right">RM${parseFloat(data.ticket.price_paid || 0).toFixed(2)}</span>
+                            </div>
+                            ${data.ticket.status ? `
+                            <div class="flex justify-between items-center pt-2">
+                                <span class="text-sm font-semibold text-gray-600">Status:</span>
+                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold uppercase">${data.ticket.status}</span>
+                            </div>
+                            ` : ''}
                         </div>
                         ` : ''}
                     </div>

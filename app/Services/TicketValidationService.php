@@ -81,8 +81,8 @@ class TicketValidationService
         // Use raw SQL for maximum performance with proper indexing
         $result = DB::selectOne("
             SELECT pt.id, pt.event_id, pt.qrcode, pt.status, pt.scanned_at, 
-                   pt.price_paid, pt.created_at, pt.ticket_type_id,
-                   e.name as event_name, e.date_time as event_date,
+                   pt.price_paid, pt.created_at, pt.ticket_type_id, pt.zone,
+                   e.name as event_name, e.date_time as event_date, e.venue,
                    t.name as ticket_type_name
             FROM purchase pt
             LEFT JOIN events e ON pt.event_id = e.id
@@ -117,7 +117,10 @@ class TicketValidationService
             // Add event and ticket type information to the ticket object
             $ticket->event_name = $result->event_name;
             $ticket->event_date = $result->event_date;
+            $ticket->venue = $result->venue ?? 'N/A';
+            $ticket->zone = $result->zone ?? 'N/A';
             $ticket->ticket_type_name = $result->ticket_type_name ?? 'N/A';
+            $ticket->status = $result->status ?? 'N/A';
         }
 
         return $ticket;
@@ -201,8 +204,12 @@ class TicketValidationService
             $response['ticket_info'] = [
                 'id' => $ticket->id,
                 'event_name' => $ticket->event_name ?? 'Unknown Event',
+                'event_date' => $ticket->event_date ?? null,
+                'venue' => $ticket->venue ?? 'N/A',
                 'ticket_identifier' => $ticket->ticket_type_name ?? $ticket->qrcode ?? "TKT-{$ticket->id}",
+                'zone' => $ticket->zone ?? 'N/A',
                 'price_paid' => $ticket->price_paid ?? 0,
+                'status' => $ticket->status ?? 'N/A',
             ];
         }
 

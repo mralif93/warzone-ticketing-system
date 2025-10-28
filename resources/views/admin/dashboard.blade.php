@@ -138,7 +138,7 @@
                                                     @elseif($event->status === 'Cancelled') bg-wwc-error text-white
                                                     @else bg-wwc-warning text-white
                                                     @endif">
-                                                    {{ $event->status }}
+                                                    {{ str_replace('_', '', ucwords(str_replace('_', ' ', $event->status))) }}
                                                 </span>
                                             </div>
                                             <div class="flex items-center space-x-6 text-sm text-wwc-neutral-600">

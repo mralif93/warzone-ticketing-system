@@ -19,7 +19,7 @@
                 @endif
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-400 text-green-900">
                     <i class='bx bx-check-circle mr-1'></i>
-                    {{ $mainEvent->status }}
+                    {{ str_replace('_', '', ucwords(str_replace('_', ' ', $mainEvent->status))) }}
                 </span>
             </div>
 

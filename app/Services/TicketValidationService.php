@@ -81,10 +81,12 @@ class TicketValidationService
         // Use raw SQL for maximum performance with proper indexing
         $result = DB::selectOne("
             SELECT pt.id, pt.event_id, pt.qrcode, pt.status, pt.scanned_at, 
-                   pt.price_paid, pt.created_at,
-                   e.name as event_name, e.date_time as event_date
+                   pt.price_paid, pt.created_at, pt.ticket_type_id,
+                   e.name as event_name, e.date_time as event_date,
+                   t.name as ticket_type_name
             FROM purchase pt
             LEFT JOIN events e ON pt.event_id = e.id
+            LEFT JOIN tickets t ON pt.ticket_type_id = t.id
             WHERE pt.qrcode = ? 
             AND pt.deleted_at IS NULL
             AND pt.status IN ('sold', 'active', 'pending')
@@ -112,9 +114,10 @@ class TicketValidationService
         // Convert to PurchaseTicket model for consistency
         $ticket = PurchaseTicket::find($result->id);
         if ($ticket) {
-            // Add event information to the ticket object
+            // Add event and ticket type information to the ticket object
             $ticket->event_name = $result->event_name;
             $ticket->event_date = $result->event_date;
+            $ticket->ticket_type_name = $result->ticket_type_name ?? 'N/A';
         }
 
         return $ticket;
@@ -198,7 +201,7 @@ class TicketValidationService
             $response['ticket_info'] = [
                 'id' => $ticket->id,
                 'event_name' => $ticket->event_name ?? 'Unknown Event',
-                'ticket_identifier' => $ticket->qrcode ?? "TKT-{$ticket->id}",
+                'ticket_identifier' => $ticket->ticket_type_name ?? $ticket->qrcode ?? "TKT-{$ticket->id}",
                 'price_paid' => $ticket->price_paid ?? 0,
             ];
         }

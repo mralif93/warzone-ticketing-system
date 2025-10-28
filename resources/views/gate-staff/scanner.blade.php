@@ -1117,15 +1117,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 title = 'Ticket Validated';
                 html = `
                     <div class="text-left">
-                        <p class="mb-3">${data.message}</p>
+                        <p class="mb-3 text-base font-semibold">${data.message}</p>
                         ${data.ticket ? `
-                        <div class="bg-gray-50 p-4 rounded-lg space-y-2">
-                            <p class="text-sm"><strong>Event:</strong> ${data.ticket.event_name || 'N/A'}</p>
-                            <p class="text-sm"><strong>Ticket:</strong> ${data.ticket.ticket_identifier || 'N/A'}</p>
-                            <p class="text-sm"><strong>Price:</strong> RM${data.ticket.price_paid || '0'}</p>
+                        <div class="bg-gray-50 p-4 rounded-lg border border-green-200">
+                            <p class="text-sm font-semibold text-gray-700 mb-1">Event:</p>
+                            <p class="text-base text-gray-900 mb-3">${data.ticket.event_name || 'N/A'}</p>
+                            <p class="text-sm font-semibold text-gray-700 mb-1">Ticket:</p>
+                            <p class="text-base text-gray-900">${data.ticket.ticket_identifier || 'N/A'}</p>
                         </div>
                         ` : ''}
-                        <p class="text-xs text-gray-500 mt-3">Scan completed in ${data.performance_time || 0}ms</p>
                     </div>
                 `;
                 break;

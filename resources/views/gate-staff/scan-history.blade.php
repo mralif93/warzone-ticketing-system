@@ -315,16 +315,7 @@
                                     </div>
                                 </th>
                                 <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                    <div class="flex items-center space-x-2">
-                                        <i class="bx bx-door-open text-sm"></i>
-                                        <span>Gate</span>
-                                    </div>
-                                </th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                    <div class="flex items-center space-x-2">
-                                        <i class="bx bx-cog text-sm"></i>
-                                        <span>Actions</span>
-                                    </div>
+                                    <span>Actions</span>
                                 </th>
                             </tr>
                         </thead>
@@ -365,14 +356,11 @@
                                             {{ $scan->scan_result }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-5 whitespace-nowrap">
-                                        <span class="font-medium text-gray-900">Gate {{ $scan->gate_id }}</span>
-                                    </td>
                                     <td class="px-6 py-5 whitespace-nowrap text-sm font-medium">
                                         <button onclick="showScanDetails({{ $scan->id }})" 
                                                 class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
                                             <i class="bx bx-show mr-1.5"></i>
-                                            View Details
+                                            View
                                         </button>
                                     </td>
                                 </tr>

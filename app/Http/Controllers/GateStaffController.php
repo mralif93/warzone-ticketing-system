@@ -35,7 +35,7 @@ class GateStaffController extends Controller
 
         // Get recent scans for this staff member
         $recentScans = AdmittanceLog::where('staff_user_id', $user->id)
-            ->with('ticket.event')
+            ->with(['ticket.event', 'ticket.ticketType'])
             ->orderBy('scan_time', 'desc')
             ->limit(10)
             ->get();

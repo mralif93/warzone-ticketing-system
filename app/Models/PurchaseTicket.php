@@ -71,7 +71,7 @@ class PurchaseTicket extends Model
      */
     public function admittanceLogs()
     {
-        return $this->hasMany(AdmittanceLog::class, 'ticket_id');
+        return $this->hasMany(AdmittanceLog::class, 'purchase_ticket_id');
     }
 
     /**

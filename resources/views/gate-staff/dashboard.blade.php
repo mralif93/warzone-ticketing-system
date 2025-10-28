@@ -311,7 +311,7 @@
                                             {{ $scan->ticket->event->name ?? 'Unknown Event' }}
                                         </p>
                                         <p class="text-xs text-gray-500">
-                                            {{ $scan->scan_time->format('g:i A') }} • {{ $scan->gate_id }}
+                                            {{ $scan->scan_time->format('g:i A') }} • {{ $scan->gate_id }}@if($scan->ticket) • {{ $scan->ticket->ticketType->name ?? 'N/A' }}@endif
                                         </p>
                                     </div>
                                 </div>

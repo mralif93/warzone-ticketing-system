@@ -628,32 +628,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     ` : ''}
                     
                     <div class="space-y-4">
-                        <!-- Enhanced Description -->
-                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-200">
-                            <div class="flex items-center mb-3">
-                                <i class='bx bx-info-circle text-blue-600 text-xl mr-2'></i>
-                                <h4 class="font-bold text-gray-900 text-lg">What's Included</h4>
-                            </div>
-                            <div class="space-y-2">
-                                <div class="flex items-center text-sm text-gray-700">
-                                    <i class='bx bx-chair text-green-500 mr-2'></i>
-                                    <span>Premium Seating</span>
-                                </div>
-                                <div class="flex items-center text-sm text-gray-700">
-                                    <i class='bx bx-key text-purple-500 mr-2'></i>
-                                    <span>Backstage Access</span>
-                                </div>
-                                <div class="flex items-center text-sm text-gray-700">
-                                    <i class='bx bx-group text-orange-500 mr-2'></i>
-                                    <span>Meet & Greet with Players</span>
-                                </div>
-                                <div class="flex items-center text-sm text-gray-700">
-                                    <i class='bx bx-gift text-red-500 mr-2'></i>
-                                    <span>Exclusive VIP Experience</span>
-                                </div>
-                            </div>
-                        </div>
-                        
                         ${dayBreakdownHtml}
                     </div>
                 </div>

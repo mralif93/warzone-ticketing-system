@@ -75,13 +75,33 @@
                 </div>
             </div>
 
-            <!-- Event Visual/Image Placeholder -->
+            <!-- Event Visual/Image - Arena Layout -->
             <div class="relative">
-                <div class="bg-wwc-neutral-800 rounded-2xl p-8 shadow-2xl text-center">
-                    <div class="py-12">
-                        <i class='bx bx-calendar-event text-8xl text-wwc-neutral-600 mb-6'></i>
-                        <h3 class="text-2xl font-bold text-wwc-neutral-300 mb-4">Premium Event Experience</h3>
-                        <p class="text-wwc-neutral-400 text-lg">
+                <div class="bg-gradient-to-br from-wwc-primary to-red-600 rounded-2xl p-8 shadow-2xl">
+                    <div class="bg-wwc-neutral-900 rounded-xl p-6">
+                        @if(file_exists(public_path('images/all-layout.jpeg')))
+                            <img src="{{ asset('images/all-layout.jpeg') }}" 
+                                 alt="N9 Arena Layout" 
+                                 class="w-full h-auto rounded-lg shadow-lg">
+                        @elseif(file_exists(public_path('images/arena-layout.png')))
+                            <img src="{{ asset('images/arena-layout.png') }}" 
+                                 alt="N9 Arena Layout" 
+                                 class="w-full h-auto rounded-lg shadow-lg">
+                        @elseif(file_exists(public_path('images/arena-layout.svg')))
+                            <img src="{{ asset('images/arena-layout.svg') }}" 
+                                 alt="N9 Arena Layout" 
+                                 class="w-full h-auto rounded-lg shadow-lg">
+                        @else
+                            <div class="text-center py-12">
+                                <i class='bx bx-image text-6xl text-wwc-neutral-600 mb-4'></i>
+                                <p class="text-wwc-neutral-400 text-lg">N9 Arena Layout</p>
+                                <p class="text-wwc-neutral-500 text-sm mt-2">Arena seating layout image</p>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="text-center mt-4">
+                        <h3 class="text-2xl font-bold text-white mb-2">Premium Event Experience</h3>
+                        <p class="text-wwc-neutral-200 text-lg">
                             Join us for an unforgettable experience with world-class entertainment and exclusive access.
                         </p>
                     </div>

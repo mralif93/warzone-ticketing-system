@@ -99,12 +99,6 @@
                             </div>
                         @endif
                     </div>
-                    <div class="text-center mt-4">
-                        <h3 class="text-2xl font-bold text-white mb-2">Premium Event Experience</h3>
-                        <p class="text-wwc-neutral-200 text-lg">
-                            Join us for an unforgettable experience with world-class entertainment and exclusive access.
-                        </p>
-                    </div>
                 </div>
             </div>
         </div>

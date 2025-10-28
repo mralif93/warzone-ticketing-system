@@ -21,11 +21,13 @@ class CustomerController extends Controller
         $user = Auth::user();
         
         // Get recent tickets with pagination - SHOW ALL TICKETS
+        // Prioritize active tickets at the top, then order by updated_at
         $recentTickets = PurchaseTicket::whereHas('order', function($query) use ($user) {
                 $query->where('user_id', $user->id);
             })
             ->with(['event', 'ticketType', 'order']) // Include order relationship
-            ->latest()
+            ->orderByRaw("CASE WHEN status = 'active' THEN 0 ELSE 1 END") // Active tickets first
+            ->orderBy('updated_at', 'desc') // Then by most recently updated
             ->paginate(10);
 
         // Get upcoming events

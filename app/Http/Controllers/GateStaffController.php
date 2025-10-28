@@ -28,9 +28,9 @@ class GateStaffController extends Controller
         $user = Auth::user();
         
         // Get today's events
-        $todayEvents = Event::whereDate('event_date', today())
+        $todayEvents = Event::whereDate('date_time', today())
             ->where('status', 'Active')
-            ->orderBy('event_date')
+            ->orderBy('date_time')
             ->get();
 
         // Get recent scans for this staff member
@@ -60,9 +60,9 @@ class GateStaffController extends Controller
         }
 
         // Get available events for today
-        $todayEvents = Event::whereDate('event_date', today())
+        $todayEvents = Event::whereDate('date_time', today())
             ->where('status', 'Active')
-            ->orderBy('event_date')
+            ->orderBy('date_time')
             ->get();
 
         return view('gate-staff.scanner', compact('event', 'todayEvents', 'gateId'));
@@ -162,7 +162,7 @@ class GateStaffController extends Controller
             ->paginate(20);
 
         $events = Event::whereHas('tickets')
-            ->orderBy('event_date', 'desc')
+            ->orderBy('date_time', 'desc')
             ->get();
 
         $results = ['SUCCESS', 'DUPLICATE', 'INVALID', 'WRONG_GATE', 'WRONG_EVENT', 'ERROR'];

@@ -176,10 +176,10 @@ class TicketValidationService
 
         if ($ticket) {
             $response['ticket_info'] = [
-            'id' => $ticket->id,
-            'event_name' => $ticket->event_name ?? 'Unknown Event',
-            'ticket_identifier' => $ticket->ticket_identifier ?? 'N/A',
-            'price_paid' => $ticket->price_paid ?? 0,
+                'id' => $ticket->id,
+                'event_name' => $ticket->event_name ?? 'Unknown Event',
+                'ticket_identifier' => $ticket->qrcode ?? "TKT-{$ticket->id}",
+                'price_paid' => $ticket->price_paid ?? 0,
             ];
         }
 

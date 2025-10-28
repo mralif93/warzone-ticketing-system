@@ -123,12 +123,13 @@ class GateStaffController extends Controller
                 'gate_id' => $gateId,
                 'event_id' => $eventId,
                 'qrcode' => $qrcode,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
                 'status' => 'ERROR',
-                'message' => 'An error occurred during scanning',
+                'message' => 'An error occurred during scanning: ' . $e->getMessage(),
                 'performance_time' => 0
             ], 500);
         }

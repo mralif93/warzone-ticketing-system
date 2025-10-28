@@ -187,13 +187,19 @@
                                                 <i class='bx bx-qr-scan text-xs mr-1.5'></i>
                                             QR Code
                                         </a>
-                                        @elseif($ticket->order->status === 'pending')
+                                        @elseif($ticket->order->status === 'pending' && (!$ticket->order->held_until || $ticket->order->held_until->isFuture()))
                                         <a href="{{ route('public.tickets.payment', $ticket->order) }}" 
                                                class="inline-flex items-center px-3 py-2 text-xs font-semibold text-white bg-wwc-success hover:bg-green-700 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
                                                title="Complete payment for this order">
                                                 <i class='bx bx-credit-card text-xs mr-1.5'></i>
                                             Pay Now
                                         </a>
+                                        @elseif($ticket->order->status === 'pending' && $ticket->order->held_until && $ticket->order->held_until->isPast())
+                                        <span class="inline-flex items-center px-3 py-2 text-xs font-semibold text-red-600 bg-red-50 rounded-lg"
+                                              title="Payment session expired">
+                                                <i class='bx bx-time-five text-xs mr-1.5'></i>
+                                            Expired
+                                        </span>
                                     @endif
                                     </div>
                                 </td>

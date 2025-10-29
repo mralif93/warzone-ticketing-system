@@ -185,13 +185,8 @@
                                 <!-- Day Availability Info -->
                                 @if($ticket->is_combo)
                                     @php
-                                        $day1Available = $totalSeats;
-                                        $day2Available = $totalSeats;
-                                        $day1Sold = 0;
-                                        $day2Sold = 0;
-                                        
-                                        // Calculate day-specific sold tickets
-                                        // Include sold, active, pending, and scanned statuses (scanned tickets are still considered sold)
+                                        // For combo tickets: 4 combo tickets = 8 PurchaseTicket records (4 Day 1 + 4 Day 2)
+                                        // Count PurchaseTicket records per day for display
                                         $day1Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
                                             ->where('event_day_name', $mainEvent->getEventDays()[0]['day_name'])
                                             ->whereIn('status', ['sold', 'active', 'pending', 'scanned'])
@@ -201,6 +196,7 @@
                                             ->whereIn('status', ['sold', 'active', 'pending', 'scanned'])
                                             ->count();
                                         
+                                        // Available per day: total seats minus sold count for that day
                                         $day1Available = $totalSeats - $day1Sold;
                                         $day2Available = $totalSeats - $day2Sold;
                                     @endphp

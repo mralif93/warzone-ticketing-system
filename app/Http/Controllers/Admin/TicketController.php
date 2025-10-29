@@ -100,6 +100,8 @@ class TicketController extends Controller
         $allTickets = $allTicketsQuery->get();
         
         // Calculate statistics directly from PurchaseTickets for accuracy
+        // For combo tickets: 4 combo tickets = 8 PurchaseTicket records (4 Day 1 + 4 Day 2)
+        // We count PurchaseTicket records directly
         $purchaseTicketsQuery = \App\Models\PurchaseTicket::whereIn('ticket_type_id', $ticketIds);
         
         $totalSeats = $allTickets->sum('total_seats');

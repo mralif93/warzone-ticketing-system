@@ -98,6 +98,8 @@ class Ticket extends Model
     {
         // Count all sold tickets including sold, active, and scanned statuses
         // Scanned tickets should still count as sold
+        // For combo tickets: 4 combo tickets = 8 PurchaseTicket records (4 Day 1 + 4 Day 2)
+        // We count PurchaseTicket records directly, not unique combo groups
         $soldCount = $this->purchaseTickets()->whereIn('status', ['sold', 'active', 'scanned'])->count();
         $scannedCount = $this->purchaseTickets()->where('status', 'scanned')->count();
         

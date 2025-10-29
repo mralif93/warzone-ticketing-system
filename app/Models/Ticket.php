@@ -88,6 +88,12 @@ class Ticket extends Model
             return 0;
         }
         
+        // For combo tickets: sold_seats is PurchaseTicket count, need to divide by 2 for combo tickets
+        if ($this->is_combo) {
+            $comboTicketsSold = ceil($this->sold_seats / 2);
+            return round(($comboTicketsSold / $this->total_seats) * 100, 2);
+        }
+        
         return round(($this->sold_seats / $this->total_seats) * 100, 2);
     }
 

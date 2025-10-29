@@ -352,7 +352,7 @@
                                            name="quantity" 
                                            value="1" 
                                            min="1" 
-                                           max="10" 
+                                           max="{{ $maxTicketsPerOrder }}" 
                                            class="quantity w-20 px-2 py-2 text-center border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm font-semibold">
                                     <button type="button" 
                                             class="quantity-increase w-10 h-10 rounded-full border-2 border-gray-200 flex items-center justify-center text-gray-500 hover:border-wwc-primary hover:text-wwc-primary hover:bg-wwc-primary/5 transition-all duration-200">
@@ -365,7 +365,7 @@
                                         {{ $message }}
                                     </p>
                                 @enderror
-                                <p class="text-sm text-gray-500">Maximum 10 tickets per order</p>
+                                <p class="text-sm text-gray-500">Maximum {{ $maxTicketsPerOrder }} tickets per order</p>
                             </div>
                         </div>
                     </div>
@@ -495,7 +495,7 @@
                                                name="day{{ $index + 1 }}_quantity" 
                                                value="1" 
                                                min="1" 
-                                               max="10" 
+                                               max="{{ $maxTicketsPerOrder }}" 
                                                class="day-quantity w-20 px-2 py-2 text-center border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm font-semibold">
                                         <button type="button" 
                                                 class="day-quantity-increase w-10 h-10 rounded-full border-2 border-gray-200 flex items-center justify-center text-gray-500 hover:border-wwc-primary hover:text-wwc-primary hover:bg-wwc-primary/5 transition-all duration-200"
@@ -503,7 +503,7 @@
                                             <i class="bx bx-plus text-lg"></i>
                                         </button>
                                     </div>
-                                    <p class="text-sm text-gray-500">Maximum 10 tickets per day</p>
+                                    <p class="text-sm text-gray-500">Maximum {{ $maxTicketsPerOrder }} tickets per day</p>
                                 </div>
                             </div>
                         </div>
@@ -759,7 +759,7 @@ document.querySelectorAll('.quantity-increase').forEach(button => {
     button.addEventListener('click', function() {
         const input = this.parentElement.querySelector('.quantity');
         const currentValue = parseInt(input.value);
-        if (currentValue < 10) {
+        if (currentValue < {{ $maxTicketsPerOrder }}) {
             input.value = currentValue + 1;
             calculatePricing();
         }
@@ -783,7 +783,7 @@ document.querySelectorAll('.day-quantity-increase').forEach(button => {
         const day = this.dataset.day;
         const input = document.getElementById(`day${day}_quantity`);
         const currentValue = parseInt(input.value);
-        if (currentValue < 10) {
+        if (currentValue < {{ $maxTicketsPerOrder }}) {
             input.value = currentValue + 1;
             calculatePricing();
         }
@@ -1062,8 +1062,8 @@ function validateForm() {
             errors.push('Please select at least 1 ticket');
         }
         
-        if (quantity > 10) {
-            errors.push('Maximum 10 tickets per purchase');
+        if (quantity > {{ $maxTicketsPerOrder }}) {
+            errors.push('Maximum {{ $maxTicketsPerOrder }} tickets per purchase');
         }
     } else if (purchaseType === 'multi_day') {
         const day1Enabled = document.getElementById('day1_enabled_input').value === '1';

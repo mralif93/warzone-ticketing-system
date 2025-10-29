@@ -54,8 +54,9 @@ class TicketController extends Controller
         // Get service fee and tax settings
         $serviceFeePercentage = Setting::get('service_fee_percentage', 5.0);
         $taxPercentage = Setting::get('tax_percentage', 6.0);
+        $maxTicketsPerOrder = Setting::get('max_tickets_per_order', 10);
 
-        return view('public.tickets.cart', compact('event', 'holdUntil', 'serviceFeePercentage', 'taxPercentage'));
+        return view('public.tickets.cart', compact('event', 'holdUntil', 'serviceFeePercentage', 'taxPercentage', 'maxTicketsPerOrder'));
     }
 
     /**
@@ -144,14 +145,15 @@ class TicketController extends Controller
             }
             
             // Add validation rules for enabled days
+            $maxTicketsPerOrder = Setting::get('max_tickets_per_order', 10);
             if ($day1Enabled) {
                 $validationRules['day1_ticket_type'] = 'required|integer|in:' . implode(',', $availableTicketIds);
-                $validationRules['day1_quantity'] = 'required|integer|min:1|max:10';
+                $validationRules['day1_quantity'] = "required|integer|min:1|max:{$maxTicketsPerOrder}";
             }
             
             if ($day2Enabled) {
                 $validationRules['day2_ticket_type'] = 'required|integer|in:' . implode(',', $availableTicketIds);
-                $validationRules['day2_quantity'] = 'required|integer|min:1|max:10';
+                $validationRules['day2_quantity'] = "required|integer|min:1|max:{$maxTicketsPerOrder}";
             }
             
             // Only validate if it's a POST request
@@ -247,19 +249,21 @@ class TicketController extends Controller
             ];
             
             if ($purchaseType === 'single_day') {
+                $maxTicketsPerOrder = Setting::get('max_tickets_per_order', 10);
                 $validationRules['ticket_type_id'] = 'required|integer|exists:tickets,id';
-                $validationRules['quantity'] = 'required|integer|min:1|max:10';
+                $validationRules['quantity'] = "required|integer|min:1|max:{$maxTicketsPerOrder}";
             } else {
                 $day1Enabled = $request->boolean('multi_day1_enabled');
                 $day2Enabled = $request->boolean('multi_day2_enabled');
                 
+                $maxTicketsPerOrder = Setting::get('max_tickets_per_order', 10);
                 if ($day1Enabled) {
                     $validationRules['day1_ticket_type'] = 'required|integer|exists:tickets,id';
-                    $validationRules['day1_quantity'] = 'required|integer|min:1|max:10';
+                    $validationRules['day1_quantity'] = "required|integer|min:1|max:{$maxTicketsPerOrder}";
                 }
                 if ($day2Enabled) {
                     $validationRules['day2_ticket_type'] = 'required|integer|exists:tickets,id';
-                    $validationRules['day2_quantity'] = 'required|integer|min:1|max:10';
+                    $validationRules['day2_quantity'] = "required|integer|min:1|max:{$maxTicketsPerOrder}";
                 }
             }
             
@@ -545,14 +549,15 @@ class TicketController extends Controller
             }
             
             // Add validation rules for enabled days
+            $maxTicketsPerOrder = Setting::get('max_tickets_per_order', 10);
             if ($day1Enabled) {
                 $validationRules['day1_ticket_type'] = 'required|integer|in:' . implode(',', $availableTicketIds);
-                $validationRules['day1_quantity'] = 'required|integer|min:1|max:10';
+                $validationRules['day1_quantity'] = "required|integer|min:1|max:{$maxTicketsPerOrder}";
             }
             
             if ($day2Enabled) {
                 $validationRules['day2_ticket_type'] = 'required|integer|in:' . implode(',', $availableTicketIds);
-                $validationRules['day2_quantity'] = 'required|integer|min:1|max:10';
+                $validationRules['day2_quantity'] = "required|integer|min:1|max:{$maxTicketsPerOrder}";
             }
             
             // Only validate if it's a POST request

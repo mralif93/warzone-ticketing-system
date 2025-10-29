@@ -362,7 +362,7 @@ document.addEventListener('DOMContentLoaded', function() {
             mode: 'payment',
             amount: {{ $order->total_amount * 100 }}, // Convert to cents
             currency: 'myr',
-            payment_method_types: ['card', 'fpx', 'grabpay'],
+            payment_method_types: ['card', 'fpx'],
         });
         
         paymentElement = elements.create('payment');

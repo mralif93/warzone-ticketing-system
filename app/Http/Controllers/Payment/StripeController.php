@@ -78,7 +78,6 @@ class StripeController extends Controller
                 'payment_method_types' => [
                     'card',           // Visa, Mastercard
                     'fpx',            // Malaysian bank transfers
-                    'grabpay',        // GrabPay e-wallet
                 ],
             ]);
 

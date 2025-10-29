@@ -1120,7 +1120,21 @@ document.addEventListener('DOMContentLoaded', function() {
                         <p class="mb-4 text-base font-semibold text-green-600">${data.message}</p>
                         ${data.ticket ? `
                         <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-2">
+                            <!-- Ticket Identifier & Price -->
                             <div class="flex justify-between items-start pb-2 border-b border-gray-300">
+                                <span class="text-sm font-semibold text-gray-600">Ticket:</span>
+                                <div class="text-right">
+                                    <div class="text-base font-bold text-gray-900">Ticket #${data.ticket.ticket_identifier || 'N/A'}</div>
+                                    <div class="text-sm text-gray-600 mt-1">
+                                        ${data.ticket.original_price && parseFloat(data.ticket.original_price || 0) > parseFloat(data.ticket.price_paid || 0) ? `
+                                        RM${parseFloat(data.ticket.price_paid || 0).toFixed(2)}
+                                        ` : `
+                                        RM${parseFloat(data.ticket.price_paid || 0).toFixed(2)}
+                                        `}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-start py-2 border-b border-gray-300">
                                 <span class="text-sm font-semibold text-gray-600">Event:</span>
                                 <span class="text-sm text-gray-900 text-right">${data.ticket.event_name || 'N/A'}</span>
                             </div>
@@ -1138,7 +1152,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             ` : ''}
                             <div class="flex justify-between items-start py-2 border-b border-gray-300">
                                 <span class="text-sm font-semibold text-gray-600">Ticket Type:</span>
-                                <span class="text-sm text-gray-900 text-right">${data.ticket.ticket_identifier || 'N/A'}</span>
+                                <span class="text-sm text-gray-900 text-right">${data.ticket.ticket_type_name || 'N/A'}</span>
                             </div>
                             ${data.ticket.zone && data.ticket.zone !== 'N/A' ? `
                             <div class="flex justify-between items-start py-2 border-b border-gray-300">
@@ -1178,13 +1192,23 @@ document.addEventListener('DOMContentLoaded', function() {
                         <p class="mb-4 text-base font-semibold text-red-600">This ticket has already been scanned!</p>
                         ${data.ticket ? `
                         <div class="bg-red-50 p-4 rounded-lg border border-red-200 space-y-2">
+                            <!-- Ticket Identifier & Price -->
                             <div class="flex justify-between items-start pb-2 border-b border-red-300">
+                                <span class="text-sm font-semibold text-gray-600">Ticket:</span>
+                                <div class="text-right">
+                                    <div class="text-base font-bold text-gray-900">Ticket #${data.ticket.ticket_identifier || 'N/A'}</div>
+                                    <div class="text-sm text-gray-600 mt-1">
+                                        RM${parseFloat(data.ticket.price_paid || 0).toFixed(2)}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-start py-2 border-b border-red-300">
                                 <span class="text-sm font-semibold text-gray-600">Event:</span>
                                 <span class="text-sm text-gray-900 text-right">${data.ticket.event_name || 'N/A'}</span>
                             </div>
                             <div class="flex justify-between items-start py-2 border-b border-red-300">
                                 <span class="text-sm font-semibold text-gray-600">Ticket Type:</span>
-                                <span class="text-sm text-gray-900 text-right">${data.ticket.ticket_identifier || 'N/A'}</span>
+                                <span class="text-sm text-gray-900 text-right">${data.ticket.ticket_type_name || 'N/A'}</span>
                             </div>
                             ${data.ticket.scanned_at ? `
                             <div class="flex justify-between items-start py-2 border-b border-red-300">
@@ -1226,13 +1250,23 @@ document.addEventListener('DOMContentLoaded', function() {
                         <p class="mb-4 text-base font-semibold text-yellow-600">${data.message}</p>
                         ${data.ticket ? `
                         <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200 space-y-2">
+                            <!-- Ticket Identifier & Price -->
                             <div class="flex justify-between items-start pb-2 border-b border-yellow-300">
+                                <span class="text-sm font-semibold text-gray-600">Ticket:</span>
+                                <div class="text-right">
+                                    <div class="text-base font-bold text-gray-900">Ticket #${data.ticket.ticket_identifier || 'N/A'}</div>
+                                    <div class="text-sm text-gray-600 mt-1">
+                                        RM${parseFloat(data.ticket.price_paid || 0).toFixed(2)}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-start py-2 border-b border-yellow-300">
                                 <span class="text-sm font-semibold text-gray-600">Event:</span>
                                 <span class="text-sm text-gray-900 text-right">${data.ticket.event_name || 'N/A'}</span>
                             </div>
                             <div class="flex justify-between items-start py-2">
                                 <span class="text-sm font-semibold text-gray-600">Ticket Type:</span>
-                                <span class="text-sm text-gray-900 text-right">${data.ticket.ticket_identifier || 'N/A'}</span>
+                                <span class="text-sm text-gray-900 text-right">${data.ticket.ticket_type_name || 'N/A'}</span>
                             </div>
                         </div>
                         ` : ''}
@@ -1249,13 +1283,23 @@ document.addEventListener('DOMContentLoaded', function() {
                         <p class="mb-4 text-base font-semibold text-yellow-600">${data.message}</p>
                         ${data.ticket ? `
                         <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200 space-y-2">
+                            <!-- Ticket Identifier & Price -->
                             <div class="flex justify-between items-start pb-2 border-b border-yellow-300">
+                                <span class="text-sm font-semibold text-gray-600">Ticket:</span>
+                                <div class="text-right">
+                                    <div class="text-base font-bold text-gray-900">Ticket #${data.ticket.ticket_identifier || 'N/A'}</div>
+                                    <div class="text-sm text-gray-600 mt-1">
+                                        RM${parseFloat(data.ticket.price_paid || 0).toFixed(2)}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-start py-2 border-b border-yellow-300">
                                 <span class="text-sm font-semibold text-gray-600">Event:</span>
                                 <span class="text-sm text-gray-900 text-right">${data.ticket.event_name || 'N/A'}</span>
                             </div>
                             <div class="flex justify-between items-start py-2">
                                 <span class="text-sm font-semibold text-gray-600">Ticket Type:</span>
-                                <span class="text-sm text-gray-900 text-right">${data.ticket.ticket_identifier || 'N/A'}</span>
+                                <span class="text-sm text-gray-900 text-right">${data.ticket.ticket_type_name || 'N/A'}</span>
                             </div>
                         </div>
                         ` : ''}

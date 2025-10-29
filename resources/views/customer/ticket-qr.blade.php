@@ -53,6 +53,21 @@
                             <p class="text-sm text-wwc-neutral-600 mb-6">Complete event and ticket details</p>
                             
                             <div class="space-y-3">
+                                <!-- Ticket Identifier & Price -->
+                                <div class="flex justify-between items-start border-b border-wwc-neutral-100 pb-3">
+                                    <label class="text-sm font-medium text-wwc-neutral-700">Ticket</label>
+                                    <div class="text-right">
+                                        <div class="text-base font-bold text-wwc-neutral-900">Ticket #{{ $ticket->ticket_identifier ?? "TKT-{$ticket->id}" }}</div>
+                                        <div class="text-sm text-wwc-neutral-600 mt-1">
+                                            @if($ticket->discount_amount > 0)
+                                                RM{{ number_format($ticket->price_paid ?? 0, 2) }}
+                                            @else
+                                                RM{{ number_format($ticket->original_price ?? $ticket->price_paid ?? 0, 2) }}
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                                
                                 <!-- Event Name -->
                                 <div class="flex justify-between items-start border-b border-wwc-neutral-100 pb-3">
                                     <label class="text-sm font-medium text-wwc-neutral-700">Event</label>

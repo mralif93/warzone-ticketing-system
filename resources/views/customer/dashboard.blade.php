@@ -157,7 +157,10 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-wwc-neutral-900">{{ $ticket->ticketType->name ?? 'General' }}</div>
+                                    <div class="flex flex-col">
+                                        <div class="text-sm font-bold text-wwc-neutral-900">Ticket #{{ $ticket->ticket_identifier ?? "TKT-{$ticket->id}" }}</div>
+                                        <div class="text-xs text-wwc-neutral-500 mt-1">{{ $ticket->ticketType->name ?? 'General' }}</div>
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if($ticket->event_day_name && $ticket->event_day_name !== 'All Days')

@@ -8,6 +8,7 @@ use App\Rules\StrongPassword;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
@@ -204,7 +205,7 @@ class AuthController extends Controller
             'email' => 'required|email',
         ]);
 
-        $status = Password::sendResetLink(
+        $status = Password::broker('users')->sendResetLink(
             $request->only('email')
         );
 
@@ -220,9 +221,34 @@ class AuthController extends Controller
      */
     public function showResetPassword(Request $request, $token)
     {
+        // Get email from query parameter (sent via temporary signed route)
+        $email = $request->query('email') ?? $request->input('email');
+        
+        // Validate token exists and is not expired
+        if ($email) {
+            $tokenRecord = DB::table('password_reset_tokens')
+                ->where('email', $email)
+                ->first();
+            
+            if (!$tokenRecord) {
+                return redirect()->route('forgot-password')
+                    ->with('error', 'This password reset token is invalid or has expired. Please request a new password reset link.');
+            }
+            
+            // Check if token is expired (default 60 minutes)
+            $expireMinutes = config('auth.passwords.users.expire', 60);
+            $createdAt = \Carbon\Carbon::parse($tokenRecord->created_at);
+            $expiresAt = $createdAt->copy()->addMinutes($expireMinutes);
+            
+            if (now()->greaterThan($expiresAt)) {
+                return redirect()->route('forgot-password')
+                    ->with('error', 'This password reset token has expired. Please request a new password reset link.');
+            }
+        }
+        
         return view('auth.reset-password', [
             'token' => $token,
-            'email' => $request->email,
+            'email' => $email,
         ]);
     }
 
@@ -237,7 +263,7 @@ class AuthController extends Controller
             'password' => ['required', 'confirmed', new StrongPassword],
         ]);
 
-        $status = Password::reset(
+        $status = Password::broker('users')->reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function (User $user, string $password) {
                 $user->forceFill([
@@ -251,10 +277,26 @@ class AuthController extends Controller
         );
 
         if ($status === Password::PASSWORD_RESET) {
-            return redirect()->route('login')->with('status', 'Password reset successful! You can now login with your new password.');
+            return redirect()->route('login')->with('success', 'Password reset successful! Please login with your new password.');
         }
 
-        return back()->withErrors(['email' => 'Unable to reset password. Please try again.']);
+        // Handle specific error cases
+        if ($status === Password::INVALID_TOKEN) {
+            return redirect()->route('forgot-password')
+                ->with('error', 'This password reset token is invalid or has expired. Please request a new password reset link.');
+        } elseif ($status === Password::INVALID_USER) {
+            return redirect()->route('forgot-password')
+                ->with('error', 'We cannot find a user with that email address.');
+        } elseif ($status === Password::THROTTLED) {
+            return back()
+                ->withInput($request->only('email'))
+                ->withErrors(['email' => 'Please wait before retrying.']);
+        }
+
+        // Generic error
+        return back()
+            ->withInput($request->only('email'))
+            ->withErrors(['email' => 'Unable to reset password. Please try again.']);
     }
 
     /**

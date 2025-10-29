@@ -57,6 +57,22 @@
                         </div>
                     @endif
 
+                    @if (session('error'))
+                        <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <i class='bx bx-error-circle text-red-400 text-lg'></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-red-800 mb-1">
+                                        Token Expired
+                                    </h3>
+                                    <p class="text-sm text-red-700">{{ session('error') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                     @if ($errors->any())
                         <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
                             <div class="flex items-start">

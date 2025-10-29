@@ -41,6 +41,38 @@
                 <form method="POST" action="{{ route('login') }}" class="space-y-6">
                     @csrf
                     
+                    @if (session('success'))
+                        <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <i class='bx bx-check-circle text-green-400 text-lg'></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-green-800 mb-1">
+                                        Success!
+                                    </h3>
+                                    <p class="text-sm text-green-700">{{ session('success') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if (session('status'))
+                        <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <i class='bx bx-check-circle text-green-400 text-lg'></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-green-800 mb-1">
+                                        Success!
+                                    </h3>
+                                    <p class="text-sm text-green-700">{{ session('status') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                    
                     @if ($errors->any())
                         <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
                             <div class="flex items-start">

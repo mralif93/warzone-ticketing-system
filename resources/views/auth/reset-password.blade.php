@@ -4,25 +4,26 @@
 @section('description', 'Reset your Warzone World Championship account password with a secure new password.')
 
 @section('content')
-<!-- Hero Section -->
-<div class="bg-gradient-to-r from-wwc-primary to-wwc-primary-dark">
-    <div class="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
-        <div class="text-center">
-            <h1 class="text-4xl md:text-5xl font-bold text-white font-display mb-6">
-                Reset Password
-            </h1>
-            <p class="text-xl text-wwc-primary-light max-w-3xl mx-auto">
-                Enter your new password below to complete the reset process.
-            </p>
-        </div>
-    </div>
-</div>
-
 <!-- Reset Password Form Section -->
 <div class="py-16 bg-white">
-    <div class="max-w-md mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="bg-white rounded-2xl shadow-lg border border-wwc-neutral-200 p-8">
-            <form method="POST" action="{{ route('password.reset') }}" class="space-y-6">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-2xl shadow-lg border border-wwc-neutral-200 overflow-hidden">
+            <!-- Card Header -->
+            <div class="bg-wwc-primary px-8 py-6">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                        <i class='bx bx-key text-white text-xl'></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-white font-display">Reset Password</h2>
+                        <p class="text-wwc-primary-light text-sm">Enter your new password below to complete the reset process</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="p-8">
+            <form method="POST" action="{{ url('/reset-password') }}" class="space-y-6">
                 @csrf
                 <input type="hidden" name="token" value="{{ $token }}">
                 
@@ -36,23 +37,8 @@
                     </div>
                 @endif
 
-                <div>
-                    <label for="email" class="block text-sm font-medium text-wwc-neutral-700 mb-2">
-                        Email Address
-                    </label>
-                    <input type="email" 
-                           id="email" 
-                           name="email" 
-                           value="{{ $email ?? old('email') }}"
-                           class="w-full px-4 py-3 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-transparent @error('email') border-wwc-error @enderror"
-                           placeholder="Enter your email address"
-                           required 
-                           autofocus>
-                    @error('email')
-                        <p class="mt-1 text-sm text-wwc-error">{{ $message }}</p>
-                    @enderror
-                </div>
-
+                <input type="hidden" name="email" value="{{ $email ?? old('email') }}">
+                
                 <div>
                     <label for="password" class="block text-sm font-medium text-wwc-neutral-700 mb-2">
                         New Password
@@ -62,7 +48,8 @@
                            name="password"
                            class="w-full px-4 py-3 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-transparent @error('password') border-wwc-error @enderror"
                            placeholder="Enter your new password"
-                           required>
+                           required 
+                           autofocus>
                     @error('password')
                         <p class="mt-1 text-sm text-wwc-error">{{ $message }}</p>
                     @enderror

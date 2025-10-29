@@ -96,7 +96,9 @@ class Ticket extends Model
      */
     public function updateSoldSeats(): void
     {
-        $soldCount = $this->purchaseTickets()->where('status', 'active')->count();
+        // Count all sold tickets including sold, active, and scanned statuses
+        // Scanned tickets should still count as sold
+        $soldCount = $this->purchaseTickets()->whereIn('status', ['sold', 'active', 'scanned'])->count();
         $scannedCount = $this->purchaseTickets()->where('status', 'scanned')->count();
         
         $this->update([

@@ -15,14 +15,14 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $payments->total() }}</div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $totalPayments }}</div>
                             <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Total Payments</div>
                             <div class="flex items-center">
                                 <div class="flex items-center text-xs text-wwc-success font-semibold">
                                     <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
                                     </svg>
-                                    {{ $payments->whereIn('status', ['succeeded', 'Succeeded', 'completed', 'Completed'])->count() }} Succeeded
+                                    {{ $succeededPayments }} Succeeded
                                 </div>
                             </div>
                         </div>
@@ -36,12 +36,12 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $payments->whereIn('status', ['succeeded', 'Succeeded', 'completed', 'Completed'])->count() }}</div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $succeededPayments }}</div>
                             <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Succeeded</div>
                             <div class="flex items-center">
                                 <div class="flex items-center text-xs text-wwc-success font-semibold">
                                     <i class='bx bx-check text-xs mr-1'></i>
-                                    {{ $payments->where('status', 'Pending')->count() }} Pending
+                                    {{ $pendingPayments }} Pending
                                 </div>
                             </div>
                         </div>
@@ -55,12 +55,12 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $payments->whereIn('status', ['pending', 'Pending'])->count() }}</div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $pendingPayments }}</div>
                             <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Pending</div>
                             <div class="flex items-center">
                                 <div class="flex items-center text-xs text-wwc-warning font-semibold">
                                     <i class='bx bx-time text-xs mr-1'></i>
-                                    {{ $payments->whereIn('status', ['failed', 'Failed'])->count() }} Failed
+                                    {{ $failedPayments }} Failed
                                 </div>
                             </div>
                         </div>
@@ -74,12 +74,12 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">RM{{ number_format($payments->whereIn('status', ['succeeded', 'Succeeded', 'completed', 'Completed'])->sum('amount'), 0) }}</div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">RM{{ number_format($totalRevenue, 0) }}</div>
                             <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Total Revenue</div>
                             <div class="flex items-center">
                                 <div class="flex items-center text-xs text-wwc-success font-semibold">
                                     <i class='bx bx-trending-up text-xs mr-1'></i>
-                                    RM{{ number_format($payments->whereIn('status', ['refunded', 'Refunded'])->sum('refund_amount') ?? 0, 0) }} Refunded
+                                    RM{{ number_format($totalRefunded, 0) }} Refunded
                                 </div>
                             </div>
                         </div>
@@ -113,9 +113,13 @@
                             <label for="status" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Status</label>
                             <select name="status" id="status" class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
                                 <option value="">All Statuses</option>
-                                @foreach($statuses as $status)
-                                    <option value="{{ $status }}" {{ request('status') == $status ? 'selected' : '' }}>{{ $status }}</option>
-                                @endforeach
+                                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                <option value="succeeded" {{ request('status') == 'succeeded' ? 'selected' : '' }}>Succeeded</option>
+                                <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                                <option value="failed" {{ request('status') == 'failed' ? 'selected' : '' }}>Failed</option>
+                                <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                <option value="refunded" {{ request('status') == 'refunded' ? 'selected' : '' }}>Refunded</option>
+                                <option value="partially_refunded" {{ request('status') == 'partially_refunded' ? 'selected' : '' }}>Partially Refunded</option>
                             </select>
                         </div>
                         <div>

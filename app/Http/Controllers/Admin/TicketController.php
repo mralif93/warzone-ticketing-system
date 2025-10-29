@@ -60,14 +60,44 @@ class TicketController extends Controller
         $statuses = Ticket::select('status')->distinct()->pluck('status');
         $events = \App\Models\Event::select('id', 'name')->get();
 
-        // Calculate additional statistics
-        $totalSeats = $ticketTypes->sum('total_seats');
-        $soldSeats = $ticketTypes->sum('sold_seats');
-        $availableSeats = $ticketTypes->sum('available_seats');
-        $comboTicketTypes = $ticketTypes->where('is_combo', true)->count();
-        $soldOutTicketTypes = $ticketTypes->where('status', 'sold_out')->count();
+        // Calculate additional statistics from ALL tickets (not paginated)
+        $allTicketsQuery = Ticket::query();
+        
+        // Apply the same filters as the main query
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $allTicketsQuery->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhereHas('event', function($eventQuery) use ($search) {
+                      $eventQuery->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+        if ($request->filled('status')) {
+            $allTicketsQuery->where('status', $request->status);
+        }
+        if ($request->filled('zone')) {
+            $allTicketsQuery->where('name', 'like', "%{$request->zone}%");
+        }
+        if ($request->filled('event_id')) {
+            $allTicketsQuery->where('event_id', $request->event_id);
+        }
+        if ($request->filled('date_from')) {
+            $allTicketsQuery->where('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $allTicketsQuery->where('created_at', '<=', $request->date_to . ' 23:59:59');
+        }
+        
+        $allTickets = $allTicketsQuery->get();
+        $totalSeats = $allTickets->sum('total_seats');
+        $soldSeats = $allTickets->sum('sold_seats');
+        $availableSeats = $allTickets->sum('available_seats');
+        $comboTicketTypes = $allTickets->where('is_combo', true)->count();
+        $soldOutTicketTypes = $allTickets->where('status', 'sold_out')->count();
+        $totalRevenue = $allTickets->sum(function($ticket) { return $ticket->sold_seats * $ticket->price; });
 
-        return view('admin.tickets.index', compact('ticketTypes', 'statuses', 'events', 'totalSeats', 'soldSeats', 'availableSeats', 'comboTicketTypes', 'soldOutTicketTypes'));
+        return view('admin.tickets.index', compact('ticketTypes', 'statuses', 'events', 'totalSeats', 'soldSeats', 'availableSeats', 'comboTicketTypes', 'soldOutTicketTypes', 'totalRevenue'));
     }
 
     /**

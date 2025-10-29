@@ -20,7 +20,7 @@
                             <div class="flex items-center">
                                 <div class="flex items-center text-xs text-wwc-info font-semibold">
                                     <i class='bx bx-receipt text-xs mr-1'></i>
-                                    {{ $orders->where('status', 'Paid')->count() }} Paid
+                                    {{ $orders->where('status', 'paid')->count() }} Paid
                                 </div>
                             </div>
                         </div>
@@ -34,12 +34,12 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $orders->where('status', 'Paid')->count() }}</div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $orders->where('status', 'paid')->count() }}</div>
                             <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Paid Orders</div>
                             <div class="flex items-center">
                                 <div class="flex items-center text-xs text-wwc-success font-semibold">
                                     <i class='bx bx-check text-xs mr-1'></i>
-                                    {{ $orders->where('status', 'Pending')->count() }} Pending
+                                    {{ $orders->where('status', 'pending')->count() }} Pending
                                 </div>
                             </div>
                         </div>
@@ -53,12 +53,12 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $orders->where('status', 'Pending')->count() }}</div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $orders->where('status', 'pending')->count() }}</div>
                             <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Pending</div>
                             <div class="flex items-center">
                                 <div class="flex items-center text-xs text-wwc-error font-semibold">
                                     <i class='bx bx-x text-xs mr-1'></i>
-                                    {{ $orders->where('status', 'Cancelled')->count() }} Cancelled
+                                    {{ $orders->where('status', 'cancelled')->count() }} Cancelled
                                 </div>
                             </div>
                         </div>
@@ -72,12 +72,12 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">RM{{ number_format($orders->where('status', 'Paid')->sum('total_amount'), 0) }}</div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">RM{{ number_format($totalRevenue, 0) }}</div>
                             <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Total Revenue</div>
                             <div class="flex items-center">
                                 <div class="flex items-center text-xs text-wwc-accent font-semibold">
                                     <i class='bx bx-trending-up text-xs mr-1'></i>
-                                    RM{{ number_format($orders->where('status', 'Paid')->avg('total_amount'), 0) }} Avg
+                                    RM{{ number_format($averageOrderValue, 0) }} Avg
                                 </div>
                             </div>
                         </div>
@@ -111,9 +111,10 @@
                             <label for="status" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">Status</label>
                             <select name="status" id="status" class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
                                 <option value="">All Statuses</option>
-                                @foreach($statuses as $status)
-                                    <option value="{{ $status }}" {{ request('status') == $status ? 'selected' : '' }}>{{ $status }}</option>
-                                @endforeach
+                                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>Paid</option>
+                                <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                <option value="refunded" {{ request('status') == 'refunded' ? 'selected' : '' }}>Refunded</option>
                             </select>
                         </div>
                         <div>
@@ -287,7 +288,7 @@
                                                         @if($order->status === 'pending')
                                                             <form action="{{ route('admin.orders.update-status', $order) }}" method="POST" class="block">
                                                                 @csrf
-                                                                <input type="hidden" name="status" value="Paid">
+                                                                <input type="hidden" name="status" value="paid">
                                                                 <button type="submit" 
                                                                         class="flex items-center w-full px-4 py-2 text-xs text-wwc-neutral-700 hover:bg-wwc-success hover:text-white transition-colors duration-200">
                                                                     <i class='bx bx-check text-xs mr-2'></i>

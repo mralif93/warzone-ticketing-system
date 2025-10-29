@@ -112,8 +112,13 @@
                             <select name="status" id="status" class="block w-full px-3 py-2 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm">
                                 <option value="">All Statuses</option>
                                 <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                                <option value="sold" {{ request('status') == 'sold' ? 'selected' : '' }}>Sold</option>
                                 <option value="scanned" {{ request('status') == 'scanned' ? 'selected' : '' }}>Scanned</option>
+                                <option value="held" {{ request('status') == 'held' ? 'selected' : '' }}>Held</option>
                                 <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                <option value="refunded" {{ request('status') == 'refunded' ? 'selected' : '' }}>Refunded</option>
+                                <option value="invalid" {{ request('status') == 'invalid' ? 'selected' : '' }}>Invalid</option>
                             </select>
                         </div>
                         <div>
@@ -253,8 +258,12 @@
                                         <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-semibold
                                             @if($purchase->status === 'scanned') bg-green-100 text-green-800
                                             @elseif($purchase->status === 'sold') bg-blue-100 text-blue-800
+                                            @elseif($purchase->status === 'active') bg-emerald-100 text-emerald-800
                                             @elseif($purchase->status === 'pending') bg-yellow-100 text-yellow-800
+                                            @elseif($purchase->status === 'held') bg-orange-100 text-orange-800
                                             @elseif($purchase->status === 'cancelled') bg-red-100 text-red-800
+                                            @elseif($purchase->status === 'refunded') bg-gray-100 text-gray-800
+                                            @elseif($purchase->status === 'invalid') bg-red-100 text-red-800
                                             @else bg-gray-100 text-gray-800
                                         @endif">
                                         {{ ucfirst($purchase->status) }}

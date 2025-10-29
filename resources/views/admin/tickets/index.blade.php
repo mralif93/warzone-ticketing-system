@@ -75,7 +75,6 @@
                     <div class="flex items-center justify-between">
                         <div>
                             @php
-                                $totalRevenue = $ticketTypes->sum(function($ticketType) { return $ticketType->sold_seats * $ticketType->price; });
                                 $averagePrice = $soldSeats > 0 ? $totalRevenue / $soldSeats : 0;
                             @endphp
                             <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">RM{{ number_format($totalRevenue, 0) }}</div>

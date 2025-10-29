@@ -49,7 +49,35 @@ class OrderController extends Controller
         $orders = $query->latest()->paginate($perPage);
         $statuses = Order::select('status')->distinct()->pluck('status');
 
-        return view('admin.orders.index', compact('orders', 'statuses'));
+        // Calculate additional statistics from ALL orders (not paginated)
+        $allOrdersQuery = Order::query();
+        
+        // Apply the same filters as the main query
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $allOrdersQuery->where(function($q) use ($search) {
+                $q->where('order_number', 'like', "%{$search}%")
+                  ->orWhere('customer_email', 'like', "%{$search}%")
+                  ->orWhereHas('user', function($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+        if ($request->filled('status')) {
+            $allOrdersQuery->where('status', $request->status);
+        }
+        if ($request->filled('date_from')) {
+            $allOrdersQuery->where('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $allOrdersQuery->where('created_at', '<=', $request->date_to . ' 23:59:59');
+        }
+        
+        $allOrders = $allOrdersQuery->get();
+        $totalRevenue = $allOrders->where('status', 'paid')->sum('total_amount');
+        $averageOrderValue = $allOrders->where('status', 'paid')->avg('total_amount');
+
+        return view('admin.orders.index', compact('orders', 'statuses', 'totalRevenue', 'averageOrderValue'));
     }
 
     /**

@@ -53,7 +53,44 @@ class PaymentController extends Controller
         $statuses = Payment::select('status')->distinct()->pluck('status');
         $paymentMethods = Payment::select('method')->distinct()->pluck('method');
 
-        return view('admin.payments.index', compact('payments', 'statuses', 'paymentMethods'));
+        // Calculate additional statistics from ALL payments (not paginated)
+        $allPaymentsQuery = Payment::query();
+        
+        // Apply the same filters as the main query
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $allPaymentsQuery->where(function($q) use ($search) {
+                $q->where('transaction_id', 'like', "%{$search}%")
+                  ->orWhere('method', 'like', "%{$search}%")
+                  ->orWhereHas('order.user', function($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+        if ($request->filled('status')) {
+            $allPaymentsQuery->where('status', $request->status);
+        }
+        if ($request->filled('method')) {
+            $allPaymentsQuery->where('method', $request->method);
+        }
+        if ($request->filled('date_from')) {
+            $allPaymentsQuery->where('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $allPaymentsQuery->where('created_at', '<=', $request->date_to . ' 23:59:59');
+        }
+        
+        $allPayments = $allPaymentsQuery->get();
+        $totalRevenue = $allPayments->whereIn('status', ['succeeded', 'completed'])->sum('amount');
+        $totalRefunded = $allPayments->whereIn('status', ['refunded', 'partially_refunded'])->sum('refund_amount');
+        
+        // Calculate individual statistics
+        $totalPayments = $allPayments->count();
+        $succeededPayments = $allPayments->whereIn('status', ['succeeded', 'completed'])->count();
+        $pendingPayments = $allPayments->whereIn('status', ['pending'])->count();
+        $failedPayments = $allPayments->whereIn('status', ['failed'])->count();
+
+        return view('admin.payments.index', compact('payments', 'statuses', 'paymentMethods', 'totalRevenue', 'totalRefunded', 'totalPayments', 'succeededPayments', 'pendingPayments', 'failedPayments'));
     }
 
     /**

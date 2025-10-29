@@ -174,8 +174,45 @@
                                     <div class="text-sm text-wwc-neutral-900">{{ $ticket->ticketType->name ?? 'General' }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-wwc-neutral-900">{{ $ticket->event->date_time->format('M j, Y') }}</div>
-                                    <div class="text-sm text-wwc-neutral-500">{{ $ticket->event->date_time->format('g:i A') }}</div>
+                                    @if($ticket->event_day_name && $ticket->event_day_name !== 'All Days')
+                                        @php
+                                            // Extract day number from event_day_name (e.g., "Day 1" -> 1)
+                                            $dayNumber = null;
+                                            if (preg_match('/Day (\d+)/', $ticket->event_day_name, $matches)) {
+                                                $dayNumber = (int)$matches[1];
+                                            }
+                                            
+                                            // Get the event days array
+                                            $eventDays = $ticket->event->getEventDays();
+                                            
+                                            // Use the day number to get the correct date, or fallback to first day
+                                            $dayIndex = $dayNumber ? $dayNumber - 1 : 0;
+                                            $displayDate = isset($eventDays[$dayIndex]) ? $eventDays[$dayIndex]['display'] : ($eventDays[0]['display'] ?? 'TBD');
+                                        @endphp
+                                        <div class="text-sm font-medium text-wwc-neutral-900">{{ $ticket->event_day_name }}</div>
+                                        <div class="text-sm text-wwc-neutral-500">{{ $displayDate }}</div>
+                                    @elseif($ticket->event_day)
+                                        @php
+                                            // Use the event_day field directly and determine which day it is
+                                            $eventDays = $ticket->event->getEventDays();
+                                            $dayName = 'Event Day';
+                                            $displayDate = $ticket->event_day->format('M j, Y');
+                                            
+                                            // Try to match the date with the event days
+                                            foreach ($eventDays as $index => $day) {
+                                                if ($day['date'] === $ticket->event_day->format('Y-m-d')) {
+                                                    $dayName = $day['day_name'];
+                                                    $displayDate = $day['display'];
+                                                    break;
+                                                }
+                                            }
+                                        @endphp
+                                        <div class="text-sm font-medium text-wwc-neutral-900">{{ $dayName }}</div>
+                                        <div class="text-sm text-wwc-neutral-500">{{ $displayDate }}</div>
+                                    @else
+                                        <div class="text-sm font-medium text-wwc-neutral-900">{{ $ticket->event->getEventDays()[0]['day_name'] }}</div>
+                                        <div class="text-sm text-wwc-neutral-500">{{ $ticket->event->getEventDays()[0]['display'] }}</div>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-wwc-neutral-900">

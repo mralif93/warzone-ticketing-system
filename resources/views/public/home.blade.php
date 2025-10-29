@@ -140,13 +140,14 @@
                         
                         if (!$ticket->is_combo) {
                             // For single-day tickets, calculate total across both days
+                            // Include sold, active, pending, and scanned statuses (scanned tickets are still considered sold)
                             $day1Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
                                 ->where('event_day_name', $mainEvent->getEventDays()[0]['day_name'])
-                                ->whereIn('status', ['active', 'pending'])
+                                ->whereIn('status', ['sold', 'active', 'pending', 'scanned'])
                                 ->count();
                             $day2Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
                                 ->where('event_day_name', $mainEvent->getEventDays()[1]['day_name'])
-                                ->whereIn('status', ['active', 'pending'])
+                                ->whereIn('status', ['sold', 'active', 'pending', 'scanned'])
                                 ->count();
                             $totalSold = $day1Sold + $day2Sold;
                             $totalAvailable = $totalSeats - $totalSold;
@@ -190,13 +191,14 @@
                                         $day2Sold = 0;
                                         
                                         // Calculate day-specific sold tickets
+                                        // Include sold, active, pending, and scanned statuses (scanned tickets are still considered sold)
                                         $day1Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
                                             ->where('event_day_name', $mainEvent->getEventDays()[0]['day_name'])
-                                            ->whereIn('status', ['active', 'pending'])
+                                            ->whereIn('status', ['sold', 'active', 'pending', 'scanned'])
                                             ->count();
                                         $day2Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
                                             ->where('event_day_name', $mainEvent->getEventDays()[1]['day_name'])
-                                            ->whereIn('status', ['active', 'pending'])
+                                            ->whereIn('status', ['sold', 'active', 'pending', 'scanned'])
                                             ->count();
                                         
                                         $day1Available = $totalSeats - $day1Sold;

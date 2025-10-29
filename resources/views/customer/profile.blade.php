@@ -178,7 +178,7 @@
                                     Address
                                 </label>
                                 <input type="text" name="address" id="address"
-                                       value="{{ old('address', $user->address) }}"
+                                       value="{{ old('address', $user->address_line_1) }}"
                                        class="block w-full px-4 py-3 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('address') border-wwc-error @enderror">
                                 @error('address')
                                     <div class="text-wwc-error text-xs mt-1">{{ $message }}</div>
@@ -217,7 +217,7 @@
                                     Postal Code
                                 </label>
                                 <input type="text" name="postal_code" id="postal_code"
-                                       value="{{ old('postal_code', $user->postal_code) }}"
+                                       value="{{ old('postal_code', $user->postcode) }}"
                                        class="block w-full px-4 py-3 border border-wwc-neutral-300 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary text-sm @error('postal_code') border-wwc-error @enderror">
                                 @error('postal_code')
                                     <div class="text-wwc-error text-xs mt-1">{{ $message }}</div>

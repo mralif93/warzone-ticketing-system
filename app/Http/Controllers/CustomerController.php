@@ -81,9 +81,19 @@ class CustomerController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
-        $user->update($request->only([
-            'name', 'email', 'phone_number', 'address', 'city', 'state', 'postal_code', 'country'
-        ]));
+        // Map form fields to database columns
+        $updateData = [
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone_number' => $request->phone_number,
+            'address_line_1' => $request->address,
+            'city' => $request->city,
+            'state' => $request->state,
+            'postcode' => $request->postal_code,
+            'country' => $request->country,
+        ];
+        
+        $user->update($updateData);
 
         return back()->with('success', 'Profile updated successfully.');
     }

@@ -69,7 +69,7 @@ class StripeController extends Controller
                 'customer' => $customer->id,
                 'metadata' => [
                     'order_id' => $order->id,
-                    'user_id' => Auth::id(),
+                    'customer_email' => Auth::user()->email,
                 ],
                 'automatic_payment_methods' => [
                     'enabled' => true,

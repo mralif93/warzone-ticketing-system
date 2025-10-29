@@ -133,9 +133,9 @@ class EventController extends Controller
         
         $ticketStats = [
             'total_capacity' => $event->total_seats,
-            'tickets_sold' => $event->purchaseTickets()->where('status', 'Sold')->count(),
-            'tickets_held' => $event->purchaseTickets()->where('status', 'Held')->count(),
-            'tickets_available' => $event->total_seats - $event->purchaseTickets()->whereIn('status', ['Sold', 'Held'])->count(),
+            'tickets_sold' => $event->purchaseTickets()->whereIn('status', ['sold', 'active', 'scanned'])->count(),
+            'tickets_held' => $event->purchaseTickets()->where('status', 'held')->count(),
+            'tickets_available' => $event->total_seats - $event->purchaseTickets()->whereIn('status', ['sold', 'active', 'scanned', 'held'])->count(),
         ];
         
         $ticketStats['sold_percentage'] = $ticketStats['total_capacity'] > 0 

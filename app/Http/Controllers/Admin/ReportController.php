@@ -122,7 +122,8 @@ class ReportController extends Controller
      */
     private function getTicketSalesByEvent($dateFrom, $dateTo)
     {
-        return PurchaseTicket::whereBetween('created_at', [$dateFrom, $dateTo])
+        return PurchaseTicket::whereIn('status', ['sold', 'active', 'scanned'])
+            ->whereBetween('created_at', [$dateFrom, $dateTo])
             ->with('order.event')
             ->get()
             ->groupBy('order.event.name')

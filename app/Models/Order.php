@@ -195,7 +195,7 @@ class Order extends Model
      */
     public function getSuccessfulPayment()
     {
-        return $this->payments()->where('status', 'Succeeded')->first();
+        return $this->payments()->where('status', 'succeeded')->first();
     }
 
     /**

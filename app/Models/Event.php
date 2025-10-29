@@ -98,7 +98,7 @@ class Event extends Model
      */
     public function getTicketsSoldCount(): int
     {
-        return $this->purchaseTickets()->where('status', 'Sold')->count();
+        return $this->purchaseTickets()->whereIn('status', ['sold', 'active', 'scanned'])->count();
     }
 
     /**
@@ -206,7 +206,7 @@ class Event extends Model
     {
         return $this->purchaseTickets()
             ->where('event_day', $eventDay)
-            ->where('status', 'Sold')
+            ->whereIn('status', ['sold', 'active', 'scanned'])
             ->count();
     }
 

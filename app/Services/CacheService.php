@@ -175,10 +175,10 @@ class CacheService
             $totalUsers = \App\Models\User::count();
             $totalEvents = \App\Models\Event::count();
             $activeEvents = \App\Models\Event::where('status', 'on_sale')->count();
-            $soldTickets = \App\Models\Ticket::where('status', 'Sold')->count();
-            $heldTickets = \App\Models\Ticket::where('status', 'Held')->count();
-            $completedOrders = \App\Models\Order::where('status', 'Completed')->count();
-            $totalRevenue = \App\Models\Order::where('status', 'Completed')->sum('total_amount');
+            $soldTickets = \App\Models\PurchaseTicket::whereIn('status', ['sold', 'active', 'scanned'])->count();
+            $heldTickets = \App\Models\PurchaseTicket::where('status', 'held')->count();
+            $completedOrders = \App\Models\Order::where('status', 'paid')->count();
+            $totalRevenue = \App\Models\Order::where('status', 'paid')->sum('total_amount');
 
             return [
                 'total_users' => $totalUsers,

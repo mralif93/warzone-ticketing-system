@@ -111,7 +111,7 @@ class PurchaseController extends Controller
         $scannedPurchases = PurchaseTicket::where('status', 'scanned')->count();
         $pendingPurchases = PurchaseTicket::where('status', 'pending')->count();
         $cancelledPurchases = PurchaseTicket::where('status', 'cancelled')->count();
-        $totalRevenue = PurchaseTicket::sum('price_paid');
+        $totalRevenue = PurchaseTicket::whereIn('status', ['sold', 'active', 'scanned'])->sum('price_paid');
 
         // Get events for filter dropdown
         $events = Event::select('id', 'name', 'date_time')->orderBy('date_time', 'desc')->get();

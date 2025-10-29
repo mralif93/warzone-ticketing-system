@@ -158,7 +158,7 @@ class PurchaseTicket extends Model
      */
     public function scopeSold($query)
     {
-        return $query->where('status', 'Sold');
+        return $query->whereIn('status', ['sold', 'active', 'scanned']);
     }
 
     /**
@@ -166,7 +166,7 @@ class PurchaseTicket extends Model
      */
     public function scopeHeld($query)
     {
-        return $query->where('status', 'Held');
+        return $query->where('status', 'held');
     }
 
     /**
@@ -198,7 +198,7 @@ class PurchaseTicket extends Model
      */
     public function scopeAvailable($query)
     {
-        return $query->whereNotIn('status', ['Sold', 'Held']);
+        return $query->whereNotIn('status', ['sold', 'active', 'scanned', 'held']);
     }
 
     /**

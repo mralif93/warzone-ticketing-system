@@ -60,16 +60,16 @@ class AdminController extends Controller
      */
     private function getRevenueData($dateFrom, $dateTo)
     {
-        return Payment::whereIn('status', ['Completed', 'completed', 'succeeded'])
+        return Order::where('status', 'paid')
             ->whereBetween('created_at', [$dateFrom, $dateTo])
             ->get()
-            ->groupBy(function($payment) {
-                return $payment->created_at->format('Y-m-d');
+            ->groupBy(function($order) {
+                return $order->created_at->format('Y-m-d');
             })
-            ->map(function($payments, $date) {
+            ->map(function($orders, $date) {
                 return [
                     'date' => $date,
-                    'total' => $payments->sum('amount')
+                    'total' => $orders->sum('total_amount')
                 ];
             })
             ->values();
@@ -108,7 +108,7 @@ class AdminController extends Controller
             'total_orders' => Order::count(),
             'total_tickets_sold' => PurchaseTicket::whereIn('status', ['active', 'sold', 'scanned'])->count(),
             'total_tickets_held' => PurchaseTicket::where('status', 'held')->count(),
-            'total_revenue' => Payment::whereIn('status', ['completed', 'succeeded'])->sum('amount'),
+            'total_revenue' => Order::where('status', 'paid')->sum('total_amount'),
             'pending_orders' => Order::where('status', 'pending')->count(),
             'completed_orders' => Order::where('status', 'paid')->count(),
             'total_tickets' => PurchaseTicket::count(),
@@ -142,11 +142,11 @@ class AdminController extends Controller
             ->get();
 
         // Get revenue by month (last 6 months) - Database agnostic
-        $revenueByMonth = Payment::select(
+        $revenueByMonth = Order::select(
                 $this->getDateGroupFormat('created_at'),
-                DB::raw('SUM(amount) as total')
+                DB::raw('SUM(total_amount) as total')
             )
-            ->whereIn('status', ['Completed', 'completed', 'succeeded'])
+            ->where('status', 'paid')
             ->where('created_at', '>=', now()->subMonths(6))
             ->groupBy('date_group')
             ->orderBy('date_group')
@@ -484,7 +484,7 @@ class AdminController extends Controller
         $totalRevenue = $revenueData->sum('total');
 
         // Ticket sales by event
-        $ticketSalesByEvent = PurchaseTicket::where('status', 'Sold')
+        $ticketSalesByEvent = PurchaseTicket::whereIn('status', ['sold', 'active', 'scanned'])
             ->whereBetween('created_at', [$dateFrom, $dateTo])
             ->with('event')
             ->get()
@@ -592,8 +592,8 @@ class AdminController extends Controller
         $ticketStats = [
             'total_capacity' => 7000,
             'tickets_sold' => $event->purchaseTickets()->where('status', 'active')->count(),
-            'tickets_held' => $event->purchaseTickets()->where('status', 'Held')->count(),
-            'tickets_available' => 7000 - $event->purchaseTickets()->whereIn('status', ['active', 'Held'])->count(),
+            'tickets_held' => $event->purchaseTickets()->where('status', 'held')->count(),
+            'tickets_available' => 7000 - $event->purchaseTickets()->whereIn('status', ['active', 'held'])->count(),
         ];
         
         $ticketStats['sold_percentage'] = $ticketStats['total_capacity'] > 0 

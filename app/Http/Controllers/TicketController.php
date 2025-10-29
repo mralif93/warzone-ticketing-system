@@ -1134,9 +1134,9 @@ class TicketController extends Controller
      */
     public function releaseHolds()
     {
-        $releasedCount = Ticket::where('status', 'Held')
+        $releasedCount = PurchaseTicket::where('status', 'held')
             ->where('created_at', '<', now()->subMinutes(10))
-            ->delete();
+            ->update(['status' => 'cancelled']);
         
         return response()->json([
             'success' => true,

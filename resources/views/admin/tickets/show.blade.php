@@ -38,7 +38,7 @@
                                 <div class="flex items-center py-3 border-b border-wwc-neutral-100">
                                     <div class="flex-shrink-0 mr-4">
                                         <div class="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center">
-                                            <i class='bx bx-ticket text-sm text-blue-600'></i>
+                                            <i class='bx bx-purchase-tag text-sm text-blue-600'></i>
                                         </div>
                                     </div>
                                     <div class="flex-1 flex items-center justify-between">

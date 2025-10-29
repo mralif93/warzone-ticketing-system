@@ -82,12 +82,6 @@
                                    required 
                                    autofocus>
                         </div>
-                        @error('email')
-                            <p class="mt-1 text-sm text-wwc-error flex items-center">
-                                <i class='bx bx-error text-wwc-error mr-1'></i>
-                                {{ $message }}
-                            </p>
-                        @enderror
                     </div>
 
                     <!-- Password Field -->

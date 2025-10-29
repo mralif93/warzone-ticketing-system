@@ -49,8 +49,20 @@ class AuthController extends Controller
             'password' => 'required|min:6',
         ]);
 
+        // Check if user exists and is active before attempting authentication
+        $user = User::where('email', $request->email)->first();
+        
+        if ($user && $user->is_active == false) {
+            return back()->withErrors([
+                'email' => 'Your account has been deactivated. Please contact support for assistance.',
+            ])->onlyInput('email');
+        }
+
         $credentials = $request->only('email', 'password');
         $remember = $request->has('remember');
+
+        // Add is_active condition to credentials
+        $credentials['is_active'] = true;
 
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
@@ -60,6 +72,16 @@ class AuthController extends Controller
             
             // Redirect based on user role to preserve session message
             $user = auth()->user();
+            
+            // Double-check is_active status (security measure)
+            if (!$user->is_active) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                return back()->withErrors([
+                    'email' => 'Your account has been deactivated. Please contact support for assistance.',
+                ])->onlyInput('email');
+            }
             
             // Log the login
             \App\Models\AuditLog::create([

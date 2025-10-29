@@ -60,7 +60,7 @@ class AdminController extends Controller
      */
     private function getRevenueData($dateFrom, $dateTo)
     {
-        return Payment::where('status', 'Completed')
+        return Payment::whereIn('status', ['Completed', 'completed', 'succeeded'])
             ->whereBetween('created_at', [$dateFrom, $dateTo])
             ->get()
             ->groupBy(function($payment) {
@@ -106,13 +106,13 @@ class AdminController extends Controller
             'events_draft' => Event::where('status', 'draft')->count(),
             'events_sold_out' => Event::where('status', 'sold_out')->count(),
             'total_orders' => Order::count(),
-            'total_tickets_sold' => PurchaseTicket::where('status', 'active')->count(),
+            'total_tickets_sold' => PurchaseTicket::whereIn('status', ['active', 'sold', 'scanned'])->count(),
             'total_tickets_held' => PurchaseTicket::where('status', 'held')->count(),
-            'total_revenue' => Payment::where('status', 'completed')->sum('amount'),
+            'total_revenue' => Payment::whereIn('status', ['completed', 'succeeded'])->sum('amount'),
             'pending_orders' => Order::where('status', 'pending')->count(),
             'completed_orders' => Order::where('status', 'paid')->count(),
             'total_tickets' => PurchaseTicket::count(),
-            'sold_tickets' => PurchaseTicket::where('status', 'active')->count(),
+            'sold_tickets' => PurchaseTicket::whereIn('status', ['active', 'sold', 'scanned'])->count(),
         ];
 
         // Get recent activity
@@ -146,7 +146,7 @@ class AdminController extends Controller
                 $this->getDateGroupFormat('created_at'),
                 DB::raw('SUM(amount) as total')
             )
-            ->where('status', 'Completed')
+            ->whereIn('status', ['Completed', 'completed', 'succeeded'])
             ->where('created_at', '>=', now()->subMonths(6))
             ->groupBy('date_group')
             ->orderBy('date_group')

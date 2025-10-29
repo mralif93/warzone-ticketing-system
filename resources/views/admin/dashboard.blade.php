@@ -48,7 +48,7 @@
                             <div class="flex items-center">
                                 <div class="flex items-center text-sm text-wwc-warning font-semibold">
                                     <i class='bx bx-time text-sm mr-2'></i>
-                                    {{ \App\Models\PurchaseTicket::where('status', 'Held')->count() }} Pending
+                                    {{ \App\Models\PurchaseTicket::where('status', 'held')->count() }} Pending
                                 </div>
                             </div>
                         </div>
@@ -71,7 +71,7 @@
                             <div class="flex items-center">
                                 <div class="flex items-center text-sm text-wwc-info font-semibold">
                                     <i class='bx bx-user text-sm mr-2'></i>
-                                    {{ \App\Models\User::where('role', 'Customer')->count() }} Customers
+                                    {{ \App\Models\User::where('role', 'customer')->count() }} Customers
                                 </div>
                             </div>
                         </div>

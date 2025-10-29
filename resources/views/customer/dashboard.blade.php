@@ -102,7 +102,11 @@
                                     </div>
                                     <div class="flex-shrink-0 ml-4 flex items-center text-sm text-wwc-neutral-500">
                                         <i class='bx bx-time mr-2'></i>
-                                        {{ $event->start_time }} - {{ $event->end_time }}
+                                        @if($event->isMultiDay())
+                                            {{ $event->start_date->format('g:i A') }} - {{ $event->end_date->format('g:i A') }}
+                                        @else
+                                            {{ $event->start_time }} - {{ $event->end_time }}
+                                        @endif
                                     </div>
                                 </div>
                             </div>

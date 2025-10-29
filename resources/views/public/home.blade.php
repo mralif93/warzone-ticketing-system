@@ -123,39 +123,6 @@
                     Choose your preferred seating and experience level
                 @endif
             </p>
-            
-            @if($mainEvent->isMultiDay() && isset($day1TotalAvailable) && isset($day2TotalAvailable))
-            <!-- Day 1 and Day 2 Total Availability Summary -->
-            <div class="mt-8 max-w-4xl mx-auto">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Day 1 Summary -->
-                    <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-6">
-                        <div class="text-center">
-                            <div class="text-sm font-semibold text-gray-600 mb-2">Day 1 Total Availability</div>
-                            <div class="text-3xl font-bold text-green-600 mb-1">{{ number_format($day1TotalAvailable) }}</div>
-                            <div class="text-sm text-gray-500">Available</div>
-                            <div class="mt-3 pt-3 border-t border-gray-200">
-                                <div class="text-lg font-semibold text-red-600">{{ number_format($day1TotalSold) }}</div>
-                                <div class="text-xs text-gray-500">Sold</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Day 2 Summary -->
-                    <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-6">
-                        <div class="text-center">
-                            <div class="text-sm font-semibold text-gray-600 mb-2">Day 2 Total Availability</div>
-                            <div class="text-3xl font-bold text-green-600 mb-1">{{ number_format($day2TotalAvailable) }}</div>
-                            <div class="text-sm text-gray-500">Available</div>
-                            <div class="mt-3 pt-3 border-t border-gray-200">
-                                <div class="text-lg font-semibold text-red-600">{{ number_format($day2TotalSold) }}</div>
-                                <div class="text-xs text-gray-500">Sold</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            @endif
         </div>
 
         @if($mainEvent->isMultiDay())

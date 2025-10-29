@@ -92,11 +92,7 @@
                                     </div>
                                     <div class="flex-shrink-0 ml-4 flex items-center text-sm text-wwc-neutral-500">
                                         <i class='bx bx-calendar mr-2'></i>
-                                        @if($event->start_date && $event->end_date)
-                                        {{ $event->start_date->format('M j, Y') }} - {{ $event->end_date->format('M j, Y') }}
-                                        @elseif($event->date_time)
-                                        {{ $event->date_time->format('M j, Y') }}
-                                        @endif
+                                        {{ $event->getFormattedDateRange() }}
                                     </div>
                                 </div>
                                 <!-- Row 2: Location (left) | Time (right) -->

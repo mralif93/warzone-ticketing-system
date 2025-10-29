@@ -274,7 +274,7 @@
                             <p class="text-sm text-gray-600">{{ $event->venue }}</p>
                         </div>
                         <div class="text-right">
-                            <p class="text-sm font-medium text-gray-900">{{ $event->date_time->format('M j, Y g:i A') }}</p>
+                            <p class="text-sm font-medium text-gray-900">{{ $event->getFormattedDateRange() }}</p>
                         </div>
                     </div>
                     @endforeach

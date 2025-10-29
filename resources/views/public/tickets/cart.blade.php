@@ -388,7 +388,6 @@
                             <!-- Day Selection Checkboxes -->
                             <div class="space-y-4">
                                 <h3 class="text-lg font-semibold text-gray-900">Select Days to Attend <span class="text-red-600">*</span></h3>
-                                <p class="text-sm text-gray-600">Both Day 1 and Day 2 are required for multi-day purchase!</p>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     @foreach($event->getEventDays() as $index => $day)
                                     <div class="relative group">
@@ -399,7 +398,7 @@
                                                class="sr-only peer day-checkbox"
                                                data-day="{{ $index + 1 }}">
                                         <label for="multi_day{{ $index + 1 }}_enabled" 
-                                               class="flex flex-col p-8 border-2 border-gray-200 rounded-xl cursor-pointer peer-checked:border-wwc-primary peer-checked:bg-red-50 hover:border-wwc-primary/50 hover:shadow-md transition-all duration-200">
+                                               class="flex flex-col p-6 border-2 border-gray-200 rounded-xl cursor-pointer peer-checked:border-wwc-primary peer-checked:bg-red-50 hover:border-wwc-primary/50 hover:shadow-md transition-all duration-200">
                                             <div class="flex items-center">
                                                 <div class="w-6 h-6 rounded-full border-2 border-gray-300 peer-checked:border-wwc-primary peer-checked:bg-wwc-primary flex items-center justify-center transition-all duration-200" id="multi_day{{ $index + 1 }}_radio">
                                                     <div class="w-4 h-4 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200 shadow-lg" id="multi_day{{ $index + 1 }}_dot"></div>
@@ -608,7 +607,13 @@ const eventData = {
     comboDiscountEnabled: {{ $event->combo_discount_enabled ? 'true' : 'false' }},
     comboDiscountPercentage: {{ $event->combo_discount_percentage ?? 0 }},
     serviceFeePercentage: {{ $serviceFeePercentage }},
-    taxPercentage: {{ $taxPercentage }}
+    taxPercentage: {{ $taxPercentage }},
+    @if($event->isMultiDay())
+    day1Date: '{{ $event->start_date ? $event->start_date->format("M j, Y") : $event->date_time->format("M j, Y") }}',
+    day2Date: '{{ $event->end_date ? $event->end_date->format("M j, Y") : $event->date_time->format("M j, Y") }}',
+    @else
+    eventDate: '{{ $event->date_time ? $event->date_time->format("M j, Y") : "Single Day" }}',
+    @endif
 };
 
 // DOM elements
@@ -903,6 +908,19 @@ function calculatePricing() {
             subtotal = originalSubtotal;
             discountAmount = 0; // No combo discount for single day
             
+            // Determine which day is selected for single day purchase
+            let dayLabel = 'Event Day';
+            let dayDate = eventData.eventDate || 'Single Day';
+            
+            if (eventData.isMultiDay) {
+                const selectedDayRadio = document.querySelector('input[name="single_day_selection"]:checked');
+                if (selectedDayRadio) {
+                    const dayNumber = selectedDayRadio.value.replace('day', '');
+                    dayLabel = `Day ${dayNumber}`;
+                    dayDate = dayNumber === '1' ? eventData.day1Date : eventData.day2Date;
+                }
+            }
+            
             orderSummary = `
                 <div class="py-4 border-t border-gray-200">
                     <div class="flex items-center justify-between mb-2">
@@ -919,7 +937,7 @@ function calculatePricing() {
                         </div>
                     </div>
                     <div class="flex items-center justify-between">
-                        <div class="text-sm text-gray-600 ml-11">Single Day Experience</div>
+                        <div class="text-sm text-gray-600 ml-11">${dayLabel} - ${dayDate}</div>
                         <div class="text-sm text-gray-600">RM${price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} each</div>
                     </div>
                 </div>
@@ -959,7 +977,7 @@ function calculatePricing() {
                             </div>
                         </div>
                         <div class="flex items-center justify-between">
-                            <div class="text-sm text-gray-600 ml-11">Day 1 - ${eventData.isMultiDay ? 'Nov 20, 2025' : 'Single Day'}</div>
+                            <div class="text-sm text-gray-600 ml-11">Day 1 - ${eventData.day1Date || 'Nov 20, 2025'}</div>
                             <div class="text-sm text-gray-600">RM${price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} each</div>
                         </div>
                     </div>
@@ -993,7 +1011,7 @@ function calculatePricing() {
                             </div>
                         </div>
                         <div class="flex items-center justify-between">
-                            <div class="text-sm text-gray-600 ml-11">Day 2 - Nov 21, 2025</div>
+                            <div class="text-sm text-gray-600 ml-11">Day 2 - ${eventData.day2Date || 'Nov 21, 2025'}</div>
                             <div class="text-sm text-gray-600">RM${price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} each</div>
                         </div>
                     </div>

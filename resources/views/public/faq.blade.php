@@ -95,78 +95,78 @@
 
 <!-- Additional FAQ Section -->
 <div class="py-16 bg-wwc-neutral-50">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-wwc-neutral-900 font-display mb-4">
+            <h2 class="text-2xl font-bold text-wwc-neutral-900 font-display mb-4">
                 More Questions?
             </h2>
-            <p class="text-lg text-wwc-neutral-600 max-w-2xl mx-auto">
+            <p class="text-base text-wwc-neutral-600 max-w-2xl mx-auto">
                 Can't find what you're looking for? We're here to help!
             </p>
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="bg-white rounded-2xl p-8 shadow-sm">
-                <div class="flex items-center mb-4">
-                    <div class="bg-wwc-primary-light rounded-lg p-3 mr-4">
-                        <svg class="w-6 h-6 text-wwc-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="bg-white rounded-2xl p-6 shadow-sm">
+                <div class="flex items-center mb-3">
+                    <div class="bg-wwc-primary-light rounded-lg p-2.5 mr-3">
+                        <svg class="w-5 h-5 text-wwc-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold text-wwc-neutral-900">Email Support</h3>
+                    <h3 class="text-lg font-semibold text-wwc-neutral-900">Email Support</h3>
                 </div>
-                <p class="text-wwc-neutral-600 mb-4">
+                <p class="text-sm text-wwc-neutral-600 mb-3">
                     Send us an email and we'll get back to you as quickly as possible.
                 </p>
                 <a href="mailto:ticketsupport@wwcworld.com" 
-                   class="text-wwc-primary font-semibold hover:text-wwc-primary-dark transition-colors duration-200">
+                   class="text-sm text-wwc-primary font-semibold hover:text-wwc-primary-dark transition-colors duration-200">
                     ticketsupport@wwcworld.com
                 </a>
             </div>
             
-            <div class="bg-white rounded-2xl p-8 shadow-sm">
-                <div class="flex items-center mb-4">
-                    <div class="bg-wwc-primary-light rounded-lg p-3 mr-4">
-                        <svg class="w-6 h-6 text-wwc-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="bg-white rounded-2xl p-6 shadow-sm">
+                <div class="flex items-center mb-3">
+                    <div class="bg-wwc-primary-light rounded-lg p-2.5 mr-3">
+                        <svg class="w-5 h-5 text-wwc-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold text-wwc-neutral-900">Phone Support</h3>
+                    <h3 class="text-lg font-semibold text-wwc-neutral-900">Phone Support</h3>
                 </div>
-                <p class="text-wwc-neutral-600 mb-4">
+                <p class="text-sm text-wwc-neutral-600 mb-3">
                     Call us directly for immediate assistance.
                 </p>
-                <div class="space-y-2">
+                <div class="space-y-1.5">
                     <a href="tel:+60326941614" 
-                       class="block text-wwc-primary font-semibold hover:text-wwc-primary-dark transition-colors duration-200">
+                       class="block text-sm text-wwc-primary font-semibold hover:text-wwc-primary-dark transition-colors duration-200">
                         +603 2694 1614
                     </a>
-                    <p class="text-sm text-wwc-neutral-600">Support Hours: Monday – Saturday, 9:00 AM – 5:00 PM</p>
+                    <p class="text-xs text-wwc-neutral-600">Support Hours: Monday – Saturday, 9:00 AM – 5:00 PM</p>
                 </div>
             </div>
             
-            <div class="bg-white rounded-2xl p-8 shadow-sm">
-                <div class="flex items-center mb-4">
-                    <div class="bg-wwc-primary-light rounded-lg p-3 mr-4">
-                        <svg class="w-6 h-6 text-wwc-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="bg-white rounded-2xl p-6 shadow-sm">
+                <div class="flex items-center mb-3">
+                    <div class="bg-wwc-primary-light rounded-lg p-2.5 mr-3">
+                        <svg class="w-5 h-5 text-wwc-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold text-wwc-neutral-900">WhatsApp Support</h3>
+                    <h3 class="text-lg font-semibold text-wwc-neutral-900">WhatsApp Support</h3>
                 </div>
-                <p class="text-wwc-neutral-600 mb-4">
+                <p class="text-sm text-wwc-neutral-600 mb-3">
                     Chat with us on WhatsApp for quick assistance.
                 </p>
                 <a href="https://wa.me/601160740656" target="_blank" rel="noopener noreferrer"
-                   class="text-wwc-primary font-semibold hover:text-wwc-primary-dark transition-colors duration-200">
+                   class="text-sm text-wwc-primary font-semibold hover:text-wwc-primary-dark transition-colors duration-200">
                     +6011 6074 0656
                 </a>
             </div>
         </div>
         
-        <div class="text-center mt-12">
+        <div class="text-center mt-10">
             <a href="{{ route('public.contact') }}" 
-               class="bg-wwc-primary text-white px-8 py-3 rounded-lg font-semibold hover:bg-wwc-primary-dark transition-colors duration-200">
+               class="bg-wwc-primary text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-wwc-primary-dark transition-colors duration-200">
                 Contact Us
             </a>
         </div>

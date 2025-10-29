@@ -101,10 +101,20 @@ class TicketController extends Controller
         
         // Calculate statistics directly from PurchaseTickets for accuracy
         // For combo tickets: 4 combo tickets = 8 PurchaseTicket records (4 Day 1 + 4 Day 2)
-        // We count PurchaseTicket records directly
+        // total_seats for combo = combo ticket count, need to multiply by 2 for PurchaseTicket capacity
         $purchaseTicketsQuery = \App\Models\PurchaseTicket::whereIn('ticket_type_id', $ticketIds);
         
-        $totalSeats = $allTickets->sum('total_seats');
+        // Calculate total seats: for combo tickets, multiply by 2 since each combo = 2 PurchaseTicket records
+        $totalSeats = 0;
+        foreach ($allTickets as $ticket) {
+            if ($ticket->is_combo) {
+                $totalSeats += $ticket->total_seats * 2; // Each combo ticket = 2 PurchaseTicket slots
+            } else {
+                $totalSeats += $ticket->total_seats; // Single-day tickets count as-is
+            }
+        }
+        
+        // Count sold seats - count PurchaseTicket records directly (as per system design)
         $soldSeats = $purchaseTicketsQuery->whereIn('status', ['sold', 'active', 'scanned'])->count();
         $scannedSeats = $purchaseTicketsQuery->where('status', 'scanned')->count();
         $availableSeats = $totalSeats - $soldSeats;

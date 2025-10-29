@@ -99,16 +99,31 @@ class Ticket extends Model
         // Count all sold tickets including sold, active, and scanned statuses
         // Scanned tickets should still count as sold
         // For combo tickets: 4 combo tickets = 8 PurchaseTicket records (4 Day 1 + 4 Day 2)
-        // We count PurchaseTicket records directly, not unique combo groups
+        // We count PurchaseTicket records directly
         $soldCount = $this->purchaseTickets()->whereIn('status', ['sold', 'active', 'scanned'])->count();
         $scannedCount = $this->purchaseTickets()->where('status', 'scanned')->count();
         
-        $this->update([
-            'sold_seats' => $soldCount,
-            'scanned_seats' => $scannedCount,
-            'available_seats' => $this->total_seats - $soldCount,
-            'status' => $this->total_seats - $soldCount <= 0 ? 'sold_out' : 'active',
-        ]);
+        // For combo tickets: total_seats represents combo ticket capacity
+        // Each combo ticket sold creates 2 PurchaseTicket records (Day 1 + Day 2)
+        // So we need to divide soldCount by 2 to get actual combo tickets sold
+        if ($this->is_combo) {
+            $comboTicketsSold = ceil($soldCount / 2); // Round up to handle partial counts
+            $availableSeats = $this->total_seats - $comboTicketsSold;
+            $this->update([
+                'sold_seats' => $soldCount, // Keep PurchaseTicket count for display
+                'scanned_seats' => $scannedCount,
+                'available_seats' => max(0, $availableSeats), // Calculate based on combo ticket capacity
+                'status' => $availableSeats <= 0 ? 'sold_out' : 'active',
+            ]);
+        } else {
+            // Single-day tickets: count directly
+            $this->update([
+                'sold_seats' => $soldCount,
+                'scanned_seats' => $scannedCount,
+                'available_seats' => $this->total_seats - $soldCount,
+                'status' => $this->total_seats - $soldCount <= 0 ? 'sold_out' : 'active',
+            ]);
+        }
     }
 
     /**

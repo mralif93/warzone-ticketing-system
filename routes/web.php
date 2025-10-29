@@ -88,23 +88,35 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
         
         // Event management
+        Route::get('/events/trashed', [AdminEventController::class, 'trashed'])->name('events.trashed');
+        Route::post('/events/{event}/restore', [AdminEventController::class, 'restore'])->name('events.restore');
+        Route::delete('/events/{event}/force-delete', [AdminEventController::class, 'forceDelete'])->name('events.force-delete');
         Route::resource('events', AdminEventController::class);
         Route::post('/events/{event}/change-status', [AdminEventController::class, 'changeStatus'])->name('events.change-status');
         Route::get('/events/{event}/ticket-types', [AdminEventController::class, 'getTicketTypes'])->name('events.ticket-types');
         Route::get('/events/{event}/ticket-types-test', [AdminEventController::class, 'getTicketTypes'])->name('events.ticket-types-test');
         
         // User management
+        Route::get('/users/trashed', [AdminUserController::class, 'trashed'])->name('users.trashed');
+        Route::post('/users/{user}/restore', [AdminUserController::class, 'restore'])->name('users.restore');
+        Route::delete('/users/{user}/force-delete', [AdminUserController::class, 'forceDelete'])->name('users.force-delete');
         Route::resource('users', AdminUserController::class);
         Route::post('/users/{user}/update-password', [AdminUserController::class, 'updatePassword'])->name('users.update-password');
         Route::post('/users/{user}/update-status', [AdminUserController::class, 'updateStatus'])->name('users.update-status');
         
         // Order management
+        Route::get('/orders/trashed', [AdminOrderController::class, 'trashed'])->name('orders.trashed');
+        Route::post('/orders/{order}/restore', [AdminOrderController::class, 'restore'])->name('orders.restore');
+        Route::delete('/orders/{order}/force-delete', [AdminOrderController::class, 'forceDelete'])->name('orders.force-delete');
         Route::resource('orders', AdminOrderController::class);
         Route::post('/orders/{order}/update-status', [AdminOrderController::class, 'updateStatus'])->name('orders.update-status');
         Route::post('/orders/{order}/cancel', [AdminOrderController::class, 'cancel'])->name('orders.cancel');
         Route::post('/orders/{order}/refund', [AdminOrderController::class, 'refund'])->name('orders.refund');
         
         // Ticket management
+        Route::get('/tickets/trashed', [AdminTicketController::class, 'trashed'])->name('tickets.trashed');
+        Route::post('/tickets/{ticket}/restore', [AdminTicketController::class, 'restore'])->name('tickets.restore');
+        Route::delete('/tickets/{ticket}/force-delete', [AdminTicketController::class, 'forceDelete'])->name('tickets.force-delete');
         Route::resource('tickets', AdminTicketController::class);
         Route::post('/tickets/{ticket}/update-status', [AdminTicketController::class, 'updateStatus'])->name('tickets.update-status');
         Route::post('/tickets/{ticket}/cancel', [AdminTicketController::class, 'cancel'])->name('tickets.cancel');
@@ -119,6 +131,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/payments/export/csv', [AdminPaymentController::class, 'export'])->name('payments.export');
         
         // Purchase management
+        Route::get('/purchases/trashed', [AdminPurchaseController::class, 'trashed'])->name('purchases.trashed');
+        Route::post('/purchases/{purchase}/restore', [AdminPurchaseController::class, 'restore'])->name('purchases.restore');
+        Route::delete('/purchases/{purchase}/force-delete', [AdminPurchaseController::class, 'forceDelete'])->name('purchases.force-delete');
         Route::resource('purchases', AdminPurchaseController::class);
         Route::post('/purchases/{purchase}/mark-scanned', [AdminPurchaseController::class, 'markScanned'])->name('purchases.mark-scanned');
         Route::post('/purchases/{purchase}/cancel', [AdminPurchaseController::class, 'cancel'])->name('purchases.cancel');

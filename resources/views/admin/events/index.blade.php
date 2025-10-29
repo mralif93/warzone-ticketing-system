@@ -93,9 +93,16 @@
                 <div class="px-6 py-4 border-b border-wwc-neutral-100">
                     <div class="flex items-center justify-between">
                         <h3 class="text-lg font-bold text-wwc-neutral-900">Search & Filter Events</h3>
-                        <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
-                            <i class='bx bx-search text-sm'></i>
-                            <span>Find specific events</span>
+                        <div class="flex items-center space-x-3">
+                            <a href="{{ route('admin.events.trashed') }}" 
+                               class="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors duration-200">
+                                <i class='bx bx-trash text-xs mr-1'></i>
+                                View Trashed
+                            </a>
+                            <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
+                                <i class='bx bx-search text-sm'></i>
+                                <span>Find specific events</span>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -39,8 +39,8 @@ return new class extends Migration
             $table->string('action'); // CREATE, UPDATE, DELETE
             $table->string('table_name');
             $table->unsignedBigInteger('record_id');
-            $table->text('old_values')->nullable();
-            $table->text('new_values')->nullable();
+            $table->json('old_values')->nullable();
+            $table->json('new_values')->nullable();
             $table->string('ip_address');
             $table->string('user_agent')->nullable();
             $table->text('description')->nullable();

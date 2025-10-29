@@ -237,4 +237,81 @@ class PurchaseController extends Controller
         return redirect()->back()
                         ->with('success', 'Ticket cancelled successfully.');
     }
+
+    /**
+     * Display a listing of trashed purchases
+     */
+    public function trashed(Request $request)
+    {
+        $query = PurchaseTicket::onlyTrashed()->with(['order.user', 'event', 'ticketType']);
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('qrcode', 'like', "%{$search}%")
+                  ->orWhereHas('order.user', function ($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', "%{$search}%")
+                               ->orWhere('email', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('event', function ($eventQuery) use ($search) {
+                      $eventQuery->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Filter by event
+        if ($request->filled('event_id')) {
+            $query->where('event_id', $request->event_id);
+        }
+
+        // Filter by date range
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $perPage = $request->get('limit', 10);
+        $perPage = in_array($perPage, [10, 15, 25, 50, 100]) ? $perPage : 10;
+        $purchases = $query->orderBy('deleted_at', 'desc')->paginate($perPage);
+
+        // Statistics
+        $totalTrashed = PurchaseTicket::onlyTrashed()->count();
+        $recentlyDeleted = PurchaseTicket::onlyTrashed()->where('deleted_at', '>=', now()->subDays(7))->count();
+
+        // Get events for filter dropdown
+        $events = Event::select('id', 'name', 'date_time')->orderBy('date_time', 'desc')->get();
+
+        return view('admin.purchases.trashed', compact('purchases', 'totalTrashed', 'recentlyDeleted', 'events'));
+    }
+
+    /**
+     * Restore a trashed purchase
+     */
+    public function restore(PurchaseTicket $purchase)
+    {
+        $purchase->restore();
+
+        return redirect()->route('admin.purchases.trashed')
+                        ->with('success', 'Purchase ticket restored successfully.');
+    }
+
+    /**
+     * Permanently delete a trashed purchase
+     */
+    public function forceDelete(PurchaseTicket $purchase)
+    {
+        $qrcode = $purchase->qrcode;
+        $purchase->forceDelete();
+
+        return redirect()->route('admin.purchases.trashed')
+                        ->with('success', "Purchase ticket '{$qrcode}' permanently deleted.");
+    }
 }

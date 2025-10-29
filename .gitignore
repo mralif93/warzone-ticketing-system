@@ -183,3 +183,5 @@ temp/
 *.njsproj
 *.sln
 *.sw?
+database/database.sqlite
+storage/logs/laravel.log

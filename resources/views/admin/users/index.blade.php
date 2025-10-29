@@ -95,9 +95,16 @@
                 <div class="px-6 py-4 border-b border-wwc-neutral-100">
                     <div class="flex items-center justify-between">
                         <h3 class="text-lg font-bold text-wwc-neutral-900">Search & Filter Users</h3>
-                        <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
-                            <i class='bx bx-search text-sm'></i>
-                            <span>Find specific users</span>
+                        <div class="flex items-center space-x-3">
+                            <a href="{{ route('admin.users.trashed') }}" 
+                               class="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors duration-200">
+                                <i class='bx bx-trash text-xs mr-1'></i>
+                                View Trashed
+                            </a>
+                            <div class="flex items-center space-x-2 text-xs text-wwc-neutral-500">
+                                <i class='bx bx-search text-sm'></i>
+                                <span>Find specific users</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -311,9 +318,10 @@
                                                             Reset Password
                                                         </a>
                                                         <div class="border-t border-wwc-neutral-100 my-1"></div>
-                                                        <form action="{{ route('admin.users.destroy', $user) }}" method="POST" 
-                                                              onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.')" 
-                                                              class="block">
+                                                        @if($user->id !== Auth::id())
+                                                            <form action="{{ route('admin.users.destroy', $user) }}" method="POST" 
+                                                                  onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.')" 
+                                                                  class="block">
                                                 @csrf
                                                 @method('DELETE')
                                                             <button type="submit" 
@@ -322,6 +330,12 @@
                                                                 Delete User
                                                             </button>
                                             </form>
+                                                        @else
+                                                            <div class="flex items-center w-full px-4 py-2 text-xs text-gray-400 cursor-not-allowed">
+                                                                <i class='bx bx-shield text-xs mr-2'></i>
+                                                                Cannot Delete Self
+                                                            </div>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             </div>

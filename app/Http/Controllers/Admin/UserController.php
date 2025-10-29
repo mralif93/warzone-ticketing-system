@@ -199,6 +199,11 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
+        // Prevent deleting the current logged-in user
+        if ($user->id === Auth::id()) {
+            return back()->withErrors(['error' => 'You cannot delete your own account.']);
+        }
+
         // Prevent deleting the last admin
         if ($user->role === 'Administrator' && User::where('role', 'Administrator')->count() <= 1) {
             return back()->withErrors(['error' => 'Cannot delete the last administrator.']);
@@ -256,5 +261,83 @@ class UserController extends Controller
         ]);
 
         return back()->with('success', 'Password updated successfully!');
+    }
+
+    /**
+     * Display a listing of trashed users
+     */
+    public function trashed(Request $request)
+    {
+        $query = User::onlyTrashed();
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by role
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            if ($request->status === 'active') {
+                $query->where('is_active', true);
+            } elseif ($request->status === 'inactive') {
+                $query->where('is_active', false);
+            }
+        }
+
+        // Filter by date range
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $perPage = $request->get('limit', 10);
+        $perPage = in_array($perPage, [10, 15, 25, 50, 100]) ? $perPage : 10;
+        $users = $query->orderBy('deleted_at', 'desc')->paginate($perPage);
+
+        // Statistics
+        $totalTrashed = User::onlyTrashed()->count();
+        $recentlyDeleted = User::onlyTrashed()->where('deleted_at', '>=', now()->subDays(7))->count();
+
+        return view('admin.users.trashed', compact('users', 'totalTrashed', 'recentlyDeleted'));
+    }
+
+    /**
+     * Restore a trashed user
+     */
+    public function restore(User $user)
+    {
+        $user->restore();
+
+        return redirect()->route('admin.users.trashed')
+                        ->with('success', 'User restored successfully.');
+    }
+
+    /**
+     * Permanently delete a trashed user
+     */
+    public function forceDelete(User $user)
+    {
+        // Prevent permanently deleting the current logged-in user
+        if ($user->id === Auth::id()) {
+            return back()->withErrors(['error' => 'You cannot permanently delete your own account.']);
+        }
+
+        $userName = $user->name;
+        $user->forceDelete();
+
+        return redirect()->route('admin.users.trashed')
+                        ->with('success', "User '{$userName}' permanently deleted.");
     }
 }

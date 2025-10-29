@@ -875,4 +875,71 @@ class OrderController extends Controller
             }
         }
     }
+
+    /**
+     * Display a listing of trashed orders
+     */
+    public function trashed(Request $request)
+    {
+        $query = Order::onlyTrashed()->with(['user', 'tickets']);
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('order_number', 'like', "%{$search}%")
+                  ->orWhere('customer_email', 'like', "%{$search}%")
+                  ->orWhere('customer_name', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Filter by date range
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $perPage = $request->get('limit', 10);
+        $perPage = in_array($perPage, [10, 15, 25, 50, 100]) ? $perPage : 10;
+        $orders = $query->orderBy('deleted_at', 'desc')->paginate($perPage);
+
+        // Statistics
+        $totalTrashed = Order::onlyTrashed()->count();
+        $recentlyDeleted = Order::onlyTrashed()->where('deleted_at', '>=', now()->subDays(7))->count();
+
+        return view('admin.orders.trashed', compact('orders', 'totalTrashed', 'recentlyDeleted'));
+    }
+
+    /**
+     * Restore a trashed order
+     */
+    public function restore(Order $order)
+    {
+        $order->restore();
+
+        return redirect()->route('admin.orders.trashed')
+                        ->with('success', 'Order restored successfully.');
+    }
+
+    /**
+     * Permanently delete a trashed order
+     */
+    public function forceDelete(Order $order)
+    {
+        $orderNumber = $order->order_number;
+        $order->forceDelete();
+
+        return redirect()->route('admin.orders.trashed')
+                        ->with('success', "Order '{$orderNumber}' permanently deleted.");
+    }
 }

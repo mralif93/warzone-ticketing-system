@@ -332,4 +332,68 @@ class EventController extends Controller
             ]
         ]);
     }
+
+    /**
+     * Display a listing of trashed events
+     */
+    public function trashed(Request $request)
+    {
+        $query = Event::onlyTrashed()->with(['tickets']);
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('venue', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Filter by date range
+        if ($request->filled('date_from')) {
+            $query->whereDate('date_time', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('date_time', '<=', $request->date_to);
+        }
+
+        $perPage = $request->get('limit', 10);
+        $perPage = in_array($perPage, [10, 15, 25, 50, 100]) ? $perPage : 10;
+        $events = $query->orderBy('deleted_at', 'desc')->paginate($perPage);
+
+        // Statistics
+        $totalTrashed = Event::onlyTrashed()->count();
+        $recentlyDeleted = Event::onlyTrashed()->where('deleted_at', '>=', now()->subDays(7))->count();
+
+        return view('admin.events.trashed', compact('events', 'totalTrashed', 'recentlyDeleted'));
+    }
+
+    /**
+     * Restore a trashed event
+     */
+    public function restore(Event $event)
+    {
+        $event->restore();
+
+        return redirect()->route('admin.events.trashed')
+                        ->with('success', 'Event restored successfully.');
+    }
+
+    /**
+     * Permanently delete a trashed event
+     */
+    public function forceDelete(Event $event)
+    {
+        $eventName = $event->name;
+        $event->forceDelete();
+
+        return redirect()->route('admin.events.trashed')
+                        ->with('success', "Event '{$eventName}' permanently deleted.");
+    }
 }

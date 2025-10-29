@@ -26,6 +26,7 @@ return new class extends Migration
             $table->string('department')->nullable(); // For staff members
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
             
             // Address fields
             $table->string('address_line_1')->nullable();

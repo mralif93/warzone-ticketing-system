@@ -207,20 +207,12 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="flex flex-col sm:flex-row justify-center gap-4 px-2">
-            @if($order->purchaseTickets && $order->purchaseTickets->count() > 0)
-                <a href="{{ route('customer.tickets.qr', $order->purchaseTickets->first()->id) }}" 
-                   class="w-full inline-flex items-center justify-center px-8 py-4 bg-green-600 text-white rounded-xl font-bold text-lg hover:bg-green-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
-                    <i class="bx bx-qr-scan mr-3 text-xl"></i>
-                    View Ticket
-                </a>
-            @else
-                <a href="{{ route('customer.dashboard') }}" 
-                   class="w-full inline-flex items-center justify-center px-8 py-4 bg-green-600 text-white rounded-xl font-bold text-lg hover:bg-green-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
-                    <i class="bx bx-ticket mr-3 text-xl"></i>
-                    My Tickets
-                </a>
-            @endif
+        <div class="flex flex-col gap-4 px-2">
+            <a href="{{ route('customer.dashboard') }}" 
+               class="w-full inline-flex items-center justify-center px-8 py-4 bg-wwc-primary text-white rounded-xl font-bold text-lg hover:bg-wwc-primary-dark transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                <i class="bx bx-home mr-3 text-xl"></i>
+                Go to Dashboard
+            </a>
         </div>
     </div>
 </div>

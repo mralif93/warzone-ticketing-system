@@ -63,7 +63,7 @@
                                     @if($event->isMultiDay())
                                         {{ $event->getEventDays()[0]['display'] }} - {{ $event->getEventDays()[1]['display'] }}
                                     @else
-                                        {{ $event->getEventDays()[0]['display'] }}
+                                        {{ $event->date_time->format('M j, Y') }}
                                     @endif
                                 </span>
                             </div>
@@ -150,7 +150,7 @@
         <!-- Next Steps -->
         <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-8">
             <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">What's Next?</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="text-center">
                     <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="bx bx-cart text-2xl text-red-600"></i>
@@ -165,18 +165,32 @@
                     <h4 class="font-bold text-gray-900 mb-2">Retry Payment</h4>
                     <p class="text-sm text-gray-600">Try processing your payment again with the same or a different payment method.</p>
                 </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="bx bx-help-circle text-2xl text-purple-600"></i>
+                    </div>
+                    <h4 class="font-bold text-gray-900 mb-2">Contact Support</h4>
+                    <p class="text-sm text-gray-600">Get help from our support team if you're experiencing payment issues.</p>
+                </div>
             </div>
         </div>
 
         <!-- Action Buttons -->
-        <div class="flex flex-col sm:flex-row justify-center gap-4 px-2">
+        <div class="flex flex-col gap-4 px-2">
             <a href="{{ route('public.tickets.cart', $event) }}" 
-               class="inline-flex items-center justify-center px-8 py-4 bg-gray-600 text-white rounded-xl font-bold text-lg hover:bg-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex-1 sm:flex-none sm:w-1/2">
+               class="w-full inline-flex items-center justify-center px-8 py-4 bg-gray-600 text-white rounded-xl font-bold text-lg hover:bg-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
                 <i class="bx bx-cart mr-3 text-xl"></i>
                 Back to Cart
             </a>
+            @auth
+            <a href="{{ route('customer.dashboard') }}" 
+               class="w-full inline-flex items-center justify-center px-8 py-4 bg-wwc-primary text-white rounded-xl font-bold text-lg hover:bg-wwc-primary-dark transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                <i class="bx bx-home mr-3 text-xl"></i>
+                Go to Dashboard
+            </a>
+            @endauth
             <a href="mailto:support@warzone.com?subject=Payment%20Failed%20-%20Event%20{{ $event->id }}" 
-               class="inline-flex items-center justify-center px-8 py-4 bg-red-600 text-white rounded-xl font-bold text-lg hover:bg-red-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex-1 sm:flex-none sm:w-1/2">
+               class="w-full inline-flex items-center justify-center px-8 py-4 bg-red-600 text-white rounded-xl font-bold text-lg hover:bg-red-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
                 <i class="bx bx-support mr-3 text-xl"></i>
                 Contact Support
             </a>

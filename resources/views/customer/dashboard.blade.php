@@ -23,7 +23,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         <!-- Statistics Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white rounded-xl border border-wwc-neutral-200 p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
@@ -65,72 +65,7 @@
                     </div>
                 </div>
             </div>
-
-            <div class="bg-white rounded-xl border border-wwc-neutral-200 p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="w-8 h-8 bg-wwc-info rounded-lg flex items-center justify-center">
-                            <i class='bx bx-calendar text-white text-sm'></i>
-                        </div>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-wwc-neutral-500">Upcoming Events</p>
-                        <p class="text-2xl font-bold text-wwc-neutral-900">{{ $orderStats['upcoming_events'] }}</p>
-                    </div>
-                </div>
-            </div>
         </div>
-
-        <!-- Upcoming Events -->
-        @if($upcomingEvents->count() > 0)
-        <div class="mb-8">
-            <h2 class="text-lg font-semibold text-wwc-neutral-900 mb-4">Upcoming Events</h2>
-            @foreach($upcomingEvents as $event)
-            <a href="{{ route('public.tickets.cart', $event) }}" class="block bg-white rounded-xl border border-wwc-neutral-200 overflow-hidden hover:shadow-md transition-all duration-200 mb-4 cursor-pointer group">
-                <div class="p-6">
-                    <div class="flex items-start">
-                        <div class="flex-shrink-0 mr-4">
-                            <div class="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center group-hover:bg-red-700 transition-colors duration-200">
-                                <i class='bx bx-calendar text-white text-lg'></i>
-                            </div>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex flex-col space-y-2">
-                                <!-- Row 1: Title - On Sale (left) | Date (right) -->
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center flex-1 min-w-0">
-                                        <h3 class="text-lg font-bold text-wwc-neutral-900 group-hover:text-wwc-primary transition-colors duration-200 mr-3 truncate">{{ $event->name }}</h3>
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-wwc-success text-white flex-shrink-0">
-                                            On Sale
-                                        </span>
-                                    </div>
-                                    <div class="flex-shrink-0 ml-4 flex items-center text-sm text-wwc-neutral-500">
-                                        <i class='bx bx-calendar mr-2'></i>
-                                        @if($event->start_date && $event->end_date)
-                                        {{ $event->start_date->format('M j, Y') }} - {{ $event->end_date->format('M j, Y') }}
-                                        @elseif($event->date_time)
-                                        {{ $event->date_time->format('M j, Y') }}
-                                        @endif
-                                    </div>
-                                </div>
-                                <!-- Row 2: Location (left) | Time (right) -->
-                                <div class="flex items-center justify-between">
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-sm text-wwc-neutral-600 truncate">{{ $event->venue }}</p>
-                                    </div>
-                                    <div class="flex-shrink-0 ml-4 flex items-center text-sm text-wwc-neutral-500">
-                                        <i class='bx bx-time mr-2'></i>
-                                        {{ $event->start_time }} - {{ $event->end_time }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </a>
-            @endforeach
-        </div>
-        @endif
 
         <!-- My Tickets Table -->
         <div class="bg-white rounded-xl shadow-sm border border-wwc-neutral-200">

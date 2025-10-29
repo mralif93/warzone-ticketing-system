@@ -87,8 +87,39 @@
                                 </div>
                                 <div class="flex items-center justify-between">
                                     <div class="text-sm text-gray-600 ml-11">
-                                        @if($purchaseTicket->event_day_name)
-                                            {{ $purchaseTicket->event_day_name }} - {{ $purchaseTicket->event_day ? $purchaseTicket->event_day->format('M j, Y') : 'TBD' }}
+                                        @if($purchaseTicket->event_day_name && $purchaseTicket->event_day_name !== 'All Days')
+                                            @php
+                                                // Extract day number from event_day_name (e.g., "Day 1" -> 1)
+                                                $dayNumber = null;
+                                                if (preg_match('/Day (\d+)/', $purchaseTicket->event_day_name, $matches)) {
+                                                    $dayNumber = (int)$matches[1];
+                                                }
+                                                
+                                                // Get the event days array
+                                                $eventDays = $order->event->getEventDays();
+                                                
+                                                // Use the day number to get the correct date, or fallback to first day
+                                                $dayIndex = $dayNumber ? $dayNumber - 1 : 0;
+                                                $displayDate = isset($eventDays[$dayIndex]) ? $eventDays[$dayIndex]['display'] : ($eventDays[0]['display'] ?? 'TBD');
+                                            @endphp
+                                            {{ $purchaseTicket->event_day_name }} - {{ $displayDate }}
+                                        @elseif($purchaseTicket->event_day)
+                                            @php
+                                                // Use the event_day field directly and determine which day it is
+                                                $eventDays = $order->event->getEventDays();
+                                                $dayName = 'Event Day';
+                                                $displayDate = $purchaseTicket->event_day->format('M j, Y');
+                                                
+                                                // Try to match the date with the event days
+                                                foreach ($eventDays as $index => $day) {
+                                                    if ($day['date'] === $purchaseTicket->event_day->format('Y-m-d')) {
+                                                        $dayName = $day['day_name'];
+                                                        $displayDate = $day['display'];
+                                                        break;
+                                                    }
+                                                }
+                                            @endphp
+                                            {{ $dayName }} - {{ $displayDate }}
                                         @else
                                             {{ $order->event->getEventDays()[0]['day_name'] }} - {{ $order->event->getEventDays()[0]['display'] }}
                                         @endif

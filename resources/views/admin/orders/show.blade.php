@@ -226,7 +226,7 @@
                                                         @endif
                                                     </h4>
                                                     <p class="text-xs text-wwc-neutral-600">{{ $ticketData['event']->name ?? 'N/A' }}</p>
-                                                    @if($ticketData['day_name'])
+                                                    @if($ticketData['day_name'] && $ticketData['day_name'] !== 'All Days')
                                                         <p class="text-xs text-wwc-neutral-500">{{ $ticketData['day_name'] }} - {{ $ticketData['event']->getEventDays()[$ticketData['day']-1]['display'] ?? '' }}</p>
                                                     @else
                                                         <p class="text-xs text-wwc-neutral-500">{{ $ticketData['event']->getFormattedDateRange() ?? 'N/A' }}</p>

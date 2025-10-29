@@ -52,8 +52,8 @@ class TicketController extends Controller
         }
 
         // Get service fee and tax settings
-        $serviceFeePercentage = Setting::get('service_fee_percentage', 5.0);
-        $taxPercentage = Setting::get('tax_percentage', 6.0);
+        $serviceFeePercentage = Setting::get('service_fee_percentage', 0.0);
+        $taxPercentage = Setting::get('tax_percentage', 0.0);
         $maxTicketsPerOrder = Setting::get('max_tickets_per_order', 10);
 
         return view('public.tickets.cart', compact('event', 'holdUntil', 'serviceFeePercentage', 'taxPercentage', 'maxTicketsPerOrder'));
@@ -236,8 +236,8 @@ class TicketController extends Controller
         $totalAmount = $subtotal + $serviceFee + $taxAmount;
         
         // Get service fee and tax settings
-        $serviceFeePercentage = Setting::get('service_fee_percentage', 5.0);
-        $taxPercentage = Setting::get('tax_percentage', 6.0);
+        $serviceFeePercentage = Setting::get('service_fee_percentage', 0.0);
+        $taxPercentage = Setting::get('tax_percentage', 0.0);
 
         // Handle POST request - create order and redirect to payment
         if ($request->isMethod('post')) {

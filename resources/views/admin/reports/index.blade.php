@@ -143,11 +143,11 @@
                                 <i class='bx bx-x text-sm mr-2'></i>
                                 Clear Filters
                             </a>
-                            <a href="{{ route('admin.reports.export', ['type' => 'revenue', 'date_from' => $dateFrom, 'date_to' => $dateTo]) }}" 
-                               class="inline-flex items-center px-4 py-2 border border-wwc-neutral-300 shadow-sm text-sm font-semibold rounded-lg text-wwc-neutral-700 bg-white hover:bg-wwc-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
+                            <button type="button" id="exportBtn"
+                                    class="inline-flex items-center px-4 py-2 border border-wwc-neutral-300 shadow-sm text-sm font-semibold rounded-lg text-wwc-neutral-700 bg-white hover:bg-wwc-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
                                 <i class='bx bx-download text-sm mr-2'></i>
                                 Export
-                            </a>
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -273,7 +273,7 @@
                                             @endif">
                                         </div>
                                         <div class="ml-3">
-                                            <div class="text-sm font-semibold text-wwc-neutral-900">{{ $role->role }}</div>
+                                            <div class="text-sm font-semibold text-wwc-neutral-900">{{ ucwords(str_replace('_', ' ', $role->role)) }}</div>
                                         </div>
                                     </div>
                                     <div class="text-sm font-semibold text-wwc-neutral-900">{{ $role->count }} users</div>
@@ -361,4 +361,26 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const exportBtn = document.getElementById('exportBtn');
+    const exportTypeSelect = document.getElementById('export_type');
+    const dateFromInput = document.getElementById('date_from');
+    const dateToInput = document.getElementById('date_to');
+    
+    exportBtn.addEventListener('click', function() {
+        const exportType = exportTypeSelect.value;
+        const dateFrom = dateFromInput.value;
+        const dateTo = dateToInput.value;
+        
+        const exportUrl = "{{ route('admin.reports.export') }}" + 
+            "?type=" + encodeURIComponent(exportType) + 
+            "&date_from=" + encodeURIComponent(dateFrom) + 
+            "&date_to=" + encodeURIComponent(dateTo);
+        
+        window.location.href = exportUrl;
+    });
+});
+</script>
 @endsection

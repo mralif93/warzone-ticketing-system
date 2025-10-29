@@ -95,8 +95,8 @@ class OrderController extends Controller
         });
         
         // Get service fee and tax settings
-        $serviceFeePercentage = Setting::get('service_fee_percentage', 5.0);
-        $taxPercentage = Setting::get('tax_percentage', 6.0);
+        $serviceFeePercentage = Setting::get('service_fee_percentage', 0.0);
+        $taxPercentage = Setting::get('tax_percentage', 0.0);
         
         return view('admin.orders.create', compact('users', 'events', 'serviceFeePercentage', 'taxPercentage'));
     }
@@ -506,8 +506,8 @@ class OrderController extends Controller
         $events = \App\Models\Event::where('status', 'on_sale')->get();
         
         // Get service fee and tax settings
-        $serviceFeePercentage = Setting::get('service_fee_percentage', 5.0);
-        $taxPercentage = Setting::get('tax_percentage', 6.0);
+        $serviceFeePercentage = Setting::get('service_fee_percentage', 0.0);
+        $taxPercentage = Setting::get('tax_percentage', 0.0);
         
         return view('admin.orders.edit', compact('order', 'users', 'events', 'serviceFeePercentage', 'taxPercentage'));
     }

@@ -21,7 +21,7 @@ class ReportController extends Controller
      */
     public function index(Request $request)
     {
-        $dateFrom = $request->get('date_from', now()->subMonth()->format('Y-m-d'));
+        $dateFrom = $request->get('date_from', '2020-01-01');
         $dateTo = $request->get('date_to', now()->format('Y-m-d'));
 
         // Revenue report
@@ -69,7 +69,7 @@ class ReportController extends Controller
      */
     public function export(Request $request)
     {
-        $dateFrom = $request->get('date_from', now()->subMonth()->format('Y-m-d'));
+        $dateFrom = $request->get('date_from', '2020-01-01');
         $dateTo = $request->get('date_to', now()->format('Y-m-d'));
         $type = $request->get('type', 'revenue');
 
@@ -109,9 +109,9 @@ class ReportController extends Controller
      */
     private function getRevenueData($dateFrom, $dateTo)
     {
-        return Order::where('status', 'paid')
-            ->whereBetween('created_at', [$dateFrom, $dateTo])
-            ->selectRaw('DATE(created_at) as date, SUM(total_amount) as total')
+        return PurchaseTicket::whereIn('status', ['sold', 'active', 'scanned'])
+            ->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+            ->selectRaw('DATE(created_at) as date, SUM(price_paid) as total')
             ->groupBy('date')
             ->orderBy('date')
             ->get();
@@ -123,12 +123,12 @@ class ReportController extends Controller
     private function getTicketSalesByEvent($dateFrom, $dateTo)
     {
         return PurchaseTicket::whereIn('status', ['sold', 'active', 'scanned'])
-            ->whereBetween('created_at', [$dateFrom, $dateTo])
-            ->with('order.event')
+            ->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+            ->with('event')
             ->get()
-            ->groupBy('order.event.name')
+            ->groupBy('event.name')
             ->map(function($tickets, $eventName) {
-                $event = $tickets->first()->order->event;
+                $event = $tickets->first()->event;
                 return (object)[
                     'title' => $eventName,
                     'event_date' => $event->date_time,
@@ -143,7 +143,7 @@ class ReportController extends Controller
      */
     private function getUserRegistrationData($dateFrom, $dateTo)
     {
-        return User::whereBetween('created_at', [$dateFrom, $dateTo])
+        return User::whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
             ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->groupBy('date')
             ->orderBy('date')
@@ -166,8 +166,12 @@ class ReportController extends Controller
      */
     private function getTopCustomers()
     {
-        return User::withCount('orders')
-            ->withSum('orders', 'total_amount')
+        return User::withCount(['orders as orders_count' => function($query) {
+                $query->where('status', 'paid');
+            }])
+            ->withSum(['orders as orders_sum_total_amount' => function($query) {
+                $query->where('status', 'paid');
+            }], 'total_amount')
             ->get()
             ->filter(function($user) {
                 return $user->orders_sum_total_amount > 0;
@@ -181,7 +185,8 @@ class ReportController extends Controller
      */
     private function getPaymentMethodsDistribution($dateFrom, $dateTo)
     {
-        return Payment::whereBetween('created_at', [$dateFrom, $dateTo])
+        return Payment::where('status', 'succeeded')
+            ->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
             ->selectRaw('method, COUNT(*) as count, SUM(amount) as total')
             ->groupBy('method')
             ->orderBy('count', 'desc')
@@ -193,9 +198,14 @@ class ReportController extends Controller
      */
     private function getEventPerformance($dateFrom, $dateTo)
     {
-        return Event::whereBetween('created_at', [$dateFrom, $dateTo])
-            ->withCount(['purchaseTickets as sold_tickets'])
-            ->withSum('purchaseTickets as total_revenue', 'price_paid')
+        return Event::withCount(['purchaseTickets as sold_tickets' => function($query) use ($dateFrom, $dateTo) {
+                $query->whereIn('status', ['sold', 'active', 'scanned'])
+                      ->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59']);
+            }])
+            ->withSum(['purchaseTickets as total_revenue' => function($query) use ($dateFrom, $dateTo) {
+                $query->whereIn('status', ['sold', 'active', 'scanned'])
+                      ->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59']);
+            }], 'price_paid')
             ->orderBy('sold_tickets', 'desc')
             ->get();
     }
@@ -210,11 +220,12 @@ class ReportController extends Controller
             $date = now()->subMonths($i);
             $months->push([
                 'month' => $date->format('M Y'),
-                'revenue' => Order::where('status', 'paid')
+                'revenue' => PurchaseTicket::whereIn('status', ['sold', 'active', 'scanned'])
                     ->whereYear('created_at', $date->year)
                     ->whereMonth('created_at', $date->month)
-                    ->sum('total_amount'),
-                'tickets' => PurchaseTicket::whereYear('created_at', $date->year)
+                    ->sum('price_paid'),
+                'tickets' => PurchaseTicket::whereIn('status', ['sold', 'active', 'scanned'])
+                    ->whereYear('created_at', $date->year)
                     ->whereMonth('created_at', $date->month)
                     ->count(),
                 'users' => User::whereYear('created_at', $date->year)

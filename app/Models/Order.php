@@ -295,7 +295,7 @@ class Order extends Model
      */
     private function calculateServiceFee($subtotal)
     {
-        $serviceFeePercentage = Setting::get('service_fee_percentage', 5.0);
+        $serviceFeePercentage = Setting::get('service_fee_percentage', 0.0);
         return round($subtotal * ($serviceFeePercentage / 100), 2);
     }
 
@@ -304,7 +304,7 @@ class Order extends Model
      */
     private function calculateTax($amount)
     {
-        $taxPercentage = Setting::get('tax_percentage', 6.0);
+        $taxPercentage = Setting::get('tax_percentage', 0.0);
         return round($amount * ($taxPercentage / 100), 2);
     }
 

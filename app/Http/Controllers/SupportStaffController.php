@@ -69,8 +69,8 @@ class SupportStaffController extends Controller
         ]);
 
         // Get system settings for pricing breakdown
-        $serviceFeePercentage = Setting::get('service_fee_percentage', 5.0);
-        $taxPercentage = Setting::get('tax_percentage', 6.0);
+        $serviceFeePercentage = Setting::get('service_fee_percentage', 0.0);
+        $taxPercentage = Setting::get('tax_percentage', 0.0);
 
         return view('support-staff.order-details', compact('order', 'serviceFeePercentage', 'taxPercentage'));
     }

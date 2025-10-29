@@ -666,8 +666,8 @@ class AdminController extends Controller
             'admin_email' => '',
             'session_timeout' => '60',
             'max_login_attempts' => '5',
-            'service_fee_percentage' => '5.0',
-            'tax_percentage' => '6.0',
+            'service_fee_percentage' => '0.0',
+            'tax_percentage' => '0.0',
         ];
 
         foreach ($defaults as $key => $defaultValue) {

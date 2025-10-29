@@ -171,6 +171,15 @@
                         <div class="p-6 space-y-4">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-3">
+                                    <div class="h-8 w-8 rounded-lg bg-orange-100 flex items-center justify-center">
+                                        <i class='bx bx-qr-scan text-sm text-orange-600'></i>
+                                    </div>
+                                    <span class="text-sm font-semibold text-wwc-neutral-600">Scanned</span>
+                                </div>
+                                <span class="text-base font-medium text-wwc-neutral-900">{{ number_format($ticket->scanned_seats ?? 0) }}</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
                                     <div class="h-8 w-8 rounded-lg bg-green-100 flex items-center justify-center">
                                         <i class='bx bx-check-circle text-sm text-green-600'></i>
                                     </div>

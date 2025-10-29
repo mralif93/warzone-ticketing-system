@@ -88,9 +88,10 @@ class GateStaffController extends Controller
             // Validate the ticket
             $result = $this->ticketValidationService->validateTicket($qrcode, $gateId, $user->id);
 
-            // Map result to frontend expected format
+            // Map result to frontend expected format (ensure lowercase)
+            $status = strtolower($result['result'] ?? $result['status'] ?? 'error');
             $response = [
-                'status' => $result['result'] ?? $result['status'] ?? 'ERROR',
+                'status' => $status,
                 'message' => $result['message'] ?? 'Unknown error',
                 'performance_time' => $result['execution_time_ms'] ?? 0,
             ];
@@ -101,7 +102,7 @@ class GateStaffController extends Controller
             }
 
             // Add event validation (only if event_id is provided)
-            if ($response['status'] === 'SUCCESS' && isset($response['ticket']) && $eventId) {
+            if ($response['status'] === 'success' && isset($response['ticket']) && $eventId) {
                 // Check event validation if needed
                 // This is handled by the service
             }
@@ -130,7 +131,7 @@ class GateStaffController extends Controller
             ]);
 
             return response()->json([
-                'status' => 'ERROR',
+                'status' => 'error',
                 'message' => 'Validation error occurred: ' . $e->getMessage(),
                 'performance_time' => 0
             ], 500);
@@ -155,9 +156,9 @@ class GateStaffController extends Controller
             $query->whereDate('scan_time', '<=', $request->date_to);
         }
 
-        // Filter by result
+        // Filter by result (normalize to lowercase)
         if ($request->filled('result')) {
-            $query->where('scan_result', $request->result);
+            $query->where('scan_result', strtolower($request->result));
         }
 
         // Filter by event
@@ -174,7 +175,7 @@ class GateStaffController extends Controller
             ->orderBy('date_time', 'desc')
             ->get();
 
-        $results = ['SUCCESS', 'DUPLICATE', 'INVALID', 'WRONG_GATE', 'WRONG_EVENT', 'ERROR'];
+        $results = ['success', 'duplicate', 'invalid', 'wrong_gate', 'wrong_event', 'error'];
 
         return view('gate-staff.scan-history', compact('scans', 'events', 'results'));
     }
@@ -192,17 +193,17 @@ class GateStaffController extends Controller
 
         $successfulScans = AdmittanceLog::where('staff_user_id', $staffUserId)
             ->whereDate('scan_time', $today)
-            ->where('scan_result', 'SUCCESS')
+            ->where('scan_result', 'success')
             ->count();
 
         $duplicateScans = AdmittanceLog::where('staff_user_id', $staffUserId)
             ->whereDate('scan_time', $today)
-            ->where('scan_result', 'DUPLICATE')
+            ->where('scan_result', 'duplicate')
             ->count();
 
         $invalidScans = AdmittanceLog::where('staff_user_id', $staffUserId)
             ->whereDate('scan_time', $today)
-            ->whereIn('scan_result', ['INVALID', 'WRONG_GATE', 'WRONG_EVENT'])
+            ->whereIn('scan_result', ['invalid', 'wrong_gate', 'wrong_event'])
             ->count();
 
         return [

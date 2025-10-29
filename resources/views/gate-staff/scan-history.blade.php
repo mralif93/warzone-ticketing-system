@@ -214,8 +214,8 @@
                                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors text-base">
                                 <option value="">All Results</option>
                                 @foreach($results as $result)
-                                    <option value="{{ $result }}" {{ request('result') == $result ? 'selected' : '' }}>
-                                        {{ $result }}
+                                    <option value="{{ $result }}" {{ strtolower(request('result')) == strtolower($result) ? 'selected' : '' }}>
+                                        {{ str_replace('_', '', ucwords(str_replace('_', ' ', strtolower($result)))) }}
                                     </option>
                                 @endforeach
                             </select>
@@ -332,14 +332,14 @@
                                     </td>
                                     <td class="px-6 py-5 whitespace-nowrap">
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
-                                            @if($scan->scan_result === 'SUCCESS') bg-green-100 text-green-800
-                                            @elseif($scan->scan_result === 'DUPLICATE') bg-red-100 text-red-800
-                                            @elseif($scan->scan_result === 'INVALID') bg-red-100 text-red-800
-                                            @elseif($scan->scan_result === 'WRONG_GATE') bg-yellow-100 text-yellow-800
-                                            @elseif($scan->scan_result === 'WRONG_EVENT') bg-yellow-100 text-yellow-800
+                                            @if(strtolower($scan->scan_result) === 'success') bg-green-100 text-green-800
+                                            @elseif(strtolower($scan->scan_result) === 'duplicate') bg-red-100 text-red-800
+                                            @elseif(strtolower($scan->scan_result) === 'invalid') bg-red-100 text-red-800
+                                            @elseif(strtolower($scan->scan_result) === 'wrong_gate') bg-yellow-100 text-yellow-800
+                                            @elseif(strtolower($scan->scan_result) === 'wrong_event') bg-yellow-100 text-yellow-800
                                             @else bg-gray-100 text-gray-800
                                             @endif">
-                                            {{ $scan->scan_result }}
+                                            {{ str_replace('_', '', ucwords(str_replace('_', ' ', strtolower($scan->scan_result)))) }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-5 whitespace-nowrap text-sm font-medium">
@@ -430,12 +430,13 @@ function showScanDetails(scanId, eventName, scanTime, gateId, scanResult, ticket
     const finalPrice = parseFloat(pricePaid).toFixed(2);
     const hasDiscount = discount > 0;
     
-    // Get result badge color
-    const resultColor = scanResult === 'SUCCESS' ? 'bg-green-100 text-green-800' : 
-                       (scanResult === 'DUPLICATE' ? 'bg-red-100 text-red-800' : 
-                       (scanResult === 'INVALID' ? 'bg-red-100 text-red-800' : 
-                       (scanResult === 'WRONG_GATE' ? 'bg-yellow-100 text-yellow-800' : 
-                       (scanResult === 'WRONG_EVENT' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'))));
+    // Get result badge color (normalize to lowercase for comparison)
+    const scanResultLower = scanResult.toLowerCase();
+    const resultColor = scanResultLower === 'success' ? 'bg-green-100 text-green-800' : 
+                       (scanResultLower === 'duplicate' ? 'bg-red-100 text-red-800' : 
+                       (scanResultLower === 'invalid' ? 'bg-red-100 text-red-800' : 
+                       (scanResultLower === 'wrong_gate' ? 'bg-yellow-100 text-yellow-800' : 
+                       (scanResultLower === 'wrong_event' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'))));
     
     document.getElementById('scan-details-content').innerHTML = `
         <div class="space-y-6">
@@ -458,7 +459,7 @@ function showScanDetails(scanId, eventName, scanTime, gateId, scanResult, ticket
                     <div>
                         <label class="text-xs text-gray-500">Result</label>
                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${resultColor}">
-                            ${scanResult}
+                            ${scanResult.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join('')}
                         </span>
                     </div>
                 </div>

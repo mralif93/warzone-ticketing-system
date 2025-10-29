@@ -25,6 +25,14 @@ class AdmittanceLog extends Model
     ];
 
     /**
+     * Set scan_result to lowercase when saving
+     */
+    public function setScanResultAttribute($value)
+    {
+        $this->attributes['scan_result'] = strtolower($value);
+    }
+
+    /**
      * Get the purchase ticket for this log entry
      */
     public function purchaseTicket()
@@ -54,7 +62,7 @@ class AdmittanceLog extends Model
      */
     public function isSuccessful(): bool
     {
-        return $this->scan_result === 'SUCCESS';
+        return strtolower($this->scan_result) === 'success';
     }
 
     /**
@@ -62,7 +70,7 @@ class AdmittanceLog extends Model
      */
     public function isDuplicate(): bool
     {
-        return $this->scan_result === 'DUPLICATE';
+        return strtolower($this->scan_result) === 'duplicate';
     }
 
     /**
@@ -70,7 +78,7 @@ class AdmittanceLog extends Model
      */
     public function isWrongGate(): bool
     {
-        return $this->scan_result === 'WRONG_GATE';
+        return strtolower($this->scan_result) === 'wrong_gate';
     }
 
     /**
@@ -78,7 +86,7 @@ class AdmittanceLog extends Model
      */
     public function isInvalid(): bool
     {
-        return $this->scan_result === 'INVALID';
+        return strtolower($this->scan_result) === 'invalid';
     }
 
     /**
@@ -86,7 +94,7 @@ class AdmittanceLog extends Model
      */
     public function isExpired(): bool
     {
-        return $this->scan_result === 'EXPIRED';
+        return strtolower($this->scan_result) === 'expired';
     }
 
     /**
@@ -94,12 +102,14 @@ class AdmittanceLog extends Model
      */
     public function getScanResultColorAttribute(): string
     {
-        return match($this->scan_result) {
-            'SUCCESS' => 'green',
-            'DUPLICATE' => 'red',
-            'WRONG_GATE' => 'yellow',
-            'INVALID' => 'red',
-            'EXPIRED' => 'red',
+        return match(strtolower($this->scan_result)) {
+            'success' => 'green',
+            'duplicate' => 'red',
+            'wrong_gate' => 'yellow',
+            'wrong_event' => 'yellow',
+            'invalid' => 'red',
+            'expired' => 'red',
+            'error' => 'red',
             default => 'gray',
         };
     }
@@ -109,7 +119,7 @@ class AdmittanceLog extends Model
      */
     public function scopeSuccessful($query)
     {
-        return $query->where('scan_result', 'SUCCESS');
+        return $query->where('scan_result', 'success');
     }
 
     /**
@@ -117,7 +127,7 @@ class AdmittanceLog extends Model
      */
     public function scopeFailed($query)
     {
-        return $query->whereIn('scan_result', ['DUPLICATE', 'INVALID', 'EXPIRED']);
+        return $query->whereIn('scan_result', ['duplicate', 'invalid', 'expired', 'wrong_gate', 'wrong_event']);
     }
 
     /**

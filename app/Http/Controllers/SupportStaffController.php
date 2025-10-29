@@ -151,7 +151,7 @@ class SupportStaffController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Ticket not found with this QR code',
-                    'scan_result' => 'INVALID'
+                    'scan_result' => 'invalid'
                 ]);
             }
 
@@ -203,7 +203,7 @@ class SupportStaffController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error scanning ticket: ' . $e->getMessage(),
-                'scan_result' => 'ERROR'
+                'scan_result' => 'error'
             ], 500);
         }
     }

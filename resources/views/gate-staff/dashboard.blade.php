@@ -286,47 +286,67 @@
             <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
                 <h3 class="text-lg font-medium text-gray-900">Recent Scans</h3>
             </div>
-            <div class="p-4 sm:p-6">
+            <div class="overflow-x-auto">
                 @if($recentScans->count() > 0)
-                    <div class="space-y-3">
-                        @foreach($recentScans as $scan)
-                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                <div class="flex items-center min-w-0 flex-1">
-                                    <div class="w-8 h-8 rounded-full flex items-center justify-center mr-3 flex-shrink-0
-                                            @if($scan->scan_result === 'SUCCESS') bg-green-100 text-green-600
-                                            @elseif($scan->scan_result === 'DUPLICATE') bg-red-100 text-red-600
-                                            @elseif($scan->scan_result === 'INVALID') bg-red-100 text-red-600
-                                            @else bg-yellow-100 text-yellow-600
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    <div class="flex items-center space-x-2">
+                                        <i class="bx bx-time text-sm"></i>
+                                        <span>Time</span>
+                                    </div>
+                                </th>
+                                <th class="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    <div class="flex items-center space-x-2">
+                                        <i class="bx bx-calendar-event text-sm"></i>
+                                        <span>Event</span>
+                                    </div>
+                                </th>
+                                <th class="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    <div class="flex items-center space-x-2">
+                                        <i class="bx bx-purchase-tag text-sm"></i>
+                                        <span>Ticket Type</span>
+                                    </div>
+                                </th>
+                                <th class="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    <div class="flex items-center space-x-2">
+                                        <i class="bx bx-check-circle text-sm"></i>
+                                        <span>Result</span>
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @foreach($recentScans as $scan)
+                                <tr class="hover:bg-gray-50 transition-colors duration-150">
+                                    <td class="px-4 sm:px-6 py-3 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">{{ $scan->scan_time->format('M j, Y') }}</div>
+                                        <div class="text-xs text-gray-500">{{ $scan->scan_time->format('g:i A') }}</div>
+                                    </td>
+                                    <td class="px-4 sm:px-6 py-3 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">{{ $scan->ticket->event->name ?? 'Unknown Event' }}</div>
+                                    </td>
+                                    <td class="px-4 sm:px-6 py-3 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ $scan->ticket->ticketType->name ?? 'N/A' }}</div>
+                                    </td>
+                                    <td class="px-4 sm:px-6 py-3 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold
+                                            @if(strtolower($scan->scan_result) === 'success') bg-green-100 text-green-800
+                                            @elseif(strtolower($scan->scan_result) === 'duplicate') bg-red-100 text-red-800
+                                            @elseif(strtolower($scan->scan_result) === 'invalid') bg-red-100 text-red-800
+                                            @elseif(strtolower($scan->scan_result) === 'wrong_gate') bg-yellow-100 text-yellow-800
+                                            @elseif(strtolower($scan->scan_result) === 'wrong_event') bg-yellow-100 text-yellow-800
+                                            @else bg-yellow-100 text-yellow-800
                                             @endif">
-                                            @if($scan->scan_result === 'SUCCESS')
-                                                <i class="bx bx-check text-sm"></i>
-                                            @elseif($scan->scan_result === 'DUPLICATE')
-                                                <i class="bx bx-x text-sm"></i>
-                                            @else
-                                                <i class="bx bx-error text-sm"></i>
-                                            @endif
-                                    </div>
-                                    <div class="min-w-0 flex-1">
-                                        <p class="text-sm font-medium text-gray-900 truncate">
-                                            {{ $scan->ticket->event->name ?? 'Unknown Event' }}
-                                        </p>
-                                        <p class="text-xs text-gray-500">
-                                            {{ $scan->scan_time->format('g:i A') }} • {{ $scan->gate_id }}@if($scan->ticket) • {{ $scan->ticket->ticketType->name ?? 'N/A' }}@endif
-                                        </p>
-                                    </div>
-                                </div>
-                                <span class="text-xs font-medium px-2 py-1 rounded-full flex-shrink-0 ml-2
-                                    @if($scan->scan_result === 'SUCCESS') bg-green-100 text-green-800
-                                    @elseif($scan->scan_result === 'DUPLICATE') bg-red-100 text-red-800
-                                    @elseif($scan->scan_result === 'INVALID') bg-red-100 text-red-800
-                                    @else bg-yellow-100 text-yellow-800
-                                    @endif">
-                                    {{ $scan->scan_result }}
-                                </span>
-                            </div>
-                        @endforeach
-                    </div>
-                    <div class="mt-4 text-center">
+                                            {{ str_replace('_', '', ucwords(str_replace('_', ' ', strtolower($scan->scan_result)))) }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                    <div class="px-4 sm:px-6 py-4 border-t border-gray-200 bg-gray-50 text-center">
                         <a href="{{ route('gate-staff.scan-history') }}" 
                            class="inline-flex items-center px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
                             <i class="bx bx-history mr-2"></i>
@@ -334,7 +354,7 @@
                         </a>
                     </div>
                 @else
-                    <div class="text-center py-6 sm:py-8">
+                    <div class="p-4 sm:p-6 text-center py-6 sm:py-8">
                         <i class="bx bx-qr-scan text-3xl sm:text-4xl text-gray-400 mb-3 sm:mb-4"></i>
                         <p class="text-gray-500 text-sm sm:text-base">No scans yet today</p>
                     </div>

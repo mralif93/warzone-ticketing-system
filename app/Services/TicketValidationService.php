@@ -27,31 +27,31 @@ class TicketValidationService
             $ticket = $this->getTicketForValidation($qrcode);
             
             if (!$ticket) {
-                return $this->createValidationResult('INVALID', 'Ticket not found', $gateId, $staffUserId, $startTime);
+                return $this->createValidationResult('invalid', 'Ticket not found', $gateId, $staffUserId, $startTime);
             }
 
             // Check if ticket is already scanned
             if ($ticket->status === 'scanned' || !is_null($ticket->scanned_at)) {
-                return $this->createValidationResult('DUPLICATE', 'Ticket already scanned', $gateId, $staffUserId, $startTime, $ticket);
+                return $this->createValidationResult('duplicate', 'Ticket already scanned', $gateId, $staffUserId, $startTime, $ticket);
             }
 
             // Check if ticket is valid for scanning
             if (!in_array($ticket->status, ['sold', 'active', 'pending'])) {
-                return $this->createValidationResult('INVALID', 'Ticket not ready for scanning', $gateId, $staffUserId, $startTime, $ticket);
+                return $this->createValidationResult('invalid', 'Ticket not ready for scanning', $gateId, $staffUserId, $startTime, $ticket);
             }
 
             // Check if ticket is for the correct event (if event is happening today)
             if (!$this->isValidForCurrentEvent($ticket)) {
-                return $this->createValidationResult('WRONG_GATE', 'Ticket not valid for current event', $gateId, $staffUserId, $startTime, $ticket);
+                return $this->createValidationResult('wrong_gate', 'Ticket not valid for current event', $gateId, $staffUserId, $startTime, $ticket);
             }
 
             // Mark ticket as scanned atomically
             $this->markTicketAsScanned($ticket, $gateId, $staffUserId);
 
             // Log successful admittance
-            $this->logAdmittance($ticket, 'SUCCESS', $gateId, $staffUserId);
+            $this->logAdmittance($ticket, 'success', $gateId, $staffUserId);
 
-            return $this->createValidationResult('SUCCESS', 'Access granted', $gateId, $staffUserId, $startTime, $ticket);
+            return $this->createValidationResult('success', 'Access granted', $gateId, $staffUserId, $startTime, $ticket);
 
         } catch (\Exception $e) {
             Log::error('Ticket validation failed', [
@@ -61,7 +61,7 @@ class TicketValidationService
                 'error' => $e->getMessage()
             ]);
 
-            return $this->createValidationResult('ERROR', 'Validation error occurred', $gateId, $staffUserId, $startTime);
+            return $this->createValidationResult('error', 'Validation error occurred', $gateId, $staffUserId, $startTime);
         }
     }
 

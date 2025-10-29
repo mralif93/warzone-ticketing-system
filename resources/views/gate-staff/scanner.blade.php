@@ -1110,8 +1110,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Determine icon and color based on status
         let icon, color, title, html;
         
-        switch(data.status) {
-            case 'SUCCESS':
+        switch(data.status.toLowerCase()) {
+            case 'success':
                 icon = 'success';
                 color = '#10B981';
                 title = 'Ticket Validated';
@@ -1161,7 +1161,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             ${data.ticket.status ? `
                             <div class="flex justify-between items-center pt-2">
                                 <span class="text-sm font-semibold text-gray-600">Status:</span>
-                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold uppercase">${data.ticket.status}</span>
+                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">${data.ticket.status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join('')}</span>
                             </div>
                             ` : ''}
                         </div>
@@ -1169,7 +1169,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 `;
                 break;
-            case 'DUPLICATE':
+            case 'duplicate':
                 icon = 'error';
                 color = '#EF4444';
                 title = 'Already Scanned';
@@ -1202,7 +1202,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 `;
                 break;
-            case 'INVALID':
+            case 'invalid':
                 icon = 'error';
                 color = '#EF4444';
                 title = 'Invalid Ticket';
@@ -1217,7 +1217,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 `;
                 break;
-            case 'WRONG_GATE':
+            case 'wrong_gate':
                 icon = 'warning';
                 color = '#F59E0B';
                 title = 'Wrong Gate';
@@ -1240,7 +1240,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 `;
                 break;
-            case 'WRONG_EVENT':
+            case 'wrong_event':
                 icon = 'warning';
                 color = '#F59E0B';
                 title = 'Wrong Event';

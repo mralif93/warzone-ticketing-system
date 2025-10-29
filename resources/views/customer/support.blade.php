@@ -47,13 +47,22 @@
                     </div>
                 </div>
                 <p class="text-sm text-wwc-neutral-600 mb-4">Need immediate assistance? Our support team is here to help you with any questions or issues.</p>
-                <a href="mailto:support@warzone-ticketing.com" 
-                   class="inline-flex items-center px-4 py-2 text-sm font-semibold text-wwc-primary hover:bg-wwc-primary-light hover:text-wwc-primary-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
-                    <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                    </svg>
-                    Email Support
-                </a>
+                <div class="space-y-2">
+                    <a href="mailto:ticketsupport@wwcworld.com" 
+                       class="inline-flex items-center px-4 py-2 text-sm font-semibold text-wwc-primary hover:bg-wwc-primary-light hover:text-wwc-primary-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
+                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                        Email Support
+                    </a>
+                    <a href="https://wa.me/601160740656" target="_blank" rel="noopener noreferrer"
+                       class="inline-flex items-center px-4 py-2 text-sm font-semibold text-green-600 hover:bg-green-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
+                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        </svg>
+                        WhatsApp Support
+                    </a>
+                </div>
             </div>
 
             <!-- FAQ -->
@@ -115,17 +124,14 @@
                         <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-4">Support Hours</h3>
                         <div class="space-y-2">
                             <div class="flex justify-between">
-                                <span class="text-sm text-wwc-neutral-600">Monday - Friday</span>
-                                <span class="text-sm font-semibold text-wwc-neutral-900">9:00 AM - 6:00 PM</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-sm text-wwc-neutral-600">Saturday</span>
-                                <span class="text-sm font-semibold text-wwc-neutral-900">10:00 AM - 4:00 PM</span>
+                                <span class="text-sm text-wwc-neutral-600">Monday – Saturday</span>
+                                <span class="text-sm font-semibold text-wwc-neutral-900">9:00 AM – 5:00 PM</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-sm text-wwc-neutral-600">Sunday</span>
                                 <span class="text-sm font-semibold text-wwc-neutral-900">Closed</span>
                             </div>
+                            <p class="text-xs text-wwc-neutral-500 italic mt-2">Operating hours may vary on event days.</p>
                         </div>
                     </div>
                     <div>
@@ -137,7 +143,7 @@
                                 </svg>
                                 <div>
                                     <p class="text-sm font-semibold text-wwc-neutral-900">Email</p>
-                                    <p class="text-sm text-wwc-neutral-600">support@warzone-ticketing.com</p>
+                                    <a href="mailto:ticketsupport@wwcworld.com" class="text-sm text-wwc-primary hover:text-wwc-primary-dark">ticketsupport@wwcworld.com</a>
                                 </div>
                             </div>
                             <div class="flex items-center">
@@ -146,17 +152,16 @@
                                 </svg>
                                 <div>
                                     <p class="text-sm font-semibold text-wwc-neutral-900">Phone</p>
-                                    <p class="text-sm text-wwc-neutral-600">+1 (555) 123-4567</p>
+                                    <a href="tel:+60326941614" class="text-sm text-wwc-primary hover:text-wwc-primary-dark">+603 2694 1614</a>
                                 </div>
                             </div>
                             <div class="flex items-center">
                                 <svg class="h-5 w-5 text-wwc-primary mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                                 </svg>
                                 <div>
-                                    <p class="text-sm font-semibold text-wwc-neutral-900">Address</p>
-                                    <p class="text-sm text-wwc-neutral-600">123 Event Street, City, State 12345</p>
+                                    <p class="text-sm font-semibold text-wwc-neutral-900">WhatsApp</p>
+                                    <a href="https://wa.me/601160740656" target="_blank" rel="noopener noreferrer" class="text-sm text-wwc-primary hover:text-wwc-primary-dark">+6011 6074 0656</a>
                                 </div>
                             </div>
                         </div>
@@ -175,49 +180,44 @@
                 <div class="space-y-6">
                     <!-- FAQ Item 1 -->
                     <div class="border-b border-wwc-neutral-200 pb-6">
-                        <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-3">How do I purchase tickets?</h3>
-                        <p class="text-sm text-wwc-neutral-600 mb-3">To purchase tickets, simply browse our events, select the event you want to attend, choose your seats, and complete the checkout process. You'll receive your tickets via email immediately after purchase.</p>
-                        <div class="bg-wwc-primary-light rounded-lg p-4">
-                            <p class="text-sm text-wwc-primary font-semibold">💡 Tip: Make sure to check the event date and time before purchasing!</p>
-                        </div>
+                        <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-3">1. How do I purchase tickets?</h3>
+                        <p class="text-sm text-wwc-neutral-600 mb-3">Simply visit our ticketing page, choose your preferred seat zone, and proceed to checkout. Once your payment is confirmed, you will receive your ticket via email and it will also appear in your account under "My Tickets."</p>
                     </div>
 
                     <!-- FAQ Item 2 -->
                     <div class="border-b border-wwc-neutral-200 pb-6">
-                        <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-3">Can I get a refund for my tickets?</h3>
-                        <p class="text-sm text-wwc-neutral-600 mb-3">Refund policies vary by event. Generally, refunds are available up to 48 hours before the event. Please check the specific event details for refund information.</p>
-                        <div class="bg-wwc-warning-light rounded-lg p-4">
-                            <p class="text-sm text-wwc-warning font-semibold">⚠️ Note: Service fees are non-refundable in most cases.</p>
-                        </div>
+                        <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-3">2. Can I get a refund for my tickets?</h3>
+                        <p class="text-sm text-wwc-neutral-600 mb-3">All ticket sales are non-refundable. Please ensure your purchase details are accurate before confirming your order.</p>
                     </div>
 
                     <!-- FAQ Item 3 -->
                     <div class="border-b border-wwc-neutral-200 pb-6">
-                        <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-3">What if I lose my tickets?</h3>
-                        <p class="text-sm text-wwc-neutral-600 mb-3">Don't worry! You can access your tickets anytime through your account. Simply log in and go to "My Tickets" to view and download your tickets again.</p>
-                        <div class="bg-wwc-info-light rounded-lg p-4">
-                            <p class="text-sm text-wwc-info font-semibold">ℹ️ Your tickets are also sent to your email address for backup.</p>
-                        </div>
+                        <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-3">3. What if I lose my tickets?</h3>
+                        <p class="text-sm text-wwc-neutral-600 mb-3">No worries! You can re-access your tickets anytime. Just log into your account and go to "My Tickets" to view, download, or reprint them.</p>
                     </div>
 
                     <!-- FAQ Item 4 -->
                     <div class="border-b border-wwc-neutral-200 pb-6">
-                        <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-3">How do I change my account information?</h3>
-                        <p class="text-sm text-wwc-neutral-600 mb-3">You can update your account information by going to your profile settings. Click on your name in the top right corner and select "Profile Settings" to make changes.</p>
+                        <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-3">4. How do I change my account information?</h3>
+                        <p class="text-sm text-wwc-neutral-600 mb-3">You may update your details in your Profile Settings. Click your account name at the top right, select "Profile Settings," and make the necessary changes.</p>
                     </div>
 
                     <!-- FAQ Item 5 -->
                     <div class="border-b border-wwc-neutral-200 pb-6">
-                        <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-3">What payment methods do you accept?</h3>
-                        <p class="text-sm text-wwc-neutral-600 mb-3">We accept all major credit cards (Visa, MasterCard, American Express) and PayPal. All payments are processed securely through our payment partners.</p>
+                        <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-3">5. What payment methods do you accept?</h3>
+                        <p class="text-sm text-wwc-neutral-600 mb-3">We accept major credit cards, debit cards, and FPX (Visa / MasterCard supported).<br>All payments are processed securely through our authorized payment gateway partners.</p>
                     </div>
 
                     <!-- FAQ Item 6 -->
                     <div class="pb-6">
-                        <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-3">How do I contact customer support?</h3>
-                        <p class="text-sm text-wwc-neutral-600 mb-3">You can contact our support team via email at support@warzone-ticketing.com or by phone at +1 (555) 123-4567. We're available Monday through Friday, 9 AM to 6 PM.</p>
-                        <div class="bg-wwc-success-light rounded-lg p-4">
-                            <p class="text-sm text-wwc-success font-semibold">✅ We typically respond to emails within 24 hours during business days.</p>
+                        <h3 class="text-lg font-semibold text-wwc-neutral-900 mb-3">6. How do I contact customer support?</h3>
+                        <p class="text-sm text-wwc-neutral-600 mb-4">Need help? We're here for you.</p>
+                        <div class="space-y-2 text-sm text-wwc-neutral-600 mb-3">
+                            <p><strong class="text-wwc-neutral-900">Email:</strong> <a href="mailto:ticketsupport@wwcworld.com" class="text-wwc-primary hover:text-wwc-primary-dark">ticketsupport@wwcworld.com</a></p>
+                            <p><strong class="text-wwc-neutral-900">Phone:</strong> <a href="tel:+60326941614" class="text-wwc-primary hover:text-wwc-primary-dark">+603 2694 1614</a></p>
+                            <p><strong class="text-wwc-neutral-900">WhatsApp:</strong> <a href="https://wa.me/601160740656" target="_blank" rel="noopener noreferrer" class="text-wwc-primary hover:text-wwc-primary-dark">+6011 6074 0656</a></p>
+                            <p class="mt-4"><strong class="text-wwc-neutral-900">Support Hours:</strong> Monday – Saturday, 9:00 AM – 5:00 PM</p>
+                            <p class="text-xs italic">Operating hours may vary on event days. We'll do our best to respond as quickly as possible.</p>
                         </div>
                     </div>
                 </div>

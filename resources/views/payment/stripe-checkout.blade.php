@@ -137,7 +137,7 @@
                                     </div>
                                     <span class="text-gray-800 font-medium">Subtotal</span>
                                 </div>
-                                <span class="font-semibold text-gray-800">RM{{ number_format($order->subtotal + $order->discount_amount, 2) }}</span>
+                                <span class="font-semibold text-gray-800">RM{{ number_format($order->subtotal, 2) }}</span>
                             </div>
                             @if($order->discount_amount > 0)
                                 <div class="flex items-center justify-between py-2">

@@ -57,12 +57,25 @@
                         <div>
                             <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ number_format($availableSeats) }}</div>
                             <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Available Seats</div>
+                            @if(isset($hasMultiDayEvent) && $hasMultiDayEvent && isset($day1TotalAvailable) && isset($day2TotalAvailable))
+                            <div class="space-y-1 mt-2 pt-2 border-t border-wwc-neutral-200">
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-wwc-neutral-500">Day 1:</span>
+                                    <span class="font-semibold text-green-600">{{ number_format($day1TotalAvailable) }}</span>
+                                </div>
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-wwc-neutral-500">Day 2:</span>
+                                    <span class="font-semibold text-green-600">{{ number_format($day2TotalAvailable) }}</span>
+                                </div>
+                            </div>
+                            @else
                             <div class="flex items-center">
                                 <div class="flex items-center text-xs text-wwc-warning font-semibold">
                                     <i class='bx bx-time text-xs mr-1'></i>
                                     {{ $ticketTypes->sum('scanned_seats') }} Scanned
                                 </div>
                             </div>
+                            @endif
                         </div>
                         <div class="h-12 w-12 rounded-lg bg-yellow-100 flex items-center justify-center">
                             <i class='bx bx-time text-2xl text-yellow-600'></i>
@@ -287,9 +300,74 @@
                                             <div class="text-lg font-bold text-wwc-neutral-900">{{ $ticketType->total_seats }}</div>
                                             <div class="text-xs text-wwc-neutral-500">Total</div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-center">
-                                            <div class="text-lg font-bold {{ $ticketType->available_seats > 0 ? 'text-green-600' : 'text-red-600' }}">{{ $ticketType->available_seats }}</div>
-                                            <div class="text-xs text-wwc-neutral-500">{{ $ticketType->available_seats > 0 ? 'Available' : 'Sold Out' }}</div>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            @if(isset($hasMultiDayEvent) && $hasMultiDayEvent && isset($ticketType->is_multi_day) && $ticketType->is_multi_day)
+                                            <!-- Multi-day event: Day 1 | Day 2 -->
+                                            <div class="space-y-2">
+                                                <!-- Row 1: Day 1 | Available | Sold -->
+                                                <div class="flex items-center gap-3">
+                                                    <!-- Day Label -->
+                                                    <div class="text-sm font-bold text-wwc-neutral-900">Day 1</div>
+                                                    <!-- Separator -->
+                                                    <div class="border-l border-wwc-neutral-300 h-8"></div>
+                                                    <!-- Available -->
+                                                    <div class="text-center">
+                                                        <div class="text-sm font-bold text-green-600">
+                                                            {{ isset($ticketType->day1_available) ? $ticketType->day1_available : 0 }}
+                                                        </div>
+                                                        <div class="text-xs text-wwc-neutral-500">Available</div>
+                                                    </div>
+                                                    <!-- Separator -->
+                                                    <div class="border-l border-wwc-neutral-300 h-8"></div>
+                                                    <!-- Sold -->
+                                                    <div class="text-center">
+                                                        <div class="text-sm font-bold text-red-600">
+                                                            {{ isset($ticketType->day1_sold) ? $ticketType->day1_sold : 0 }}
+                                                        </div>
+                                                        <div class="text-xs text-wwc-neutral-500">Sold</div>
+                                                    </div>
+                                                </div>
+                                                <!-- Separator: ---- -->
+                                                <div class="flex items-center justify-center py-1">
+                                                    <div class="border-t border-wwc-neutral-300 w-full"></div>
+                                                </div>
+                                                <!-- Row 2: Day 2 | Available | Sold -->
+                                                <div class="flex items-center gap-3">
+                                                    <!-- Day Label -->
+                                                    <div class="text-sm font-bold text-wwc-neutral-900">Day 2</div>
+                                                    <!-- Separator -->
+                                                    <div class="border-l border-wwc-neutral-300 h-8"></div>
+                                                    <!-- Available -->
+                                                    <div class="text-center">
+                                                        <div class="text-sm font-bold text-green-600">
+                                                            {{ isset($ticketType->day2_available) ? $ticketType->day2_available : 0 }}
+                                                        </div>
+                                                        <div class="text-xs text-wwc-neutral-500">Available</div>
+                                                    </div>
+                                                    <!-- Separator -->
+                                                    <div class="border-l border-wwc-neutral-300 h-8"></div>
+                                                    <!-- Sold -->
+                                                    <div class="text-center">
+                                                        <div class="text-sm font-bold text-red-600">
+                                                            {{ isset($ticketType->day2_sold) ? $ticketType->day2_sold : 0 }}
+                                                        </div>
+                                                        <div class="text-xs text-wwc-neutral-500">Sold</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @elseif(isset($hasMultiDayEvent) && $hasMultiDayEvent && (!isset($ticketType->is_multi_day) || !$ticketType->is_multi_day))
+                                            <!-- Multi-day event but single-day ticket: Show total -->
+                                            <div class="text-center">
+                                                <div class="text-lg font-bold {{ $ticketType->available_seats > 0 ? 'text-green-600' : 'text-red-600' }}">{{ $ticketType->available_seats }}</div>
+                                                <div class="text-xs text-wwc-neutral-500 mt-1">Available</div>
+                                            </div>
+                                            @else
+                                            <!-- Single-day event: Show total available -->
+                                            <div class="text-center">
+                                                <div class="text-lg font-bold {{ $ticketType->available_seats > 0 ? 'text-green-600' : 'text-red-600' }}">{{ $ticketType->available_seats }}</div>
+                                                <div class="text-xs text-wwc-neutral-500 mt-1">Available</div>
+                                            </div>
+                                            @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-center">
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold

@@ -59,6 +59,52 @@ class TicketController extends Controller
         $ticketTypes = $query->latest()->paginate($perPage);
         $statuses = Ticket::select('status')->distinct()->pluck('status');
         $events = \App\Models\Event::select('id', 'name')->get();
+        
+        // Calculate Day 1 and Day 2 availability for each ticket type
+        $eventIds = $ticketTypes->pluck('event_id')->unique();
+        $multiDayEvents = \App\Models\Event::whereIn('id', $eventIds)
+            ->whereNotNull('start_date')
+            ->whereNotNull('end_date')
+            ->get()
+            ->keyBy('id')
+            ->map(function($event) {
+                return $event->isMultiDay() ? $event->getEventDays() : null;
+            })
+            ->filter();
+        
+        // Add Day 1 and Day 2 availability to each ticket type
+        $ticketTypes->getCollection()->transform(function($ticketType) use ($multiDayEvents) {
+            if (isset($multiDayEvents[$ticketType->event_id]) && count($multiDayEvents[$ticketType->event_id]) >= 2) {
+                $eventDays = $multiDayEvents[$ticketType->event_id];
+                $day1Name = $eventDays[0]['day_name'];
+                $day2Name = $eventDays[1]['day_name'];
+                
+                // Count sold tickets per day
+                $day1Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticketType->id)
+                    ->where('event_day_name', $day1Name)
+                    ->whereIn('status', ['sold', 'active', 'scanned'])
+                    ->count();
+                    
+                $day2Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticketType->id)
+                    ->where('event_day_name', $day2Name)
+                    ->whereIn('status', ['sold', 'active', 'scanned'])
+                    ->count();
+                
+                // Calculate available per day
+                $ticketType->day1_available = max(0, $ticketType->total_seats - $day1Sold);
+                $ticketType->day2_available = max(0, $ticketType->total_seats - $day2Sold);
+                $ticketType->day1_sold = $day1Sold;
+                $ticketType->day2_sold = $day2Sold;
+                $ticketType->is_multi_day = true;
+            } else {
+                $ticketType->day1_available = null;
+                $ticketType->day2_available = null;
+                $ticketType->day1_sold = null;
+                $ticketType->day2_sold = null;
+                $ticketType->is_multi_day = false;
+            }
+            return $ticketType;
+        });
 
         // Calculate additional statistics from ALL tickets (not paginated)
         $allTicketsQuery = Ticket::query();
@@ -121,6 +167,57 @@ class TicketController extends Controller
         $comboTicketTypes = $allTickets->where('is_combo', true)->count();
         $soldOutTicketTypes = $allTickets->where('status', 'sold_out')->count();
         
+        // Calculate Day 1 and Day 2 totals for multi-day events
+        $day1TotalAvailable = 0;
+        $day2TotalAvailable = 0;
+        $day1TotalSold = 0;
+        $day2TotalSold = 0;
+        $hasMultiDayEvent = false;
+        
+        // Check if any filtered event is multi-day
+        $eventIds = $allTickets->pluck('event_id')->unique();
+        $multiDayEvents = \App\Models\Event::whereIn('id', $eventIds)
+            ->whereNotNull('start_date')
+            ->whereNotNull('end_date')
+            ->get()
+            ->filter(function($event) {
+                return $event->isMultiDay();
+            });
+        
+        if ($multiDayEvents->count() > 0) {
+            $hasMultiDayEvent = true;
+            // Get the first multi-day event's days (assuming all are 2-day events)
+            $firstMultiDayEvent = $multiDayEvents->first();
+            $eventDays = $firstMultiDayEvent->getEventDays();
+            
+            if (count($eventDays) >= 2) {
+                $day1Name = $eventDays[0]['day_name'];
+                $day2Name = $eventDays[1]['day_name'];
+                
+                foreach ($allTickets as $ticket) {
+                    // Count sold tickets per day
+                    $day1Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
+                        ->where('event_day_name', $day1Name)
+                        ->whereIn('status', ['sold', 'active', 'scanned'])
+                        ->count();
+                        
+                    $day2Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
+                        ->where('event_day_name', $day2Name)
+                        ->whereIn('status', ['sold', 'active', 'scanned'])
+                        ->count();
+                    
+                    // Calculate available per day
+                    $day1Available = $ticket->total_seats - $day1Sold;
+                    $day2Available = $ticket->total_seats - $day2Sold;
+                    
+                    $day1TotalAvailable += max(0, $day1Available);
+                    $day2TotalAvailable += max(0, $day2Available);
+                    $day1TotalSold += $day1Sold;
+                    $day2TotalSold += $day2Sold;
+                }
+            }
+        }
+        
         // Calculate revenue from actual purchased tickets (only active and scanned tickets that were paid)
         // Use the model's relationship instead of join to avoid table name issues
         $totalRevenue = \App\Models\PurchaseTicket::whereIn('ticket_type_id', $ticketIds)
@@ -130,7 +227,7 @@ class TicketController extends Controller
             })
             ->sum('price_paid');
 
-        return view('admin.tickets.index', compact('ticketTypes', 'statuses', 'events', 'totalSeats', 'soldSeats', 'availableSeats', 'scannedSeats', 'comboTicketTypes', 'soldOutTicketTypes', 'totalRevenue'));
+        return view('admin.tickets.index', compact('ticketTypes', 'statuses', 'events', 'totalSeats', 'soldSeats', 'availableSeats', 'scannedSeats', 'comboTicketTypes', 'soldOutTicketTypes', 'totalRevenue', 'day1TotalAvailable', 'day2TotalAvailable', 'day1TotalSold', 'day2TotalSold', 'hasMultiDayEvent'));
     }
 
     /**
@@ -233,8 +330,59 @@ class TicketController extends Controller
     public function show(Ticket $ticket)
     {
         $ticket->load('event');
+        
+        // Calculate Day 1 and Day 2 availability for multi-day events
+        $day1Available = null;
+        $day2Available = null;
+        $day1Sold = null;
+        $day2Sold = null;
+        $day1Scanned = null;
+        $day2Scanned = null;
+        $totalCapacity = $ticket->total_seats;
+        
+        if ($ticket->event->isMultiDay()) {
+            $eventDays = $ticket->event->getEventDays();
+            
+            if (count($eventDays) >= 2) {
+                $day1Name = $eventDays[0]['day_name'];
+                $day2Name = $eventDays[1]['day_name'];
+                
+                // Count tickets per day
+                $day1Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
+                    ->where('event_day_name', $day1Name)
+                    ->whereIn('status', ['sold', 'active', 'scanned'])
+                    ->count();
+                    
+                $day2Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
+                    ->where('event_day_name', $day2Name)
+                    ->whereIn('status', ['sold', 'active', 'scanned'])
+                    ->count();
+                
+                $day1Scanned = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
+                    ->where('event_day_name', $day1Name)
+                    ->where('status', 'scanned')
+                    ->count();
+                    
+                $day2Scanned = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
+                    ->where('event_day_name', $day2Name)
+                    ->where('status', 'scanned')
+                    ->count();
+                
+                // Calculate available per day
+                $day1Available = max(0, $ticket->total_seats - $day1Sold);
+                $day2Available = max(0, $ticket->total_seats - $day2Sold);
+                
+                // For multi-day events, total capacity is combined for 2 days
+                // If combo ticket: total_seats represents combo capacity, multiply by 2 for PurchaseTicket capacity
+                if ($ticket->is_combo) {
+                    $totalCapacity = $ticket->total_seats * 2; // Each combo = 2 PurchaseTicket slots
+                } else {
+                    $totalCapacity = $ticket->total_seats * 2; // 2 days worth of capacity
+                }
+            }
+        }
 
-        return view('admin.tickets.show', compact('ticket'));
+        return view('admin.tickets.show', compact('ticket', 'day1Available', 'day2Available', 'day1Sold', 'day2Sold', 'day1Scanned', 'day2Scanned', 'totalCapacity'));
     }
 
     /**

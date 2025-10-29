@@ -169,6 +169,88 @@
                             </div>
                         </div>
                         <div class="p-6 space-y-4">
+                            @if(isset($day1Available) && isset($day2Available) && $ticket->event->isMultiDay())
+                            <!-- Multi-day event: Show Day 1 and Day 2 separately -->
+                            
+                            <!-- Day 1 Section -->
+                            <div class="border-b border-wwc-neutral-200 pb-4 space-y-2">
+                                <div class="text-sm font-bold text-wwc-neutral-900 mb-2">Day 1</div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="h-8 w-8 rounded-lg bg-orange-100 flex items-center justify-center">
+                                            <i class='bx bx-qr-scan text-sm text-orange-600'></i>
+                                        </div>
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Scanned</span>
+                                    </div>
+                                    <span class="text-base font-medium text-wwc-neutral-900">{{ number_format($day1Scanned ?? 0) }}</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="h-8 w-8 rounded-lg bg-green-100 flex items-center justify-center">
+                                            <i class='bx bx-check-circle text-sm text-green-600'></i>
+                                        </div>
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Sold</span>
+                                    </div>
+                                    <span class="text-base font-medium text-wwc-neutral-900">{{ number_format($day1Sold ?? 0) }}</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                                            <i class='bx bx-group text-sm text-blue-600'></i>
+                                        </div>
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Available</span>
+                                    </div>
+                                    <span class="text-base font-medium text-wwc-neutral-900">{{ number_format($day1Available ?? 0) }}</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Day 2 Section -->
+                            <div class="pt-4 space-y-2">
+                                <div class="text-sm font-bold text-wwc-neutral-900 mb-2">Day 2</div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="h-8 w-8 rounded-lg bg-orange-100 flex items-center justify-center">
+                                            <i class='bx bx-qr-scan text-sm text-orange-600'></i>
+                                        </div>
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Scanned</span>
+                                    </div>
+                                    <span class="text-base font-medium text-wwc-neutral-900">{{ number_format($day2Scanned ?? 0) }}</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="h-8 w-8 rounded-lg bg-green-100 flex items-center justify-center">
+                                            <i class='bx bx-check-circle text-sm text-green-600'></i>
+                                        </div>
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Sold</span>
+                                    </div>
+                                    <span class="text-base font-medium text-wwc-neutral-900">{{ number_format($day2Sold ?? 0) }}</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                                            <i class='bx bx-group text-sm text-blue-600'></i>
+                                        </div>
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Available</span>
+                                    </div>
+                                    <span class="text-base font-medium text-wwc-neutral-900">{{ number_format($day2Available ?? 0) }}</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Total Capacity (Combined for 2 days) -->
+                            <div class="pt-4 border-t border-wwc-neutral-200">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="h-8 w-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                                            <i class='bx bx-layer text-sm text-purple-600'></i>
+                                        </div>
+                                        <span class="text-sm font-semibold text-wwc-neutral-600">Total Capacity</span>
+                                    </div>
+                                    <span class="text-base font-medium text-wwc-neutral-900">{{ number_format($totalCapacity ?? $ticket->total_seats) }}</span>
+                                </div>
+                                <p class="text-xs text-wwc-neutral-500 mt-1">Combined for 2 days</p>
+                            </div>
+                            @else
+                            <!-- Single-day event: Show totals -->
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-3">
                                     <div class="h-8 w-8 rounded-lg bg-orange-100 flex items-center justify-center">
@@ -205,6 +287,7 @@
                                 </div>
                                 <span class="text-base font-medium text-wwc-neutral-900">{{ number_format($ticket->total_seats) }}</span>
                             </div>
+                            @endif
                         </div>
                     </div>
 

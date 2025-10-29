@@ -26,8 +26,42 @@ class PublicController extends Controller
             ->first();
 
         // Featured events removed - focusing on main event tickets only
+        
+        // Calculate Day 1 and Day 2 totals for multi-day events
+        $day1TotalAvailable = 0;
+        $day2TotalAvailable = 0;
+        $day1TotalSold = 0;
+        $day2TotalSold = 0;
+        
+        if ($mainEvent && $mainEvent->isMultiDay()) {
+            $eventDays = $mainEvent->getEventDays();
+            $day1Name = $eventDays[0]['day_name'] ?? 'Day 1';
+            $day2Name = $eventDays[1]['day_name'] ?? 'Day 2';
+            
+            foreach ($mainEvent->tickets as $ticket) {
+                // Count sold tickets per day
+                $day1Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
+                    ->where('event_day_name', $day1Name)
+                    ->whereIn('status', ['sold', 'active', 'pending', 'scanned'])
+                    ->count();
+                    
+                $day2Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
+                    ->where('event_day_name', $day2Name)
+                    ->whereIn('status', ['sold', 'active', 'pending', 'scanned'])
+                    ->count();
+                
+                // Calculate available per day
+                $day1Available = $ticket->total_seats - $day1Sold;
+                $day2Available = $ticket->total_seats - $day2Sold;
+                
+                $day1TotalAvailable += max(0, $day1Available);
+                $day2TotalAvailable += max(0, $day2Available);
+                $day1TotalSold += $day1Sold;
+                $day2TotalSold += $day2Sold;
+            }
+        }
 
-        return view('public.home', compact('mainEvent'));
+        return view('public.home', compact('mainEvent', 'day1TotalAvailable', 'day2TotalAvailable', 'day1TotalSold', 'day2TotalSold'));
     }
 
     /**

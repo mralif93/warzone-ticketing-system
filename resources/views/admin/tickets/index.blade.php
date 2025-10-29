@@ -187,7 +187,7 @@
                                 </span>
                                 <span class="flex items-center">
                                     <div class="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-                                    {{ $ticketTypes->sum('scanned_seats') }} Scanned
+                                    {{ number_format($scannedSeats) }} Scanned
                                 </span>
                                 <span class="flex items-center">
                                     <div class="w-2 h-2 bg-red-500 rounded-full mr-2"></div>

@@ -90,14 +90,35 @@ class TicketController extends Controller
         }
         
         $allTickets = $allTicketsQuery->get();
+        $ticketIds = $allTickets->pluck('id')->toArray();
+        
+        // Update cached values for all tickets to match actual PurchaseTickets data
+        foreach ($allTickets as $ticket) {
+            $ticket->updateSoldSeats();
+        }
+        // Reload tickets to get updated values
+        $allTickets = $allTicketsQuery->get();
+        
+        // Calculate statistics directly from PurchaseTickets for accuracy
+        $purchaseTicketsQuery = \App\Models\PurchaseTicket::whereIn('ticket_type_id', $ticketIds);
+        
         $totalSeats = $allTickets->sum('total_seats');
-        $soldSeats = $allTickets->sum('sold_seats');
-        $availableSeats = $allTickets->sum('available_seats');
+        $soldSeats = $purchaseTicketsQuery->whereIn('status', ['sold', 'active', 'scanned'])->count();
+        $scannedSeats = $purchaseTicketsQuery->where('status', 'scanned')->count();
+        $availableSeats = $totalSeats - $soldSeats;
         $comboTicketTypes = $allTickets->where('is_combo', true)->count();
         $soldOutTicketTypes = $allTickets->where('status', 'sold_out')->count();
-        $totalRevenue = $allTickets->sum(function($ticket) { return $ticket->sold_seats * $ticket->price; });
+        
+        // Calculate revenue from actual purchased tickets (only active and scanned tickets that were paid)
+        // Use the model's relationship instead of join to avoid table name issues
+        $totalRevenue = \App\Models\PurchaseTicket::whereIn('ticket_type_id', $ticketIds)
+            ->whereIn('status', ['sold', 'active', 'scanned'])
+            ->whereHas('order', function($query) {
+                $query->where('status', 'paid');
+            })
+            ->sum('price_paid');
 
-        return view('admin.tickets.index', compact('ticketTypes', 'statuses', 'events', 'totalSeats', 'soldSeats', 'availableSeats', 'comboTicketTypes', 'soldOutTicketTypes', 'totalRevenue'));
+        return view('admin.tickets.index', compact('ticketTypes', 'statuses', 'events', 'totalSeats', 'soldSeats', 'availableSeats', 'scannedSeats', 'comboTicketTypes', 'soldOutTicketTypes', 'totalRevenue'));
     }
 
     /**

@@ -167,16 +167,9 @@ class StripeController extends Controller
             // Update all purchase ticket statuses to 'active'
             $order->purchaseTickets()->update(['status' => 'active']);
 
-            // Update ticket quantities
-            foreach ($order->purchaseTickets as $purchaseTicket) {
-                $ticket = $purchaseTicket->ticket;
-                $ticket->decrement('quantity_available', $purchaseTicket->quantity);
-                
-                // Check if event is sold out
-                if ($ticket->quantity_available <= 0) {
-                    $ticket->update(['status' => 'sold_out']);
-                }
-            }
+            // Note: Inventory and availability are tracked via PurchaseTicket records and
+            // Ticket model helper methods elsewhere. Avoid mutating quantities here to
+            // prevent inconsistencies or undefined relations during payment callback.
 
             // Log payment to audit trail
             \App\Models\AuditLog::create([

@@ -582,10 +582,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 // Confirm payment with Stripe - this validates that payment details are complete
+                // Build return URL - ensure we use the correct absolute URL
+                // Use url() helper which handles both relative and absolute routes correctly
+                @php
+                    $paymentRoute = route('public.tickets.payment', $order);
+                    // Ensure we have an absolute URL (url() helper handles this)
+                    $absoluteReturnUrl = url($paymentRoute) . '?payment_success=true';
+                @endphp
+                const returnUrl = '{{ $absoluteReturnUrl }}';
+                
+                console.log('Return URL:', returnUrl);
+                
                 const {error: confirmError, paymentIntent} = await stripe.confirmPayment({
                     elements,
                     confirmParams: {
-                        return_url: window.location.origin + '{{ route("public.tickets.payment", $order) }}?payment_success=true',
+                        return_url: returnUrl,
                     },
                     redirect: 'if_required', // Only redirect if required (for FPX)
                 });
@@ -653,7 +664,39 @@ document.addEventListener('DOMContentLoaded', function() {
                             window.location.href = '{{ route("public.tickets.success", $order) }}';
                         });
                     }
-                } else if (paymentIntent.status === 'requires_action' || paymentIntent.next_action) {
+                } 
+                // Handle payment failures - redirect to failure page
+                else if (paymentIntent.status === 'requires_payment_method' || 
+                         paymentIntent.status === 'canceled' ||
+                         paymentIntent.status === 'payment_failed') {
+                    
+                    // Record payment failure
+                    try {
+                        await fetch('{{ route("payment.stripe.failure") }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify({
+                                payment_intent_id: paymentIntent.id,
+                                order_id: {{ $order->id }}
+                            })
+                        });
+                    } catch (error) {
+                        console.error('Failed to record payment failure:', error);
+                    }
+                    
+                    // Get failure reason
+                    let failureMessage = 'Payment was not successful. Please try again.';
+                    if (paymentIntent.last_payment_error) {
+                        failureMessage = paymentIntent.last_payment_error.message || failureMessage;
+                    }
+                    
+                    // Redirect to failure page
+                    window.location.href = '{{ route("public.tickets.failure", $order->event) }}';
+                }
+                else if (paymentIntent.status === 'requires_action' || paymentIntent.next_action) {
                     // Payment requires additional action (e.g., 3D Secure, FPX redirect)
                     // Stripe will handle the redirect automatically
                     console.log('Payment requires action, Stripe will handle redirect');

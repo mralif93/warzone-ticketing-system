@@ -822,7 +822,7 @@ class TicketController extends Controller
     /**
      * Show payment page for Stripe integration
      */
-    public function payment(Order $order)
+    public function payment(Order $order, Request $request)
     {
         // Check if user is authenticated and owns this order
         if (!Auth::check() || $order->user_id !== Auth::id()) {
@@ -838,6 +838,119 @@ class TicketController extends Controller
             } else {
                 return redirect()->route('public.tickets.failure', $order->event)
                     ->with('error', 'This order is no longer available for payment.');
+            }
+        }
+
+        // Handle Stripe redirect after payment (FPX or 3D Secure)
+        if ($request->has('payment_intent') && $request->has('payment_success')) {
+            $paymentIntentId = $request->get('payment_intent');
+            $redirectStatus = $request->get('redirect_status');
+            
+            try {
+                // Retrieve payment intent from Stripe
+                \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+                $paymentIntent = \Stripe\PaymentIntent::retrieve($paymentIntentId);
+                
+                // Handle payment success
+                if ($paymentIntent->status === 'succeeded' && $redirectStatus === 'succeeded') {
+                    // Payment succeeded - process it via backend handler
+                    $stripeController = new \App\Http\Controllers\Payment\StripeController();
+                    $response = $stripeController->handlePaymentSuccess(new \Illuminate\Http\Request([
+                        'payment_intent_id' => $paymentIntentId,
+                        'order_id' => $order->id,
+                    ]));
+                    
+                    $responseData = json_decode($response->getContent(), true);
+                    
+                    if ($response->getStatusCode() === 200 && isset($responseData['success']) && $responseData['success']) {
+                        // Payment processed successfully - redirect to success page
+                        return redirect()->route('public.tickets.success', $order)
+                            ->with('success', 'Payment completed successfully!');
+                    } else {
+                        // Payment succeeded in Stripe but backend processing failed
+                        \Log::error('Payment processing failed after Stripe redirect', [
+                            'payment_intent_id' => $paymentIntentId,
+                            'order_id' => $order->id,
+                            'error' => $responseData['error'] ?? 'Unknown error'
+                        ]);
+                        
+                        return redirect()->route('public.tickets.success', $order)
+                            ->with('warning', 'Your payment was successful, but we encountered an issue updating your order. Please contact support.');
+                    }
+                }
+                
+                // Handle payment failures - redirect to failure page
+                elseif (in_array($paymentIntent->status, ['requires_payment_method', 'canceled', 'payment_failed']) 
+                        || $redirectStatus === 'failed' 
+                        || ($redirectStatus !== 'succeeded' && $paymentIntent->status !== 'succeeded')) {
+                    
+                    // Record payment failure
+                    try {
+                        $stripeController = new \App\Http\Controllers\Payment\StripeController();
+                        $stripeController->handlePaymentFailure(new \Illuminate\Http\Request([
+                            'payment_intent_id' => $paymentIntentId,
+                            'order_id' => $order->id,
+                        ]));
+                    } catch (\Exception $e) {
+                        \Log::error('Failed to record payment failure', [
+                            'payment_intent_id' => $paymentIntentId,
+                            'order_id' => $order->id,
+                            'error' => $e->getMessage()
+                        ]);
+                    }
+                    
+                    // Get failure reason from payment intent if available
+                    $failureReason = 'Payment was not successful. Please try again.';
+                    if (isset($paymentIntent->last_payment_error)) {
+                        $failureReason = $paymentIntent->last_payment_error->message ?? $failureReason;
+                    }
+                    
+                    return redirect()->route('public.tickets.failure', $order->event)
+                        ->with('error', $failureReason);
+                } 
+                
+                // Handle other statuses (processing, requires_action, etc.)
+                else {
+                    \Log::info('Payment status after redirect', [
+                        'payment_intent_id' => $paymentIntentId,
+                        'status' => $paymentIntent->status,
+                        'redirect_status' => $redirectStatus
+                    ]);
+                    
+                    // If status is requires_action, show payment page again (3D Secure might still be processing)
+                    if ($paymentIntent->status === 'requires_action') {
+                        return redirect()->route('public.tickets.payment', $order)
+                            ->with('info', 'Payment requires additional authentication. Please complete the payment process.');
+                    }
+                    
+                    // For other processing statuses, redirect back to payment page
+                    return redirect()->route('public.tickets.payment', $order)
+                        ->with('info', 'Payment is still being processed. Please wait a moment and check your order status.');
+                }
+            } catch (\Exception $e) {
+                \Log::error('Error processing Stripe redirect', [
+                    'payment_intent_id' => $paymentIntentId ?? null,
+                    'order_id' => $order->id,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+                
+                // Handle based on redirect status
+                $redirectStatus = $request->get('redirect_status');
+                
+                if ($redirectStatus === 'succeeded') {
+                    // Payment succeeded but we can't verify - redirect to success with warning
+                    return redirect()->route('public.tickets.success', $order)
+                        ->with('warning', 'Payment appears successful. Please verify your order status.');
+                } elseif ($redirectStatus === 'failed') {
+                    // Payment failed - redirect to failure page
+                    return redirect()->route('public.tickets.failure', $order->event)
+                        ->with('error', 'Payment processing failed. Please try again.');
+                } else {
+                    // Unknown error - redirect to failure page for safety
+                    return redirect()->route('public.tickets.failure', $order->event)
+                        ->with('error', 'An error occurred while processing your payment. Please try again.');
+                }
             }
         }
 

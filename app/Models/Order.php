@@ -45,6 +45,38 @@ class Order extends Model
     ];
 
     /**
+     * Get created_at timestamp in Malaysia timezone
+     */
+    public function getCreatedAtMalaysiaAttribute()
+    {
+        return $this->created_at->setTimezone('Asia/Kuala_Lumpur');
+    }
+
+    /**
+     * Get updated_at timestamp in Malaysia timezone
+     */
+    public function getUpdatedAtMalaysiaAttribute()
+    {
+        return $this->updated_at->setTimezone('Asia/Kuala_Lumpur');
+    }
+
+    /**
+     * Get paid_at timestamp in Malaysia timezone
+     */
+    public function getPaidAtMalaysiaAttribute()
+    {
+        return $this->paid_at ? $this->paid_at->setTimezone('Asia/Kuala_Lumpur') : null;
+    }
+
+    /**
+     * Get cancelled_at timestamp in Malaysia timezone
+     */
+    public function getCancelledAtMalaysiaAttribute()
+    {
+        return $this->cancelled_at ? $this->cancelled_at->setTimezone('Asia/Kuala_Lumpur') : null;
+    }
+
+    /**
      * Get the user who placed the order
      */
     public function user()

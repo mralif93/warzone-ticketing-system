@@ -63,6 +63,8 @@ class StripeController extends Controller
             $customer = $this->getOrCreateStripeCustomer(Auth::user());
 
             // Create payment intent with Malaysian payment methods
+            // Note: Cannot use both automatic_payment_methods and payment_method_types together
+            // We specify payment_method_types explicitly to control which methods are available
             $paymentIntent = PaymentIntent::create([
                 'amount' => $totalAmount,
                 'currency' => 'myr', // Malaysian Ringgit
@@ -70,10 +72,6 @@ class StripeController extends Controller
                 'metadata' => [
                     'order_id' => $order->id,
                     'customer_email' => Auth::user()->email,
-                ],
-                'automatic_payment_methods' => [
-                    'enabled' => true,
-                    'allow_redirects' => 'always', // Enable FPX and other redirect-based payments
                 ],
                 'payment_method_types' => [
                     'card',           // Visa, Mastercard
@@ -87,14 +85,25 @@ class StripeController extends Controller
             ]);
 
         } catch (ApiErrorException $e) {
-            Log::error('Stripe API Error: ' . $e->getMessage());
+            Log::error('Stripe API Error in createPaymentIntent: ' . $e->getMessage());
+            Log::error('Stripe API Error Details: ' . json_encode([
+                'type' => get_class($e),
+                'code' => $e->getStripeCode(),
+                'stripe_code' => $e->getStripeCode(),
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]));
             return response()->json([
-                'error' => 'Payment processing error. Please try again.'
+                'error' => 'Payment processing error. Please try again.',
+                'message' => $e->getMessage(), // Include in response for debugging
             ], 500);
         } catch (\Exception $e) {
             Log::error('Payment Intent Creation Error: ' . $e->getMessage());
+            Log::error('Exception Type: ' . get_class($e));
+            Log::error('Stack Trace: ' . $e->getTraceAsString());
             return response()->json([
-                'error' => 'An unexpected error occurred. Please try again.'
+                'error' => 'An unexpected error occurred. Please try again.',
+                'message' => $e->getMessage(), // Include in response for debugging
             ], 500);
         }
     }
@@ -295,27 +304,51 @@ class StripeController extends Controller
     private function getOrCreateStripeCustomer($user)
     {
         try {
-            // Check if customer already exists
-            $customers = Customer::all([
-                'email' => $user->email,
-                'limit' => 1,
-            ]);
-
-            if ($customers->data) {
-                return $customers->data[0];
+            // Note: Customer::all() doesn't support filtering by email directly
+            // Instead, we'll search for customers by email using list method
+            // For simplicity, we'll create a new customer each time (Stripe handles duplicates)
+            // Or we can store Stripe customer ID in users table for better performance
+            
+            // Try to search for existing customer by email
+            try {
+                $customers = Customer::all([
+                    'limit' => 100, // Get up to 100 customers
+                ]);
+                
+                // Manually filter by email
+                foreach ($customers->data as $customer) {
+                    if ($customer->email === $user->email) {
+                        Log::info('Found existing Stripe customer: ' . $customer->id);
+                        return $customer;
+                    }
+                }
+            } catch (\Exception $e) {
+                // If listing fails, just create a new customer
+                Log::warning('Could not search for existing Stripe customer: ' . $e->getMessage());
             }
 
             // Create new customer
-            return Customer::create([
+            $customer = Customer::create([
                 'email' => $user->email,
-                'name' => $user->name,
+                'name' => $user->name ?? 'Customer',
                 'metadata' => [
                     'user_id' => $user->id,
                 ],
             ]);
+            
+            Log::info('Created new Stripe customer: ' . $customer->id);
+            return $customer;
 
         } catch (ApiErrorException $e) {
             Log::error('Stripe Customer Creation Error: ' . $e->getMessage());
+            Log::error('Stripe Customer Error Details: ' . json_encode([
+                'type' => get_class($e),
+                'code' => method_exists($e, 'getStripeCode') ? $e->getStripeCode() : null,
+                'message' => $e->getMessage(),
+            ]));
+            throw $e;
+        } catch (\Exception $e) {
+            Log::error('Unexpected error in getOrCreateStripeCustomer: ' . $e->getMessage());
             throw $e;
         }
     }

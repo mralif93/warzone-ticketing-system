@@ -323,9 +323,6 @@
     window.orderId = {{ $order->id }};
 </script>
 
-<!-- Stripe Payment Script -->
-<script src="{{ asset('js/stripe-payment.js') }}"></script>
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Payment page loaded');
@@ -355,30 +352,112 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('Stripe initialized successfully');
     
-    // Create and mount the payment element
+    // Create payment intent first, then mount elements
     let elements, paymentElement;
-    try {
+    let clientSecret = null;
+    let paymentIntentId = null;
+    
+    // Wrap async code in an immediately invoked async function
+    (async function() {
+        try {
+            // Create payment intent via backend
+            const response = await fetch('{{ route("payment.stripe.create-intent") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    order_id: {{ $order->id }}
+                })
+            });
+            
+            const data = await response.json();
+        
+        if (!response.ok || !data.client_secret) {
+            console.error('Failed to create payment intent:', data.error || 'Unknown error');
+            Swal.fire({
+                icon: 'error',
+                title: 'Payment Setup Failed',
+                text: data.error || 'Unable to initialize payment. Please try again.',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#dc2626',
+            });
+            return;
+        }
+        
+        clientSecret = data.client_secret;
+        paymentIntentId = data.payment_intent_id;
+        console.log('Payment intent created:', paymentIntentId);
+        
+        // Create Stripe Elements with the payment intent client secret
         elements = stripe.elements({
-            mode: 'payment',
-            amount: {{ $order->total_amount * 100 }}, // Convert to cents
-            currency: 'myr',
-            payment_method_types: ['card', 'fpx'],
+            clientSecret: clientSecret,
         });
         
         paymentElement = elements.create('payment');
         const paymentElementContainer = document.getElementById('payment-element');
         
         if (paymentElementContainer) {
+            // Hide loading message immediately before mounting (Stripe will replace the content)
+            const loadingMessage = paymentElementContainer.querySelector('.text-center');
+            if (loadingMessage) {
+                loadingMessage.style.display = 'none';
+            }
+            
+            // Mount the payment element
             paymentElement.mount('#payment-element');
             console.log('Payment element mounted successfully');
             
-            // Hide loading message when Stripe Elements are loaded
-            setTimeout(() => {
-                const loadingMessage = paymentElementContainer.querySelector('.text-center');
-                if (loadingMessage) {
+            // Listen for ready event from Stripe Elements
+            paymentElement.on('ready', function() {
+                console.log('Stripe Elements are ready');
+                // Ensure loading message is hidden
+                if (loadingMessage && loadingMessage.parentNode) {
                     loadingMessage.style.display = 'none';
                 }
-            }, 1000); // Wait 1 second for Stripe Elements to fully load
+            });
+            
+            // Listen for load error
+            paymentElement.on('loaderror', function(event) {
+                console.error('Stripe Elements load error:', event);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Payment Form Load Failed',
+                    text: 'Unable to load payment form. Please refresh the page and try again.',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#dc2626',
+                });
+            });
+            
+            // Fallback: Check if Stripe Elements loaded after 5 seconds
+            setTimeout(() => {
+                // Check if payment element container has Stripe-generated content
+                // Stripe Elements typically have specific class names or attributes
+                const hasStripeContent = paymentElementContainer.querySelector(
+                    '[data-testid], .Input, input[name*="card"], iframe[src*="stripe"], .p-Input'
+                );
+                
+                // Check if there's still a loading message visible
+                const stillLoading = paymentElementContainer.querySelector('.text-center:not([style*="display: none"])');
+                
+                if (!hasStripeContent || stillLoading) {
+                    console.warn('Stripe Elements may not have loaded properly');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Payment Form Not Loading',
+                        html: '<div class="text-left"><p>The payment form is taking longer than expected to load.</p><p class="text-sm mt-2">Please try:</p><ul class="text-sm mt-2 list-disc list-inside"><li>Refreshing the page</li><li>Checking your internet connection</li><li>Disabling browser extensions that might block Stripe</li></ul></div>',
+                        confirmButtonText: 'Refresh Page',
+                        confirmButtonColor: '#dc2626',
+                        showCancelButton: true,
+                        cancelButtonText: 'Wait',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.reload();
+                        }
+                    });
+                }
+            }, 5000); // Check after 5 seconds
         } else {
             console.error('Payment element container not found');
             showStripeConfigError();
@@ -386,18 +465,31 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     } catch (error) {
         console.error('Failed to create payment element:', error);
-        showStripeBlockedError();
-        return;
-    }
-    
-    // Add timeout to detect if Stripe Elements fail to load
-    setTimeout(() => {
+        
+        // Hide loading message and show error
         const paymentElementContainer = document.getElementById('payment-element');
-        if (paymentElementContainer && paymentElementContainer.children.length === 0) {
-            console.log('Stripe Elements failed to load within timeout, showing fallback...');
-            showStripeBlockedError();
+        if (paymentElementContainer) {
+            const loadingMessage = paymentElementContainer.querySelector('.text-center');
+            if (loadingMessage) {
+                loadingMessage.style.display = 'none';
+            }
         }
-    }, 3000); // Reduced timeout to 3 seconds for faster feedback
+        
+        Swal.fire({
+            icon: 'error',
+            title: 'Payment Setup Failed',
+            html: `<div class="text-left"><p>Unable to initialize payment system.</p><p class="text-sm mt-2 text-gray-600">${error.message || 'Please refresh the page and try again.'}</p></div>`,
+            confirmButtonText: 'Refresh Page',
+            confirmButtonColor: '#dc2626',
+            showCancelButton: true,
+            cancelButtonText: 'Cancel',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.reload();
+            }
+        });
+        } // Close catch block
+    })(); // Close and invoke the async IIFE
     
     // Set up form submission
     const checkoutForm = document.getElementById('checkout-form');
@@ -407,62 +499,183 @@ document.addEventListener('DOMContentLoaded', function() {
             
             console.log('Form submitted');
             
-            // Validate required fields
+            // Collect validation errors
+            const errors = [];
+            
+            // Validate customer name (should be pre-filled, but double check)
             const customerName = document.getElementById('customer_name');
-            const customerEmail = document.getElementById('customer_email');
-            const termsAgreement = document.getElementById('terms_agreement');
-            
             if (!customerName || !customerName.value.trim()) {
-                alert('Customer name is required.');
-                return false;
+                errors.push('Customer name is required');
             }
             
+            // Validate customer email (should be pre-filled, but double check)
+            const customerEmail = document.getElementById('customer_email');
             if (!customerEmail || !customerEmail.value.trim()) {
-                alert('Customer email is required.');
-                return false;
+                errors.push('Customer email is required');
+            } else {
+                // Validate email format
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailPattern.test(customerEmail.value.trim())) {
+                    errors.push('Please enter a valid email address');
+                }
             }
             
+            // Validate terms agreement
+            const termsAgreement = document.getElementById('terms_agreement');
             if (!termsAgreement || !termsAgreement.checked) {
-                alert('Please agree to the Terms and Conditions to proceed.');
-                return false;
+                errors.push('Please agree to the Terms and Conditions to proceed');
             }
             
             // Check if Stripe Elements are available
             if (!elements || !paymentElement) {
-                alert('Payment system is not ready. Please refresh the page and try again.');
+                errors.push('Payment system is not ready. Please refresh the page and try again.');
+            }
+            
+            // Get submit button and original text (needed for reset if validation fails)
+            const submitButton = document.getElementById('purchase-button');
+            const originalText = submitButton ? submitButton.innerHTML : '';
+            
+            // If there are errors, show them
+            if (errors.length > 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Missing Required Information',
+                    html: '<div class="text-left space-y-2">' + 
+                          errors.map(error => `<p class="text-sm">• ${error}</p>`).join('') + 
+                          '</div>',
+                    confirmButtonText: 'I understand',
+                    confirmButtonColor: '#dc2626',
+                    showCancelButton: false,
+                    allowOutsideClick: false,
+                });
+                
+                // Reset button if needed
+                if (submitButton && originalText) {
+                    submitButton.innerHTML = originalText;
+                    submitButton.disabled = false;
+                }
                 return false;
             }
             
             // Show loading state
-            const submitButton = document.getElementById('purchase-button');
-            const originalText = submitButton.innerHTML;
-            submitButton.innerHTML = '<i class="bx bx-loader-alt animate-spin mr-2"></i>Processing Payment...';
-            submitButton.disabled = true;
+            if (submitButton) {
+                submitButton.innerHTML = '<i class="bx bx-loader-alt animate-spin mr-2"></i>Processing Payment...';
+                submitButton.disabled = true;
+            }
             
             try {
-                // Check if Stripe Elements are available
-                if (!elements || !paymentElement) {
-                    console.log('Stripe Elements not available, redirecting to success page...');
-                    window.location.href = '{{ route("public.tickets.success", $order) }}';
+                // Check if Stripe Elements are available and client secret exists
+                if (!elements || !paymentElement || !clientSecret) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Payment System Not Ready',
+                        text: 'Payment system is not properly initialized. Please refresh the page and try again.',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#dc2626',
+                    });
+                    
+                    if (submitButton && originalText) {
+                        submitButton.innerHTML = originalText;
+                        submitButton.disabled = false;
+                    }
                     return;
                 }
                 
-                // For now, just redirect to success page since Stripe Elements are working
-                // In a real implementation, you would process the payment here
-                console.log('Redirecting to success page...');
-                window.location.href = '{{ route("public.tickets.success", $order) }}';
+                // Confirm payment with Stripe - this validates that payment details are complete
+                const {error: confirmError, paymentIntent} = await stripe.confirmPayment({
+                    elements,
+                    confirmParams: {
+                        return_url: window.location.origin + '{{ route("public.tickets.payment", $order) }}?payment_success=true',
+                    },
+                    redirect: 'if_required', // Only redirect if required (for FPX)
+                });
+                
+                // If there's an error, it means payment details are incomplete or invalid
+                if (confirmError) {
+                    console.error('Payment confirmation error:', confirmError);
+                    
+                    let errorMessage = 'Payment failed. ';
+                    if (confirmError.type === 'card_error' || confirmError.type === 'validation_error') {
+                        errorMessage = confirmError.message || 'Please check your payment details and try again.';
+                    } else if (confirmError.type === 'invalid_request_error') {
+                        errorMessage = 'Payment details are incomplete. Please fill in all required payment information.';
+                    } else {
+                        errorMessage = confirmError.message || 'An error occurred while processing your payment.';
+                    }
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Payment Failed',
+                        html: `<div class="text-center"><p>${errorMessage}</p></div>`,
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#dc2626',
+                    });
+                    
+                    if (submitButton && originalText) {
+                        submitButton.innerHTML = originalText;
+                        submitButton.disabled = false;
+                    }
+                    return;
+                }
+                
+                // Payment confirmed successfully
+                console.log('Payment confirmed:', paymentIntent);
+                
+                // Check payment status
+                if (paymentIntent.status === 'succeeded') {
+                    // Call backend to process the payment
+                    const successResponse = await fetch('{{ route("payment.stripe.success") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            payment_intent_id: paymentIntent.id,
+                            order_id: {{ $order->id }}
+                        })
+                    });
+                    
+                    const successData = await successResponse.json();
+                    
+                    if (successResponse.ok && successData.success) {
+                        // Redirect to success page
+                        window.location.href = '{{ route("public.tickets.success", $order) }}';
+                    } else {
+                        // Payment succeeded in Stripe but backend processing failed
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Payment Processed',
+                            text: successData.error || 'Your payment was successful, but we encountered an issue updating your order. Please contact support.',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#dc2626',
+                        }).then(() => {
+                            window.location.href = '{{ route("public.tickets.success", $order) }}';
+                        });
+                    }
+                } else if (paymentIntent.status === 'requires_action' || paymentIntent.next_action) {
+                    // Payment requires additional action (e.g., 3D Secure, FPX redirect)
+                    // Stripe will handle the redirect automatically
+                    console.log('Payment requires action, Stripe will handle redirect');
+                } else {
+                    // Payment is still processing
+                    console.log('Payment status:', paymentIntent.status);
+                    window.location.href = '{{ route("public.tickets.payment", $order) }}?payment_success=processing';
+                }
                 
             } catch (error) {
                 console.error('Payment processing error:', error);
                 
-                // If it's a network error, redirect to success page as fallback
-                if (error.message.includes('Failed to fetch') || error.message.includes('ERR_BLOCKED_BY_CLIENT')) {
-                    console.log('Network error detected, redirecting to success page...');
-                    window.location.href = '{{ route("public.tickets.success", $order) }}';
-                } else {
-                    alert('Payment processing failed. Please try again.');
-                    
-                    // Reset button
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Payment Processing Failed',
+                    text: error.message || 'An unexpected error occurred. Please try again or contact support.',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#dc2626',
+                });
+                
+                // Reset button
+                if (submitButton && originalText) {
                     submitButton.innerHTML = originalText;
                     submitButton.disabled = false;
                 }

@@ -517,33 +517,64 @@ document.addEventListener('DOMContentLoaded', function() {
     const checkoutForm = document.getElementById('checkout-form');
     if (checkoutForm) {
         checkoutForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
             // Sync customer fields one more time before submission
             syncCustomerFields();
             
-            // Validate required fields
-            const requiredFields = ['customer_name', 'customer_email', 'payment_method'];
-            let isValid = true;
+            // Collect validation errors
+            const errors = [];
             
-            requiredFields.forEach(fieldName => {
-                const field = document.querySelector(`[name="${fieldName}"]`);
-                if (!field || !field.value.trim()) {
-                    isValid = false;
-                    console.error(`Required field ${fieldName} is empty`);
+            // Validate customer name
+            const customerName = document.getElementById('customer_name');
+            if (!customerName || !customerName.value.trim()) {
+                errors.push('Full Name is required');
+                customerName?.classList.add('border-red-500');
+            } else {
+                customerName?.classList.remove('border-red-500');
+            }
+            
+            // Validate customer email
+            const customerEmail = document.getElementById('customer_email');
+            if (!customerEmail || !customerEmail.value.trim()) {
+                errors.push('Email Address is required');
+                customerEmail?.classList.add('border-red-500');
+            } else {
+                // Validate email format
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailPattern.test(customerEmail.value.trim())) {
+                    errors.push('Please enter a valid email address');
+                    customerEmail.classList.add('border-red-500');
+                } else {
+                    customerEmail.classList.remove('border-red-500');
                 }
-            });
+            }
+            
+            // Validate payment method
+            const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+            if (!paymentMethod) {
+                errors.push('Please select a payment method');
+            }
             
             // Validate terms agreement
             const termsCheckbox = document.getElementById('terms_agreement');
             if (!termsCheckbox || !termsCheckbox.checked) {
-                isValid = false;
-                alert('Please agree to the Terms and Conditions to proceed.');
-                e.preventDefault();
-                return false;
+                errors.push('Please agree to the Terms and Conditions to proceed');
             }
             
-            if (!isValid) {
-                e.preventDefault();
-                alert('Please fill in all required fields before submitting.');
+            // If there are errors, show them
+            if (errors.length > 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Missing Required Information',
+                    html: '<div class="text-left space-y-2">' + 
+                          errors.map(error => `<p class="text-sm">• ${error}</p>`).join('') + 
+                          '</div>',
+                    confirmButtonText: 'I understand',
+                    confirmButtonColor: '#dc2626',
+                    showCancelButton: false,
+                    allowOutsideClick: false,
+                });
                 return false;
             }
             
@@ -553,6 +584,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 submitButton.disabled = true;
                 submitButton.innerHTML = '<i class="bx bx-loader-alt animate-spin mr-3 text-xl"></i>Processing...';
             }
+            
+            // Submit the form
+            this.submit();
         });
     }
 });

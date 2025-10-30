@@ -79,18 +79,18 @@
             <div class="relative">
                 <div class="bg-gradient-to-br from-wwc-primary to-red-600 rounded-2xl p-8 shadow-2xl">
                     <div class="bg-wwc-neutral-900 rounded-xl p-6">
-                        @if(file_exists(public_path('images/all-layout.jpeg')))
-                            <img src="{{ asset('images/all-layout.jpeg') }}" 
+                        @if(file_exists(public_path('images/home/full-layout-seat-zone.jpeg')))
+                            <img src="{{ asset('images/home/full-layout-seat-zone.jpeg') }}" 
                                  alt="N9 Arena Layout" 
                                  onclick="openArenaLayoutModal()"
                                  class="w-full h-auto rounded-lg shadow-lg cursor-pointer hover:opacity-90 transition-opacity">
-                        @elseif(file_exists(public_path('images/arena-layout.png')))
-                            <img src="{{ asset('images/arena-layout.png') }}" 
+                        @elseif(file_exists(public_path('images/home/full-layout-seat-zone.png')))
+                            <img src="{{ asset('images/home/full-layout-seat-zone.png') }}" 
                                  alt="N9 Arena Layout" 
                                  onclick="openArenaLayoutModal()"
                                  class="w-full h-auto rounded-lg shadow-lg cursor-pointer hover:opacity-90 transition-opacity">
-                        @elseif(file_exists(public_path('images/arena-layout.svg')))
-                            <img src="{{ asset('images/arena-layout.svg') }}" 
+                        @elseif(file_exists(public_path('images/home/full-layout-seat-zone.svg')))
+                            <img src="{{ asset('images/home/full-layout-seat-zone.svg') }}" 
                                  alt="N9 Arena Layout" 
                                  onclick="openArenaLayoutModal()"
                                  class="w-full h-auto rounded-lg shadow-lg cursor-pointer hover:opacity-90 transition-opacity">
@@ -818,7 +818,7 @@ document.addEventListener('click', function(e) {
 // Arena Layout Modal
 function openArenaLayoutModal() {
     // Get the image source
-    let imageSrc = "{{ asset('images/all-layout.jpeg') }}";
+    let imageSrc = "{{ asset('images/home/full-layout-seat-zone.png') }}";
     
     // Check if modal exists, if not create it
     let modal = document.getElementById('arenaLayoutModal');

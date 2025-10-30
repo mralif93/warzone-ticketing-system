@@ -109,6 +109,94 @@
 </div>
 @endif
 
+ 
+@php
+    $homeSliderImages = [];
+    $homeSliderDir = public_path('images/home');
+    if (is_dir($homeSliderDir)) {
+        $patterns = ['*.jpg', '*.jpeg', '*.png', '*.webp'];
+        foreach ($patterns as $pattern) {
+            foreach (glob($homeSliderDir . DIRECTORY_SEPARATOR . $pattern) as $imgPath) {
+                $relative = 'images/home/' . basename($imgPath);
+                $homeSliderImages[] = asset($relative);
+            }
+        }
+    }
+@endphp
+
+@if(!empty($homeSliderImages))
+<!-- Home Slider -->
+<link rel="stylesheet" href="https://unpkg.com/swiper@9/swiper-bundle.min.css" />
+<div class="bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="swiper home-swiper rounded-2xl overflow-hidden shadow">
+            <div class="swiper-wrapper">
+                @foreach($homeSliderImages as $img)
+                    <div class="swiper-slide bg-black flex items-center justify-center">
+                        <img src="{{ $img }}" alt="Slide Image" class="w-full h-96 sm:h-[32rem] md:h-[40rem] lg:h-[48rem] object-contain">
+                    </div>
+                @endforeach
+            </div>
+            <div class="swiper-pagination"></div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
+        </div>
+    </div>
+</div>
+<script src="https://unpkg.com/swiper@9/swiper-bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        new Swiper('.home-swiper', {
+            loop: true,
+            autoplay: { delay: 4000, disableOnInteraction: false },
+            pagination: { el: '.swiper-pagination', clickable: true },
+            navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+            slidesPerView: 1,
+            spaceBetween: 0,
+        });
+        
+        // Image click to open full-screen modal
+        const modal = document.getElementById('homeImageModal');
+        const modalImg = document.getElementById('homeModalImage');
+        const modalClose = document.getElementById('homeModalClose');
+        const swiperImages = document.querySelectorAll('.home-swiper img');
+        
+        swiperImages.forEach(img => {
+            img.style.cursor = 'zoom-in';
+            img.addEventListener('click', () => {
+                if (!modal || !modalImg) return;
+                modalImg.src = img.src;
+                modal.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+            });
+        });
+        
+        function closeModal() {
+            if (!modal) return;
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+            if (modalImg) modalImg.src = '';
+        }
+        
+        if (modalClose) modalClose.addEventListener('click', closeModal);
+        if (modal) modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+    });
+    </script>
+<!-- Full-screen Image Modal -->
+<div id="homeImageModal" class="fixed inset-0 z-50 bg-black/90 hidden">
+    <button id="homeModalClose" type="button" class="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white rounded-full p-2">
+        <i class='bx bx-x text-2xl'></i>
+    </button>
+    <div class="w-full h-full flex items-center justify-center p-4">
+        <img id="homeModalImage" src="" alt="Full Image" class="max-w-full max-h-full object-contain rounded-lg shadow-lg">
+    </div>
+</div>
+@endif
 
 <!-- Ticket Types Section for Default Event -->
 @if($mainEvent && $mainEvent->tickets->count() > 0)

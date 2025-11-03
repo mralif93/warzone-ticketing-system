@@ -108,6 +108,7 @@ class AdminController extends Controller
             'total_orders' => Order::count(),
             'total_tickets_sold' => PurchaseTicket::whereIn('status', ['sold', 'active', 'scanned'])->count(),
             'total_tickets_held' => PurchaseTicket::where('status', 'held')->count(),
+            'total_tickets_pending' => PurchaseTicket::where('status', 'pending')->count(),
             'total_revenue' => Order::where('status', 'paid')->sum('total_amount'),
             'pending_orders' => Order::where('status', 'pending')->count(),
             'completed_orders' => Order::where('status', 'paid')->count(),

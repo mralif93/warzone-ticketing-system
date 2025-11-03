@@ -48,7 +48,7 @@
                             <div class="flex items-center">
                                 <div class="flex items-center text-sm text-wwc-warning font-semibold">
                                     <i class='bx bx-time text-sm mr-2'></i>
-                                    {{ \App\Models\PurchaseTicket::where('status', 'held')->count() }} Pending
+                                    {{ $stats['total_tickets_pending'] ?? 0 }} Pending
                                 </div>
                             </div>
                         </div>

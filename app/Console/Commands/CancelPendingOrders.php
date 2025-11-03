@@ -21,7 +21,7 @@ class CancelPendingOrders extends Command
      *
      * @var string
      */
-    protected $description = 'Cancel pending orders that are older than specified minutes (default: 15 minutes)';
+    protected $description = 'Cancel pending orders from previous days that are older than specified minutes (default: 15 minutes). Does not cancel today\'s orders.';
 
     /**
      * Execute the console command.
@@ -31,9 +31,13 @@ class CancelPendingOrders extends Command
         $minutes = $this->option('minutes');
         $cutoffTime = Carbon::now()->subMinutes($minutes);
         
-        // Find pending orders older than the cutoff time
+        // Find pending orders older than the cutoff time AND from previous days (not today)
+        // This ensures we only cancel orders from previous days, not today's orders
+        $startOfToday = Carbon::today()->startOfDay();
+        
         $pendingOrders = Order::where('status', 'pending')
             ->where('created_at', '<', $cutoffTime)
+            ->where('created_at', '<', $startOfToday) // Only orders from previous days (not today)
             ->get();
         
         $cancelledCount = 0;
@@ -90,9 +94,9 @@ class CancelPendingOrders extends Command
         }
         
         if ($cancelledCount > 0) {
-            $this->info("Cancelled {$cancelledCount} pending orders older than {$minutes} minutes.");
+            $this->info("Cancelled {$cancelledCount} pending orders from previous days (older than {$minutes} minutes).");
         } else {
-            $this->info("No pending orders found older than {$minutes} minutes.");
+            $this->info("No pending orders found from previous days (older than {$minutes} minutes).");
         }
         
         return Command::SUCCESS;

@@ -76,8 +76,15 @@ class OrderController extends Controller
         $allOrders = $allOrdersQuery->get();
         $totalRevenue = $allOrders->where('status', 'paid')->sum('total_amount');
         $averageOrderValue = $allOrders->where('status', 'paid')->avg('total_amount');
+        
+        // Calculate counts from all orders (not just paginated)
+        $totalOrders = $allOrders->count();
+        $paidOrdersCount = $allOrders->where('status', 'paid')->count();
+        $pendingOrdersCount = $allOrders->where('status', 'pending')->count();
+        $cancelledOrdersCount = $allOrders->where('status', 'cancelled')->count();
+        $refundedOrdersCount = $allOrders->where('status', 'refunded')->count();
 
-        return view('admin.orders.index', compact('orders', 'statuses', 'totalRevenue', 'averageOrderValue'));
+        return view('admin.orders.index', compact('orders', 'statuses', 'totalRevenue', 'averageOrderValue', 'totalOrders', 'paidOrdersCount', 'pendingOrdersCount', 'cancelledOrdersCount', 'refundedOrdersCount'));
     }
 
     /**

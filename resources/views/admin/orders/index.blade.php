@@ -15,12 +15,12 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $orders->total() }}</div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $totalOrders ?? $orders->total() }}</div>
                             <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Total Orders</div>
                             <div class="flex items-center">
                                 <div class="flex items-center text-xs text-wwc-info font-semibold">
                                     <i class='bx bx-receipt text-xs mr-1'></i>
-                                    {{ $orders->where('status', 'paid')->count() }} Paid
+                                    {{ $paidOrdersCount ?? 0 }} Paid
                                 </div>
                             </div>
                         </div>
@@ -34,12 +34,12 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $orders->where('status', 'paid')->count() }}</div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $paidOrdersCount ?? 0 }}</div>
                             <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Paid Orders</div>
                             <div class="flex items-center">
                                 <div class="flex items-center text-xs text-wwc-success font-semibold">
                                     <i class='bx bx-check text-xs mr-1'></i>
-                                    {{ $orders->where('status', 'pending')->count() }} Pending
+                                    {{ $pendingOrdersCount ?? 0 }} Pending
                                 </div>
                             </div>
                         </div>
@@ -53,12 +53,12 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $orders->where('status', 'pending')->count() }}</div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">{{ $pendingOrdersCount ?? 0 }}</div>
                             <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Pending</div>
                             <div class="flex items-center">
                                 <div class="flex items-center text-xs text-wwc-error font-semibold">
                                     <i class='bx bx-x text-xs mr-1'></i>
-                                    {{ $orders->where('status', 'cancelled')->count() }} Cancelled
+                                    {{ $cancelledOrdersCount ?? 0 }} Cancelled
                                 </div>
                             </div>
                         </div>

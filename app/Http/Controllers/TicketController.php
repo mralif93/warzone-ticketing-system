@@ -977,6 +977,11 @@ class TicketController extends Controller
                     'cancellation_reason' => 'Payment timeout - exceeded ' . $timeoutMinutes . ' minutes'
                 ]);
                 
+                // Update Payment status to cancelled if exists (sync with Order status)
+                $order->payments()->where('status', '!=', 'refunded')->update([
+                    'status' => 'cancelled'
+                ]);
+                
                 // Release the tickets back to available inventory
                 foreach ($order->purchaseTickets as $purchaseTicket) {
                     $ticketType = $purchaseTicket->ticketType;
@@ -1338,6 +1343,11 @@ class TicketController extends Controller
                     'status' => 'cancelled',
                     'cancelled_at' => now(),
                     'cancellation_reason' => 'Payment timeout - exceeded ' . $timeoutMinutes . ' minutes'
+                ]);
+                
+                // Update Payment status to cancelled if exists (sync with Order status)
+                $order->payments()->where('status', '!=', 'refunded')->update([
+                    'status' => 'cancelled'
                 ]);
                 
                 // Release the tickets back to available inventory

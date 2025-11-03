@@ -166,6 +166,15 @@ class StripeController extends Controller
 
             // Update all purchase ticket statuses to 'active'
             $order->purchaseTickets()->update(['status' => 'active']);
+            
+            // Log the synchronization
+            Log::info('Payment success - Status synced', [
+                'payment_id' => $payment->id,
+                'order_id' => $order->id,
+                'payment_status' => 'succeeded',
+                'order_status' => 'paid',
+                'tickets_updated' => $order->purchaseTickets()->count()
+            ]);
 
             // Note: Inventory and availability are tracked via PurchaseTicket records and
             // Ticket model helper methods elsewhere. Avoid mutating quantities here to
@@ -245,8 +254,11 @@ class StripeController extends Controller
                 ]),
             ]);
 
-            // Update order status
-            $order->update(['status' => 'payment_failed']);
+            // Update order status to pending (keep order active for retry)
+            $order->update(['status' => 'pending']);
+
+            // Update purchase ticket statuses back to pending
+            $order->purchaseTickets()->update(['status' => 'pending']);
 
             DB::commit();
 
@@ -473,9 +485,22 @@ class StripeController extends Controller
                 $order->update([
                     'status' => 'paid',
                     'payment_id' => $payment->id,
+                    'paid_at' => now(),
                 ]);
 
+                // Update all purchase ticket statuses to 'active'
+                $order->purchaseTickets()->update(['status' => 'active']);
+
                 DB::commit();
+                
+                // Log the synchronization
+                Log::info('Webhook payment success - Status synced', [
+                    'payment_id' => $payment->id,
+                    'order_id' => $order->id,
+                    'payment_status' => 'succeeded',
+                    'order_status' => 'paid',
+                    'tickets_updated' => $order->purchaseTickets()->count()
+                ]);
             }
 
         } catch (\Exception $e) {
@@ -503,8 +528,19 @@ class StripeController extends Controller
                 return;
             }
 
-            // Update order status
-            $order->update(['status' => 'payment_failed']);
+            // Update order status to pending (keep order active for retry)
+            $order->update(['status' => 'pending']);
+
+            // Update purchase ticket statuses back to pending
+            $order->purchaseTickets()->update(['status' => 'pending']);
+            
+            // Log the synchronization
+            Log::info('Payment failure - Status synced', [
+                'order_id' => $orderId,
+                'payment_status' => 'failed',
+                'order_status' => 'pending',
+                'tickets_updated' => $order->purchaseTickets()->count()
+            ]);
 
         } catch (\Exception $e) {
             Log::error('Webhook Payment Failure Error: ' . $e->getMessage());

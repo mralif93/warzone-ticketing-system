@@ -712,7 +712,40 @@ class OrderController extends Controller
         ]);
 
         $oldValues = $order->toArray();
-        $order->update(['status' => $request->status]);
+        $newStatus = strtolower($request->status);
+        
+        // Update order status
+        $updateData = ['status' => $newStatus];
+        if ($newStatus === 'paid') {
+            $updateData['paid_at'] = now();
+        } elseif ($newStatus === 'cancelled') {
+            $updateData['cancelled_at'] = now();
+            $updateData['cancellation_reason'] = 'Order status updated by admin';
+        }
+        $order->update($updateData);
+
+        // Sync PurchaseTicket statuses based on Order status
+        if ($newStatus === 'paid') {
+            $order->purchaseTickets()->update(['status' => 'active']);
+            // Update Payment status to succeeded if exists
+            $order->payments()->where('status', '!=', 'refunded')->update(['status' => 'succeeded']);
+        } elseif ($newStatus === 'cancelled') {
+            $order->purchaseTickets()->update([
+                'status' => 'cancelled',
+                'cancelled_at' => now(),
+                'cancellation_reason' => 'Order cancelled by admin'
+            ]);
+            // Update Payment status to cancelled if exists
+            $order->payments()->where('status', '!=', 'refunded')->update(['status' => 'cancelled']);
+        } elseif ($newStatus === 'refunded') {
+            $order->purchaseTickets()->update(['status' => 'refunded']);
+            // Update Payment status to refunded if exists
+            $order->payments()->where('status', 'succeeded')->update(['status' => 'refunded']);
+        } elseif ($newStatus === 'pending') {
+            $order->purchaseTickets()->update(['status' => 'pending']);
+            // Update Payment status to pending/failed if exists
+            $order->payments()->whereIn('status', ['succeeded'])->update(['status' => 'pending']);
+        }
 
         // Log the status update
         AuditLog::create([
@@ -739,10 +772,21 @@ class OrderController extends Controller
         }
 
         $oldValues = $order->toArray();
-        $order->update(['status' => 'cancelled']);
+        $order->update([
+            'status' => 'cancelled',
+            'cancelled_at' => now(),
+            'cancellation_reason' => 'Order cancelled by admin'
+        ]);
 
-        // Cancel all tickets in this order
-        $order->tickets()->update(['status' => 'cancelled']);
+        // Cancel all purchase tickets in this order
+        $order->purchaseTickets()->update([
+            'status' => 'cancelled',
+            'cancelled_at' => now(),
+            'cancellation_reason' => 'Order cancelled by admin'
+        ]);
+
+        // Update Payment status to cancelled if exists
+        $order->payments()->where('status', '!=', 'refunded')->update(['status' => 'cancelled']);
 
         // Log the order cancellation
         AuditLog::create([
@@ -771,8 +815,11 @@ class OrderController extends Controller
         $oldValues = $order->toArray();
         $order->update(['status' => 'refunded']);
 
-        // Cancel all tickets in this order
-        $order->tickets()->update(['status' => 'cancelled']);
+        // Update all purchase tickets to refunded status
+        $order->purchaseTickets()->update(['status' => 'refunded']);
+
+        // Update Payment status to refunded if exists
+        $order->payments()->where('status', 'succeeded')->update(['status' => 'refunded']);
 
         // Log the order refund
         AuditLog::create([

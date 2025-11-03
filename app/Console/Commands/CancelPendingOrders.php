@@ -54,6 +54,11 @@ class CancelPendingOrders extends Command
                     'cancellation_reason' => 'Payment timeout - exceeded ' . $minutes . ' minutes'
                 ]);
                 
+                // Update Payment status to cancelled if exists (sync with Order status)
+                $order->payments()->where('status', '!=', 'refunded')->update([
+                    'status' => 'cancelled'
+                ]);
+                
                 // Release the tickets back to available inventory
                 foreach ($order->purchaseTickets as $purchaseTicket) {
                     $ticketType = $purchaseTicket->ticketType;

@@ -119,14 +119,27 @@ class PaymentController extends Controller
         $oldValues = $payment->toArray();
         $payment->update(['status' => $request->status]);
 
-        // If payment is succeeded, update order status
-        if ($request->status === 'succeeded' && $payment->order) {
-            $payment->order->update(['status' => 'paid']);
-        }
-
-        // If payment is refunded, update order status
-        if ($request->status === 'refunded' && $payment->order) {
-            $payment->order->update(['status' => 'refunded']);
+        // Sync Order and PurchaseTicket statuses based on Payment status
+        if ($payment->order) {
+            $order = $payment->order;
+            
+            if ($request->status === 'succeeded') {
+                // Payment succeeded → Order paid → Tickets active
+                $order->update(['status' => 'paid', 'paid_at' => now()]);
+                $order->purchaseTickets()->update(['status' => 'active']);
+            } elseif ($request->status === 'refunded') {
+                // Payment refunded → Order refunded → Tickets refunded
+                $order->update(['status' => 'refunded']);
+                $order->purchaseTickets()->update(['status' => 'refunded']);
+            } elseif ($request->status === 'failed' || $request->status === 'cancelled') {
+                // Payment failed/cancelled → Order pending → Tickets pending
+                $order->update(['status' => 'pending']);
+                $order->purchaseTickets()->update(['status' => 'pending']);
+            } elseif ($request->status === 'pending') {
+                // Payment pending → Order pending → Tickets pending
+                $order->update(['status' => 'pending']);
+                $order->purchaseTickets()->update(['status' => 'pending']);
+            }
         }
 
         // Log the payment update
@@ -328,9 +341,23 @@ class PaymentController extends Controller
 
         $payment = Payment::create($request->all());
 
-        // If payment is succeeded, update order status
-        if ($request->status === 'succeeded' && $payment->order) {
-            $payment->order->update(['status' => 'paid']);
+        // Sync Order and PurchaseTicket statuses based on Payment status
+        if ($payment->order) {
+            $order = $payment->order;
+            
+            if ($request->status === 'succeeded') {
+                // Payment succeeded → Order paid → Tickets active
+                $order->update(['status' => 'paid', 'paid_at' => now()]);
+                $order->purchaseTickets()->update(['status' => 'active']);
+            } elseif ($request->status === 'refunded') {
+                // Payment refunded → Order refunded → Tickets refunded
+                $order->update(['status' => 'refunded']);
+                $order->purchaseTickets()->update(['status' => 'refunded']);
+            } elseif (in_array($request->status, ['failed', 'cancelled', 'pending'])) {
+                // Payment failed/cancelled/pending → Order pending → Tickets pending
+                $order->update(['status' => 'pending']);
+                $order->purchaseTickets()->update(['status' => 'pending']);
+            }
         }
 
         // Log the payment creation
@@ -386,14 +413,23 @@ class PaymentController extends Controller
         $oldValues = $payment->toArray();
         $payment->update($request->all());
 
-        // If payment is succeeded, update order status
-        if ($request->status === 'succeeded' && $payment->order) {
-            $payment->order->update(['status' => 'paid']);
-        }
-
-        // If payment is refunded, update order status
-        if ($request->status === 'refunded' && $payment->order) {
-            $payment->order->update(['status' => 'refunded']);
+        // Sync Order and PurchaseTicket statuses based on Payment status
+        if ($payment->order) {
+            $order = $payment->order;
+            
+            if ($request->status === 'succeeded') {
+                // Payment succeeded → Order paid → Tickets active
+                $order->update(['status' => 'paid', 'paid_at' => now()]);
+                $order->purchaseTickets()->update(['status' => 'active']);
+            } elseif ($request->status === 'refunded') {
+                // Payment refunded → Order refunded → Tickets refunded
+                $order->update(['status' => 'refunded']);
+                $order->purchaseTickets()->update(['status' => 'refunded']);
+            } elseif (in_array($request->status, ['failed', 'cancelled', 'pending'])) {
+                // Payment failed/cancelled/pending → Order pending → Tickets pending
+                $order->update(['status' => 'pending']);
+                $order->purchaseTickets()->update(['status' => 'pending']);
+            }
         }
 
         // Log the payment update

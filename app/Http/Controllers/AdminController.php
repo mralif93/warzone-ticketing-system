@@ -106,13 +106,13 @@ class AdminController extends Controller
             'events_draft' => Event::where('status', 'draft')->count(),
             'events_sold_out' => Event::where('status', 'sold_out')->count(),
             'total_orders' => Order::count(),
-            'total_tickets_sold' => PurchaseTicket::whereIn('status', ['active', 'sold', 'scanned'])->count(),
+            'total_tickets_sold' => PurchaseTicket::whereIn('status', ['sold', 'active', 'scanned'])->count(),
             'total_tickets_held' => PurchaseTicket::where('status', 'held')->count(),
             'total_revenue' => Order::where('status', 'paid')->sum('total_amount'),
             'pending_orders' => Order::where('status', 'pending')->count(),
             'completed_orders' => Order::where('status', 'paid')->count(),
             'total_tickets' => PurchaseTicket::count(),
-            'sold_tickets' => PurchaseTicket::whereIn('status', ['active', 'sold', 'scanned'])->count(),
+            'sold_tickets' => PurchaseTicket::whereIn('status', ['sold', 'active', 'scanned'])->count(),
         ];
 
         // Get recent activity

@@ -42,12 +42,12 @@ class PublicController extends Controller
                 // Count sold tickets per day
                 $day1Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
                     ->where('event_day_name', $day1Name)
-                    ->whereIn('status', ['sold', 'active', 'pending', 'scanned'])
+                    ->whereIn('status', ['sold', 'active', 'scanned'])
                     ->count();
                     
                 $day2Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
                     ->where('event_day_name', $day2Name)
-                    ->whereIn('status', ['sold', 'active', 'pending', 'scanned'])
+                    ->whereIn('status', ['sold', 'active', 'scanned'])
                     ->count();
                 
                 // Calculate available per day

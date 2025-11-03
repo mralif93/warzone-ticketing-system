@@ -298,11 +298,11 @@ class EventController extends Controller
                 $dayAvailability = [];
                 
                 foreach ($eventDays as $day) {
-                    // Count sold and pending tickets for this specific day and ticket type
+                    // Count sold tickets for this specific day and ticket type
                     $soldForDay = \App\Models\PurchaseTicket::where('event_id', $ticket->event_id)
                         ->where('ticket_type_id', $ticket->id)
                         ->whereDate('event_day', $day['date'])
-                        ->whereIn('status', ['sold', 'pending'])
+                        ->whereIn('status', ['sold', 'active', 'scanned'])
                         ->count();
                     
                     $availableForDay = $ticket->total_seats - $soldForDay;

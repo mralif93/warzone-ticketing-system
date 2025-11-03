@@ -459,7 +459,7 @@
                                                     // Calculate day-specific availability for single-day tickets
                                                     $daySold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
                                                         ->where('event_day_name', $day['day_name'])
-                                                        ->whereIn('status', ['sold', 'pending'])
+                                                        ->whereIn('status', ['sold', 'active', 'scanned'])
                                                         ->count();
                                                     $dayAvailable = $ticket->total_seats - $daySold;
                                                 @endphp

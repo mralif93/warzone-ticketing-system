@@ -72,8 +72,8 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200 p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">RM{{ number_format($events->sum(function($event) { return $event->purchase_tickets_count * 50; }), 0) }}</div>
-                            <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Est. Revenue</div>
+                            <div class="text-2xl font-bold text-wwc-neutral-900 mb-1">RM{{ number_format($events->sum(function($event) { return \App\Models\PurchaseTicket::where('event_id', $event->id)->whereIn('status', ['sold', 'active', 'scanned'])->sum('price_paid'); }), 0) }}</div>
+                            <div class="text-xs text-wwc-neutral-600 mb-2 font-medium">Total Revenue</div>
                             <div class="flex items-center">
                                 <div class="flex items-center text-xs text-wwc-accent font-semibold">
                                     <i class='bx bx-trending-up text-xs mr-1'></i>
@@ -265,11 +265,11 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-semibold text-wwc-neutral-900">{{ \App\Models\PurchaseTicket::where('event_id', $event->id)->where('status', 'sold')->count() }}</div>
+                                        <div class="text-sm font-semibold text-wwc-neutral-900">{{ \App\Models\PurchaseTicket::where('event_id', $event->id)->whereIn('status', ['sold', 'active', 'scanned'])->count() }}</div>
                                         <div class="text-xs text-wwc-neutral-500">tickets sold</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-semibold text-wwc-neutral-900">RM{{ number_format($event->purchaseTickets()->where('status', 'sold')->sum('price_paid'), 0) }}</div>
+                                        <div class="text-sm font-semibold text-wwc-neutral-900">RM{{ number_format($event->purchaseTickets()->whereIn('status', ['sold', 'active', 'scanned'])->sum('price_paid'), 0) }}</div>
                                         <div class="text-xs text-wwc-neutral-500">total revenue</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">

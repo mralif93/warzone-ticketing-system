@@ -280,7 +280,7 @@
                                     </div>
                                     <span class="text-sm font-semibold text-wwc-neutral-600">Tickets Sold</span>
                                 </div>
-                                <span class="text-base font-medium text-wwc-neutral-900">{{ \App\Models\PurchaseTicket::where('event_id', $event->id)->where('status', 'sold')->count() }}</span>
+                                <span class="text-base font-medium text-wwc-neutral-900">{{ \App\Models\PurchaseTicket::where('event_id', $event->id)->whereIn('status', ['sold', 'active', 'scanned'])->count() }}</span>
                             </div>
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-3">
@@ -289,7 +289,7 @@
                                     </div>
                                     <span class="text-sm font-semibold text-wwc-neutral-600">Revenue</span>
                                 </div>
-                                <span class="text-base font-medium text-wwc-neutral-900">RM{{ number_format($event->purchaseTickets()->where('status', 'sold')->sum('price_paid'), 0) }}</span>
+                                <span class="text-base font-medium text-wwc-neutral-900">RM{{ number_format($event->purchaseTickets()->whereIn('status', ['sold', 'active', 'scanned'])->sum('price_paid'), 0) }}</span>
                             </div>
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-3">

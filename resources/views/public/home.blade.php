@@ -61,7 +61,7 @@
                 </div>
 
                 @if($mainEvent->description)
-                <p class="text-lg text-wwc-neutral-100 leading-relaxed">
+                <p class="text-lg text-wwc-neutral-100 leading-relaxed text-justify">
                     {{ Str::limit($mainEvent->description, 200) }}
                 </p>
                 @endif
@@ -265,7 +265,7 @@
                         <!-- Content Section -->
                         <div class="p-6 flex flex-col flex-1">
                             @if($ticket->description)
-                            <p class="text-gray-600 text-sm mb-4">{{ $ticket->description }}</p>
+                            <p class="text-gray-600 text-sm mb-4 text-justify">{{ $ticket->description }}</p>
                             @endif
 
                             <!-- Bottom Section: Day Info + Buttons -->
@@ -289,47 +289,7 @@
                                         $day2Available = $totalSeats - $day2Sold;
                                     @endphp
                                     
-                                    <div>
-                                        <div class="space-y-3">
-                                            <!-- Day 1 -->
-                                            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                                <div class="flex items-center justify-between">
-                                                    <div class="flex items-center gap-3">
-                                                        <div class="text-sm font-bold text-gray-800">Day 1</div>
-                                                    </div>
-                                                    <div class="flex items-center gap-6">
-                                                        <div class="text-center">
-                                                            <div class="text-lg font-bold text-green-600">{{ $day1Available }}</div>
-                                                            <div class="text-xs text-gray-600">Available</div>
-                                                        </div>
-                                                        <div class="text-center">
-                                                            <div class="text-lg font-bold text-red-600">{{ $day1Sold }}</div>
-                                                            <div class="text-xs text-gray-600">Sold</div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- Day 2 -->
-                                            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                                <div class="flex items-center justify-between">
-                                                    <div class="flex items-center gap-3">
-                                                        <div class="text-sm font-bold text-gray-800">Day 2</div>
-                                                    </div>
-                                                    <div class="flex items-center gap-6">
-                                                        <div class="text-center">
-                                                            <div class="text-lg font-bold text-green-600">{{ $day2Available }}</div>
-                                                            <div class="text-xs text-gray-600">Available</div>
-                                                        </div>
-                                                        <div class="text-center">
-                                                            <div class="text-lg font-bold text-red-600">{{ $day2Sold }}</div>
-                                                            <div class="text-xs text-gray-600">Sold</div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    {{-- Day Availability Info Hidden --}}
                                 @endif
 
                                 <!-- Action Buttons -->
@@ -417,64 +377,10 @@
                     </div>
 
                     @if($ticket->description)
-                    <p class="text-sm text-wwc-neutral-600 mb-4 text-center">{{ $ticket->description }}</p>
+                    <p class="text-sm text-wwc-neutral-600 mb-4 text-justify">{{ $ticket->description }}</p>
                     @endif
 
-                    <div class="space-y-3 mb-6">
-                        @if($mainEvent->isMultiDay())
-                            @if($ticket->is_combo)
-                                <!-- Combo ticket display (for multi-day purchases) -->
-                                <div class="flex justify-between items-center text-sm">
-                                    <span class="text-wwc-neutral-600">Total Seats (Per Day):</span>
-                                    <span class="font-semibold">{{ number_format($ticket->total_seats) }}</span>
-                                </div>
-                                <div class="flex justify-between items-center text-sm">
-                                    <span class="text-wwc-neutral-600">Available (Per Day):</span>
-                                    <span class="font-semibold text-green-600">{{ number_format($ticket->available_seats) }}</span>
-                                </div>
-                                <div class="flex justify-between items-center text-sm">
-                                    <span class="text-wwc-neutral-600">Sold (Per Day):</span>
-                                    <span class="font-semibold text-wwc-neutral-900">{{ number_format($ticket->sold_seats) }}</span>
-                                </div>
-                                <div class="flex justify-between items-center text-sm">
-                                    <span class="text-wwc-neutral-600">Total Capacity ({{ $mainEvent->getDurationInDays() }} days):</span>
-                                    <span class="font-semibold text-blue-600">{{ number_format($ticket->total_seats * $mainEvent->getDurationInDays()) }}</span>
-                                </div>
-                            @else
-                                <!-- Single-day ticket display (for individual day purchases) -->
-                                <div class="flex justify-between items-center text-sm">
-                                    <span class="text-wwc-neutral-600">Total Seats (Per Day):</span>
-                                    <span class="font-semibold">{{ number_format($ticket->total_seats) }}</span>
-                                </div>
-                                <div class="flex justify-between items-center text-sm">
-                                    <span class="text-wwc-neutral-600">Available (Per Day):</span>
-                                    <span class="font-semibold text-green-600">{{ number_format($ticket->available_seats) }}</span>
-                                </div>
-                                <div class="flex justify-between items-center text-sm">
-                                    <span class="text-wwc-neutral-600">Sold (Per Day):</span>
-                                    <span class="font-semibold text-wwc-neutral-900">{{ number_format($ticket->sold_seats) }}</span>
-                                </div>
-                                <div class="flex justify-between items-center text-sm">
-                                    <span class="text-wwc-neutral-600">Event Duration:</span>
-                                    <span class="font-semibold text-blue-600">{{ $mainEvent->getDurationInDays() }} days</span>
-                                </div>
-                            @endif
-                        @else
-                            <!-- Single-day event display -->
-                            <div class="flex justify-between items-center text-sm">
-                                <span class="text-wwc-neutral-600">Total Seats:</span>
-                                <span class="font-semibold">{{ number_format($ticket->total_seats) }}</span>
-                            </div>
-                            <div class="flex justify-between items-center text-sm">
-                                <span class="text-wwc-neutral-600">Available:</span>
-                                <span class="font-semibold text-green-600">{{ number_format($ticket->available_seats) }}</span>
-                            </div>
-                            <div class="flex justify-between items-center text-sm">
-                                <span class="text-wwc-neutral-600">Sold:</span>
-                                <span class="font-semibold text-wwc-neutral-900">{{ number_format($ticket->sold_seats) }}</span>
-                            </div>
-                        @endif
-                    </div>
+                    {{-- Total Available and Total Sold sections hidden --}}
 
                     @if($ticket->total_seats > 0)
                     <div class="mb-6">
@@ -643,40 +549,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Calculate availability percentage
         const availabilityPercentage = ticketTotal > 0 ? Math.round((ticketAvailable / ticketTotal) * 100) : 0;
         
-        // Generate day-by-day breakdown HTML if it's a combo ticket
+        // Daily Availability section hidden
         let dayBreakdownHtml = '';
-        if (isCombo && day1Available !== null && day2Available !== null) {
-            dayBreakdownHtml = `
-                <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-5 border border-green-200">
-                    <div class="flex items-center mb-3">
-                        <i class='bx bx-calendar text-green-600 text-xl mr-2'></i>
-                        <h4 class="font-bold text-gray-900 text-lg">Daily Availability</h4>
-                    </div>
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between text-sm text-gray-700">
-                            <div class="flex items-center">
-                                <i class='bx bx-calendar-check text-green-500 mr-2'></i>
-                                <span>Day 1</span>
-                            </div>
-                            <div class="flex items-center space-x-4">
-                                <span class="text-green-600 font-semibold">${day1Available} Available</span>
-                                <span class="text-red-600 font-semibold">${day1Sold} Sold</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between text-sm text-gray-700">
-                            <div class="flex items-center">
-                                <i class='bx bx-calendar-check text-blue-500 mr-2'></i>
-                                <span>Day 2</span>
-                            </div>
-                            <div class="flex items-center space-x-4">
-                                <span class="text-green-600 font-semibold">${day2Available} Available</span>
-                                <span class="text-red-600 font-semibold">${day2Sold} Sold</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
         
         // Show SweetAlert with ticket details
         Swal.fire({

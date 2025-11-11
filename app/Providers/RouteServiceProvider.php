@@ -28,6 +28,11 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
 
+        // Configure route model binding for Gallery to include trashed models
+        Route::bind('gallery', function ($value) {
+            return \App\Models\Gallery::withTrashed()->findOrFail($value);
+        });
+
         $this->routes(function () {
             Route::middleware('api')
                 ->prefix('api')

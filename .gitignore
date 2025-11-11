@@ -185,3 +185,4 @@ temp/
 *.sw?
 database/database.sqlite
 storage/logs/laravel.log
+database/database.sqlite

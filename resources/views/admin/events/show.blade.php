@@ -33,6 +33,13 @@
                             </div>
                         </div>
                         <div class="p-6">
+                            @if($event->image_path)
+                            <!-- Event Image -->
+                            <div class="mb-6">
+                                <img src="{{ $event->image_url }}" alt="{{ $event->name }}" class="w-full h-auto rounded-lg border border-wwc-neutral-200 shadow-sm">
+                            </div>
+                            @endif
+                            
                             <div class="space-y-4">
                                 <!-- Event Name -->
                                 <div class="flex items-center py-3 border-b border-wwc-neutral-100">
@@ -319,6 +326,12 @@
                                class="w-full inline-flex items-center justify-center px-4 py-2 bg-wwc-primary text-white text-sm font-semibold rounded-lg hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
                                 <i class='bx bx-edit text-sm mr-2'></i>
                                 Edit Event
+                            </a>
+                            
+                            <a href="{{ route('admin.events.galleries.index', $event) }}" 
+                               class="w-full inline-flex items-center justify-center px-4 py-2 bg-wwc-accent text-white text-sm font-semibold rounded-lg hover:bg-wwc-accent-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-accent transition-colors duration-200">
+                                <i class='bx bx-images text-sm mr-2'></i>
+                                Manage Gallery
                             </a>
                             
                             @if($event->status === 'draft')

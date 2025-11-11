@@ -75,34 +75,52 @@
                 </div>
             </div>
 
-            <!-- Event Visual/Image - Arena Layout -->
+            <!-- Event Visual/Image - Event Image or Arena Layout -->
             <div class="relative">
-                <div class="bg-gradient-to-br from-wwc-primary to-red-600 rounded-2xl p-8 shadow-2xl">
-                    <div class="bg-wwc-neutral-900 rounded-xl p-6">
-                        @if(file_exists(public_path('images/home/full-layout-seat-zone.jpeg')))
-                            <img src="{{ asset('images/home/full-layout-seat-zone.jpeg') }}" 
-                                 alt="N9 Arena Layout" 
-                                 onclick="openArenaLayoutModal()"
-                                 class="w-full h-auto rounded-lg shadow-lg cursor-pointer hover:opacity-90 transition-opacity">
-                        @elseif(file_exists(public_path('images/home/full-layout-seat-zone.png')))
-                            <img src="{{ asset('images/home/full-layout-seat-zone.png') }}" 
-                                 alt="N9 Arena Layout" 
-                                 onclick="openArenaLayoutModal()"
-                                 class="w-full h-auto rounded-lg shadow-lg cursor-pointer hover:opacity-90 transition-opacity">
-                        @elseif(file_exists(public_path('images/home/full-layout-seat-zone.svg')))
-                            <img src="{{ asset('images/home/full-layout-seat-zone.svg') }}" 
-                                 alt="N9 Arena Layout" 
-                                 onclick="openArenaLayoutModal()"
-                                 class="w-full h-auto rounded-lg shadow-lg cursor-pointer hover:opacity-90 transition-opacity">
-                        @else
-                            <div class="text-center py-12">
-                                <i class='bx bx-image text-6xl text-wwc-neutral-600 mb-4'></i>
-                                <p class="text-wwc-neutral-400 text-lg">N9 Arena Layout</p>
-                                <p class="text-wwc-neutral-500 text-sm mt-2">Arena seating layout image</p>
+                @if($mainEvent->image_path)
+                    <!-- Event Image Display -->
+                    <div class="relative group">
+                        <div class="overflow-hidden rounded-2xl shadow-2xl">
+                            <img src="{{ $mainEvent->image_url }}" 
+                                 alt="{{ $mainEvent->name }}" 
+                                 onclick="openEventImageModal('{{ $mainEvent->image_url }}', '{{ $mainEvent->name }}')"
+                                 class="w-full h-auto object-cover cursor-pointer transform transition-transform duration-300 group-hover:scale-105">
+                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center rounded-2xl">
+                                <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <i class='bx bx-zoom-in text-white text-5xl'></i>
+                                </div>
                             </div>
-                        @endif
+                        </div>
                     </div>
-                </div>
+                @else
+                    <!-- Fallback to Arena Layout -->
+                    <div class="bg-gradient-to-br from-wwc-primary to-red-600 rounded-2xl p-8 shadow-2xl">
+                        <div class="bg-wwc-neutral-900 rounded-xl p-6">
+                            @if(file_exists(public_path('images/home/full-layout-seat-zone.jpeg')))
+                                <img src="{{ asset('images/home/full-layout-seat-zone.jpeg') }}" 
+                                     alt="N9 Arena Layout" 
+                                     onclick="openArenaLayoutModal()"
+                                     class="w-full h-auto rounded-lg shadow-lg cursor-pointer hover:opacity-90 transition-opacity">
+                            @elseif(file_exists(public_path('images/home/full-layout-seat-zone.png')))
+                                <img src="{{ asset('images/home/full-layout-seat-zone.png') }}" 
+                                     alt="N9 Arena Layout" 
+                                     onclick="openArenaLayoutModal()"
+                                     class="w-full h-auto rounded-lg shadow-lg cursor-pointer hover:opacity-90 transition-opacity">
+                            @elseif(file_exists(public_path('images/home/full-layout-seat-zone.svg')))
+                                <img src="{{ asset('images/home/full-layout-seat-zone.svg') }}" 
+                                     alt="N9 Arena Layout" 
+                                     onclick="openArenaLayoutModal()"
+                                     class="w-full h-auto rounded-lg shadow-lg cursor-pointer hover:opacity-90 transition-opacity">
+                            @else
+                                <div class="text-center py-12">
+                                    <i class='bx bx-image text-6xl text-wwc-neutral-600 mb-4'></i>
+                                    <p class="text-wwc-neutral-400 text-lg">N9 Arena Layout</p>
+                                    <p class="text-wwc-neutral-500 text-sm mt-2">Arena seating layout image</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
@@ -194,6 +212,48 @@
     </button>
     <div class="w-full h-full flex items-center justify-center p-4">
         <img id="homeModalImage" src="" alt="Full Image" class="max-w-full max-h-full object-contain rounded-lg shadow-lg">
+    </div>
+</div>
+@endif
+
+<!-- Event Gallery Slider Section -->
+@if($mainEvent && $mainEvent->activeGalleries && $mainEvent->activeGalleries->count() > 0)
+<div class="bg-white py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-wwc-neutral-900 mb-2">Event Gallery</h2>
+            <p class="text-lg text-wwc-neutral-600">Explore highlights from {{ $mainEvent->name }}</p>
+        </div>
+        
+        <!-- Swiper Gallery Slider -->
+        <div class="swiper event-gallery-swiper">
+            <div class="swiper-wrapper">
+                @foreach($mainEvent->activeGalleries as $gallery)
+                <div class="swiper-slide">
+                    <div class="relative group cursor-pointer" onclick="openGalleryImageModal('{{ $gallery->image_url }}', '{{ $gallery->title ?? 'Event Image' }}', '{{ $gallery->description ?? '' }}')">
+                        <img src="{{ $gallery->image_url }}" 
+                             alt="{{ $gallery->title ?? 'Event Image' }}" 
+                             class="w-full h-96 sm:h-[32rem] md:h-[40rem] lg:h-[48rem] object-cover rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 rounded-lg flex items-center justify-center">
+                            <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <i class='bx bx-zoom-in text-white text-5xl'></i>
+                            </div>
+                        </div>
+                        @if($gallery->title)
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 rounded-b-lg">
+                            <h3 class="text-white font-semibold text-lg">{{ $gallery->title }}</h3>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            <!-- Navigation -->
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+            <!-- Pagination -->
+            <div class="swiper-pagination"></div>
+        </div>
     </div>
 </div>
 @endif
@@ -865,6 +925,155 @@ document.addEventListener('click', function(e) {
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeArenaLayoutModal();
+    }
+});
+
+// Initialize Event Gallery Swiper
+@if($mainEvent && $mainEvent->activeGalleries && $mainEvent->activeGalleries->count() > 0)
+document.addEventListener('DOMContentLoaded', function() {
+    const gallerySwiper = new Swiper('.event-gallery-swiper', {
+        slidesPerView: 1,
+        spaceBetween: 20,
+        loop: {{ $mainEvent->activeGalleries->count() > 1 ? 'true' : 'false' }},
+        autoplay: {
+            delay: 5000,
+            disableOnInteraction: false,
+        },
+        pagination: {
+            el: '.event-gallery-swiper .swiper-pagination',
+            clickable: true,
+        },
+        navigation: {
+            nextEl: '.event-gallery-swiper .swiper-button-next',
+            prevEl: '.event-gallery-swiper .swiper-button-prev',
+        },
+        breakpoints: {
+            640: {
+                slidesPerView: 1,
+            },
+            768: {
+                slidesPerView: 1,
+            },
+            1024: {
+                slidesPerView: 1,
+            },
+        },
+    });
+});
+@endif
+
+// Gallery Image Modal
+function openGalleryImageModal(imageUrl, title, description) {
+    let modal = document.getElementById('galleryImageModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'galleryImageModal';
+        modal.className = 'fixed inset-0 bg-black bg-opacity-90 z-50 hidden flex items-center justify-center p-4';
+        modal.innerHTML = `
+            <div class="relative max-w-7xl w-full max-h-[95vh] overflow-hidden">
+                <button onclick="closeGalleryImageModal()" class="absolute top-4 right-4 z-10 text-white hover:text-gray-300 transition-colors bg-black/50 rounded-full p-2">
+                    <i class='bx bx-x text-3xl'></i>
+                </button>
+                <div class="bg-white rounded-lg shadow-2xl overflow-hidden">
+                    <div id="galleryModalImageContainer" class="relative">
+                        <img id="galleryModalImage" src="" alt="${title}" class="w-full h-auto max-h-[85vh] object-contain">
+                    </div>
+                    ${title || description ? `
+                    <div class="bg-gradient-to-t from-black/80 to-transparent absolute bottom-0 left-0 right-0 p-6 text-white">
+                        ${title ? `<h3 class="text-2xl font-bold mb-2">${title}</h3>` : ''}
+                        ${description ? `<p class="text-lg opacity-90">${description}</p>` : ''}
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    document.getElementById('galleryModalImage').src = imageUrl;
+    if (title) {
+        const titleElement = modal.querySelector('h3');
+        if (titleElement) titleElement.textContent = title;
+    }
+    if (description) {
+        const descElement = modal.querySelector('p');
+        if (descElement) descElement.textContent = description;
+    }
+    modal.classList.remove('hidden');
+}
+
+function closeGalleryImageModal() {
+    const modal = document.getElementById('galleryImageModal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}
+
+// Close gallery modal when clicking outside
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('galleryImageModal');
+    if (modal && e.target === modal) {
+        closeGalleryImageModal();
+    }
+});
+
+// Close gallery modal with ESC key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeGalleryImageModal();
+    }
+});
+
+// Event Image Modal
+function openEventImageModal(imageUrl, eventName) {
+    let modal = document.getElementById('eventImageModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'eventImageModal';
+        modal.className = 'fixed inset-0 bg-black bg-opacity-90 z-50 hidden flex items-center justify-center p-4';
+        modal.innerHTML = `
+            <div class="relative max-w-7xl w-full max-h-[95vh] overflow-hidden">
+                <button onclick="closeEventImageModal()" class="absolute top-4 right-4 z-10 text-white hover:text-gray-300 transition-colors bg-black/50 rounded-full p-2">
+                    <i class='bx bx-x text-3xl'></i>
+                </button>
+                <div class="bg-white rounded-lg shadow-2xl overflow-hidden">
+                    <div id="eventModalImageContainer" class="relative">
+                        <img id="eventModalImage" src="" alt="${eventName}" class="w-full h-auto max-h-[85vh] object-contain">
+                    </div>
+                    <div class="bg-gradient-to-t from-black/80 to-transparent absolute bottom-0 left-0 right-0 p-6 text-white">
+                        <h3 class="text-2xl font-bold">${eventName}</h3>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    document.getElementById('eventModalImage').src = imageUrl;
+    const titleElement = modal.querySelector('h3');
+    if (titleElement) titleElement.textContent = eventName;
+    modal.classList.remove('hidden');
+}
+
+function closeEventImageModal() {
+    const modal = document.getElementById('eventImageModal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}
+
+// Close event image modal when clicking outside
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('eventImageModal');
+    if (modal && e.target === modal) {
+        closeEventImageModal();
+    }
+});
+
+// Close event image modal with ESC key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeEventImageModal();
     }
 });
 </script>

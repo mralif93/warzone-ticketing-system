@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class EventController extends Controller
 {
@@ -78,6 +79,13 @@ class EventController extends Controller
 
         // Prepare data for creation
         $data = $request->all();
+        
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imagePath = $image->store('events', 'public');
+            $data['image_path'] = $imagePath;
+        }
         
         // Handle combo discount checkbox
         $data['combo_discount_enabled'] = $request->has('combo_discount_enabled');
@@ -165,6 +173,7 @@ class EventController extends Controller
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'venue' => 'nullable|string|max:255',
             'description' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240', // Max 10MB
             'max_tickets_per_order' => 'required|integer|min:1|max:20',
             'total_seats' => 'required|integer|min:1',
             'status' => 'required|in:draft,on_sale,sold_out,cancelled',
@@ -177,6 +186,18 @@ class EventController extends Controller
 
         // Prepare data for update
         $data = $request->all();
+        
+        // Handle image upload if new image is provided
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($event->image_path && Storage::disk('public')->exists($event->image_path)) {
+                Storage::disk('public')->delete($event->image_path);
+            }
+            
+            $image = $request->file('image');
+            $imagePath = $image->store('events', 'public');
+            $data['image_path'] = $imagePath;
+        }
         
         // Handle combo discount checkbox
         $data['combo_discount_enabled'] = $request->has('combo_discount_enabled');

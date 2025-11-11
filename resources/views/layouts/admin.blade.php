@@ -94,7 +94,11 @@
                 <div class="px-8 py-10 bg-gradient-to-br from-wwc-secondary to-wwc-neutral-900">
                     <div class="flex flex-col items-center">
                         <div class="flex-shrink-0 mb-6">
-                            <img src="{{ asset('images/warzone-logo.png') }}" alt="Warzone Tickets" class="h-20 w-auto" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            @php
+                                $logoPath = \App\Models\Setting::get('logo_path');
+                                $logoUrl = $logoPath ? asset('storage/' . $logoPath) : asset('images/warzone-logo.png');
+                            @endphp
+                            <img src="{{ $logoUrl }}" alt="Warzone Tickets" class="h-20 w-auto" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                             <div class="h-20 w-20 rounded-2xl bg-wwc-primary flex items-center justify-center shadow-lg" style="display: none;">
                                 <span class="text-white font-bold text-3xl">W</span>
                             </div>
@@ -232,6 +236,22 @@
                         @endif
                     </a>
 
+                    <!-- Gallery -->
+                    <a href="{{ route('admin.galleries.index') }}" 
+                       class="group flex items-center px-4 py-4 text-sm font-semibold rounded-xl transition-all duration-300 {{ request()->routeIs('admin.galleries.index') || request()->routeIs('admin.events.galleries*') ? 'bg-gradient-to-r from-wwc-primary-light to-red-100 text-wwc-primary shadow-lg border border-red-200' : 'text-wwc-neutral-600 hover:bg-wwc-neutral-50 hover:text-wwc-neutral-900 hover:shadow-md' }}">
+                        <div class="flex-shrink-0 mr-4">
+                            <div class="h-10 w-10 rounded-xl flex items-center justify-center {{ request()->routeIs('admin.galleries.index') || request()->routeIs('admin.events.galleries*') ? 'bg-wwc-primary-light' : 'bg-wwc-neutral-100 group-hover:bg-wwc-neutral-200' }} transition-colors duration-300">
+                                <i class='bx bx-images text-lg {{ request()->routeIs('admin.galleries.index') || request()->routeIs('admin.events.galleries*') ? 'text-wwc-primary' : 'text-wwc-neutral-500 group-hover:text-wwc-neutral-700' }}'></i>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="font-semibold">Gallery</div>
+                            <div class="text-xs text-wwc-neutral-500 mt-0.5">Event Images</div>
+                        </div>
+                        @if(request()->routeIs('admin.galleries.index') || request()->routeIs('admin.events.galleries*'))
+                        <div class="h-2 w-2 bg-wwc-primary rounded-full"></div>
+                        @endif
+                    </a>
 
                     <!-- Reports -->
                     <a href="{{ route('admin.reports') }}" 
@@ -442,6 +462,7 @@
                         <a href="{{ route('admin.tickets.index') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Tickets</a>
                         <a href="{{ route('admin.orders.index') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Orders</a>
                         <a href="{{ route('admin.payments.index') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Payments</a>
+                        <a href="{{ route('admin.galleries.index') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Gallery</a>
                         <a href="{{ route('admin.reports') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Reports</a>
                         <a href="{{ route('admin.audit-logs.index') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Audit Trail</a>
                         <a href="{{ route('admin.settings') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">Settings</a>

@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
@@ -716,6 +717,7 @@ class AdminController extends Controller
             'max_login_attempts' => 'required|integer|min:3|max:10',
             'service_fee_percentage' => 'required|numeric|min:0|max:100',
             'tax_percentage' => 'required|numeric|min:0|max:100',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:5120', // Max 5MB
         ]);
 
         // Get old settings for audit
@@ -737,6 +739,19 @@ class AdminController extends Controller
         Setting::set('max_login_attempts', $request->max_login_attempts, 'integer');
         Setting::set('service_fee_percentage', $request->service_fee_percentage, 'string');
         Setting::set('tax_percentage', $request->tax_percentage, 'string');
+        
+        // Handle logo upload
+        if ($request->hasFile('logo')) {
+            // Delete old logo if exists
+            $oldLogo = Setting::get('logo_path');
+            if ($oldLogo && Storage::disk('public')->exists($oldLogo)) {
+                Storage::disk('public')->delete($oldLogo);
+            }
+            
+            // Store new logo
+            $logoPath = $request->file('logo')->store('logos', 'public');
+            Setting::set('logo_path', $logoPath, 'string');
+        }
         
         // Get new settings for audit
         $newSettings = Setting::getAll();

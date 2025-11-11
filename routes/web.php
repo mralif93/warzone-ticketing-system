@@ -96,6 +96,20 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/events/{event}/ticket-types', [AdminEventController::class, 'getTicketTypes'])->name('events.ticket-types');
         Route::get('/events/{event}/ticket-types-test', [AdminEventController::class, 'getTicketTypes'])->name('events.ticket-types-test');
         
+        // Gallery management
+        Route::get('/galleries', [\App\Http\Controllers\Admin\GalleryController::class, 'all'])->name('galleries.index');
+        Route::get('/events/{event}/galleries', [\App\Http\Controllers\Admin\GalleryController::class, 'index'])->name('events.galleries.index');
+        Route::get('/events/{event}/galleries/trashed', [\App\Http\Controllers\Admin\GalleryController::class, 'trashed'])->name('events.galleries.trashed');
+        Route::get('/events/{event}/galleries/create', [\App\Http\Controllers\Admin\GalleryController::class, 'create'])->name('events.galleries.create');
+        Route::post('/events/{event}/galleries', [\App\Http\Controllers\Admin\GalleryController::class, 'store'])->name('events.galleries.store');
+        Route::get('/events/{event}/galleries/{gallery}', [\App\Http\Controllers\Admin\GalleryController::class, 'show'])->name('events.galleries.show');
+        Route::get('/events/{event}/galleries/{gallery}/edit', [\App\Http\Controllers\Admin\GalleryController::class, 'edit'])->name('events.galleries.edit');
+        Route::put('/events/{event}/galleries/{gallery}', [\App\Http\Controllers\Admin\GalleryController::class, 'update'])->name('events.galleries.update');
+        Route::delete('/events/{event}/galleries/{gallery}', [\App\Http\Controllers\Admin\GalleryController::class, 'destroy'])->name('events.galleries.destroy');
+        Route::post('/events/{event}/galleries/{gallery}/restore', [\App\Http\Controllers\Admin\GalleryController::class, 'restore'])->name('events.galleries.restore');
+        Route::delete('/events/{event}/galleries/{gallery}/force-delete', [\App\Http\Controllers\Admin\GalleryController::class, 'forceDelete'])->name('events.galleries.force-delete');
+        Route::post('/events/{event}/galleries/{gallery}/toggle-status', [\App\Http\Controllers\Admin\GalleryController::class, 'toggleStatus'])->name('events.galleries.toggle-status');
+        
         // User management
         Route::get('/users/trashed', [AdminUserController::class, 'trashed'])->name('users.trashed');
         Route::post('/users/{user}/restore', [AdminUserController::class, 'restore'])->name('users.restore');

@@ -20,6 +20,7 @@ class Event extends Model
         'total_seats',
         'description',
         'venue',
+        'image_path',
         'combo_discount_percentage',
         'combo_discount_enabled',
         'default',
@@ -66,6 +67,24 @@ class Event extends Model
     public function ticketTypes()
     {
         return $this->hasMany(Ticket::class);
+    }
+
+    /**
+     * Get the gallery images for this event
+     */
+    public function galleries()
+    {
+        return $this->hasMany(Gallery::class);
+    }
+
+    /**
+     * Get active gallery images for this event (excludes trashed)
+     */
+    public function activeGalleries()
+    {
+        return $this->hasMany(Gallery::class)
+            ->where('is_active', true)
+            ->orderBy('order', 'asc');
     }
 
     /**
@@ -452,6 +471,22 @@ class Event extends Model
         
         // Add 4 hours to date_time as default event duration
         return $this->date_time->copy()->addHours(4)->format('g:i A');
+    }
+
+    /**
+     * Get the full URL for the event image
+     */
+    public function getImageUrlAttribute()
+    {
+        if (!$this->image_path) {
+            return null;
+        }
+        
+        if (str_starts_with($this->image_path, 'http://') || str_starts_with($this->image_path, 'https://')) {
+            return $this->image_path;
+        }
+        
+        return asset('storage/' . $this->image_path);
     }
 
     /**

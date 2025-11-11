@@ -24,9 +24,9 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             UserModuleSeeder::class,      // Module 1: User Management
-            // EventModuleSeeder::class,     // Module 2: Event Management
-            // TicketModuleSeeder::class,    // Module 3: Ticket Management
-            // OrderModuleSeeder::class,     // Module 4: Order Management
+            EventModuleSeeder::class,     // Module 2: Event Management
+            TicketModuleSeeder::class,    // Module 3: Ticket Management
+            OrderModuleSeeder::class,     // Module 4: Order Management
             SystemModuleSeeder::class,    // Module 5: System Management
         ]);
 

@@ -141,8 +141,78 @@
                         </div>
                     </div>
                 </div>
-                <form method="POST" action="{{ route('admin.settings.update') }}" class="p-6">
+                <form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data" class="p-6">
                 @csrf
+                    <!-- Logo Upload Section -->
+                    <div class="mb-8">
+                        <h3 class="text-lg font-medium text-wwc-neutral-900 mb-4 flex items-center">
+                            <i class='bx bx-image text-sm mr-2 text-wwc-primary'></i>
+                            Logo Settings
+                        </h3>
+                        <p class="text-sm text-wwc-neutral-500 mb-4">Upload your company logo to display in the admin panel</p>
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <div>
+                                <label for="logo" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                    Upload Logo
+                                </label>
+                                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-wwc-neutral-300 border-dashed rounded-lg hover:border-wwc-primary transition-colors">
+                                    <div class="space-y-1 text-center">
+                                        <i class='bx bx-cloud-upload text-4xl text-wwc-neutral-400 mb-2'></i>
+                                        <div class="flex text-sm text-wwc-neutral-600">
+                                            <label for="logo" class="relative cursor-pointer bg-white rounded-md font-medium text-wwc-primary hover:text-red-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-wwc-primary">
+                                                <span>Upload a logo</span>
+                                                <input id="logo" name="logo" type="file" accept="image/*" class="sr-only" onchange="previewLogo(this)">
+                                            </label>
+                                            <p class="pl-1">or drag and drop</p>
+                                        </div>
+                                        <p class="text-xs text-wwc-neutral-500">PNG, JPG, GIF, WEBP, SVG up to 5MB</p>
+                                    </div>
+                                </div>
+                                <div id="logoPreview" class="mt-4 hidden">
+                                    <label class="block text-xs text-wwc-neutral-600 mb-2">New Logo Preview</label>
+                                    <img id="previewLogoImg" 
+                                         src="" 
+                                         alt="Logo Preview" 
+                                         class="max-w-xs h-20 object-contain rounded-lg border border-wwc-neutral-200">
+                                </div>
+                                @error('logo')
+                                    <p class="mt-2 text-sm text-wwc-error">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div>
+                                @if(\App\Models\Setting::get('logo_path'))
+                                <div class="mt-8">
+                                    <label class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                        Current Logo
+                                    </label>
+                                    <div class="bg-wwc-neutral-50 rounded-lg p-4 border border-wwc-neutral-200">
+                                        <img src="{{ asset('storage/' . \App\Models\Setting::get('logo_path')) }}" 
+                                             alt="Current Logo" 
+                                             class="max-w-full h-20 object-contain">
+                                        <p class="text-xs text-wwc-neutral-500 mt-2">This logo is currently displayed in the admin panel</p>
+                                    </div>
+                                </div>
+                                @else
+                                <div class="mt-8">
+                                    <label class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                        Default Logo
+                                    </label>
+                                    <div class="bg-wwc-neutral-50 rounded-lg p-4 border border-wwc-neutral-200">
+                                        <img src="{{ asset('images/warzone-logo.png') }}" 
+                                             alt="Default Logo" 
+                                             class="max-w-full h-20 object-contain"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                        <div class="hidden items-center justify-center h-20 text-wwc-neutral-400">
+                                            <i class='bx bx-image text-4xl'></i>
+                                        </div>
+                                        <p class="text-xs text-wwc-neutral-500 mt-2">Default logo (no custom logo uploaded)</p>
+                                    </div>
+                                </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Ticket Settings -->
                     <div class="mb-8">
                         <h3 class="text-lg font-medium text-wwc-neutral-900 mb-4 flex items-center">
@@ -331,6 +401,19 @@
                 </div>
             </form>
         </div>
+
+        <script>
+            function previewLogo(input) {
+                if (input.files && input.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('previewLogoImg').src = e.target.result;
+                        document.getElementById('logoPreview').classList.remove('hidden');
+                    };
+                    reader.readAsDataURL(input.files[0]);
+                }
+            }
+        </script>
 
         <!-- System Information -->
             <div class="bg-white rounded-2xl shadow-sm border border-wwc-neutral-200">

@@ -20,7 +20,7 @@ class PublicController extends Controller
             })
             ->with(['tickets' => function($query) {
                 $query->whereIn('status', ['Active', 'active']);
-            }])
+            }, 'activeGalleries'])
             ->orderBy('default', 'desc')
             ->orderBy('date_time')
             ->first();

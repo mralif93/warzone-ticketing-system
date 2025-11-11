@@ -32,7 +32,7 @@
                     </div>
                 </div>
                 <div class="p-6">
-                    <form action="{{ route('admin.events.update', $event) }}" method="POST">
+                    <form action="{{ route('admin.events.update', $event) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
                         
@@ -175,6 +175,42 @@
                                     @enderror
                                 </div>
 
+                                <!-- Event Image -->
+                                <div class="sm:col-span-2">
+                                    <label for="image" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
+                                        Event Image
+                                        <span class="text-xs text-wwc-neutral-500 font-normal">(Optional)</span>
+                                    </label>
+                                    
+                                    @if($event->image_path)
+                                    <div class="mb-4">
+                                        <label class="block text-xs text-wwc-neutral-600 mb-2">Current Image</label>
+                                        <img src="{{ $event->image_url }}" alt="{{ $event->name }}" class="max-w-full h-64 object-cover rounded-lg border border-wwc-neutral-200">
+                                    </div>
+                                    @endif
+                                    
+                                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-wwc-neutral-300 border-dashed rounded-lg hover:border-wwc-primary transition-colors">
+                                        <div class="space-y-1 text-center">
+                                            <i class='bx bx-cloud-upload text-4xl text-wwc-neutral-400 mb-2'></i>
+                                            <div class="flex text-sm text-wwc-neutral-600">
+                                                <label for="image" class="relative cursor-pointer bg-white rounded-md font-medium text-wwc-primary hover:text-red-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-wwc-primary">
+                                                    <span>{{ $event->image_path ? 'Replace image' : 'Upload an image' }}</span>
+                                                    <input id="image" name="image" type="file" accept="image/*" class="sr-only" onchange="previewEventImage(this)">
+                                                </label>
+                                                <p class="pl-1">or drag and drop</p>
+                                            </div>
+                                            <p class="text-xs text-wwc-neutral-500">PNG, JPG, GIF, WEBP up to 10MB</p>
+                                        </div>
+                                    </div>
+                                    <div id="imagePreview" class="mt-4 hidden">
+                                        <label class="block text-xs text-wwc-neutral-600 mb-2">New Image Preview</label>
+                                        <img id="previewImg" src="" alt="Preview" class="max-w-full h-64 object-cover rounded-lg border border-wwc-neutral-200">
+                                    </div>
+                                    @error('image')
+                                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
                                 <!-- Description -->
                                 <div class="sm:col-span-2">
                                     <label for="description" class="block text-sm font-semibold text-wwc-neutral-900 mb-2">
@@ -311,6 +347,18 @@ document.addEventListener('DOMContentLoaded', function() {
     
     comboDiscountEnabled.addEventListener('change', toggleComboDiscount);
     toggleComboDiscount(); // Initial state
+    
+    // Image preview function
+    function previewEventImage(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('previewImg').src = e.target.result;
+                document.getElementById('imagePreview').classList.remove('hidden');
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
     
     // Validate multi-day events (max 2 days)
     function validateMultiDayEvent() {

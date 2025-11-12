@@ -327,6 +327,47 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Payment page loaded');
     
+    // Track Meta Pixel InitiateCheckout event
+    if (typeof fbq !== 'undefined') {
+        // Get order data from PHP
+        const totalValue = {{ $order->total_amount ?? 0 }};
+        const contentIds = [];
+        const contentNames = [];
+        let numItems = 0;
+        
+        // Collect ticket information from order
+        @foreach($order->purchaseTickets as $purchaseTicket)
+            @if(isset($purchaseTicket->ticketType->id))
+                contentIds.push('{{ $purchaseTicket->ticketType->id }}');
+                contentNames.push('{{ addslashes($purchaseTicket->ticketType->name ?? "Ticket") }}');
+                numItems += 1;
+            @endif
+        @endforeach
+        
+        // Track InitiateCheckout event
+        if (totalValue > 0 && numItems > 0) {
+            fbq('track', 'InitiateCheckout', {
+                value: totalValue,
+                currency: 'MYR',
+                content_ids: contentIds,
+                content_name: contentNames.length > 0 ? contentNames.join(', ') : '{{ addslashes($order->event->name ?? "Event") }}',
+                content_type: 'product',
+                num_items: numItems,
+                order_id: '{{ $order->order_number ?? $order->id }}',
+                event_name: '{{ addslashes($order->event->name ?? "Event") }}'
+            });
+            
+            console.log('Meta Pixel InitiateCheckout event tracked:', {
+                value: totalValue,
+                currency: 'MYR',
+                content_ids: contentIds,
+                num_items: numItems,
+                order_id: '{{ $order->order_number ?? $order->id }}',
+                event_name: '{{ addslashes($order->event->name ?? "Event") }}'
+            });
+        }
+    }
+    
     // Check if Stripe is available
     if (typeof Stripe === 'undefined') {
         console.error('Stripe is not loaded - likely blocked by browser extension');

@@ -216,4 +216,55 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<!-- Meta Pixel Purchase Tracking -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if fbq is available (Meta Pixel loaded)
+    if (typeof fbq !== 'undefined') {
+        // Use order total amount
+        var totalAmount = {{ $order->total_amount ?? ($originalSubtotal - $comboDiscountAmount + ($serviceFeePercentage == 0 ? 0 : $order->service_fee) + ($taxPercentage == 0 ? 0 : $order->tax_amount)) }};
+        
+        // Get ticket content IDs
+        var contentIds = [];
+        @foreach($tickets as $ticketData)
+            @if(isset($ticketData['ticket']->id))
+                contentIds.push('{{ $ticketData["ticket"]->id }}');
+            @endif
+        @endforeach
+        
+        // Get ticket names for content names
+        var contentNames = [];
+        @foreach($tickets as $ticketData)
+            @if(isset($ticketData['ticket']->name))
+                contentNames.push('{{ addslashes($ticketData["ticket"]->name) }}');
+            @endif
+        @endforeach
+        
+        // Track Purchase event
+        fbq('track', 'Purchase', {
+            value: totalAmount,
+            currency: 'MYR',
+            content_ids: contentIds,
+            content_name: contentNames.length > 0 ? contentNames.join(', ') : '{{ addslashes($event->name) }}',
+            content_type: 'product',
+            num_items: {{ $totalQuantity }},
+            order_id: '{{ $order->order_number ?? $order->id }}',
+            event_name: '{{ addslashes($event->name) }}'
+        });
+        
+        console.log('Meta Pixel Purchase event tracked:', {
+            value: totalAmount,
+            currency: 'MYR',
+            content_ids: contentIds,
+            num_items: {{ $totalQuantity }},
+            order_id: '{{ $order->order_number ?? $order->id }}'
+        });
+    } else {
+        console.warn('Meta Pixel (fbq) not loaded. Purchase event not tracked.');
+    }
+});
+</script>
+@endpush
 @endsection

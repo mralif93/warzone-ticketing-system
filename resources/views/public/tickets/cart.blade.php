@@ -624,6 +624,30 @@ const singleDayRadios = document.querySelectorAll('input[name="single_day_select
 const dayCheckboxes = document.querySelectorAll('.day-checkbox');
 const ticketTypeSelect = document.getElementById('ticket_type_id');
 const quantityInput = document.getElementById('quantity');
+
+// Track AddToCart when single-day quantity input changes
+if (quantityInput) {
+    quantityInput.addEventListener('change', function() {
+        const ticketTypeSelect = document.getElementById('ticket_type_id');
+        if (ticketTypeSelect && ticketTypeSelect.value) {
+            const selectedOption = ticketTypeSelect.options[ticketTypeSelect.selectedIndex];
+            const price = parseFloat(selectedOption.dataset.price) || 0;
+            const quantity = parseInt(this.value) || 1;
+            const ticketName = selectedOption.text.split(' - ')[0];
+            
+            let dayInfo = null;
+            if (eventData.isMultiDay) {
+                const selectedDayRadio = document.querySelector('input[name="single_day_selection"]:checked');
+                if (selectedDayRadio) {
+                    const dayNumber = selectedDayRadio.value.replace('day', '');
+                    dayInfo = `Day ${dayNumber}`;
+                }
+            }
+            
+            trackAddToCart(ticketTypeSelect.value, ticketName, quantity, price, dayInfo);
+        }
+    });
+}
 const orderSummaryContent = document.getElementById('order-summary-content');
 const subtotalElement = document.getElementById('subtotal');
 const serviceFeeElement = document.getElementById('service-fee');
@@ -767,6 +791,26 @@ document.querySelectorAll('.quantity-increase').forEach(button => {
         if (currentValue < {{ $maxTicketsPerOrder }}) {
             input.value = currentValue + 1;
             calculatePricing();
+            
+            // Track AddToCart when quantity increases (if ticket is selected)
+            const ticketTypeSelect = document.getElementById('ticket_type_id');
+            if (ticketTypeSelect && ticketTypeSelect.value) {
+                const selectedOption = ticketTypeSelect.options[ticketTypeSelect.selectedIndex];
+                const price = parseFloat(selectedOption.dataset.price) || 0;
+                const quantity = parseInt(input.value) || 1;
+                const ticketName = selectedOption.text.split(' - ')[0];
+                
+                let dayInfo = null;
+                if (eventData.isMultiDay) {
+                    const selectedDayRadio = document.querySelector('input[name="single_day_selection"]:checked');
+                    if (selectedDayRadio) {
+                        const dayNumber = selectedDayRadio.value.replace('day', '');
+                        dayInfo = `Day ${dayNumber}`;
+                    }
+                }
+                
+                trackAddToCart(ticketTypeSelect.value, ticketName, quantity, price, dayInfo);
+            }
         }
     });
 });
@@ -778,6 +822,26 @@ document.querySelectorAll('.quantity-decrease').forEach(button => {
         if (currentValue > 1) {
             input.value = currentValue - 1;
             calculatePricing();
+            
+            // Track AddToCart when quantity decreases (if ticket is selected)
+            const ticketTypeSelect = document.getElementById('ticket_type_id');
+            if (ticketTypeSelect && ticketTypeSelect.value) {
+                const selectedOption = ticketTypeSelect.options[ticketTypeSelect.selectedIndex];
+                const price = parseFloat(selectedOption.dataset.price) || 0;
+                const quantity = parseInt(input.value) || 1;
+                const ticketName = selectedOption.text.split(' - ')[0];
+                
+                let dayInfo = null;
+                if (eventData.isMultiDay) {
+                    const selectedDayRadio = document.querySelector('input[name="single_day_selection"]:checked');
+                    if (selectedDayRadio) {
+                        const dayNumber = selectedDayRadio.value.replace('day', '');
+                        dayInfo = `Day ${dayNumber}`;
+                    }
+                }
+                
+                trackAddToCart(ticketTypeSelect.value, ticketName, quantity, price, dayInfo);
+            }
         }
     });
 });
@@ -791,6 +855,18 @@ document.querySelectorAll('.day-quantity-increase').forEach(button => {
         if (currentValue < {{ $maxTicketsPerOrder }}) {
             input.value = currentValue + 1;
             calculatePricing();
+            
+            // Track AddToCart when day quantity increases (if ticket is selected)
+            const ticketSelect = document.getElementById(`day${day}_ticket_type`);
+            if (ticketSelect && ticketSelect.value) {
+                const selectedOption = ticketSelect.options[ticketSelect.selectedIndex];
+                const price = parseFloat(selectedOption.dataset.price) || 0;
+                const quantity = parseInt(input.value) || 1;
+                const ticketName = selectedOption.text.split(' - ')[0];
+                const dayInfo = `Day ${day}`;
+                
+                trackAddToCart(ticketSelect.value, ticketName, quantity, price, dayInfo);
+            }
         }
     });
 });
@@ -803,16 +879,89 @@ document.querySelectorAll('.day-quantity-decrease').forEach(button => {
         if (currentValue > 1) {
             input.value = currentValue - 1;
             calculatePricing();
+            
+            // Track AddToCart when day quantity decreases (if ticket is selected)
+            const ticketSelect = document.getElementById(`day${day}_ticket_type`);
+            if (ticketSelect && ticketSelect.value) {
+                const selectedOption = ticketSelect.options[ticketSelect.selectedIndex];
+                const price = parseFloat(selectedOption.dataset.price) || 0;
+                const quantity = parseInt(input.value) || 1;
+                const ticketName = selectedOption.text.split(' - ')[0];
+                const dayInfo = `Day ${day}`;
+                
+                trackAddToCart(ticketSelect.value, ticketName, quantity, price, dayInfo);
+            }
         }
     });
 });
 
+// Function to track AddToCart event
+function trackAddToCart(ticketId, ticketName, quantity, price, dayInfo = null) {
+    if (typeof fbq !== 'undefined' && ticketId && quantity > 0) {
+        const contentName = dayInfo ? `${ticketName} - ${dayInfo}` : ticketName;
+        
+        fbq('track', 'AddToCart', {
+            value: price * quantity,
+            currency: 'MYR',
+            content_ids: [ticketId],
+            content_name: contentName,
+            content_type: 'product',
+            num_items: quantity
+        });
+        
+        console.log('Meta Pixel AddToCart event tracked:', {
+            ticket_id: ticketId,
+            ticket_name: contentName,
+            quantity: quantity,
+            value: price * quantity,
+            currency: 'MYR'
+        });
+    }
+}
+
 // Ticket type change handler
-ticketTypeSelect.addEventListener('change', calculatePricing);
+ticketTypeSelect.addEventListener('change', function() {
+    calculatePricing();
+    
+    // Track AddToCart when ticket is selected
+    if (this.value) {
+        const selectedOption = this.options[this.selectedIndex];
+        const price = parseFloat(selectedOption.dataset.price) || 0;
+        const quantity = parseInt(quantityInput.value) || 1;
+        const ticketName = selectedOption.text.split(' - ')[0];
+        
+        // Determine day info for single day purchase
+        let dayInfo = null;
+        if (eventData.isMultiDay) {
+            const selectedDayRadio = document.querySelector('input[name="single_day_selection"]:checked');
+            if (selectedDayRadio) {
+                const dayNumber = selectedDayRadio.value.replace('day', '');
+                dayInfo = `Day ${dayNumber}`;
+            }
+        }
+        
+        trackAddToCart(this.value, ticketName, quantity, price, dayInfo);
+    }
+});
 
 // Day ticket type change handlers
 document.querySelectorAll('.day-ticket-select').forEach(select => {
-    select.addEventListener('change', calculatePricing);
+    select.addEventListener('change', function() {
+        calculatePricing();
+        
+        // Track AddToCart when day ticket is selected
+        if (this.value) {
+            const selectedOption = this.options[this.selectedIndex];
+            const price = parseFloat(selectedOption.dataset.price) || 0;
+            const dayNumber = this.id.replace('day', '').replace('_ticket_type', '');
+            const quantityInput = document.getElementById(`day${dayNumber}_quantity`);
+            const quantity = parseInt(quantityInput ? quantityInput.value : 1) || 1;
+            const ticketName = selectedOption.text.split(' - ')[0];
+            const dayInfo = `Day ${dayNumber}`;
+            
+            trackAddToCart(this.value, ticketName, quantity, price, dayInfo);
+        }
+    });
 });
 
 // Day checkbox change handlers
@@ -825,7 +974,22 @@ document.querySelectorAll('.day-checkbox').forEach(checkbox => {
 
 // Day quantity change handlers
 document.querySelectorAll('.day-quantity').forEach(input => {
-    input.addEventListener('change', calculatePricing);
+    input.addEventListener('change', function() {
+        calculatePricing();
+        
+        // Track AddToCart when day quantity changes (if ticket is selected)
+        const dayNumber = this.id.replace('day', '').replace('_quantity', '');
+        const ticketSelect = document.getElementById(`day${dayNumber}_ticket_type`);
+        if (ticketSelect && ticketSelect.value) {
+            const selectedOption = ticketSelect.options[ticketSelect.selectedIndex];
+            const price = parseFloat(selectedOption.dataset.price) || 0;
+            const quantity = parseInt(this.value) || 1;
+            const ticketName = selectedOption.text.split(' - ')[0];
+            const dayInfo = `Day ${dayNumber}`;
+            
+            trackAddToCart(ticketSelect.value, ticketName, quantity, price, dayInfo);
+        }
+    });
     input.addEventListener('input', calculatePricing);
 });
 
@@ -1144,6 +1308,141 @@ document.getElementById('ticket-form').addEventListener('submit', function(e) {
             allowEscapeKey: true
         });
         return;
+    }
+    
+    // Track Meta Pixel InitiateCheckout event
+    if (typeof fbq !== 'undefined') {
+        // Recalculate pricing to ensure we have latest values
+        calculatePricing();
+        
+        const purchaseType = document.getElementById('purchase_type_input').value;
+        let contentIds = [];
+        let contentNames = [];
+        let numItems = 0;
+        let totalValue = 0;
+        
+        // Get total value from the displayed total (more reliable after recalculating)
+        const totalText = document.getElementById('total').textContent;
+        const totalMatch = totalText.match(/RM([\d,]+\.?\d*)/);
+        if (totalMatch) {
+            totalValue = parseFloat(totalMatch[1].replace(/,/g, ''));
+        }
+        
+        // Fallback: calculate from form data if parsing fails
+        if (!totalValue || isNaN(totalValue)) {
+            // Calculate manually as fallback
+            let subtotal = 0;
+            if (purchaseType === 'single_day') {
+                const ticketTypeSelect = document.getElementById('ticket_type_id');
+                const quantity = parseInt(document.getElementById('quantity').value) || 0;
+                if (ticketTypeSelect && ticketTypeSelect.value) {
+                    const selectedOption = ticketTypeSelect.options[ticketTypeSelect.selectedIndex];
+                    const price = parseFloat(selectedOption.dataset.price) || 0;
+                    subtotal = price * quantity;
+                }
+            } else {
+                // Multi-day calculation
+                const day1Enabled = document.getElementById('day1_enabled_input').value === '1';
+                const day2Enabled = document.getElementById('day2_enabled_input').value === '1';
+                
+                if (day1Enabled) {
+                    const day1Select = document.getElementById('day1_ticket_type');
+                    const day1Quantity = parseInt(document.getElementById('day1_quantity_input').value) || 0;
+                    if (day1Select && day1Select.value) {
+                        const selectedOption = day1Select.options[day1Select.selectedIndex];
+                        const price = parseFloat(selectedOption.dataset.price) || 0;
+                        subtotal += price * day1Quantity;
+                    }
+                }
+                
+                if (day2Enabled) {
+                    const day2Select = document.getElementById('day2_ticket_type');
+                    const day2Quantity = parseInt(document.getElementById('day2_quantity_input').value) || 0;
+                    if (day2Select && day2Select.value) {
+                        const selectedOption = day2Select.options[day2Select.selectedIndex];
+                        const price = parseFloat(selectedOption.dataset.price) || 0;
+                        subtotal += price * day2Quantity;
+                    }
+                }
+                
+                // Apply combo discount if applicable
+                if (day1Enabled && day2Enabled && eventData.comboDiscountEnabled) {
+                    subtotal = subtotal * (1 - eventData.comboDiscountPercentage / 100);
+                }
+            }
+            
+            // Add service fee and tax
+            const serviceFee = Math.round(subtotal * (eventData.serviceFeePercentage / 100) * 100) / 100;
+            const tax = Math.round((subtotal + serviceFee) * (eventData.taxPercentage / 100) * 100) / 100;
+            totalValue = Math.round((subtotal + serviceFee + tax) * 100) / 100;
+        }
+        
+        if (purchaseType === 'single_day') {
+            const ticketTypeSelect = document.getElementById('ticket_type_id');
+            const quantity = parseInt(document.getElementById('quantity').value) || 0;
+            
+            if (ticketTypeSelect && ticketTypeSelect.value) {
+                const selectedOption = ticketTypeSelect.options[ticketTypeSelect.selectedIndex];
+                contentIds.push(ticketTypeSelect.value);
+                contentNames.push(selectedOption.text.split(' - ')[0]);
+                numItems = quantity;
+            }
+        } else {
+            // Multi-day purchase
+            const day1Enabled = document.getElementById('day1_enabled_input').value === '1';
+            const day2Enabled = document.getElementById('day2_enabled_input').value === '1';
+            
+            if (day1Enabled) {
+                const day1TicketType = document.getElementById('day1_ticket_type_input').value;
+                const day1Quantity = parseInt(document.getElementById('day1_quantity_input').value) || 0;
+                
+                if (day1TicketType) {
+                    const day1Select = document.getElementById('day1_ticket_type');
+                    if (day1Select) {
+                        const selectedOption = day1Select.options[day1Select.selectedIndex];
+                        contentIds.push(day1TicketType);
+                        contentNames.push(selectedOption ? selectedOption.text.split(' - ')[0] : 'Day 1 Ticket');
+                        numItems += day1Quantity;
+                    }
+                }
+            }
+            
+            if (day2Enabled) {
+                const day2TicketType = document.getElementById('day2_ticket_type_input').value;
+                const day2Quantity = parseInt(document.getElementById('day2_quantity_input').value) || 0;
+                
+                if (day2TicketType) {
+                    const day2Select = document.getElementById('day2_ticket_type');
+                    if (day2Select) {
+                        const selectedOption = day2Select.options[day2Select.selectedIndex];
+                        contentIds.push(day2TicketType);
+                        contentNames.push(selectedOption ? selectedOption.text.split(' - ')[0] : 'Day 2 Ticket');
+                        numItems += day2Quantity;
+                    }
+                }
+            }
+        }
+        
+        // Track InitiateCheckout event
+        if (totalValue > 0 && numItems > 0) {
+            fbq('track', 'InitiateCheckout', {
+                value: totalValue,
+                currency: 'MYR',
+                content_ids: contentIds,
+                content_name: contentNames.length > 0 ? contentNames.join(', ') : '{{ addslashes($event->name) }}',
+                content_type: 'product',
+                num_items: numItems,
+                event_name: '{{ addslashes($event->name) }}'
+            });
+            
+            console.log('Meta Pixel InitiateCheckout event tracked:', {
+                value: totalValue,
+                currency: 'MYR',
+                content_ids: contentIds,
+                num_items: numItems,
+                event_name: '{{ addslashes($event->name) }}'
+            });
+        }
     }
     
     // Show loading state

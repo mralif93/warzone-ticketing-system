@@ -84,18 +84,27 @@ class AuthController extends Controller
                 ])->onlyInput('email');
             }
             
-            // Log the login
-            \App\Models\AuditLog::create([
-                'user_id' => $user->id,
-                'action' => 'login',
-                'table_name' => 'users',
-                'record_id' => $user->id,
-                'old_values' => ['last_login_at' => $user->last_login_at ?? null],
-                'new_values' => ['last_login_at' => now()],
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-                'description' => "User {$user->name} logged in"
-            ]);
+            // Log the login (wrap in try-catch to prevent login failure if audit log fails)
+            try {
+                \App\Models\AuditLog::create([
+                    'user_id' => $user->id,
+                    'action' => 'login',
+                    'table_name' => 'users',
+                    'record_id' => $user->id,
+                    'old_values' => ['last_login_at' => $user->last_login_at ?? null],
+                    'new_values' => ['last_login_at' => now()],
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'description' => "User {$user->name} logged in"
+                ]);
+            } catch (\Exception $e) {
+                // Log the error but don't break the login flow
+                \Log::error('Failed to create audit log for login', [
+                    'user_id' => $user->id,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+            }
             
             if ($user->hasRole('administrator')) {
                 return redirect()->intended(route('admin.dashboard'))->with('success', 'Login successful!');
@@ -165,23 +174,32 @@ class AuthController extends Controller
             'role' => 'Customer', // Default role
         ]);
 
-        // Log the user registration
-        \App\Models\AuditLog::create([
-            'user_id' => $user->id,
-            'action' => 'create',
-            'table_name' => 'users',
-            'record_id' => $user->id,
-            'old_values' => null,
-            'new_values' => [
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role,
-                'phone' => $user->phone
-            ],
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'description' => "New customer registered: {$user->name}"
-        ]);
+        // Log the user registration (wrap in try-catch to prevent registration failure)
+        try {
+            \App\Models\AuditLog::create([
+                'user_id' => $user->id,
+                'action' => 'create',
+                'table_name' => 'users',
+                'record_id' => $user->id,
+                'old_values' => null,
+                'new_values' => [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                    'phone' => $user->phone
+                ],
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'description' => "New customer registered: {$user->name}"
+            ]);
+        } catch (\Exception $e) {
+            // Log the error but don't break the registration flow
+            \Log::error('Failed to create audit log for registration', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
 
         Auth::login($user);
 
@@ -306,19 +324,27 @@ public function logout(Request $request)
     {
         $user = Auth::user();
         
-        // Log the logout before session is invalidated
+        // Log the logout before session is invalidated (wrap in try-catch)
         if ($user) {
-            \App\Models\AuditLog::create([
-                'user_id' => $user->id,
-                'action' => 'logout',
-                'table_name' => 'users',
-                'record_id' => $user->id,
-                'old_values' => null,
-                'new_values' => ['last_logout_at' => now()],
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-                'description' => "User {$user->name} logged out"
-            ]);
+            try {
+                \App\Models\AuditLog::create([
+                    'user_id' => $user->id,
+                    'action' => 'logout',
+                    'table_name' => 'users',
+                    'record_id' => $user->id,
+                    'old_values' => null,
+                    'new_values' => ['last_logout_at' => now()],
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'description' => "User {$user->name} logged out"
+                ]);
+            } catch (\Exception $e) {
+                // Log the error but don't break the logout flow
+                \Log::error('Failed to create audit log for logout', [
+                    'user_id' => $user->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
         }
         
         Auth::logout();

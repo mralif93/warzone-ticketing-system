@@ -43,7 +43,10 @@ class CustomerController extends Controller
             'total_tickets' => PurchaseTicket::whereHas('order', function($query) use ($user) {
                 $query->where('user_id', $user->id);
             })->count(),
-            'total_spent' => Order::where('user_id', $user->id)->sum('total_amount'),
+            // Only count paid orders for total spent (exclude pending, cancelled, refunded)
+            'total_spent' => Order::where('user_id', $user->id)
+                ->where('status', 'paid')
+                ->sum('total_amount'),
             'upcoming_events' => $recentTickets->where('event.date_time', '>', now())->count()
         ];
 

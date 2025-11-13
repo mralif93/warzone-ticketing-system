@@ -1034,53 +1034,53 @@ class TicketController extends Controller
             abort(403, 'Unauthorized access to order.');
         }
 
-        // Update order status to paid if it's still pending
+        // Update order status to paid if it's still pending AND payment is verified
+        // Only mark as paid if a successful payment record exists (security measure)
         if ($order->status === 'pending') {
-            DB::beginTransaction();
-            try {
-                // Update order status
-                $order->update([
-                    'status' => 'paid',
-                    'payment_method' => 'stripe',
-                    'paid_at' => now(),
-                ]);
-                
-                // Update all purchase ticket statuses to 'active'
-                $order->purchaseTickets()->update(['status' => 'active']);
-                
-                // Create payment record
-                \App\Models\Payment::create([
-                    'order_id' => $order->id,
-                    'method' => 'stripe',
-                    'amount' => $order->total_amount,
-                    'currency' => 'myr',
-                    'status' => 'succeeded',
-                    'processed_at' => now(),
-                    'payment_date' => now(),
-                    'transaction_id' => 'STRIPE_' . $order->id . '_' . time(),
-                    'notes' => 'Payment completed via Stripe payment gateway',
-                ]);
-                
-                DB::commit();
-                
-                // Log the payment
-                \Log::info('Order payment completed', [
+            // Check if payment record exists with succeeded status
+            $payment = \App\Models\Payment::where('order_id', $order->id)
+                ->where('status', 'succeeded')
+                ->first();
+            
+            if ($payment) {
+                // Payment verified - safe to mark order as paid
+                DB::beginTransaction();
+                try {
+                    $order->update([
+                        'status' => 'paid',
+                        'payment_method' => $payment->method ?? 'stripe',
+                        'paid_at' => $payment->payment_date ?? $payment->processed_at ?? now(),
+                    ]);
+                    
+                    // Note: payment_id field doesn't exist in orders table
+                    // Relationship is maintained via payments.order_id foreign key
+                    
+                    // Update all purchase ticket statuses to 'active'
+                    $order->purchaseTickets()->update(['status' => 'active']);
+                    
+                    DB::commit();
+                    
+                    \Log::info('Order marked as paid via success page (payment verified)', [
+                        'order_id' => $order->id,
+                        'payment_id' => $payment->id,
+                        'order_number' => $order->order_number,
+                    ]);
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    \Log::error('Payment processing error in success page', [
+                        'order_id' => $order->id,
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+                }
+            } else {
+                // No verified payment found - order remains pending
+                // This is expected if payment handler hasn't run yet
+                \Log::info('Success page accessed but no verified payment found', [
                     'order_id' => $order->id,
                     'order_number' => $order->order_number,
-                    'user_id' => $order->user_id,
-                    'total_amount' => $order->total_amount,
-                    'payment_method' => 'stripe'
+                    'note' => 'Order remains pending until payment is verified'
                 ]);
-                
-            } catch (\Exception $e) {
-                DB::rollBack();
-                \Log::error('Payment processing error', [
-                    'order_id' => $order->id,
-                    'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString()
-                ]);
-                
-                // Still show success page but log the error
             }
         }
 

@@ -30,9 +30,9 @@ class CustomerController extends Controller
             ->orderBy('updated_at', 'desc') // Then by most recently updated
             ->paginate(10);
 
-        // Get upcoming events
+        // Get upcoming events (include events happening today)
         $upcomingEvents = Event::where('status', 'on_sale')
-            ->where('date_time', '>', now())
+            ->where('date_time', '>=', now()->startOfDay())
             ->orderBy('date_time')
             ->take(3)
             ->get();

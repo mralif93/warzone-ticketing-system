@@ -288,20 +288,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const endDateInput = document.getElementById('end_date');
     const comboDiscountEnabled = document.getElementById('combo_discount_enabled');
     const comboDiscountPercentage = document.getElementById('combo_discount_percentage');
-    
-    // Set minimum date to today
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    
-    const minDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
-    dateInput.min = minDateTime;
-    startDateInput.min = minDateTime;
-    endDateInput.min = minDateTime;
-    
+
+    // No minimum date restriction for admin - allow editing past events
+
     // Handle combo discount checkbox
     function toggleComboDiscount() {
         const isEnabled = comboDiscountEnabled.checked;

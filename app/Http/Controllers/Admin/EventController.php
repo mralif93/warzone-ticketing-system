@@ -160,7 +160,7 @@ class EventController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'date_time' => 'required|date|after:now',
+            'date_time' => 'required|date', // Allow editing past events for admin
             'start_date' => 'nullable|date|after_or_equal:date_time',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'venue' => 'nullable|string|max:255',

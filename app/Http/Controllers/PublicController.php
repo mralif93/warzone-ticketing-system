@@ -12,11 +12,11 @@ class PublicController extends Controller
      */
     public function home()
     {
-        // Get the default event or the first upcoming event
+        // Get the default event or the first upcoming event (include events happening today)
         $mainEvent = Event::where('default', true)
             ->orWhere(function($query) {
                 $query->where('status', 'on_sale')
-                      ->where('date_time', '>', now());
+                      ->where('date_time', '>=', now()->startOfDay());
             })
             ->with(['tickets' => function($query) {
                 $query->whereIn('status', ['Active', 'active']);

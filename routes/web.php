@@ -148,6 +148,7 @@ Route::middleware(['auth'])->group(function () {
         // Reports
         Route::get('/reports', [AdminReportController::class, 'index'])->name('reports');
         Route::get('/reports/export', [AdminReportController::class, 'export'])->name('reports.export');
+        Route::get('/reports/verify', fn() => view('admin.reports.verify'))->name('reports.verify');
         
         // Settings
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');

@@ -106,12 +106,13 @@ class ReportController extends Controller
 
     /**
      * Get revenue data for the specified date range
+     * Uses payments table for accurate revenue tracking
      */
     private function getRevenueData($dateFrom, $dateTo)
     {
-        return PurchaseTicket::whereIn('status', ['sold', 'active', 'scanned'])
+        return Payment::where('status', 'succeeded')
             ->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
-            ->selectRaw('DATE(created_at) as date, SUM(price_paid) as total')
+            ->selectRaw('DATE(created_at) as date, SUM(amount) as total')
             ->groupBy('date')
             ->orderBy('date')
             ->get();
@@ -119,11 +120,15 @@ class ReportController extends Controller
 
     /**
      * Get ticket sales by event
+     * Only counts tickets from paid orders (orders with successful payments)
      */
     private function getTicketSalesByEvent($dateFrom, $dateTo)
     {
-        return PurchaseTicket::whereIn('status', ['sold', 'active', 'scanned'])
-            ->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+        return PurchaseTicket::whereIn('purchase.status', ['sold', 'active', 'scanned'])
+            ->whereBetween('purchase.created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+            ->whereHas('order', function($query) {
+                $query->where('status', 'paid');
+            })
             ->with('event')
             ->get()
             ->groupBy('event.name')
@@ -212,6 +217,7 @@ class ReportController extends Controller
 
     /**
      * Get monthly trends
+     * Uses payments table for accurate revenue tracking
      */
     private function getMonthlyTrends()
     {
@@ -220,11 +226,14 @@ class ReportController extends Controller
             $date = now()->subMonths($i);
             $months->push([
                 'month' => $date->format('M Y'),
-                'revenue' => PurchaseTicket::whereIn('status', ['sold', 'active', 'scanned'])
+                'revenue' => Payment::where('status', 'succeeded')
                     ->whereYear('created_at', $date->year)
                     ->whereMonth('created_at', $date->month)
-                    ->sum('price_paid'),
+                    ->sum('amount'),
                 'tickets' => PurchaseTicket::whereIn('status', ['sold', 'active', 'scanned'])
+                    ->whereHas('order', function($query) {
+                        $query->where('status', 'paid');
+                    })
                     ->whereYear('created_at', $date->year)
                     ->whereMonth('created_at', $date->month)
                     ->count(),
@@ -238,14 +247,21 @@ class ReportController extends Controller
 
     /**
      * Export revenue data to CSV
+     * Uses payments table for accurate revenue tracking
      */
     private function exportRevenueData($file, $dateFrom, $dateTo)
     {
-        fputcsv($file, ['Date', 'Revenue (RM)']);
-        
-        $revenueData = $this->getRevenueData($dateFrom, $dateTo);
+        fputcsv($file, ['Date', 'Revenue (RM)', 'Payments Count']);
+
+        $revenueData = Payment::where('status', 'succeeded')
+            ->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+            ->selectRaw('DATE(created_at) as date, SUM(amount) as total, COUNT(*) as count')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
         foreach ($revenueData as $data) {
-            fputcsv($file, [$data->date, number_format($data->total, 2)]);
+            fputcsv($file, [$data->date, number_format($data->total, 2), $data->count]);
         }
     }
 

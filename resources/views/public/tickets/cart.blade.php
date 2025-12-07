@@ -844,7 +844,6 @@ function initializeTicketOptions() {
                 name: option.dataset.name || option.textContent.split(' - ')[0].trim()
             };
             originalTicketOptions.push(ticketData);
-            console.log('DEBUG initializeTicketOptions:', ticketData.name, 'Day1:', ticketData.day1Available, 'Day2:', ticketData.day2Available);
         }
     });
 }
@@ -863,8 +862,6 @@ function updateTicketDropdownForSelectedDay() {
     const selectedDay = selectedDayRadio.value; // 'day1' or 'day2'
     const dayNumber = selectedDay === 'day1' ? 1 : 2;
 
-    console.log('DEBUG updateTicketDropdownForSelectedDay: Selected day =', selectedDay, 'dayNumber =', dayNumber);
-
     // Store current selection
     const currentSelection = ticketSelect.value;
 
@@ -876,7 +873,6 @@ function updateTicketDropdownForSelectedDay() {
     // Re-add only options with availability for selected day
     originalTicketOptions.forEach(ticket => {
         const dayAvailable = dayNumber === 1 ? ticket.day1Available : ticket.day2Available;
-        console.log('DEBUG filtering:', ticket.name, 'dayAvailable =', dayAvailable, '(day1:', ticket.day1Available, 'day2:', ticket.day2Available, ')');
 
         if (dayAvailable > 0) {
             const option = document.createElement('option');
@@ -895,8 +891,6 @@ function updateTicketDropdownForSelectedDay() {
             }
 
             ticketSelect.appendChild(option);
-        } else {
-            console.log('DEBUG HIDDEN:', ticket.name, 'because dayAvailable =', dayAvailable);
         }
     });
 

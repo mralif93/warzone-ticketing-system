@@ -4,11 +4,13 @@
 @section('page-subtitle', 'Manage all tickets and sales')
 
 @section('content')
-<!-- DEBUG: Overselling Diagnostic Report -->
+<!-- DEBUG: Overselling Diagnostic Report with Order Investigation -->
 <script>
 console.log('=== OVERSELLING DIAGNOSTIC REPORT ===');
 @php
 $debugTickets = \App\Models\Ticket::whereNull('deleted_at')->get();
+$oversoldTickets = [];
+
 foreach($debugTickets as $debugTicket) {
     $debugEvent = $debugTicket->event;
     if (!$debugEvent || !$debugEvent->isMultiDay()) continue;
@@ -18,6 +20,8 @@ foreach($debugTickets as $debugTicket) {
 
     $day1Name = $debugEventDays[0]['day_name'];
     $day2Name = $debugEventDays[1]['day_name'];
+    $day1Date = $debugEventDays[0]['date'];
+    $day2Date = $debugEventDays[1]['date'];
 
     // Count ALL statuses for Day 1
     $day1All = \App\Models\PurchaseTicket::where('ticket_type_id', $debugTicket->id)
@@ -68,12 +72,118 @@ foreach($debugTickets as $debugTicket) {
             'oversold_by' => $day2Oversold ? $day2Sold - $debugTicket->total_seats : 0,
         ],
     ];
+
+    // Track oversold tickets for order investigation
+    if ($day1Oversold || $day2Oversold) {
+        $oversoldTickets[] = [
+            'ticket' => $debugTicket,
+            'day1_oversold' => $day1Oversold,
+            'day2_oversold' => $day2Oversold,
+            'day1_name' => $day1Name,
+            'day2_name' => $day2Name,
+            'day1_date' => $day1Date,
+            'day2_date' => $day2Date,
+            'max_seats' => $debugTicket->total_seats,
+        ];
+    }
 @endphp
 console.log(@json($ticketInfo));
 @php
 }
 @endphp
 console.log('=== END DIAGNOSTIC ===');
+
+// === OVERSOLD ORDERS INVESTIGATION ===
+@if(count($oversoldTickets) > 0)
+console.log('%c=== OVERSOLD ORDERS INVESTIGATION ===', 'background: #ff0000; color: white; font-size: 14px; padding: 5px;');
+@foreach($oversoldTickets as $oversoldInfo)
+@php
+    $ticket = $oversoldInfo['ticket'];
+    $maxSeats = $oversoldInfo['max_seats'];
+
+    // Check Day 2 if oversold (most common case based on your data)
+    if ($oversoldInfo['day2_oversold']) {
+        $dayName = $oversoldInfo['day2_name'];
+        $dayDate = $oversoldInfo['day2_date'];
+        $dayLabel = 'Day 2';
+    } else {
+        $dayName = $oversoldInfo['day1_name'];
+        $dayDate = $oversoldInfo['day1_date'];
+        $dayLabel = 'Day 1';
+    }
+
+    // Get all orders for this ticket type on the oversold day
+    $orderData = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
+        ->where('event_day_name', $dayName)
+        ->whereIn('status', ['sold', 'active', 'scanned', 'pending'])
+        ->join('orders', 'purchase.order_id', '=', 'orders.id')
+        ->select([
+            'orders.id as order_id',
+            'orders.order_number',
+            'orders.customer_email',
+            'orders.status as order_status',
+            'orders.created_at',
+            'orders.payment_method',
+            \DB::raw('COUNT(*) as ticket_count')
+        ])
+        ->groupBy('orders.id', 'orders.order_number', 'orders.customer_email', 'orders.status', 'orders.created_at', 'orders.payment_method')
+        ->orderBy('orders.created_at')
+        ->get();
+
+    // Calculate running total and find oversold orders
+    $runningTotal = 0;
+    $orderTimeline = [];
+    $oversoldOrders = [];
+
+    foreach ($orderData as $order) {
+        $runningTotal += $order->ticket_count;
+        $isOversold = $runningTotal > $maxSeats;
+
+        $orderTimeline[] = [
+            'order_id' => $order->order_id,
+            'order_number' => $order->order_number,
+            'email' => $order->customer_email,
+            'status' => $order->order_status,
+            'payment' => $order->payment_method,
+            'created_at' => $order->created_at->format('Y-m-d H:i:s'),
+            'tickets' => $order->ticket_count,
+            'running_total' => $runningTotal,
+            'oversold' => $isOversold,
+        ];
+
+        if ($isOversold) {
+            $oversoldOrders[] = [
+                'order_id' => $order->order_id,
+                'order_number' => $order->order_number,
+                'email' => $order->customer_email,
+                'status' => $order->order_status,
+                'payment' => $order->payment_method,
+                'created_at' => $order->created_at->format('Y-m-d H:i:s'),
+                'tickets' => $order->ticket_count,
+            ];
+        }
+    }
+
+    $investigationData = [
+        'ticket_name' => $ticket->name,
+        'ticket_id' => $ticket->id,
+        'day' => $dayLabel,
+        'max_seats' => $maxSeats,
+        'total_sold' => $runningTotal,
+        'oversold_by' => max(0, $runningTotal - $maxSeats),
+        'total_orders' => count($orderTimeline),
+        'oversold_orders_count' => count($oversoldOrders),
+        'order_timeline' => $orderTimeline,
+        'oversold_orders' => $oversoldOrders,
+    ];
+@endphp
+console.log('%c{{ $ticket->name }} - {{ $dayLabel }} OVERSOLD', 'color: red; font-weight: bold;');
+console.log(@json($investigationData));
+console.table(@json($orderTimeline));
+console.log('%cOversold Orders (Need Attention):', 'color: orange; font-weight: bold;');
+console.table(@json($oversoldOrders));
+@endforeach
+@endif
 </script>
 <!-- END DEBUG -->
 

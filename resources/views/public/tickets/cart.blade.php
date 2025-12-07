@@ -831,13 +831,9 @@ let originalTicketOptions = [];
 // Initialize original options on page load
 function initializeTicketOptions() {
     const ticketSelect = document.getElementById('ticket_type_id');
-    if (!ticketSelect) {
-        console.log('initializeTicketOptions: ticket_type_id select not found');
-        return;
-    }
+    if (!ticketSelect) return;
 
     const options = ticketSelect.querySelectorAll('option');
-    console.log('initializeTicketOptions: Found ' + options.length + ' options');
     options.forEach(option => {
         if (option.value) { // Skip placeholder
             const ticketData = {
@@ -848,35 +844,24 @@ function initializeTicketOptions() {
                 total: option.dataset.total || '0',
                 name: option.dataset.name || option.textContent.split(' - ')[0].trim()
             };
-            console.log('initializeTicketOptions: Adding ticket:', ticketData);
             originalTicketOptions.push(ticketData);
         }
     });
-    console.log('initializeTicketOptions: Total stored:', originalTicketOptions.length);
 }
 
 // Function to update ticket dropdown options based on selected day
 function updateTicketDropdownForSelectedDay() {
-    console.log('updateTicketDropdownForSelectedDay called, isMultiDay:', eventData.isMultiDay);
     if (!eventData.isMultiDay) return;
 
     const ticketSelect = document.getElementById('ticket_type_id');
-    if (!ticketSelect) {
-        console.log('updateTicketDropdownForSelectedDay: ticket_type_id not found');
-        return;
-    }
+    if (!ticketSelect) return;
 
     // Find selected day
     const selectedDayRadio = document.querySelector('input[name="single_day_selection"]:checked');
-    if (!selectedDayRadio) {
-        console.log('updateTicketDropdownForSelectedDay: no day radio selected');
-        return;
-    }
+    if (!selectedDayRadio) return;
 
     const selectedDay = selectedDayRadio.value; // 'day1' or 'day2'
     const dayNumber = selectedDay === 'day1' ? 1 : 2;
-    console.log('updateTicketDropdownForSelectedDay: selectedDay=' + selectedDay + ', dayNumber=' + dayNumber);
-    console.log('updateTicketDropdownForSelectedDay: originalTicketOptions count=' + originalTicketOptions.length);
 
     // Store current selection
     const currentSelection = ticketSelect.value;
@@ -887,10 +872,8 @@ function updateTicketDropdownForSelectedDay() {
     }
 
     // Re-add only options with availability for selected day
-    let addedCount = 0;
     originalTicketOptions.forEach(ticket => {
         const dayAvailable = dayNumber === 1 ? ticket.day1Available : ticket.day2Available;
-        console.log('  Ticket: ' + ticket.name + ', day' + dayNumber + 'Available=' + dayAvailable);
 
         if (dayAvailable > 0) {
             const option = document.createElement('option');
@@ -909,10 +892,8 @@ function updateTicketDropdownForSelectedDay() {
             }
 
             ticketSelect.appendChild(option);
-            addedCount++;
         }
     });
-    console.log('updateTicketDropdownForSelectedDay: Added ' + addedCount + ' options to dropdown');
 
     // If previous selection is no longer available, reset
     if (currentSelection && ticketSelect.value !== currentSelection) {
@@ -1104,14 +1085,6 @@ function trackAddToCart(ticketId, ticketName, quantity, price, dayInfo = null) {
             content_name: contentName,
             content_type: 'product',
             num_items: quantity
-        });
-        
-        console.log('Meta Pixel AddToCart event tracked:', {
-            ticket_id: ticketId,
-            ticket_name: contentName,
-            quantity: quantity,
-            value: price * quantity,
-            currency: 'MYR'
         });
     }
 }

@@ -334,8 +334,10 @@
                                         <option value="">Choose your preferred ticket type</option>
                                         @php
                                             $eventDays = $event->isMultiDay() ? $event->getEventDays() : [];
+                                            // For multi-day events, include 'sold_out' tickets too since they may have per-day availability
+                                            $ticketStatuses = $event->isMultiDay() ? ['active', 'sold_out'] : ['active'];
                                         @endphp
-                                        @foreach($event->tickets->where('status', 'active') as $ticket)
+                                        @foreach($event->tickets->whereIn('status', $ticketStatuses) as $ticket)
                                             @php
                                                 // Calculate per-day availability for multi-day events
                                                 $day1Available = $ticket->total_seats;
@@ -500,7 +502,7 @@
                                                 name="day{{ $index + 1 }}_ticket_type"
                                                 class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary day-ticket-select text-sm bg-white shadow-sm transition-all duration-200 hover:border-gray-300">
                                             <option value="">Choose your preferred ticket type</option>
-                                            @foreach($event->tickets->where('status', 'active') as $ticket)
+                                            @foreach($event->tickets->whereIn('status', ['active', 'sold_out']) as $ticket)
                                                 @php
                                                     // Calculate day-specific availability using event_day (date)
                                                     $daySold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
@@ -822,6 +824,29 @@ function updateSingleDayRadioStates() {
     updateTicketDropdownForSelectedDay();
 }
 
+// Store original ticket options for rebuilding dropdown
+let originalTicketOptions = [];
+
+// Initialize original options on page load
+function initializeTicketOptions() {
+    const ticketSelect = document.getElementById('ticket_type_id');
+    if (!ticketSelect) return;
+
+    const options = ticketSelect.querySelectorAll('option');
+    options.forEach(option => {
+        if (option.value) { // Skip placeholder
+            originalTicketOptions.push({
+                value: option.value,
+                price: option.dataset.price || '0',
+                day1Available: parseInt(option.dataset.day1Available) || 0,
+                day2Available: parseInt(option.dataset.day2Available) || 0,
+                total: option.dataset.total || '0',
+                name: option.dataset.name || option.textContent.split(' - ')[0].trim()
+            });
+        }
+    });
+}
+
 // Function to update ticket dropdown options based on selected day
 function updateTicketDropdownForSelectedDay() {
     if (!eventData.isMultiDay) return;
@@ -839,32 +864,39 @@ function updateTicketDropdownForSelectedDay() {
     // Store current selection
     const currentSelection = ticketSelect.value;
 
-    // Loop through all options and show/hide based on per-day availability
-    const options = ticketSelect.querySelectorAll('option');
-    options.forEach(option => {
-        if (!option.value) return; // Skip placeholder option
+    // Clear all options except placeholder
+    while (ticketSelect.options.length > 1) {
+        ticketSelect.remove(1);
+    }
 
-        const day1Available = parseInt(option.dataset.day1Available) || 0;
-        const day2Available = parseInt(option.dataset.day2Available) || 0;
-        const ticketName = option.dataset.name || option.textContent.split(' - ')[0];
-        const price = option.dataset.price || '0';
-
-        // Get availability for selected day
-        const dayAvailable = dayNumber === 1 ? day1Available : day2Available;
+    // Re-add only options with availability for selected day
+    originalTicketOptions.forEach(ticket => {
+        const dayAvailable = dayNumber === 1 ? ticket.day1Available : ticket.day2Available;
 
         if (dayAvailable > 0) {
-            option.style.display = '';
-            option.disabled = false;
-            option.textContent = `${ticketName} - RM${parseFloat(price).toFixed(2)}`;
-        } else {
-            option.style.display = 'none';
-            option.disabled = true;
-            // If this was the selected option, clear selection
-            if (option.value === currentSelection) {
-                ticketSelect.value = '';
+            const option = document.createElement('option');
+            option.value = ticket.value;
+            option.dataset.price = ticket.price;
+            option.dataset.available = dayAvailable;
+            option.dataset.day1Available = ticket.day1Available;
+            option.dataset.day2Available = ticket.day2Available;
+            option.dataset.total = ticket.total;
+            option.dataset.name = ticket.name;
+            option.textContent = `${ticket.name} - RM${parseFloat(ticket.price).toFixed(2)}`;
+
+            // Restore selection if this was previously selected
+            if (ticket.value === currentSelection) {
+                option.selected = true;
             }
+
+            ticketSelect.appendChild(option);
         }
     });
+
+    // If previous selection is no longer available, reset
+    if (currentSelection && ticketSelect.value !== currentSelection) {
+        ticketSelect.value = '';
+    }
 }
 
 // Function to update multi-day checkbox visual states
@@ -1437,6 +1469,7 @@ document.getElementById('ticket-form').addEventListener('submit', function(e) {
 });
 
 // Initialize visual states and pricing on page load
+initializeTicketOptions(); // Store original ticket options for day-based filtering
 updateRadioButtonStates();
 updateSingleDayRadioStates();
 updateMultiDayCheckboxStates();

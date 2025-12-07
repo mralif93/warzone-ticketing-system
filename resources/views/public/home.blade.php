@@ -222,7 +222,7 @@
 
                 <!-- Tickets Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @foreach($mainEvent->tickets->where('status', 'active') as $ticket)
+                    @foreach($mainEvent->tickets->whereIn('status', ['active', 'sold_out']) as $ticket)
                     @php
                         // Calculate per-day availability
                         $totalSeats = $ticket->total_seats;

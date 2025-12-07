@@ -30,9 +30,16 @@ class CustomerController extends Controller
             ->orderBy('updated_at', 'desc') // Then by most recently updated
             ->paginate(10);
 
-        // Get upcoming events (include events happening today)
+        // Get upcoming events (include events happening today and multi-day events still in progress)
         $upcomingEvents = Event::where('status', 'on_sale')
-            ->where('date_time', '>=', now()->startOfDay())
+            ->where(function($query) {
+                $query->where('date_time', '>=', now()->startOfDay())
+                      ->orWhere(function($q) {
+                          // For multi-day events, check if end_date is today or in the future
+                          $q->whereNotNull('end_date')
+                            ->where('end_date', '>=', now()->startOfDay());
+                      });
+            })
             ->orderBy('date_time')
             ->take(3)
             ->get();

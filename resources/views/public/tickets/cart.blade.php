@@ -515,7 +515,7 @@
                                                         data-available="{{ $dayAvailable }}"
                                                         data-total="{{ $ticket->total_seats }}"
                                                         data-sold="{{ $daySold }}">
-                                                    {{ $ticket->name }} - RM{{ number_format($ticket->price, 2) }} ({{ $dayAvailable }} left)
+                                                    {{ $ticket->name }} - RM{{ number_format($ticket->price, 2) }}
                                                 </option>
                                                 @endif
                                             @endforeach
@@ -855,8 +855,7 @@ function updateTicketDropdownForSelectedDay() {
         if (dayAvailable > 0) {
             option.style.display = '';
             option.disabled = false;
-            // Update text to show per-day availability
-            option.textContent = `${ticketName} - RM${parseFloat(price).toFixed(2)} (${dayAvailable} left)`;
+            option.textContent = `${ticketName} - RM${parseFloat(price).toFixed(2)}`;
         } else {
             option.style.display = 'none';
             option.disabled = true;

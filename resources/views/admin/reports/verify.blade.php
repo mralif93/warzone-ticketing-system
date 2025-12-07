@@ -48,14 +48,14 @@
 
     // ALL TICKETS DETAILED (from paid orders) - for console
     $allTicketsDetailed = \App\Models\PurchaseTicket::whereHas('order', fn($q) => $q->where('status', 'paid'))
-        ->with(['order:id,order_number,status', 'ticket:id,name,price'])
+        ->with(['order:id,order_number,status', 'ticketType:id,name,price'])
         ->select('id', 'order_id', 'ticket_type_id', 'event_day_name', 'price_paid', 'status', 'created_at')
         ->orderBy('created_at')
         ->get()
         ->map(fn($t) => [
             'ticket_id' => $t->id,
             'order_number' => $t->order->order_number ?? 'N/A',
-            'ticket_type' => $t->ticket->name ?? 'N/A',
+            'ticket_type' => $t->ticketType->name ?? 'N/A',
             'event_day' => $t->event_day_name,
             'price_paid' => $t->price_paid,
             'status' => $t->status,

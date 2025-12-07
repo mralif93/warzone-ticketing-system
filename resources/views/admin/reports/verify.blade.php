@@ -20,17 +20,47 @@
     $paymentsByStatus = \App\Models\Payment::selectRaw('status, COUNT(*) as count, SUM(amount) as total')
         ->groupBy('status')->get()->keyBy('status');
     $succeededPayments = $paymentsByStatus->get('succeeded');
-    
+
     $paymentsByMethod = \App\Models\Payment::where('status', 'succeeded')
         ->selectRaw('method, COUNT(*) as count, SUM(amount) as total')
         ->groupBy('method')->get();
 
-    // TICKETS
+    // TICKETS BY STATUS
     $ticketsByStatus = \App\Models\PurchaseTicket::selectRaw('status, COUNT(*) as count, SUM(price_paid) as total')
         ->groupBy('status')->get()->keyBy('status');
-    
+
+    // TICKETS FROM PAID ORDERS
     $ticketsFromPaidOrders = \App\Models\PurchaseTicket::whereHas('order', fn($q) => $q->where('status', 'paid'))
         ->selectRaw('COUNT(*) as count, SUM(price_paid) as total')->first();
+
+    // TICKETS BY TICKET TYPE (from paid orders)
+    $ticketsByType = \App\Models\PurchaseTicket::whereHas('order', fn($q) => $q->where('status', 'paid'))
+        ->join('tickets', 'purchase.ticket_type_id', '=', 'tickets.id')
+        ->selectRaw('tickets.name as ticket_name, tickets.total_seats, COUNT(purchase.id) as sold_count, SUM(purchase.price_paid) as total_revenue')
+        ->groupBy('tickets.id', 'tickets.name', 'tickets.total_seats')
+        ->get();
+
+    // TICKETS BY EVENT DAY (from paid orders)
+    $ticketsByDay = \App\Models\PurchaseTicket::whereHas('order', fn($q) => $q->where('status', 'paid'))
+        ->selectRaw('event_day_name, COUNT(*) as count, SUM(price_paid) as total')
+        ->groupBy('event_day_name')
+        ->get();
+
+    // ALL TICKETS DETAILED (from paid orders) - for console
+    $allTicketsDetailed = \App\Models\PurchaseTicket::whereHas('order', fn($q) => $q->where('status', 'paid'))
+        ->with(['order:id,order_number,status', 'ticket:id,name,price'])
+        ->select('id', 'order_id', 'ticket_type_id', 'event_day_name', 'price_paid', 'status', 'created_at')
+        ->orderBy('created_at')
+        ->get()
+        ->map(fn($t) => [
+            'ticket_id' => $t->id,
+            'order_number' => $t->order->order_number ?? 'N/A',
+            'ticket_type' => $t->ticket->name ?? 'N/A',
+            'event_day' => $t->event_day_name,
+            'price_paid' => $t->price_paid,
+            'status' => $t->status,
+            'created_at' => $t->created_at->format('Y-m-d H:i:s'),
+        ]);
 
     // DISCREPANCIES
     $paidOrdersNoPayment = \App\Models\Order::where('status', 'paid')
@@ -49,8 +79,11 @@
         'ORDERS' => $ordersByStatus->map(fn($o) => ['count' => $o->count, 'total' => $o->total]),
         'PAYMENTS' => $paymentsByStatus->map(fn($p) => ['count' => $p->count, 'total' => $p->total]),
         'PAYMENTS_BY_METHOD' => $paymentsByMethod,
-        'TICKETS' => $ticketsByStatus->map(fn($t) => ['count' => $t->count, 'total' => $t->total]),
+        'TICKETS_BY_STATUS' => $ticketsByStatus->map(fn($t) => ['count' => $t->count, 'total' => $t->total]),
         'TICKETS_FROM_PAID_ORDERS' => $ticketsFromPaidOrders,
+        'TICKETS_BY_TYPE' => $ticketsByType,
+        'TICKETS_BY_DAY' => $ticketsByDay,
+        'ALL_TICKETS_DETAILED' => $allTicketsDetailed,
         'PAID_ORDERS_NO_PAYMENT' => $paidOrdersNoPayment,
         'UNPAID_ORDERS_WITH_PAYMENT' => $unpaidOrdersWithPayment,
         'REFUNDS' => $totalRefunds,
@@ -69,11 +102,20 @@ console.log('');
 console.log('===== 💰 PAYMENTS BY METHOD (Succeeded) =====');
 console.table(@json($consoleData['PAYMENTS_BY_METHOD']));
 console.log('');
-console.log('===== 🎫 TICKETS BY STATUS =====');
-console.table(@json($consoleData['TICKETS']));
+console.log('===== 🎫 TICKETS BY STATUS (ALL) =====');
+console.table(@json($consoleData['TICKETS_BY_STATUS']));
 console.log('');
-console.log('===== ✅ TICKETS FROM PAID ORDERS =====');
+console.log('===== ✅ TICKETS FROM PAID ORDERS SUMMARY =====');
 console.log(@json($consoleData['TICKETS_FROM_PAID_ORDERS']));
+console.log('');
+console.log('===== 🎫 TICKETS BY TYPE (Paid Orders) =====');
+console.table(@json($consoleData['TICKETS_BY_TYPE']));
+console.log('');
+console.log('===== 📅 TICKETS BY EVENT DAY (Paid Orders) =====');
+console.table(@json($consoleData['TICKETS_BY_DAY']));
+console.log('');
+console.log('===== 📋 ALL TICKETS DETAILED (Paid Orders) - ' + @json($allTicketsDetailed->count()) + ' tickets =====');
+console.table(@json($consoleData['ALL_TICKETS_DETAILED']));
 console.log('');
 console.log('===== ⚠️ PAID ORDERS WITHOUT PAYMENT (' + @json($paidOrdersNoPayment->count()) + ') =====');
 console.table(@json($consoleData['PAID_ORDERS_NO_PAYMENT']));
@@ -103,6 +145,69 @@ console.log('===== 💸 REFUNDS: RM ' + @json($totalRefunds) + ' =====');
         <p>Count: {{ $ticketsFromPaidOrders->count ?? 0 }}</p>
         <p>Total: RM {{ number_format($ticketsFromPaidOrders->total ?? 0, 2) }}</p>
     </div>
+</div>
+
+<!-- Tickets by Type -->
+<div class="bg-white p-4 rounded shadow mb-4">
+    <h2 class="font-bold text-purple-600 mb-2">🎫 TICKETS BY TYPE (From Paid Orders)</h2>
+    <table class="w-full text-sm">
+        <thead><tr class="bg-purple-100"><th class="text-left p-2">Ticket Type</th><th class="text-right p-2">Capacity</th><th class="text-right p-2">Sold</th><th class="text-right p-2">Revenue</th></tr></thead>
+        <tbody>
+        @foreach($ticketsByType as $t)
+        <tr class="border-b">
+            <td class="p-2">{{ $t->ticket_name }}</td>
+            <td class="text-right p-2">{{ $t->total_seats }}</td>
+            <td class="text-right p-2 {{ $t->sold_count > $t->total_seats ? 'text-red-600 font-bold' : '' }}">{{ $t->sold_count }}</td>
+            <td class="text-right p-2">RM {{ number_format($t->total_revenue, 2) }}</td>
+        </tr>
+        @endforeach
+        <tr class="bg-purple-50 font-bold">
+            <td class="p-2">TOTAL</td>
+            <td class="text-right p-2">{{ $ticketsByType->sum('total_seats') }}</td>
+            <td class="text-right p-2">{{ $ticketsByType->sum('sold_count') }}</td>
+            <td class="text-right p-2">RM {{ number_format($ticketsByType->sum('total_revenue'), 2) }}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Tickets by Event Day -->
+<div class="bg-white p-4 rounded shadow mb-4">
+    <h2 class="font-bold text-indigo-600 mb-2">📅 TICKETS BY EVENT DAY (From Paid Orders)</h2>
+    <table class="w-full text-sm">
+        <thead><tr class="bg-indigo-100"><th class="text-left p-2">Event Day</th><th class="text-right p-2">Count</th><th class="text-right p-2">Revenue</th></tr></thead>
+        <tbody>
+        @foreach($ticketsByDay as $d)
+        <tr class="border-b">
+            <td class="p-2">{{ $d->event_day_name ?? 'N/A' }}</td>
+            <td class="text-right p-2">{{ $d->count }}</td>
+            <td class="text-right p-2">RM {{ number_format($d->total, 2) }}</td>
+        </tr>
+        @endforeach
+        <tr class="bg-indigo-50 font-bold">
+            <td class="p-2">TOTAL</td>
+            <td class="text-right p-2">{{ $ticketsByDay->sum('count') }}</td>
+            <td class="text-right p-2">RM {{ number_format($ticketsByDay->sum('total'), 2) }}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Tickets by Status (All) -->
+<div class="bg-white p-4 rounded shadow mb-4">
+    <h2 class="font-bold text-gray-600 mb-2">📊 ALL TICKETS BY STATUS</h2>
+    <table class="w-full text-sm">
+        <thead><tr class="bg-gray-100"><th class="text-left p-2">Status</th><th class="text-right p-2">Count</th><th class="text-right p-2">Total Value</th></tr></thead>
+        <tbody>
+        @foreach($ticketsByStatus as $status => $t)
+        <tr class="border-b">
+            <td class="p-2">{{ $status }}</td>
+            <td class="text-right p-2">{{ $t->count }}</td>
+            <td class="text-right p-2">RM {{ number_format($t->total, 2) }}</td>
+        </tr>
+        @endforeach
+        </tbody>
+    </table>
 </div>
 
 <div class="bg-red-50 p-4 rounded shadow mb-4">

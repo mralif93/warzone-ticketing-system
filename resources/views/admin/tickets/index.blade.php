@@ -4,6 +4,79 @@
 @section('page-subtitle', 'Manage all tickets and sales')
 
 @section('content')
+<!-- DEBUG: Overselling Diagnostic Report -->
+<script>
+console.log('=== OVERSELLING DIAGNOSTIC REPORT ===');
+@php
+$debugTickets = \App\Models\Ticket::whereNull('deleted_at')->get();
+foreach($debugTickets as $debugTicket) {
+    $debugEvent = $debugTicket->event;
+    if (!$debugEvent || !$debugEvent->isMultiDay()) continue;
+
+    $debugEventDays = $debugEvent->getEventDays();
+    if (count($debugEventDays) < 2) continue;
+
+    $day1Name = $debugEventDays[0]['day_name'];
+    $day2Name = $debugEventDays[1]['day_name'];
+
+    // Count ALL statuses for Day 1
+    $day1All = \App\Models\PurchaseTicket::where('ticket_type_id', $debugTicket->id)
+        ->where('event_day_name', $day1Name)
+        ->selectRaw('status, count(*) as cnt')
+        ->groupBy('status')
+        ->pluck('cnt', 'status')
+        ->toArray();
+
+    // Count ALL statuses for Day 2
+    $day2All = \App\Models\PurchaseTicket::where('ticket_type_id', $debugTicket->id)
+        ->where('event_day_name', $day2Name)
+        ->selectRaw('status, count(*) as cnt')
+        ->groupBy('status')
+        ->pluck('cnt', 'status')
+        ->toArray();
+
+    // Calculate sold (what admin counts)
+    $day1Sold = ($day1All['sold'] ?? 0) + ($day1All['active'] ?? 0) + ($day1All['scanned'] ?? 0);
+    $day2Sold = ($day2All['sold'] ?? 0) + ($day2All['active'] ?? 0) + ($day2All['scanned'] ?? 0);
+
+    // Check if oversold
+    $day1Oversold = $day1Sold > $debugTicket->total_seats;
+    $day2Oversold = $day2Sold > $debugTicket->total_seats;
+
+    $ticketInfo = [
+        'name' => $debugTicket->name,
+        'id' => $debugTicket->id,
+        'total_seats' => $debugTicket->total_seats,
+        'day1' => [
+            'sold' => $day1Sold,
+            'pending' => $day1All['pending'] ?? 0,
+            'sold_status' => $day1All['sold'] ?? 0,
+            'active' => $day1All['active'] ?? 0,
+            'scanned' => $day1All['scanned'] ?? 0,
+            'cancelled' => $day1All['cancelled'] ?? 0,
+            'oversold' => $day1Oversold,
+            'oversold_by' => $day1Oversold ? $day1Sold - $debugTicket->total_seats : 0,
+        ],
+        'day2' => [
+            'sold' => $day2Sold,
+            'pending' => $day2All['pending'] ?? 0,
+            'sold_status' => $day2All['sold'] ?? 0,
+            'active' => $day2All['active'] ?? 0,
+            'scanned' => $day2All['scanned'] ?? 0,
+            'cancelled' => $day2All['cancelled'] ?? 0,
+            'oversold' => $day2Oversold,
+            'oversold_by' => $day2Oversold ? $day2Sold - $debugTicket->total_seats : 0,
+        ],
+    ];
+@endphp
+console.log(@json($ticketInfo));
+@php
+}
+@endphp
+console.log('=== END DIAGNOSTIC ===');
+</script>
+<!-- END DEBUG -->
+
 <!-- Professional Ticket Management with WWC Brand Design -->
 <div class="min-h-screen bg-wwc-neutral-50">
     <!-- Main Content -->

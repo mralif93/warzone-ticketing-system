@@ -98,7 +98,7 @@ class Event extends Model
      */
     public function getTicketsSoldCount(): int
     {
-        return $this->purchaseTickets()->whereIn('status', ['sold', 'active', 'scanned'])->count();
+        return $this->purchaseTickets()->whereIn('status', ['pending', 'sold', 'active', 'scanned'])->count();
     }
 
     /**
@@ -110,19 +110,56 @@ class Event extends Model
     }
 
     /**
-     * Get remaining tickets
+     * Get remaining tickets (for single-day events or total across all days)
      */
     public function getRemainingTicketsCount(): int
     {
+        if ($this->isMultiDay()) {
+            // For multi-day events, return the minimum remaining across all days
+            // This represents the worst-case scenario for display purposes
+            $days = $this->getEventDays();
+            $minRemaining = PHP_INT_MAX;
+            foreach ($days as $day) {
+                $remaining = $this->getTicketsAvailableForDay($day['date']);
+                $minRemaining = min($minRemaining, $remaining);
+            }
+            return $minRemaining === PHP_INT_MAX ? $this->getTotalCapacity() : $minRemaining;
+        }
         return $this->getTotalCapacity() - $this->getTicketsSoldCount();
     }
 
     /**
-     * Check if event has available seats
+     * Get remaining tickets for a specific day
+     */
+    public function getRemainingTicketsForDay($eventDay): int
+    {
+        return $this->getTicketsAvailableForDay($eventDay);
+    }
+
+    /**
+     * Check if event has available seats (checks per-day for multi-day events)
      */
     public function hasAvailableSeats(): bool
     {
+        if ($this->isMultiDay()) {
+            // For multi-day events, check if ANY day has available seats
+            $days = $this->getEventDays();
+            foreach ($days as $day) {
+                if ($this->hasAvailableTicketsForDay($day['date'])) {
+                    return true;
+                }
+            }
+            return false;
+        }
         return $this->getRemainingTicketsCount() > 0;
+    }
+
+    /**
+     * Check if a specific day has available seats
+     */
+    public function hasAvailableSeatsForDay($eventDay): bool
+    {
+        return $this->getTicketsAvailableForDay($eventDay) > 0;
     }
 
     /**
@@ -205,8 +242,8 @@ class Event extends Model
     public function getTicketsSoldForDay($eventDay): int
     {
         return $this->purchaseTickets()
-            ->where('event_day', $eventDay)
-            ->whereIn('status', ['sold', 'active', 'scanned'])
+            ->whereDate('event_day', $eventDay)
+            ->whereIn('status', ['pending', 'sold', 'active', 'scanned'])
             ->count();
     }
 

@@ -46,15 +46,15 @@ class PublicController extends Controller
             $day2Name = $eventDays[1]['day_name'] ?? 'Day 2';
             
             foreach ($mainEvent->tickets as $ticket) {
-                // Count sold tickets per day
+                // Count sold/reserved tickets per day (including pending)
                 $day1Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
                     ->where('event_day_name', $day1Name)
-                    ->whereIn('status', ['sold', 'active', 'scanned'])
+                    ->whereIn('status', ['pending', 'sold', 'active', 'scanned'])
                     ->count();
-                    
+
                 $day2Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
                     ->where('event_day_name', $day2Name)
-                    ->whereIn('status', ['sold', 'active', 'scanned'])
+                    ->whereIn('status', ['pending', 'sold', 'active', 'scanned'])
                     ->count();
                 
                 // Calculate available per day

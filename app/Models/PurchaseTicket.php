@@ -206,7 +206,7 @@ class PurchaseTicket extends Model
      */
     public function scopeForEventDay($query, $eventDay)
     {
-        return $query->where('event_day', $eventDay);
+        return $query->whereDate('event_day', $eventDay);
     }
 
     /**

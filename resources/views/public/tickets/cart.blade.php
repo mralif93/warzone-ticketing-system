@@ -128,18 +128,41 @@
                         </div>
                     </div>
                     <div class="p-6">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-4">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <div class="flex items-center space-x-4 flex-wrap gap-2">
                                 <div class="flex items-center text-sm text-gray-600">
                                     <i class="bx bx-map-pin mr-2 text-wwc-primary"></i>
                                     <span>{{ $event->venue }}</span>
                                 </div>
+                                @if($event->isMultiDay())
+                                    @php $eventDays = $event->getEventDays(); @endphp
+                                    <div class="flex items-center text-sm text-gray-600">
+                                        <i class="bx bx-group mr-2 text-wwc-primary"></i>
+                                        <span>Day 1: {{ number_format($event->getTicketsAvailableForDay($eventDays[0]['date'])) }} left</span>
+                                    </div>
+                                    <div class="flex items-center text-sm text-gray-600">
+                                        <i class="bx bx-group mr-2 text-wwc-primary"></i>
+                                        <span>Day 2: {{ number_format($event->getTicketsAvailableForDay($eventDays[1]['date'])) }} left</span>
+                                    </div>
+                                @else
+                                    <div class="flex items-center text-sm text-gray-600">
+                                        <i class="bx bx-group mr-2 text-wwc-primary"></i>
+                                        <span>{{ number_format($event->getRemainingTicketsCount()) }} tickets remaining</span>
+                                    </div>
+                                @endif
                             </div>
                             <div class="flex items-center">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    <i class="bx bx-check-circle mr-1"></i>
-                                    On Sale
-                                </span>
+                                @if($event->hasAvailableSeats())
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <i class="bx bx-check-circle mr-1"></i>
+                                        On Sale
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        <i class="bx bx-x-circle mr-1"></i>
+                                        Sold Out
+                                    </span>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -304,25 +327,48 @@
                                     Select Ticket Type <span class="text-red-500">*</span>
                                 </label>
                                 <div class="relative">
-                                    <select id="ticket_type_id" 
-                                            name="ticket_type_id" 
+                                    <select id="ticket_type_id"
+                                            name="ticket_type_id"
                                             required
                                             class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary @error('ticket_type_id') border-red-500 @enderror text-sm bg-white shadow-sm transition-all duration-200 hover:border-gray-300">
                                         <option value="">Choose your preferred ticket type</option>
-                                        @foreach($event->tickets->where('available_seats', '>', 0) as $ticket)
+                                        @php
+                                            $eventDays = $event->isMultiDay() ? $event->getEventDays() : [];
+                                        @endphp
+                                        @foreach($event->tickets->where('status', 'active') as $ticket)
                                             @php
-                                                // For single-day purchase, show overall availability
-                                                $displayAvailable = $ticket->available_seats;
-                                                $displaySold = $ticket->sold_seats;
+                                                // Calculate per-day availability for multi-day events
+                                                $day1Available = $ticket->total_seats;
+                                                $day2Available = $ticket->total_seats;
+
+                                                if ($event->isMultiDay() && count($eventDays) >= 2) {
+                                                    $day1Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
+                                                        ->whereDate('event_day', $eventDays[0]['date'])
+                                                        ->whereIn('status', ['pending', 'sold', 'active', 'scanned'])
+                                                        ->count();
+                                                    $day2Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
+                                                        ->whereDate('event_day', $eventDays[1]['date'])
+                                                        ->whereIn('status', ['pending', 'sold', 'active', 'scanned'])
+                                                        ->count();
+                                                    $day1Available = $ticket->total_seats - $day1Sold;
+                                                    $day2Available = $ticket->total_seats - $day2Sold;
+                                                }
+
+                                                // Show ticket if at least one day has availability (for multi-day) or overall availability (for single-day)
+                                                $showTicket = $event->isMultiDay() ? ($day1Available > 0 || $day2Available > 0) : ($ticket->available_seats > 0);
                                             @endphp
-                                            <option value="{{ $ticket->id }}" 
+                                            @if($showTicket)
+                                            <option value="{{ $ticket->id }}"
                                                     data-price="{{ $ticket->price }}"
-                                                    data-available="{{ $displayAvailable }}"
+                                                    data-available="{{ $ticket->available_seats }}"
+                                                    data-day1-available="{{ $day1Available }}"
+                                                    data-day2-available="{{ $day2Available }}"
                                                     data-total="{{ $ticket->total_seats }}"
-                                                    data-sold="{{ $displaySold }}"
+                                                    data-name="{{ $ticket->name }}"
                                                     {{ old('ticket_type_id') == $ticket->id ? 'selected' : '' }}>
                                                 {{ $ticket->name }} - RM{{ number_format($ticket->price, 2) }}
                                             </option>
+                                            @endif
                                         @endforeach
                                     </select>
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -450,26 +496,28 @@
                                         Select Ticket Type <span class="text-red-500">*</span>
                                     </label>
                                     <div class="relative">
-                                        <select id="day{{ $index + 1 }}_ticket_type" 
-                                                name="day{{ $index + 1 }}_ticket_type" 
+                                        <select id="day{{ $index + 1 }}_ticket_type"
+                                                name="day{{ $index + 1 }}_ticket_type"
                                                 class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary day-ticket-select text-sm bg-white shadow-sm transition-all duration-200 hover:border-gray-300">
                                             <option value="">Choose your preferred ticket type</option>
-                                            @foreach($event->tickets->where('available_seats', '>', 0) as $ticket)
+                                            @foreach($event->tickets->where('status', 'active') as $ticket)
                                                 @php
-                                                    // Calculate day-specific availability for single-day tickets
+                                                    // Calculate day-specific availability using event_day (date)
                                                     $daySold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
-                                                        ->where('event_day_name', $day['day_name'])
-                                                        ->whereIn('status', ['sold', 'active', 'scanned'])
+                                                        ->whereDate('event_day', $day['date'])
+                                                        ->whereIn('status', ['pending', 'sold', 'active', 'scanned'])
                                                         ->count();
                                                     $dayAvailable = $ticket->total_seats - $daySold;
                                                 @endphp
-                                                <option value="{{ $ticket->id }}" 
+                                                @if($dayAvailable > 0)
+                                                <option value="{{ $ticket->id }}"
                                                         data-price="{{ $ticket->price }}"
                                                         data-available="{{ $dayAvailable }}"
                                                         data-total="{{ $ticket->total_seats }}"
                                                         data-sold="{{ $daySold }}">
-                                                    {{ $ticket->name }} - RM{{ number_format($ticket->price, 2) }}
+                                                    {{ $ticket->name }} - RM{{ number_format($ticket->price, 2) }} ({{ $dayAvailable }} left)
                                                 </option>
+                                                @endif
                                             @endforeach
                                         </select>
                                         <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -608,7 +656,14 @@ const eventData = {
     comboDiscountPercentage: {{ $event->combo_discount_percentage ?? 0 }},
     serviceFeePercentage: {{ $serviceFeePercentage }},
     taxPercentage: {{ $taxPercentage }},
+    totalCapacity: {{ $event->getTotalCapacity() }},
+    ticketsSold: {{ $event->getTicketsSoldCount() }},
+    remainingCapacity: {{ $event->getRemainingTicketsCount() }},
+    hasAvailableSeats: {{ $event->hasAvailableSeats() ? 'true' : 'false' }},
     @if($event->isMultiDay())
+    @php $eventDaysJs = $event->getEventDays(); @endphp
+    day1RemainingCapacity: {{ $event->getTicketsAvailableForDay($eventDaysJs[0]['date']) }},
+    day2RemainingCapacity: {{ $event->getTicketsAvailableForDay($eventDaysJs[1]['date']) }},
     day1Date: '{{ $event->start_date ? $event->start_date->format("M j, Y") : $event->date_time->format("M j, Y") }}',
     day2Date: '{{ $event->end_date ? $event->end_date->format("M j, Y") : $event->date_time->format("M j, Y") }}',
     @else
@@ -751,7 +806,7 @@ function updateSingleDayRadioStates() {
         const day = radio.value.replace('day', '');
         const dot = document.getElementById(`single_day${day}_dot`);
         const circle = document.getElementById(`single_day${day}_radio`);
-        
+
         if (radio.checked) {
             dot.style.opacity = '1';
             circle.classList.add('border-wwc-primary', 'bg-wwc-primary');
@@ -760,6 +815,55 @@ function updateSingleDayRadioStates() {
             dot.style.opacity = '0';
             circle.classList.remove('border-wwc-primary', 'bg-wwc-primary');
             circle.classList.add('border-gray-300');
+        }
+    });
+
+    // Update ticket dropdown based on selected day (for multi-day events)
+    updateTicketDropdownForSelectedDay();
+}
+
+// Function to update ticket dropdown options based on selected day
+function updateTicketDropdownForSelectedDay() {
+    if (!eventData.isMultiDay) return;
+
+    const ticketSelect = document.getElementById('ticket_type_id');
+    if (!ticketSelect) return;
+
+    // Find selected day
+    const selectedDayRadio = document.querySelector('input[name="single_day_selection"]:checked');
+    if (!selectedDayRadio) return;
+
+    const selectedDay = selectedDayRadio.value; // 'day1' or 'day2'
+    const dayNumber = selectedDay === 'day1' ? 1 : 2;
+
+    // Store current selection
+    const currentSelection = ticketSelect.value;
+
+    // Loop through all options and show/hide based on per-day availability
+    const options = ticketSelect.querySelectorAll('option');
+    options.forEach(option => {
+        if (!option.value) return; // Skip placeholder option
+
+        const day1Available = parseInt(option.dataset.day1Available) || 0;
+        const day2Available = parseInt(option.dataset.day2Available) || 0;
+        const ticketName = option.dataset.name || option.textContent.split(' - ')[0];
+        const price = option.dataset.price || '0';
+
+        // Get availability for selected day
+        const dayAvailable = dayNumber === 1 ? day1Available : day2Available;
+
+        if (dayAvailable > 0) {
+            option.style.display = '';
+            option.disabled = false;
+            // Update text to show per-day availability
+            option.textContent = `${ticketName} - RM${parseFloat(price).toFixed(2)} (${dayAvailable} left)`;
+        } else {
+            option.style.display = 'none';
+            option.disabled = true;
+            // If this was the selected option, clear selection
+            if (option.value === currentSelection) {
+                ticketSelect.value = '';
+            }
         }
     });
 }
@@ -788,10 +892,20 @@ document.querySelectorAll('.quantity-increase').forEach(button => {
     button.addEventListener('click', function() {
         const input = this.parentElement.querySelector('.quantity');
         const currentValue = parseInt(input.value);
-        if (currentValue < {{ $maxTicketsPerOrder }}) {
+        // Check both max tickets per order AND event/day remaining capacity
+        let capacityLimit = eventData.remainingCapacity;
+        if (eventData.isMultiDay) {
+            // For multi-day events, check the selected day's capacity
+            const selectedDayRadio = document.querySelector('input[name="single_day_selection"]:checked');
+            if (selectedDayRadio) {
+                capacityLimit = selectedDayRadio.value === 'day1' ? eventData.day1RemainingCapacity : eventData.day2RemainingCapacity;
+            }
+        }
+        const maxAllowed = Math.min({{ $maxTicketsPerOrder }}, capacityLimit);
+        if (currentValue < maxAllowed) {
             input.value = currentValue + 1;
             calculatePricing();
-            
+
             // Track AddToCart when quantity increases (if ticket is selected)
             const ticketTypeSelect = document.getElementById('ticket_type_id');
             if (ticketTypeSelect && ticketTypeSelect.value) {
@@ -799,7 +913,7 @@ document.querySelectorAll('.quantity-increase').forEach(button => {
                 const price = parseFloat(selectedOption.dataset.price) || 0;
                 const quantity = parseInt(input.value) || 1;
                 const ticketName = selectedOption.text.split(' - ')[0];
-                
+
                 let dayInfo = null;
                 if (eventData.isMultiDay) {
                     const selectedDayRadio = document.querySelector('input[name="single_day_selection"]:checked');
@@ -808,7 +922,7 @@ document.querySelectorAll('.quantity-increase').forEach(button => {
                         dayInfo = `Day ${dayNumber}`;
                     }
                 }
-                
+
                 trackAddToCart(ticketTypeSelect.value, ticketName, quantity, price, dayInfo);
             }
         }
@@ -852,10 +966,13 @@ document.querySelectorAll('.day-quantity-increase').forEach(button => {
         const day = this.dataset.day;
         const input = document.getElementById(`day${day}_quantity`);
         const currentValue = parseInt(input.value);
-        if (currentValue < {{ $maxTicketsPerOrder }}) {
+        // Check both max tickets per order AND the specific day's remaining capacity
+        const dayCapacity = day === '1' ? eventData.day1RemainingCapacity : eventData.day2RemainingCapacity;
+        const maxAllowed = Math.min({{ $maxTicketsPerOrder }}, dayCapacity);
+        if (currentValue < maxAllowed) {
             input.value = currentValue + 1;
             calculatePricing();
-            
+
             // Track AddToCart when day quantity increases (if ticket is selected)
             const ticketSelect = document.getElementById(`day${day}_ticket_type`);
             if (ticketSelect && ticketSelect.value) {
@@ -864,7 +981,7 @@ document.querySelectorAll('.day-quantity-increase').forEach(button => {
                 const quantity = parseInt(input.value) || 1;
                 const ticketName = selectedOption.text.split(' - ')[0];
                 const dayInfo = `Day ${day}`;
-                
+
                 trackAddToCart(ticketSelect.value, ticketName, quantity, price, dayInfo);
             }
         }

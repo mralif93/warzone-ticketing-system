@@ -216,31 +216,38 @@
         @if($mainEvent->isMultiDay())
             <!-- Multi-day event: Combined layout with total availability -->
             <div class="space-y-8">
+                @php
+                    $eventDays = $mainEvent->getEventDays();
+                @endphp
 
                 <!-- Tickets Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @foreach($mainEvent->tickets->where('available_seats', '>', 0) as $ticket)
+                    @foreach($mainEvent->tickets->where('status', 'active') as $ticket)
                     @php
-                        // Calculate total availability across all days
-                        $totalAvailable = $ticket->available_seats;
-                        $totalSold = $ticket->sold_seats;
+                        // Calculate per-day availability
                         $totalSeats = $ticket->total_seats;
-                        
-                        if (!$ticket->is_combo) {
-                            // For single-day tickets, calculate total across both days
-                            // Include sold, active, and scanned statuses (scanned tickets are still considered sold)
-                            $day1Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
-                                ->where('event_day_name', $mainEvent->getEventDays()[0]['day_name'])
-                                ->whereIn('status', ['sold', 'active', 'scanned'])
-                                ->count();
-                            $day2Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
-                                ->where('event_day_name', $mainEvent->getEventDays()[1]['day_name'])
-                                ->whereIn('status', ['sold', 'active', 'scanned'])
-                                ->count();
-                            $totalSold = $day1Sold + $day2Sold;
-                            $totalAvailable = $totalSeats - $totalSold;
-                        }
+
+                        // For multi-day events, calculate sold per day
+                        $day1Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
+                            ->whereDate('event_day', $eventDays[0]['date'])
+                            ->whereIn('status', ['pending', 'sold', 'active', 'scanned'])
+                            ->count();
+                        $day2Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
+                            ->whereDate('event_day', $eventDays[1]['date'])
+                            ->whereIn('status', ['pending', 'sold', 'active', 'scanned'])
+                            ->count();
+
+                        $day1Available = $totalSeats - $day1Sold;
+                        $day2Available = $totalSeats - $day2Sold;
+
+                        // Total sold and available across both days
+                        $totalSold = $day1Sold + $day2Sold;
+                        $totalAvailable = $day1Available + $day2Available;
+
+                        // Check if ANY day has availability - if so, show the ticket
+                        $hasAnyAvailability = ($day1Available > 0 || $day2Available > 0);
                     @endphp
+                    @if($hasAnyAvailability)
                     <div class="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 group ticket-card border border-gray-100 overflow-hidden flex flex-col h-full" 
                          data-ticket="{{ $ticket->name }}" 
                          data-price="{{ $ticket->price }}" 
@@ -270,28 +277,6 @@
 
                             <!-- Bottom Section: Day Info + Buttons -->
                             <div class="mt-auto space-y-4">
-                                <!-- Day Availability Info -->
-                                @if($ticket->is_combo)
-                                    @php
-                                        // For combo tickets: 4 combo tickets = 8 PurchaseTicket records (4 Day 1 + 4 Day 2)
-                                        // Count PurchaseTicket records per day for display
-                                        $day1Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
-                                            ->where('event_day_name', $mainEvent->getEventDays()[0]['day_name'])
-                                            ->whereIn('status', ['sold', 'active', 'scanned'])
-                                            ->count();
-                                        $day2Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
-                                            ->where('event_day_name', $mainEvent->getEventDays()[1]['day_name'])
-                                            ->whereIn('status', ['sold', 'active', 'scanned'])
-                                            ->count();
-                                        
-                                        // Available per day: total seats minus sold count for that day
-                                        $day1Available = $totalSeats - $day1Sold;
-                                        $day2Available = $totalSeats - $day2Sold;
-                                    @endphp
-                                    
-                                    {{-- Day Availability Info Hidden --}}
-                                @endif
-
                                 <!-- Action Buttons -->
                                 <div class="space-y-3">
                                 <a href="{{ route('public.tickets.cart', $mainEvent) }}" 
@@ -326,10 +311,29 @@
                             </div>
                         </div>
                     </div>
+                    @endif
                     @endforeach
                 </div>
 
-                @if($mainEvent->tickets->where('available_seats', '>', 0)->count() == 0)
+                @php
+                    // Check if any ticket has per-day availability
+                    $hasAnyTicketsAvailable = false;
+                    foreach($mainEvent->tickets->where('status', 'active') as $t) {
+                        $d1Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $t->id)
+                            ->whereDate('event_day', $eventDays[0]['date'])
+                            ->whereIn('status', ['pending', 'sold', 'active', 'scanned'])
+                            ->count();
+                        $d2Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $t->id)
+                            ->whereDate('event_day', $eventDays[1]['date'])
+                            ->whereIn('status', ['pending', 'sold', 'active', 'scanned'])
+                            ->count();
+                        if (($t->total_seats - $d1Sold) > 0 || ($t->total_seats - $d2Sold) > 0) {
+                            $hasAnyTicketsAvailable = true;
+                            break;
+                        }
+                    }
+                @endphp
+                @if(!$hasAnyTicketsAvailable)
                 <div class="text-center py-12">
                     <i class='bx bx-ticket text-5xl text-wwc-neutral-300 mb-4'></i>
                     <p class="text-wwc-neutral-500 text-lg">No tickets available</p>

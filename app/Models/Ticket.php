@@ -102,17 +102,45 @@ class Ticket extends Model
      */
     public function updateSoldSeats(): void
     {
-        // Count all sold tickets including sold, active, and scanned statuses
-        // Scanned tickets should still count as sold
-        // For combo tickets: 4 combo tickets = 8 PurchaseTicket records (4 Day 1 + 4 Day 2)
-        // We count PurchaseTicket records directly
-        $soldCount = $this->purchaseTickets()->whereIn('status', ['sold', 'active', 'scanned'])->count();
+        // Count all sold/reserved tickets including pending, sold, active, and scanned statuses
+        // Pending tickets should reserve capacity until payment expires
+        $soldCount = $this->purchaseTickets()->whereIn('status', ['pending', 'sold', 'active', 'scanned'])->count();
         $scannedCount = $this->purchaseTickets()->where('status', 'scanned')->count();
-        
-        // For combo tickets: total_seats represents combo ticket capacity
-        // Each combo ticket sold creates 2 PurchaseTicket records (Day 1 + Day 2)
-        // So we need to divide soldCount by 2 to get actual combo tickets sold
-        if ($this->is_combo) {
+
+        // Check if event is multi-day
+        $event = $this->event;
+        $isMultiDay = $event && $event->isMultiDay();
+
+        if ($isMultiDay) {
+            // For multi-day events: check per-day availability
+            // Ticket should only be sold_out if ALL days are sold out
+            $eventDays = $event->getEventDays();
+            $hasAnyDayAvailable = false;
+            $totalAvailableAcrossDays = 0;
+
+            foreach ($eventDays as $day) {
+                $daySold = $this->purchaseTickets()
+                    ->whereDate('event_day', $day['date'])
+                    ->whereIn('status', ['pending', 'sold', 'active', 'scanned'])
+                    ->count();
+                $dayAvailable = $this->total_seats - $daySold;
+
+                if ($dayAvailable > 0) {
+                    $hasAnyDayAvailable = true;
+                }
+                $totalAvailableAcrossDays += max(0, $dayAvailable);
+            }
+
+            $this->update([
+                'sold_seats' => $soldCount,
+                'scanned_seats' => $scannedCount,
+                'available_seats' => $totalAvailableAcrossDays, // Sum of available across all days
+                'status' => $hasAnyDayAvailable ? 'active' : 'sold_out',
+            ]);
+        } elseif ($this->is_combo) {
+            // For combo tickets: total_seats represents combo ticket capacity
+            // Each combo ticket sold creates 2 PurchaseTicket records (Day 1 + Day 2)
+            // So we need to divide soldCount by 2 to get actual combo tickets sold
             $comboTicketsSold = ceil($soldCount / 2); // Round up to handle partial counts
             $availableSeats = $this->total_seats - $comboTicketsSold;
             $this->update([
@@ -122,7 +150,7 @@ class Ticket extends Model
                 'status' => $availableSeats <= 0 ? 'sold_out' : 'active',
             ]);
         } else {
-            // Single-day tickets: count directly
+            // Single-day event tickets: count directly
             $this->update([
                 'sold_seats' => $soldCount,
                 'scanned_seats' => $scannedCount,

@@ -35,6 +35,12 @@ class TicketController extends Controller
             $query->where('status', 'active');
         }]);
 
+        // Check if event has reached its total capacity limit
+        if (!$event->hasAvailableSeats()) {
+            return redirect()->route('public.events.show', $event)
+                ->with('error', 'This event has reached its maximum capacity and is sold out.');
+        }
+
         // Check if there are any available tickets
         if ($event->tickets->where('available_seats', '>', 0)->count() === 0) {
             return redirect()->route('public.events.show', $event)
@@ -88,6 +94,12 @@ class TicketController extends Controller
             if (!$event->isOnSale()) {
                 return redirect()->route('public.events.show', $event)
                     ->with('error', 'This event is not currently on sale.');
+            }
+
+            // Check if event has reached its total capacity limit
+            if (!$event->hasAvailableSeats()) {
+                return redirect()->route('public.events.show', $event)
+                    ->with('error', 'This event has reached its maximum capacity and is sold out.');
             }
 
             // Handle POST request (form submission from cart)
@@ -162,12 +174,70 @@ class TicketController extends Controller
             }
         }
 
+        // Check per-day capacity for multi-day events
+        if ($event->isMultiDay()) {
+            $eventDays = $event->getEventDays();
+
+            if ($purchaseType === 'single_day') {
+                // Single day purchase on a multi-day event
+                $selectedDay = $request->single_day_selection ?? 'day1';
+                $dayIndex = $selectedDay === 'day1' ? 0 : 1;
+                $eventDay = $eventDays[$dayIndex]['date'] ?? null;
+                $requestedQuantity = $request->quantity ?? 1;
+
+                if ($eventDay) {
+                    $remainingForDay = $event->getTicketsAvailableForDay($eventDay);
+                    if ($requestedQuantity > $remainingForDay) {
+                        return redirect()->back()
+                            ->with('error', "Only {$remainingForDay} tickets remaining for " . ($selectedDay === 'day1' ? 'Day 1' : 'Day 2') . ". Please reduce your quantity.")
+                            ->withInput();
+                    }
+                }
+            } else {
+                // Multi-day purchase - check each day separately
+                if ($request->boolean('multi_day1_enabled')) {
+                    $day1Quantity = $request->day1_quantity ?? 1;
+                    $day1Date = $eventDays[0]['date'] ?? null;
+                    if ($day1Date) {
+                        $remainingForDay1 = $event->getTicketsAvailableForDay($day1Date);
+                        if ($day1Quantity > $remainingForDay1) {
+                            return redirect()->back()
+                                ->with('error', "Only {$remainingForDay1} tickets remaining for Day 1. Please reduce your quantity.")
+                                ->withInput();
+                        }
+                    }
+                }
+
+                if ($request->boolean('multi_day2_enabled')) {
+                    $day2Quantity = $request->day2_quantity ?? 1;
+                    $day2Date = $eventDays[1]['date'] ?? null;
+                    if ($day2Date) {
+                        $remainingForDay2 = $event->getTicketsAvailableForDay($day2Date);
+                        if ($day2Quantity > $remainingForDay2) {
+                            return redirect()->back()
+                                ->with('error', "Only {$remainingForDay2} tickets remaining for Day 2. Please reduce your quantity.")
+                                ->withInput();
+                        }
+                    }
+                }
+            }
+        } else {
+            // Single-day event - check overall capacity
+            $requestedQuantity = $request->quantity ?? 1;
+            $remainingCapacity = $event->getRemainingTicketsCount();
+            if ($requestedQuantity > $remainingCapacity) {
+                return redirect()->back()
+                    ->with('error', "Only {$remainingCapacity} tickets remaining for this event. Please reduce your quantity.")
+                    ->withInput();
+            }
+        }
+
         // Calculate pricing
         $tickets = [];
         $totalQuantity = 0;
         $subtotal = 0;
         $discountAmount = 0;
-        
+
         if ($purchaseType === 'single_day') {
             $ticketType = \App\Models\Ticket::findOrFail($request->ticket_type_id);
             $quantity = $request->quantity;
@@ -299,8 +369,12 @@ class TicketController extends Controller
                     $ticket = $ticketData['ticket'];
                     $quantity = $ticketData['quantity'];
                     $price = $ticketData['price'];
-                    $eventDay = $ticketData['day'] ?? 1;
-                    $eventDayName = $ticketData['day'] ? 'Day ' . $ticketData['day'] : 'Day 1';
+                    $dayNumber = $ticketData['day'] ?? 1;
+
+                    // Convert day number to actual date and day name
+                    $dayIndex = $dayNumber - 1;
+                    $eventDay = $eventDays[$dayIndex]['date'] ?? $eventDays[0]['date'];
+                    $eventDayName = $eventDays[$dayIndex]['day_name'] ?? 'Day 1';
                     
                     // Calculate per-ticket price (after discount if applicable)
                     $perTicketPrice = $price;
@@ -497,6 +571,14 @@ class TicketController extends Controller
             ], 400);
         }
 
+        // Check if event has reached its total capacity limit
+        if (!$event->hasAvailableSeats()) {
+            return response()->json([
+                'success' => false,
+                'error' => 'This event has reached its maximum capacity and is sold out.'
+            ], 400);
+        }
+
         // Load tickets for this event
         $event->load(['tickets' => function($query) {
             $query->where('status', 'active');
@@ -569,6 +651,68 @@ class TicketController extends Controller
         if (!$event->isOnSale()) {
             return redirect()->route('public.events.show', $event)
                 ->with('error', 'This event is not currently on sale.');
+        }
+
+        // Check per-day capacity for multi-day events
+        if ($event->isMultiDay()) {
+            $eventDays = $event->getEventDays();
+
+            if ($purchaseType === 'single_day') {
+                // Single day purchase on a multi-day event
+                $selectedDay = $request->single_day_selection ?? 'day1';
+                $dayIndex = $selectedDay === 'day1' ? 0 : 1;
+                $eventDay = $eventDays[$dayIndex]['date'] ?? null;
+                $requestedQuantity = $request->quantity ?? 1;
+
+                if ($eventDay) {
+                    $remainingForDay = $event->getTicketsAvailableForDay($eventDay);
+                    if ($requestedQuantity > $remainingForDay) {
+                        return response()->json([
+                            'success' => false,
+                            'error' => "Only {$remainingForDay} tickets remaining for " . ($selectedDay === 'day1' ? 'Day 1' : 'Day 2') . ". Please reduce your quantity."
+                        ], 400);
+                    }
+                }
+            } else {
+                // Multi-day purchase - check each day separately
+                if ($request->boolean('multi_day1_enabled')) {
+                    $day1Quantity = $request->day1_quantity ?? 1;
+                    $day1Date = $eventDays[0]['date'] ?? null;
+                    if ($day1Date) {
+                        $remainingForDay1 = $event->getTicketsAvailableForDay($day1Date);
+                        if ($day1Quantity > $remainingForDay1) {
+                            return response()->json([
+                                'success' => false,
+                                'error' => "Only {$remainingForDay1} tickets remaining for Day 1. Please reduce your quantity."
+                            ], 400);
+                        }
+                    }
+                }
+
+                if ($request->boolean('multi_day2_enabled')) {
+                    $day2Quantity = $request->day2_quantity ?? 1;
+                    $day2Date = $eventDays[1]['date'] ?? null;
+                    if ($day2Date) {
+                        $remainingForDay2 = $event->getTicketsAvailableForDay($day2Date);
+                        if ($day2Quantity > $remainingForDay2) {
+                            return response()->json([
+                                'success' => false,
+                                'error' => "Only {$remainingForDay2} tickets remaining for Day 2. Please reduce your quantity."
+                            ], 400);
+                        }
+                    }
+                }
+            }
+        } else {
+            // Single-day event - check overall capacity
+            $requestedQuantity = $request->quantity ?? 1;
+            $remainingCapacity = $event->getRemainingTicketsCount();
+            if ($requestedQuantity > $remainingCapacity) {
+                return response()->json([
+                    'success' => false,
+                    'error' => "Only {$remainingCapacity} tickets remaining for this event. Please reduce your quantity."
+                ], 400);
+            }
         }
 
         DB::beginTransaction();

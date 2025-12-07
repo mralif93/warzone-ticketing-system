@@ -750,44 +750,56 @@ class TicketController extends Controller
                 if ($day1Enabled) {
                     $day1Ticket = \App\Models\Ticket::findOrFail($request->day1_ticket_type);
                     $day1Quantity = $request->day1_quantity ?? 1;
-                    
+
                     // Verify ticket type belongs to selected event
                     if ($day1Ticket->event_id != $event->id) {
                         return redirect()->back()
                             ->with('error', 'Selected Day 1 ticket type does not belong to the selected event.')
                             ->withInput();
                     }
-                    
-                    // Check availability
-                    if ($day1Ticket->available_seats < $day1Quantity) {
+
+                    // Check day-specific availability (including pending tickets)
+                    $day1Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $day1Ticket->id)
+                        ->whereDate('event_day', $eventDays[0]['date'])
+                        ->whereIn('status', ['pending', 'sold', 'active', 'scanned'])
+                        ->count();
+                    $day1Available = $day1Ticket->total_seats - $day1Sold;
+
+                    if ($day1Available < $day1Quantity) {
                         return redirect()->back()
-                            ->with('error', 'Insufficient Day 1 tickets available. Only ' . $day1Ticket->available_seats . ' tickets remaining.')
+                            ->with('error', 'Insufficient Day 1 tickets available. Only ' . max(0, $day1Available) . ' tickets remaining for this day.')
                             ->withInput();
                     }
-                    
+
                     $tickets[] = ['ticket' => $day1Ticket, 'price' => $day1Ticket->price, 'quantity' => $day1Quantity, 'day' => 1];
                     $totalQuantity += $day1Quantity;
                 }
-                
+
                 // Process Day 2 if enabled
                 if ($day2Enabled) {
                     $day2Ticket = \App\Models\Ticket::findOrFail($request->day2_ticket_type);
                     $day2Quantity = $request->day2_quantity ?? 1;
-                    
+
                     // Verify ticket type belongs to selected event
                     if ($day2Ticket->event_id != $event->id) {
                         return redirect()->back()
                             ->with('error', 'Selected Day 2 ticket type does not belong to the selected event.')
                             ->withInput();
                     }
-                    
-                    // Check availability
-                    if ($day2Ticket->available_seats < $day2Quantity) {
+
+                    // Check day-specific availability (including pending tickets)
+                    $day2Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $day2Ticket->id)
+                        ->whereDate('event_day', $eventDays[1]['date'])
+                        ->whereIn('status', ['pending', 'sold', 'active', 'scanned'])
+                        ->count();
+                    $day2Available = $day2Ticket->total_seats - $day2Sold;
+
+                    if ($day2Available < $day2Quantity) {
                         return redirect()->back()
-                            ->with('error', 'Insufficient Day 2 tickets available. Only ' . $day2Ticket->available_seats . ' tickets remaining.')
+                            ->with('error', 'Insufficient Day 2 tickets available. Only ' . max(0, $day2Available) . ' tickets remaining for this day.')
                             ->withInput();
                     }
-                    
+
                     $tickets[] = ['ticket' => $day2Ticket, 'price' => $day2Ticket->price, 'quantity' => $day2Quantity, 'day' => 2];
                     $totalQuantity += $day2Quantity;
                 }
@@ -807,32 +819,48 @@ class TicketController extends Controller
             } else {
                 // Single day purchase
                 $ticketType = \App\Models\Ticket::findOrFail($request->ticket_type_id);
-                
+
                 // Verify ticket type belongs to selected event
                 if ($ticketType->event_id != $event->id) {
                     return redirect()->back()
                         ->with('error', 'Selected ticket type does not belong to the selected event.')
                         ->withInput();
                 }
-                
+
                 // Check availability
                 $quantity = $request->quantity;
-                if ($ticketType->available_seats < $quantity) {
-                    return redirect()->back()
-                        ->with('error', 'Insufficient tickets available. Only ' . $ticketType->available_seats . ' tickets remaining.')
-                        ->withInput();
-                }
-                
-                // Calculate pricing
-                $basePrice = $ticketType->price;
-                $subtotal = $basePrice * $quantity;
-                
+
                 // Determine which day for multi-day events
                 $selectedDay = null;
                 if ($event->isMultiDay() && $request->has('single_day_selection')) {
                     $selectedDay = $request->single_day_selection === 'day1' ? 1 : 2;
+
+                    // Check day-specific availability (including pending tickets)
+                    $dayIndex = $selectedDay - 1;
+                    $daySold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticketType->id)
+                        ->whereDate('event_day', $eventDays[$dayIndex]['date'])
+                        ->whereIn('status', ['pending', 'sold', 'active', 'scanned'])
+                        ->count();
+                    $dayAvailable = $ticketType->total_seats - $daySold;
+
+                    if ($dayAvailable < $quantity) {
+                        return redirect()->back()
+                            ->with('error', 'Insufficient tickets available for Day ' . $selectedDay . '. Only ' . max(0, $dayAvailable) . ' tickets remaining for this day.')
+                            ->withInput();
+                    }
+                } else {
+                    // Single-day event - use global available_seats
+                    if ($ticketType->available_seats < $quantity) {
+                        return redirect()->back()
+                            ->with('error', 'Insufficient tickets available. Only ' . $ticketType->available_seats . ' tickets remaining.')
+                            ->withInput();
+                    }
                 }
-                
+
+                // Calculate pricing
+                $basePrice = $ticketType->price;
+                $subtotal = $basePrice * $quantity;
+
                 $tickets = [
                     ['ticket' => $ticketType, 'price' => $basePrice, 'quantity' => $quantity, 'day' => $selectedDay]
                 ];

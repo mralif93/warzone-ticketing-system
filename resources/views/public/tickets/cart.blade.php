@@ -943,8 +943,26 @@ document.querySelectorAll('.quantity-increase').forEach(button => {
     button.addEventListener('click', function() {
         const input = this.parentElement.querySelector('.quantity');
         const currentValue = parseInt(input.value);
-        // Check both max tickets per order AND event/day remaining capacity
+        // Check max tickets per order, event/day remaining capacity, AND selected ticket's available seats
         let capacityLimit = eventData.remainingCapacity;
+        let ticketAvailable = 999999; // Default high value if no ticket selected
+
+        // Get selected ticket's available seats for the selected day
+        const ticketTypeSelect = document.getElementById('ticket_type_id');
+        if (ticketTypeSelect && ticketTypeSelect.value) {
+            const selectedOption = ticketTypeSelect.options[ticketTypeSelect.selectedIndex];
+            if (eventData.isMultiDay) {
+                const selectedDayRadio = document.querySelector('input[name="single_day_selection"]:checked');
+                if (selectedDayRadio) {
+                    ticketAvailable = selectedDayRadio.value === 'day1'
+                        ? parseInt(selectedOption.dataset.day1Available) || 0
+                        : parseInt(selectedOption.dataset.day2Available) || 0;
+                }
+            } else {
+                ticketAvailable = parseInt(selectedOption.dataset.available) || 0;
+            }
+        }
+
         if (eventData.isMultiDay) {
             // For multi-day events, check the selected day's capacity
             const selectedDayRadio = document.querySelector('input[name="single_day_selection"]:checked');
@@ -952,7 +970,8 @@ document.querySelectorAll('.quantity-increase').forEach(button => {
                 capacityLimit = selectedDayRadio.value === 'day1' ? eventData.day1RemainingCapacity : eventData.day2RemainingCapacity;
             }
         }
-        const maxAllowed = Math.min({{ $maxTicketsPerOrder }}, capacityLimit);
+        // Use the minimum of max per order, event capacity, and ticket available seats
+        const maxAllowed = Math.min({{ $maxTicketsPerOrder }}, capacityLimit, ticketAvailable);
         if (currentValue < maxAllowed) {
             input.value = currentValue + 1;
             calculatePricing();
@@ -1017,15 +1036,24 @@ document.querySelectorAll('.day-quantity-increase').forEach(button => {
         const day = this.dataset.day;
         const input = document.getElementById(`day${day}_quantity`);
         const currentValue = parseInt(input.value);
-        // Check both max tickets per order AND the specific day's remaining capacity
+        // Check max tickets per order, day's remaining capacity, AND selected ticket's available seats
         const dayCapacity = day === '1' ? eventData.day1RemainingCapacity : eventData.day2RemainingCapacity;
-        const maxAllowed = Math.min({{ $maxTicketsPerOrder }}, dayCapacity);
+
+        // Get selected ticket's available seats for this day
+        let ticketAvailable = 999999; // Default high value if no ticket selected
+        const ticketSelect = document.getElementById(`day${day}_ticket_type`);
+        if (ticketSelect && ticketSelect.value) {
+            const selectedOption = ticketSelect.options[ticketSelect.selectedIndex];
+            ticketAvailable = parseInt(selectedOption.dataset.available) || 0;
+        }
+
+        // Use the minimum of max per order, day capacity, and ticket available seats
+        const maxAllowed = Math.min({{ $maxTicketsPerOrder }}, dayCapacity, ticketAvailable);
         if (currentValue < maxAllowed) {
             input.value = currentValue + 1;
             calculatePricing();
 
             // Track AddToCart when day quantity increases (if ticket is selected)
-            const ticketSelect = document.getElementById(`day${day}_ticket_type`);
             if (ticketSelect && ticketSelect.value) {
                 const selectedOption = ticketSelect.options[ticketSelect.selectedIndex];
                 const price = parseFloat(selectedOption.dataset.price) || 0;

@@ -113,9 +113,9 @@ console.log('%c=== OVERSOLD ORDERS INVESTIGATION ===', 'background: #ff0000; col
     }
 
     // Get all orders for this ticket type on the oversold day
-    $orderData = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)
-        ->where('event_day_name', $dayName)
-        ->whereIn('status', ['sold', 'active', 'scanned', 'pending'])
+    $orderData = \App\Models\PurchaseTicket::where('purchase.ticket_type_id', $ticket->id)
+        ->where('purchase.event_day_name', $dayName)
+        ->whereIn('purchase.status', ['sold', 'active', 'scanned', 'pending'])
         ->join('orders', 'purchase.order_id', '=', 'orders.id')
         ->select([
             'orders.id as order_id',

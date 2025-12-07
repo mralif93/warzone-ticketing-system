@@ -65,8 +65,23 @@
     // DISCREPANCIES
     $paidOrdersNoPayment = \App\Models\Order::where('status', 'paid')
         ->whereDoesntHave('payments', fn($q) => $q->where('status', 'succeeded'))
-        ->select('id', 'order_number', 'total_amount', 'payment_method', 'created_at')
-        ->orderBy('created_at')->get();
+        ->with(['purchaseTickets.ticketType:id,name'])
+        ->select('id', 'order_number', 'status', 'total_amount', 'payment_method', 'created_at')
+        ->orderBy('created_at')->get()
+        ->map(function($order) {
+            $ticketTypes = $order->purchaseTickets->map(fn($pt) => $pt->ticketType->name ?? 'N/A')->unique()->implode(', ');
+            $ticketCount = $order->purchaseTickets->count();
+            return (object)[
+                'id' => $order->id,
+                'order_number' => $order->order_number,
+                'status' => $order->status,
+                'total_amount' => $order->total_amount,
+                'payment_method' => $order->payment_method,
+                'created_at' => $order->created_at,
+                'ticket_types' => $ticketTypes,
+                'ticket_count' => $ticketCount,
+            ];
+        });
 
     $unpaidOrdersWithPayment = \App\Models\Order::where('status', '!=', 'paid')
         ->whereHas('payments', fn($q) => $q->where('status', 'succeeded'))
@@ -213,10 +228,26 @@ console.log('===== 💸 REFUNDS: RM ' + @json($totalRefunds) + ' =====');
 <div class="bg-red-50 p-4 rounded shadow mb-4">
     <h2 class="font-bold text-red-600">⚠️ PAID ORDERS WITHOUT PAYMENT ({{ $paidOrdersNoPayment->count() }}) = RM {{ number_format($paidOrdersNoPayment->sum('total_amount'), 2) }}</h2>
     <table class="w-full text-sm mt-2">
-        <thead><tr class="bg-red-100"><th>Order #</th><th>Amount</th><th>Method</th><th>Date</th></tr></thead>
+        <thead><tr class="bg-red-100">
+            <th class="text-left p-2">Order #</th>
+            <th class="text-left p-2">Status</th>
+            <th class="text-left p-2">Ticket Type</th>
+            <th class="text-center p-2">Qty</th>
+            <th class="text-right p-2">Amount</th>
+            <th class="text-left p-2">Method</th>
+            <th class="text-left p-2">Date</th>
+        </tr></thead>
         <tbody>
         @foreach($paidOrdersNoPayment as $o)
-        <tr class="border-b"><td>{{ $o->order_number }}</td><td>RM {{ number_format($o->total_amount, 2) }}</td><td>{{ $o->payment_method }}</td><td>{{ $o->created_at }}</td></tr>
+        <tr class="border-b">
+            <td class="p-2">{{ $o->order_number }}</td>
+            <td class="p-2"><span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">{{ $o->status }}</span></td>
+            <td class="p-2">{{ $o->ticket_types }}</td>
+            <td class="text-center p-2">{{ $o->ticket_count }}</td>
+            <td class="text-right p-2">RM {{ number_format($o->total_amount, 2) }}</td>
+            <td class="p-2">{{ $o->payment_method }}</td>
+            <td class="p-2">{{ $o->created_at->format('Y-m-d H:i') }}</td>
+        </tr>
         @endforeach
         </tbody>
     </table>

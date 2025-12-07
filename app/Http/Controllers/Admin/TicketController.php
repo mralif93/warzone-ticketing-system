@@ -559,4 +559,79 @@ class TicketController extends Controller
                         ->with('success', "Ticket type '{$ticketName}' permanently deleted.");
     }
 
+    /**
+     * Cancel pending oversold orders
+     */
+    public function cancelPendingOversold(Request $request)
+    {
+        $orderIds = explode(',', $request->input('order_ids', ''));
+        $orderIds = array_filter(array_map('intval', $orderIds));
+
+        if (empty($orderIds)) {
+            return back()->withErrors(['error' => 'No order IDs provided.']);
+        }
+
+        $cancelledCount = 0;
+        $errors = [];
+
+        foreach ($orderIds as $orderId) {
+            try {
+                $order = \App\Models\Order::find($orderId);
+
+                if (!$order) {
+                    $errors[] = "Order ID {$orderId} not found.";
+                    continue;
+                }
+
+                if ($order->status !== 'pending') {
+                    $errors[] = "Order {$order->order_number} is not pending (status: {$order->status}).";
+                    continue;
+                }
+
+                $oldValues = $order->toArray();
+
+                // Update order status to cancelled
+                $order->update([
+                    'status' => 'cancelled',
+                    'cancelled_at' => now(),
+                    'cancellation_reason' => 'Cancelled due to overselling - order placed after capacity reached'
+                ]);
+
+                // Cancel all purchase tickets in this order
+                $order->purchaseTickets()->update([
+                    'status' => 'cancelled',
+                    'cancelled_at' => now(),
+                    'cancellation_reason' => 'Cancelled due to overselling - order placed after capacity reached'
+                ]);
+
+                // Update Payment status to cancelled if exists
+                $order->payments()->where('status', '!=', 'refunded')->update(['status' => 'cancelled']);
+
+                // Log the cancellation
+                AuditLog::create([
+                    'user_id' => Auth::id(),
+                    'action' => 'CANCEL_OVERSOLD',
+                    'table_name' => 'orders',
+                    'record_id' => $order->id,
+                    'old_values' => $oldValues,
+                    'new_values' => $order->fresh()->toArray(),
+                    'ip_address' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                ]);
+
+                $cancelledCount++;
+
+            } catch (\Exception $e) {
+                $errors[] = "Error cancelling order ID {$orderId}: " . $e->getMessage();
+            }
+        }
+
+        $message = "Successfully cancelled {$cancelledCount} pending oversold order(s).";
+        if (!empty($errors)) {
+            $message .= " Errors: " . implode(', ', $errors);
+        }
+
+        return back()->with('success', $message);
+    }
+
 }

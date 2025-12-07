@@ -5,11 +5,10 @@
 
 @section('content')
 <!-- DEBUG: Overselling Diagnostic Report with Order Investigation -->
-<script>
-console.log('=== OVERSELLING DIAGNOSTIC REPORT ===');
 @php
 $debugTickets = \App\Models\Ticket::whereNull('deleted_at')->get();
 $oversoldTickets = [];
+$pendingOversoldOrderIds = [];
 
 foreach($debugTickets as $debugTicket) {
     $debugEvent = $debugTicket->event;
@@ -20,8 +19,6 @@ foreach($debugTickets as $debugTicket) {
 
     $day1Name = $debugEventDays[0]['day_name'];
     $day2Name = $debugEventDays[1]['day_name'];
-    $day1Date = $debugEventDays[0]['date'];
-    $day2Date = $debugEventDays[1]['date'];
 
     // Count ALL statuses for Day 1
     $day1All = \App\Models\PurchaseTicket::where('ticket_type_id', $debugTicket->id)
@@ -47,32 +44,6 @@ foreach($debugTickets as $debugTicket) {
     $day1Oversold = $day1Sold > $debugTicket->total_seats;
     $day2Oversold = $day2Sold > $debugTicket->total_seats;
 
-    $ticketInfo = [
-        'name' => $debugTicket->name,
-        'id' => $debugTicket->id,
-        'total_seats' => $debugTicket->total_seats,
-        'day1' => [
-            'sold' => $day1Sold,
-            'pending' => $day1All['pending'] ?? 0,
-            'sold_status' => $day1All['sold'] ?? 0,
-            'active' => $day1All['active'] ?? 0,
-            'scanned' => $day1All['scanned'] ?? 0,
-            'cancelled' => $day1All['cancelled'] ?? 0,
-            'oversold' => $day1Oversold,
-            'oversold_by' => $day1Oversold ? $day1Sold - $debugTicket->total_seats : 0,
-        ],
-        'day2' => [
-            'sold' => $day2Sold,
-            'pending' => $day2All['pending'] ?? 0,
-            'sold_status' => $day2All['sold'] ?? 0,
-            'active' => $day2All['active'] ?? 0,
-            'scanned' => $day2All['scanned'] ?? 0,
-            'cancelled' => $day2All['cancelled'] ?? 0,
-            'oversold' => $day2Oversold,
-            'oversold_by' => $day2Oversold ? $day2Sold - $debugTicket->total_seats : 0,
-        ],
-    ];
-
     // Track oversold tickets for order investigation
     if ($day1Oversold || $day2Oversold) {
         $oversoldTickets[] = [
@@ -81,110 +52,67 @@ foreach($debugTickets as $debugTicket) {
             'day2_oversold' => $day2Oversold,
             'day1_name' => $day1Name,
             'day2_name' => $day2Name,
-            'day1_date' => $day1Date,
-            'day2_date' => $day2Date,
             'max_seats' => $debugTicket->total_seats,
         ];
-    }
-@endphp
-console.log(@json($ticketInfo));
-@php
-}
-@endphp
-console.log('=== END DIAGNOSTIC ===');
 
-// === OVERSOLD ORDERS INVESTIGATION ===
-@if(count($oversoldTickets) > 0)
-console.log('%c=== OVERSOLD ORDERS INVESTIGATION ===', 'background: #ff0000; color: white; font-size: 14px; padding: 5px;');
-@foreach($oversoldTickets as $oversoldInfo)
-@php
-    $ticket = $oversoldInfo['ticket'];
-    $maxSeats = $oversoldInfo['max_seats'];
+        // Find pending oversold orders for this ticket
+        $dayName = $day2Oversold ? $day2Name : $day1Name;
+        $maxSeats = $debugTicket->total_seats;
 
-    // Check Day 2 if oversold (most common case based on your data)
-    if ($oversoldInfo['day2_oversold']) {
-        $dayName = $oversoldInfo['day2_name'];
-        $dayDate = $oversoldInfo['day2_date'];
-        $dayLabel = 'Day 2';
-    } else {
-        $dayName = $oversoldInfo['day1_name'];
-        $dayDate = $oversoldInfo['day1_date'];
-        $dayLabel = 'Day 1';
-    }
+        $orderData = \App\Models\PurchaseTicket::where('purchase.ticket_type_id', $debugTicket->id)
+            ->where('purchase.event_day_name', $dayName)
+            ->whereIn('purchase.status', ['sold', 'active', 'scanned', 'pending'])
+            ->join('orders', 'purchase.order_id', '=', 'orders.id')
+            ->select([
+                'orders.id as order_id',
+                'orders.status as order_status',
+                \DB::raw('COUNT(*) as ticket_count')
+            ])
+            ->groupBy('orders.id', 'orders.status')
+            ->orderBy('orders.created_at')
+            ->get();
 
-    // Get all orders for this ticket type on the oversold day
-    $orderData = \App\Models\PurchaseTicket::where('purchase.ticket_type_id', $ticket->id)
-        ->where('purchase.event_day_name', $dayName)
-        ->whereIn('purchase.status', ['sold', 'active', 'scanned', 'pending'])
-        ->join('orders', 'purchase.order_id', '=', 'orders.id')
-        ->select([
-            'orders.id as order_id',
-            'orders.order_number',
-            'orders.customer_email',
-            'orders.status as order_status',
-            'orders.created_at',
-            'orders.payment_method',
-            \DB::raw('COUNT(*) as ticket_count')
-        ])
-        ->groupBy('orders.id', 'orders.order_number', 'orders.customer_email', 'orders.status', 'orders.created_at', 'orders.payment_method')
-        ->orderBy('orders.created_at')
-        ->get();
-
-    // Calculate running total and find oversold orders
-    $runningTotal = 0;
-    $orderTimeline = [];
-    $oversoldOrders = [];
-
-    foreach ($orderData as $order) {
-        $runningTotal += $order->ticket_count;
-        $isOversold = $runningTotal > $maxSeats;
-
-        $orderTimeline[] = [
-            'order_id' => $order->order_id,
-            'order_number' => $order->order_number,
-            'email' => $order->customer_email,
-            'status' => $order->order_status,
-            'payment' => $order->payment_method,
-            'created_at' => $order->created_at->format('Y-m-d H:i:s'),
-            'tickets' => $order->ticket_count,
-            'running_total' => $runningTotal,
-            'oversold' => $isOversold,
-        ];
-
-        if ($isOversold) {
-            $oversoldOrders[] = [
-                'order_id' => $order->order_id,
-                'order_number' => $order->order_number,
-                'email' => $order->customer_email,
-                'status' => $order->order_status,
-                'payment' => $order->payment_method,
-                'created_at' => $order->created_at->format('Y-m-d H:i:s'),
-                'tickets' => $order->ticket_count,
-            ];
+        $runningTotal = 0;
+        foreach ($orderData as $order) {
+            $runningTotal += $order->ticket_count;
+            if ($runningTotal > $maxSeats && $order->order_status === 'pending') {
+                $pendingOversoldOrderIds[] = $order->order_id;
+            }
         }
     }
-
-    $investigationData = [
-        'ticket_name' => $ticket->name,
-        'ticket_id' => $ticket->id,
-        'day' => $dayLabel,
-        'max_seats' => $maxSeats,
-        'total_sold' => $runningTotal,
-        'oversold_by' => max(0, $runningTotal - $maxSeats),
-        'total_orders' => count($orderTimeline),
-        'oversold_orders_count' => count($oversoldOrders),
-        'order_timeline' => $orderTimeline,
-        'oversold_orders' => $oversoldOrders,
-    ];
+}
 @endphp
-console.log('%c{{ $ticket->name }} - {{ $dayLabel }} OVERSOLD', 'color: red; font-weight: bold;');
-console.log(@json($investigationData));
-console.table(@json($orderTimeline));
-console.log('%cOversold Orders (Need Attention):', 'color: orange; font-weight: bold;');
-console.table(@json($oversoldOrders));
-@endforeach
+
+@if(count($pendingOversoldOrderIds) > 0)
+<!-- Cancel Pending Oversold Orders Panel -->
+<div class="bg-red-50 border border-red-300 rounded-2xl shadow-sm mb-6 p-6">
+    <div class="flex items-start justify-between">
+        <div>
+            <h3 class="text-lg font-bold text-red-800 flex items-center">
+                <i class='bx bx-error-circle text-xl mr-2'></i>
+                ⚠️ Pending Oversold Orders Detected
+            </h3>
+            <p class="text-sm text-red-700 mt-2">
+                Found <strong>{{ count($pendingOversoldOrderIds) }}</strong> pending orders that are oversold.
+                These orders have not been paid yet and can be safely cancelled.
+            </p>
+            <div class="mt-3 text-xs text-red-600">
+                Order IDs: {{ implode(', ', $pendingOversoldOrderIds) }}
+            </div>
+        </div>
+        <form action="{{ route('admin.tickets.cancel-pending-oversold') }}" method="POST"
+              onsubmit="return confirm('Are you sure you want to cancel {{ count($pendingOversoldOrderIds) }} pending oversold orders? This action cannot be undone.');">
+            @csrf
+            <input type="hidden" name="order_ids" value="{{ implode(',', $pendingOversoldOrderIds) }}">
+            <button type="submit"
+                    class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors duration-200">
+                <i class='bx bx-trash mr-2'></i>
+                Cancel {{ count($pendingOversoldOrderIds) }} Pending Orders
+            </button>
+        </form>
+    </div>
+</div>
 @endif
-</script>
 <!-- END DEBUG -->
 
 <!-- Professional Ticket Management with WWC Brand Design -->

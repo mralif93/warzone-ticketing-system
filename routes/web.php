@@ -122,6 +122,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/tickets/{ticket}/cancel', [AdminTicketController::class, 'cancel'])->name('tickets.cancel');
         Route::post('/tickets/{ticket}/mark-used', [AdminTicketController::class, 'markUsed'])->name('tickets.mark-used');
         Route::post('/tickets/bulk-update', [AdminTicketController::class, 'bulkUpdate'])->name('tickets.bulk-update');
+        Route::post('/tickets/cancel-pending-oversold', [AdminTicketController::class, 'cancelPendingOversold'])->name('tickets.cancel-pending-oversold');
         
         // Payment management
         Route::resource('payments', AdminPaymentController::class);

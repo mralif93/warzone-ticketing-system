@@ -99,6 +99,8 @@ class Ticket extends Model
 
     /**
      * Update sold seats count
+     * Note: This method only updates seat counts, NOT the status.
+     * Status is managed by admin through the ticket edit form.
      */
     public function updateSoldSeats(): void
     {
@@ -113,49 +115,43 @@ class Ticket extends Model
 
         if ($isMultiDay) {
             // For multi-day events: check per-day availability
-            // Ticket should only be sold_out if ALL days are sold out
             $eventDays = $event->getEventDays();
-            $hasAnyDayAvailable = false;
             $totalAvailableAcrossDays = 0;
 
             foreach ($eventDays as $day) {
                 $daySold = $this->purchaseTickets()
-                    ->whereDate('event_day', $day['date'])
+                    ->where('event_day_name', $day['day_name'])
                     ->whereIn('status', ['pending', 'sold', 'active', 'scanned'])
                     ->count();
                 $dayAvailable = $this->total_seats - $daySold;
-
-                if ($dayAvailable > 0) {
-                    $hasAnyDayAvailable = true;
-                }
                 $totalAvailableAcrossDays += max(0, $dayAvailable);
             }
 
+            // Only update seat counts, preserve admin-set status
             $this->update([
                 'sold_seats' => $soldCount,
                 'scanned_seats' => $scannedCount,
-                'available_seats' => $totalAvailableAcrossDays, // Sum of available across all days
-                'status' => $hasAnyDayAvailable ? 'active' : 'sold_out',
+                'available_seats' => $totalAvailableAcrossDays,
             ]);
         } elseif ($this->is_combo) {
             // For combo tickets: total_seats represents combo ticket capacity
             // Each combo ticket sold creates 2 PurchaseTicket records (Day 1 + Day 2)
-            // So we need to divide soldCount by 2 to get actual combo tickets sold
-            $comboTicketsSold = ceil($soldCount / 2); // Round up to handle partial counts
+            $comboTicketsSold = ceil($soldCount / 2);
             $availableSeats = $this->total_seats - $comboTicketsSold;
+
+            // Only update seat counts, preserve admin-set status
             $this->update([
-                'sold_seats' => $soldCount, // Keep PurchaseTicket count for display
+                'sold_seats' => $soldCount,
                 'scanned_seats' => $scannedCount,
-                'available_seats' => max(0, $availableSeats), // Calculate based on combo ticket capacity
-                'status' => $availableSeats <= 0 ? 'sold_out' : 'active',
+                'available_seats' => max(0, $availableSeats),
             ]);
         } else {
             // Single-day event tickets: count directly
+            // Only update seat counts, preserve admin-set status
             $this->update([
                 'sold_seats' => $soldCount,
                 'scanned_seats' => $scannedCount,
                 'available_seats' => $this->total_seats - $soldCount,
-                'status' => $this->total_seats - $soldCount <= 0 ? 'sold_out' : 'active',
             ]);
         }
     }

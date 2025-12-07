@@ -334,10 +334,9 @@
                                         <option value="">Choose your preferred ticket type</option>
                                         @php
                                             $eventDays = $event->isMultiDay() ? $event->getEventDays() : [];
-                                            // For multi-day events, include 'sold_out' tickets too since they may have per-day availability
-                                            $ticketStatuses = $event->isMultiDay() ? ['active', 'sold_out'] : ['active'];
+                                            // Only show 'active' tickets - respect admin's sold_out status
                                         @endphp
-                                        @foreach($event->tickets->whereIn('status', $ticketStatuses) as $ticket)
+                                        @foreach($event->tickets->where('status', 'active') as $ticket)
                                             @php
                                                 // Calculate per-day availability for multi-day events
                                                 $day1Available = $ticket->total_seats;
@@ -503,7 +502,7 @@
                                                 name="day{{ $index + 1 }}_ticket_type"
                                                 class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-wwc-primary focus:border-wwc-primary day-ticket-select text-sm bg-white shadow-sm transition-all duration-200 hover:border-gray-300">
                                             <option value="">Choose your preferred ticket type</option>
-                                            @foreach($event->tickets->whereIn('status', ['active', 'sold_out']) as $ticket)
+                                            @foreach($event->tickets->where('status', 'active') as $ticket)
                                                 @php
                                                     // Calculate day-specific availability using event_day_name (same as admin)
                                                     $daySold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticket->id)

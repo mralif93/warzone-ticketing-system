@@ -30,14 +30,9 @@ class TicketController extends Controller
                 ->with('error', 'This event is not currently on sale.');
         }
 
-        // Load tickets for this event
-        // For multi-day events, include 'sold_out' tickets too since they may have per-day availability
-        $event->load(['tickets' => function($query) use ($event) {
-            if ($event->isMultiDay()) {
-                $query->whereIn('status', ['active', 'sold_out']);
-            } else {
-                $query->where('status', 'active');
-            }
+        // Load tickets for this event - only show 'active' tickets (respect admin's sold_out status)
+        $event->load(['tickets' => function($query) {
+            $query->where('status', 'active');
         }]);
 
         // Check if event has reached its total capacity limit
@@ -115,18 +110,13 @@ class TicketController extends Controller
                 ]);
             }
 
-        // Load tickets for this event
-        // For multi-day events, include 'sold_out' tickets too since they may have per-day availability
-        $event->load(['tickets' => function($query) use ($event) {
-            if ($event->isMultiDay()) {
-                $query->whereIn('status', ['active', 'sold_out']);
-            } else {
-                $query->where('status', 'active');
-            }
+        // Load tickets for this event - only show 'active' tickets (respect admin's sold_out status)
+        $event->load(['tickets' => function($query) {
+            $query->where('status', 'active');
         }]);
 
         // Get available ticket IDs for validation
-        $availableTicketIds = $event->tickets->where('available_seats', '>', 0)->pluck('id')->toArray();
+        $availableTicketIds = $event->tickets->pluck('id')->toArray();
 
         // Validate based on purchase type
         $purchaseType = $request->purchase_type ?? 'single_day';
@@ -589,18 +579,12 @@ class TicketController extends Controller
             ], 400);
         }
 
-        // Load tickets for this event
-        // For multi-day events, include 'sold_out' tickets too since they may have per-day availability
-        $event->load(['tickets' => function($query) use ($event) {
-            if ($event->isMultiDay()) {
-                $query->whereIn('status', ['active', 'sold_out']);
-            } else {
-                $query->where('status', 'active');
-            }
+        // Load tickets for this event - only show 'active' tickets (respect admin's sold_out status)
+        $event->load(['tickets' => function($query) {
+            $query->where('status', 'active');
         }]);
 
         // Get available ticket IDs for validation
-        // For multi-day events, we need to include sold_out tickets that may have per-day availability
         $availableTicketIds = $event->tickets->pluck('id')->toArray();
 
         // Validate based on purchase type

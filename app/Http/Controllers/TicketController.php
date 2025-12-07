@@ -758,9 +758,9 @@ class TicketController extends Controller
                             ->withInput();
                     }
 
-                    // Check day-specific availability (including pending tickets)
+                    // Check day-specific availability using event_day_name (same as admin)
                     $day1Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $day1Ticket->id)
-                        ->whereDate('event_day', $eventDays[0]['date'])
+                        ->where('event_day_name', $eventDays[0]['day_name'])
                         ->whereIn('status', ['pending', 'sold', 'active', 'scanned'])
                         ->count();
                     $day1Available = $day1Ticket->total_seats - $day1Sold;
@@ -787,9 +787,9 @@ class TicketController extends Controller
                             ->withInput();
                     }
 
-                    // Check day-specific availability (including pending tickets)
+                    // Check day-specific availability using event_day_name (same as admin)
                     $day2Sold = \App\Models\PurchaseTicket::where('ticket_type_id', $day2Ticket->id)
-                        ->whereDate('event_day', $eventDays[1]['date'])
+                        ->where('event_day_name', $eventDays[1]['day_name'])
                         ->whereIn('status', ['pending', 'sold', 'active', 'scanned'])
                         ->count();
                     $day2Available = $day2Ticket->total_seats - $day2Sold;
@@ -835,10 +835,10 @@ class TicketController extends Controller
                 if ($event->isMultiDay() && $request->has('single_day_selection')) {
                     $selectedDay = $request->single_day_selection === 'day1' ? 1 : 2;
 
-                    // Check day-specific availability (including pending tickets)
+                    // Check day-specific availability using event_day_name (same as admin)
                     $dayIndex = $selectedDay - 1;
                     $daySold = \App\Models\PurchaseTicket::where('ticket_type_id', $ticketType->id)
-                        ->whereDate('event_day', $eventDays[$dayIndex]['date'])
+                        ->where('event_day_name', $eventDays[$dayIndex]['day_name'])
                         ->whereIn('status', ['pending', 'sold', 'active', 'scanned'])
                         ->count();
                     $dayAvailable = $ticketType->total_seats - $daySold;

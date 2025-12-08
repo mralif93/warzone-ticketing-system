@@ -70,6 +70,7 @@
         ->orderBy('created_at')->get()
         ->map(function($order) {
             $ticketTypes = $order->purchaseTickets->map(fn($pt) => $pt->ticketType->name ?? 'N/A')->unique()->implode(', ');
+            $ticketStatuses = $order->purchaseTickets->map(fn($pt) => $pt->status)->unique()->implode(', ');
             $ticketCount = $order->purchaseTickets->count();
             return (object)[
                 'id' => $order->id,
@@ -79,6 +80,7 @@
                 'payment_method' => $order->payment_method,
                 'created_at' => $order->created_at,
                 'ticket_types' => $ticketTypes,
+                'ticket_statuses' => $ticketStatuses,
                 'ticket_count' => $ticketCount,
             ];
         });
@@ -230,8 +232,9 @@ console.log('===== 💸 REFUNDS: RM ' + @json($totalRefunds) + ' =====');
     <table class="w-full text-sm mt-2">
         <thead><tr class="bg-red-100">
             <th class="text-left p-2">Order #</th>
-            <th class="text-left p-2">Status</th>
+            <th class="text-left p-2">Order Status</th>
             <th class="text-left p-2">Ticket Type</th>
+            <th class="text-left p-2">Ticket Status</th>
             <th class="text-center p-2">Qty</th>
             <th class="text-right p-2">Amount</th>
             <th class="text-left p-2">Method</th>
@@ -243,6 +246,7 @@ console.log('===== 💸 REFUNDS: RM ' + @json($totalRefunds) + ' =====');
             <td class="p-2">{{ $o->order_number }}</td>
             <td class="p-2"><span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">{{ $o->status }}</span></td>
             <td class="p-2">{{ $o->ticket_types }}</td>
+            <td class="p-2"><span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">{{ $o->ticket_statuses }}</span></td>
             <td class="text-center p-2">{{ $o->ticket_count }}</td>
             <td class="text-right p-2">RM {{ number_format($o->total_amount, 2) }}</td>
             <td class="p-2">{{ $o->payment_method }}</td>

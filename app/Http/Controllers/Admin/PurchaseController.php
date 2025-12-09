@@ -126,6 +126,7 @@ class PurchaseController extends Controller
 
         // Get events for filter dropdown
         $events = Event::select('id', 'name', 'date_time')->orderBy('date_time', 'desc')->get();
+        $purchaseExportableFields = $this->purchaseExportableFields();
 
         return view('admin.purchases.index', compact(
             'purchases',
@@ -134,8 +135,163 @@ class PurchaseController extends Controller
             'pendingPurchases',
             'cancelledPurchases',
             'totalRevenue',
-            'events'
+            'events',
+            'purchaseExportableFields'
         ));
+    }
+
+    public function exportPage()
+    {
+        $fields = $this->purchaseExportableFields();
+        return view('admin.purchases.export', compact('fields'));
+    }
+
+    /**
+     * Export purchases as CSV with selectable fields
+     */
+    public function export(Request $request)
+    {
+        $fields = $this->parseExportFields($request->get('fields'), $this->purchaseExportableFields());
+
+        $query = PurchaseTicket::with(['order.user', 'event', 'ticketType'])
+            ->when($request->filled('search'), function ($q) use ($request) {
+                $search = $request->search;
+                $q->where(function ($q2) use ($search) {
+                    $q2->where('qrcode', 'like', "%{$search}%")
+                       ->orWhereHas('order.user', function ($userQuery) use ($search) {
+                           $userQuery->where('name', 'like', "%{$search}%")
+                                     ->orWhere('email', 'like', "%{$search}%");
+                       })
+                       ->orWhereHas('event', function ($eventQuery) use ($search) {
+                           $eventQuery->where('name', 'like', "%{$search}%");
+                       });
+                });
+            })
+            ->when($request->filled('status'), fn($q) => $q->where('status', $request->status))
+            ->when($request->filled('event_id'), fn($q) => $q->where('event_id', $request->event_id))
+            ->when($request->filled('date_from'), fn($q) => $q->whereDate('created_at', '>=', $request->date_from))
+            ->when($request->filled('date_to'), fn($q) => $q->whereDate('created_at', '<=', $request->date_to))
+            ->orderByDesc('created_at');
+
+        $filename = 'purchases_' . now()->format('Y-m-d_H-i-s') . '.csv';
+
+        return response()->streamDownload(function() use ($query, $fields) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, $fields);
+
+            $query->chunk(500, function($rows) use ($handle, $fields) {
+                foreach ($rows as $purchase) {
+                    $row = [];
+                    foreach ($fields as $field) {
+                        $row[] = data_get($purchase, $field);
+                    }
+                    fputcsv($handle, $row);
+                }
+            });
+
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv',
+            'Cache-Control' => 'no-store, no-cache',
+        ]);
+    }
+
+    /**
+     * Import purchases from CSV
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:csv,txt',
+        ]);
+
+        $path = $request->file('file')->getRealPath();
+        $handle = fopen($path, 'r');
+        if (!$handle) {
+            return back()->withErrors(['file' => 'Unable to read uploaded file.']);
+        }
+
+        $headers = fgetcsv($handle);
+        if (!$headers) {
+            return back()->withErrors(['file' => 'CSV appears empty.']);
+        }
+
+        $allowed = $this->purchaseExportableFields();
+        $selected = array_values(array_intersect($headers, $allowed));
+        if (empty($selected)) {
+            fclose($handle);
+            return back()->withErrors(['file' => 'No valid columns found in CSV.']);
+        }
+
+        $created = 0; $updated = 0;
+        while (($row = fgetcsv($handle)) !== false) {
+            $data = array_combine($headers, $row);
+            $payload = array_intersect_key($data, array_flip($allowed));
+
+            $id = $payload['id'] ?? null;
+            unset($payload['id']);
+
+            if ($id && $existing = PurchaseTicket::find($id)) {
+                $existing->forceFill($payload);
+                if (isset($payload['created_at']) || isset($payload['updated_at'])) {
+                    $existing->timestamps = false;
+                }
+                $existing->save();
+                $updated++;
+            } else {
+                $purchase = new PurchaseTicket();
+                $purchase->forceFill($payload);
+                if (isset($payload['created_at']) || isset($payload['updated_at'])) {
+                    $purchase->timestamps = false;
+                }
+                $purchase->save();
+                $created++;
+            }
+        }
+        fclose($handle);
+
+        return back()->with('success', "Import completed. Created: {$created}, Updated: {$updated}");
+    }
+
+    private function parseExportFields($fields, array $allowed): array
+    {
+        if (!$fields) {
+            return $allowed;
+        }
+        if (is_array($fields)) {
+            $requested = collect($fields)->map(fn($f) => trim($f));
+        } else {
+            $requested = collect(explode(',', $fields))->map(fn($f) => trim($f));
+        }
+        $requested = $requested->filter()->unique()->values()->all();
+
+        $valid = array_values(array_intersect($requested, $allowed));
+        return count($valid) ? $valid : $allowed;
+    }
+
+    private function purchaseExportableFields(): array
+    {
+        return [
+            'id',
+            'order_id',
+            'event_id',
+            'ticket_type_id',
+            'event_day',
+            'event_day_name',
+            'zone',
+            'is_combo_purchase',
+            'combo_group_id',
+            'original_price',
+            'discount_amount',
+            'qrcode',
+            'status',
+            'price_paid',
+            'scanned_at',
+            'cancelled_at',
+            'cancellation_reason',
+            'created_at',
+            'updated_at',
+        ];
     }
 
     /**

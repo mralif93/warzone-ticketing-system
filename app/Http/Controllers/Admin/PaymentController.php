@@ -56,6 +56,7 @@ class PaymentController extends Controller
         $statuses = Payment::select('status')->distinct()->pluck('status');
         $paymentMethods = Payment::select('method')->distinct()->pluck('method');
         $paymentMethodsList = $paymentMethods->filter()->values();
+        $paymentExportableFields = $this->paymentExportableFields();
 
         // Calculate additional statistics from ALL payments (not paginated)
         $allPaymentsQuery = Payment::query();
@@ -113,7 +114,13 @@ class PaymentController extends Controller
             'methods_list' => $paymentMethodsList,
         ]);
 
-        return view('admin.payments.index', compact('payments', 'statuses', 'paymentMethods', 'paymentMethodsList', 'totalRevenue', 'totalRefunded', 'totalPayments', 'succeededPayments', 'pendingPayments', 'failedPayments'));
+        return view('admin.payments.index', compact('payments', 'statuses', 'paymentMethods', 'paymentMethodsList', 'paymentExportableFields', 'totalRevenue', 'totalRefunded', 'totalPayments', 'succeededPayments', 'pendingPayments', 'failedPayments'));
+    }
+
+    public function exportPage()
+    {
+        $fields = $this->paymentExportableFields();
+        return view('admin.payments.export', compact('fields'));
     }
 
     /**
@@ -243,83 +250,145 @@ class PaymentController extends Controller
      */
     public function export(Request $request)
     {
-        $query = Payment::with(['order.user']);
+        $fields = $this->parseExportFields($request->get('fields'), $this->paymentExportableFields());
 
-        // Apply same filters as index
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('transaction_id', 'like', "%{$search}%")
-                  ->orWhere('method', 'like', "%{$search}%")
-                  ->orWhereHas('order.user', function($userQuery) use ($search) {
-                      $userQuery->where('name', 'like', "%{$search}%");
-                  });
-            });
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->filled('method')) {
-            $query->where('method', $request->method);
-        }
-
-        if ($request->filled('date_from')) {
-            $query->where('created_at', '>=', $request->date_from);
-        }
-        if ($request->filled('date_to')) {
-            $query->where('created_at', '<=', $request->date_to . ' 23:59:59');
-        }
-
-        $payments = $query->latest()->get();
+        $query = Payment::with(['order.user'])
+            ->when($request->filled('search'), function($q) use ($request) {
+                $search = $request->search;
+                $q->where(function($q2) use ($search) {
+                    $q2->where('transaction_id', 'like', "%{$search}%")
+                       ->orWhere('method', 'like', "%{$search}%")
+                       ->orWhereHas('order.user', function($userQuery) use ($search) {
+                           $userQuery->where('name', 'like', "%{$search}%");
+                       });
+                });
+            })
+            ->when($request->filled('status'), fn($q) => $q->where('status', $request->status))
+            ->when($request->filled('method'), fn($q) => $q->where('method', $request->method))
+            ->when($request->filled('date_from'), fn($q) => $q->where('created_at', '>=', $request->date_from))
+            ->when($request->filled('date_to'), fn($q) => $q->where('created_at', '<=', $request->date_to . ' 23:59:59'))
+            ->orderByDesc('created_at');
 
         $filename = 'payments_' . now()->format('Y-m-d_H-i-s') . '.csv';
-        
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ];
 
-        $callback = function() use ($payments) {
+        return response()->streamDownload(function() use ($query, $fields) {
             $file = fopen('php://output', 'w');
-            
-            // CSV headers
-            fputcsv($file, [
-                'ID',
-                'Transaction ID',
-                'Order ID',
-                'Customer Name',
-                'Customer Email',
-                'Amount',
-                'Payment Method',
-                'Status',
-                'Refund Amount',
-                'Refund Reason',
-                'Created At'
-            ]);
+            fputcsv($file, $fields);
 
-            // CSV data
-            foreach ($payments as $payment) {
-                fputcsv($file, [
-                    $payment->id,
-                    $payment->transaction_id,
-                    $payment->order_id,
-                    $payment->order->user->name ?? 'N/A',
-                    $payment->order->customer_email ?? 'N/A',
-                    $payment->amount,
-                    $payment->method,
-                    $payment->status,
-                    $payment->refund_amount ?? '',
-                    $payment->refund_reason ?? '',
-                    $payment->created_at->format('Y-m-d H:i:s')
-                ]);
-            }
+            $query->chunk(500, function($payments) use ($file, $fields) {
+                foreach ($payments as $payment) {
+                    $row = [];
+                    foreach ($fields as $field) {
+                        $row[] = data_get($payment, $field);
+                    }
+                    fputcsv($file, $row);
+                }
+            });
 
             fclose($file);
-        };
+        }, $filename, [
+            'Content-Type' => 'text/csv',
+            'Cache-Control' => 'no-store, no-cache',
+        ]);
+    }
 
-        return response()->stream($callback, 200, $headers);
+    /**
+     * Import payments from CSV
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:csv,txt',
+        ]);
+
+        $path = $request->file('file')->getRealPath();
+        $handle = fopen($path, 'r');
+        if (!$handle) {
+            return back()->withErrors(['file' => 'Unable to read uploaded file.']);
+        }
+
+        $headers = fgetcsv($handle);
+        if (!$headers) {
+            return back()->withErrors(['file' => 'CSV appears empty.']);
+        }
+
+        $allowed = $this->paymentExportableFields();
+        $selected = array_values(array_intersect($headers, $allowed));
+        if (empty($selected)) {
+            fclose($handle);
+            return back()->withErrors(['file' => 'No valid columns found in CSV.']);
+        }
+
+        $created = 0; $updated = 0;
+        while (($row = fgetcsv($handle)) !== false) {
+            $data = array_combine($headers, $row);
+            $payload = array_intersect_key($data, array_flip($allowed));
+
+            $id = $payload['id'] ?? null;
+            unset($payload['id']);
+
+            if ($id && $payment = Payment::find($id)) {
+                $payment->forceFill($payload);
+                if (isset($payload['created_at']) || isset($payload['updated_at'])) {
+                    $payment->timestamps = false;
+                }
+                $payment->save();
+                $updated++;
+            } else {
+                $payment = new Payment();
+                $payment->forceFill($payload);
+                if (isset($payload['created_at']) || isset($payload['updated_at'])) {
+                    $payment->timestamps = false;
+                }
+                $payment->save();
+                $created++;
+            }
+        }
+        fclose($handle);
+
+        return back()->with('success', "Import completed. Created: {$created}, Updated: {$updated}");
+    }
+
+    private function parseExportFields($fields, array $allowed): array
+    {
+        if (!$fields) {
+            return $allowed;
+        }
+        if (is_array($fields)) {
+            $requested = collect($fields)->map(fn($f) => trim($f));
+        } else {
+            $requested = collect(explode(',', $fields))->map(fn($f) => trim($f));
+        }
+        $requested = $requested->filter()->unique()->values()->all();
+
+        $valid = array_values(array_intersect($requested, $allowed));
+        return count($valid) ? $valid : $allowed;
+    }
+
+    private function paymentExportableFields(): array
+    {
+        return [
+            'id',
+            'order_id',
+            'transaction_id',
+            'stripe_charge_id',
+            'stripe_payment_intent_id',
+            'method',
+            'amount',
+            'currency',
+            'status',
+            'failure_reason',
+            'processed_at',
+            'refund_amount',
+            'refund_date',
+            'refund_reason',
+            'refund_method',
+            'refund_reference',
+            'payment_date',
+            'notes',
+            'created_at',
+            'updated_at',
+        ];
     }
 
     /**

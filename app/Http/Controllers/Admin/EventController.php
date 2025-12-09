@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class EventController extends Controller
 {
@@ -46,6 +47,15 @@ class EventController extends Controller
         $statuses = Event::select('status')->distinct()->pluck('status');
 
         return view('admin.events.index', compact('events', 'statuses'));
+    }
+
+    /**
+     * Export/Import page
+     */
+    public function exportPage()
+    {
+        $fields = $this->eventExportableFields();
+        return view('admin.events.export', compact('fields'));
     }
 
     /**
@@ -395,5 +405,144 @@ class EventController extends Controller
 
         return redirect()->route('admin.events.trashed')
                         ->with('success', "Event '{$eventName}' permanently deleted.");
+    }
+
+    /**
+     * Export events as CSV with selectable fields
+     */
+    public function export(Request $request)
+    {
+        $fields = $this->parseExportFields($request->get('fields'), $this->eventExportableFields());
+
+        $query = Event::query()
+            ->when($request->filled('search'), function($q) use ($request) {
+                $search = $request->search;
+                $q->where(function($q2) use ($search) {
+                    $q2->where('name', 'like', "%{$search}%")
+                       ->orWhere('venue', 'like', "%{$search}%")
+                       ->orWhere('description', 'like', "%{$search}%");
+                });
+            })
+            ->when($request->filled('status'), fn($q) => $q->where('status', $request->status))
+            ->when($request->filled('date_from'), fn($q) => $q->where('start_date', '>=', $request->date_from))
+            ->when($request->filled('date_to'), fn($q) => $q->where('start_date', '<=', $request->date_to . ' 23:59:59'))
+            ->orderByDesc('created_at');
+
+        $filename = 'events_' . now()->format('Y-m-d_H-i-s') . '.csv';
+
+        return response()->streamDownload(function() use ($query, $fields) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, $fields);
+
+            $query->chunk(500, function($rows) use ($handle, $fields) {
+                foreach ($rows as $event) {
+                    $row = [];
+                    foreach ($fields as $field) {
+                        $row[] = data_get($event, $field);
+                    }
+                    fputcsv($handle, $row);
+                }
+            });
+
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv',
+            'Cache-Control' => 'no-store, no-cache',
+        ]);
+    }
+
+    /**
+     * Import events from CSV
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:csv,txt',
+        ]);
+
+        $path = $request->file('file')->getRealPath();
+        $handle = fopen($path, 'r');
+        if (!$handle) {
+            return back()->withErrors(['file' => 'Unable to read uploaded file.']);
+        }
+
+        $headers = fgetcsv($handle);
+        if (!$headers) {
+            return back()->withErrors(['file' => 'CSV appears empty.']);
+        }
+
+        $allowed = $this->eventExportableFields();
+        $selected = array_values(array_intersect($headers, $allowed));
+        if (empty($selected)) {
+            fclose($handle);
+            return back()->withErrors(['file' => 'No valid columns found in CSV.']);
+        }
+
+        $created = 0; $updated = 0;
+        while (($row = fgetcsv($handle)) !== false) {
+            $data = array_combine($headers, $row);
+            $payload = array_intersect_key($data, array_flip($allowed));
+
+            $id = $payload['id'] ?? null;
+            unset($payload['id']);
+
+            if ($id && $event = Event::find($id)) {
+                $event->forceFill($payload);
+                if (isset($payload['created_at']) || isset($payload['updated_at'])) {
+                    $event->timestamps = false;
+                }
+                $event->save();
+                $updated++;
+            } else {
+                $event = new Event();
+                $event->forceFill($payload);
+                if (isset($payload['created_at']) || isset($payload['updated_at'])) {
+                    $event->timestamps = false;
+                }
+                $event->save();
+                $created++;
+            }
+        }
+        fclose($handle);
+
+        return back()->with('success', "Import completed. Created: {$created}, Updated: {$updated}");
+    }
+
+    private function parseExportFields($fields, array $allowed): array
+    {
+        if (!$fields) {
+            return $allowed;
+        }
+        if (is_array($fields)) {
+            $requested = collect($fields)->map(fn($f) => trim($f));
+        } else {
+            $requested = collect(explode(',', $fields))->map(fn($f) => trim($f));
+        }
+        $requested = $requested->filter()->unique()->values()->all();
+
+        $valid = array_values(array_intersect($requested, $allowed));
+        return count($valid) ? $valid : $allowed;
+    }
+
+    private function eventExportableFields(): array
+    {
+        return [
+            'id',
+            'name',
+            'date_time',
+            'start_date',
+            'end_date',
+            'status',
+            'max_tickets_per_order',
+            'total_seats',
+            'description',
+            'venue',
+            'combo_discount_percentage',
+            'combo_discount_enabled',
+            'default',
+            'created_at',
+            'updated_at',
+            'deleted_at',
+        ];
     }
 }

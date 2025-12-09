@@ -91,6 +91,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/events/trashed', [AdminEventController::class, 'trashed'])->name('events.trashed');
         Route::post('/events/{event}/restore', [AdminEventController::class, 'restore'])->name('events.restore');
         Route::delete('/events/{event}/force-delete', [AdminEventController::class, 'forceDelete'])->name('events.force-delete');
+        Route::get('/events/export', [AdminEventController::class, 'exportPage'])->name('events.export.page');
+        Route::get('/events/export/csv', [AdminEventController::class, 'export'])->name('events.export');
+        Route::post('/events/import/csv', [AdminEventController::class, 'import'])->name('events.import');
         Route::resource('events', AdminEventController::class);
         Route::post('/events/{event}/change-status', [AdminEventController::class, 'changeStatus'])->name('events.change-status');
         Route::get('/events/{event}/ticket-types', [AdminEventController::class, 'getTicketTypes'])->name('events.ticket-types');
@@ -105,6 +108,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/users/{user}/update-status', [AdminUserController::class, 'updateStatus'])->name('users.update-status');
         
         // Order management
+        Route::get('/orders/export', [AdminOrderController::class, 'exportPage'])->name('orders.export.page');
+        Route::get('/orders/export/csv', [AdminOrderController::class, 'export'])->name('orders.export');
+        Route::post('/orders/import/csv', [AdminOrderController::class, 'import'])->name('orders.import');
         Route::get('/orders/trashed', [AdminOrderController::class, 'trashed'])->name('orders.trashed');
         Route::post('/orders/{order}/restore', [AdminOrderController::class, 'restore'])->name('orders.restore');
         Route::delete('/orders/{order}/force-delete', [AdminOrderController::class, 'forceDelete'])->name('orders.force-delete');
@@ -117,6 +123,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/tickets/trashed', [AdminTicketController::class, 'trashed'])->name('tickets.trashed');
         Route::post('/tickets/{ticket}/restore', [AdminTicketController::class, 'restore'])->name('tickets.restore');
         Route::delete('/tickets/{ticket}/force-delete', [AdminTicketController::class, 'forceDelete'])->name('tickets.force-delete');
+        Route::get('/tickets/export', [AdminTicketController::class, 'exportPage'])->name('tickets.export.page');
+        Route::get('/tickets/export/csv', [AdminTicketController::class, 'export'])->name('tickets.export');
+        Route::post('/tickets/import/csv', [AdminTicketController::class, 'import'])->name('tickets.import');
         Route::resource('tickets', AdminTicketController::class);
         Route::post('/tickets/{ticket}/update-status', [AdminTicketController::class, 'updateStatus'])->name('tickets.update-status');
         Route::post('/tickets/{ticket}/cancel', [AdminTicketController::class, 'cancel'])->name('tickets.cancel');
@@ -125,13 +134,18 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/tickets/cancel-pending-oversold', [AdminTicketController::class, 'cancelPendingOversold'])->name('tickets.cancel-pending-oversold');
         
         // Payment management
+        Route::get('/payments/export', [AdminPaymentController::class, 'exportPage'])->name('payments.export.page');
+        Route::get('/payments/export/csv', [AdminPaymentController::class, 'export'])->name('payments.export');
+        Route::post('/payments/import/csv', [AdminPaymentController::class, 'import'])->name('payments.import');
         Route::resource('payments', AdminPaymentController::class);
         Route::post('/payments/{payment}/change-status', [AdminPaymentController::class, 'changeStatus'])->name('payments.change-status');
         Route::post('/payments/{payment}/update-status', [AdminPaymentController::class, 'updateStatus'])->name('payments.update-status');
         Route::post('/payments/{payment}/refund', [AdminPaymentController::class, 'refund'])->name('payments.refund');
-        Route::get('/payments/export/csv', [AdminPaymentController::class, 'export'])->name('payments.export');
         
         // Purchase management
+        Route::get('/purchases/export', [AdminPurchaseController::class, 'exportPage'])->name('purchases.export.page');
+        Route::get('/purchases/export/csv', [AdminPurchaseController::class, 'export'])->name('purchases.export');
+        Route::post('/purchases/import/csv', [AdminPurchaseController::class, 'import'])->name('purchases.import');
         Route::get('/purchases/trashed', [AdminPurchaseController::class, 'trashed'])->name('purchases.trashed');
         Route::post('/purchases/{purchase}/restore', [AdminPurchaseController::class, 'restore'])->name('purchases.restore');
         Route::delete('/purchases/{purchase}/force-delete', [AdminPurchaseController::class, 'forceDelete'])->name('purchases.force-delete');

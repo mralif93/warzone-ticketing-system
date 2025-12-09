@@ -160,6 +160,11 @@
             <!-- Header Section with Create Button -->
             <div class="flex justify-end items-center mb-6">
                 <div class="flex space-x-3">
+                    <a href="{{ route('admin.payments.export.page') }}"
+                       class="inline-flex items-center px-4 py-2 border border-wwc-neutral-300 shadow-sm text-sm font-semibold rounded-lg text-wwc-neutral-700 bg-white hover:bg-wwc-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition">
+                        <i class='bx bx-download text-sm mr-2'></i>
+                        Export / Import
+                    </a>
                     <a href="{{ route('admin.payments.create') }}" 
                         class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-semibold rounded-lg text-white bg-wwc-primary hover:bg-wwc-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wwc-primary transition-colors duration-200">
                         <i class='bx bx-plus text-sm mr-2'></i>

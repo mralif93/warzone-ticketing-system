@@ -49,7 +49,8 @@ class PaymentController extends Controller
 
         $perPage = $request->get('limit', 10);
         $perPage = in_array($perPage, [10, 15, 25, 50, 100]) ? $perPage : 10;
-        $payments = $query->latest()->paginate($perPage);
+        // Preserve search/filters when moving between pages
+        $payments = $query->latest()->paginate($perPage)->withQueryString();
         $statuses = Payment::select('status')->distinct()->pluck('status');
         $paymentMethods = Payment::select('method')->distinct()->pluck('method');
 

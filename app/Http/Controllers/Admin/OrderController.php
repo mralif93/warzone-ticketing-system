@@ -46,7 +46,8 @@ class OrderController extends Controller
 
         $perPage = $request->get('limit', 10);
         $perPage = in_array($perPage, [10, 15, 25, 50, 100]) ? $perPage : 10;
-        $orders = $query->latest()->paginate($perPage);
+        // Keep search/filter params when navigating between pages
+        $orders = $query->latest()->paginate($perPage)->withQueryString();
         $statuses = Order::select('status')->distinct()->pluck('status');
 
         // Calculate additional statistics from ALL orders (not paginated)
@@ -1048,7 +1049,8 @@ class OrderController extends Controller
 
         $perPage = $request->get('limit', 10);
         $perPage = in_array($perPage, [10, 15, 25, 50, 100]) ? $perPage : 10;
-        $orders = $query->orderBy('deleted_at', 'desc')->paginate($perPage);
+        // Preserve query params for pagination on trashed list as well
+        $orders = $query->orderBy('deleted_at', 'desc')->paginate($perPage)->withQueryString();
 
         // Statistics
         $totalTrashed = Order::onlyTrashed()->count();

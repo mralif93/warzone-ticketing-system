@@ -346,7 +346,7 @@
 
                     <!-- Pagination -->
                     <div class="px-6 py-4 border-t border-wwc-neutral-100">
-                        {{ $orders->links() }}
+                        {{ $orders->appends(request()->query())->links() }}
                     </div>
                 </div>
             @else

@@ -104,7 +104,8 @@ class PurchaseController extends Controller
 
         $perPage = $request->get('limit', 10);
         $perPage = in_array($perPage, [10, 15, 25, 50, 100]) ? $perPage : 10;
-        $purchases = $query->orderBy('created_at', 'desc')->paginate($perPage);
+        // Preserve applied filters when paging through purchases
+        $purchases = $query->orderBy('created_at', 'desc')->paginate($perPage)->withQueryString();
 
         // Statistics
         $totalPurchases = PurchaseTicket::count();
@@ -280,7 +281,8 @@ class PurchaseController extends Controller
 
         $perPage = $request->get('limit', 10);
         $perPage = in_array($perPage, [10, 15, 25, 50, 100]) ? $perPage : 10;
-        $purchases = $query->orderBy('deleted_at', 'desc')->paginate($perPage);
+        // Preserve filters/search across trashed pagination too
+        $purchases = $query->orderBy('deleted_at', 'desc')->paginate($perPage)->withQueryString();
 
         // Statistics
         $totalTrashed = PurchaseTicket::onlyTrashed()->count();

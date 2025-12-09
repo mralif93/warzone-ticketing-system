@@ -385,7 +385,7 @@
 
                     <!-- Pagination -->
                     <div class="px-6 py-4 border-t border-wwc-neutral-100">
-                        {{ $payments->links('vendor.pagination.wwc-tailwind') }}
+                        {{ $payments->appends(request()->query())->links('vendor.pagination.wwc-tailwind') }}
                     </div>
                 @else
                     <!-- Empty State -->

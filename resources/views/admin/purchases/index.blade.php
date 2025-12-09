@@ -246,8 +246,12 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-wwc-neutral-900">{{ $purchase->order->user->name }}</div>
-                                    <div class="text-xs text-wwc-neutral-500">{{ $purchase->order->user->email }}</div>
+                                    <div class="text-sm text-wwc-neutral-900">
+                                        {{ $purchase->order->user->name ?? $purchase->order->customer_name ?? 'N/A' }}
+                                    </div>
+                                    <div class="text-xs text-wwc-neutral-500">
+                                        {{ $purchase->order->user->email ?? $purchase->order->customer_email ?? 'N/A' }}
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-wwc-neutral-900">{{ $purchase->event->name }}</div>

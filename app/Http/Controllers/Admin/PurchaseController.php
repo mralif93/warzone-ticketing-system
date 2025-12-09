@@ -67,7 +67,17 @@ class PurchaseController extends Controller
      */
     public function index(Request $request)
     {
-        $query = PurchaseTicket::with(['order.user', 'event', 'ticketType']);
+        $query = PurchaseTicket::with([
+            'order' => function ($orderQuery) {
+                $orderQuery->withTrashed()->with([
+                    'user' => function ($userQuery) {
+                        $userQuery->withTrashed();
+                    }
+                ]);
+            },
+            'event',
+            'ticketType'
+        ]);
 
         // Search functionality
         if ($request->filled('search')) {
@@ -244,7 +254,17 @@ class PurchaseController extends Controller
      */
     public function trashed(Request $request)
     {
-        $query = PurchaseTicket::onlyTrashed()->with(['order.user', 'event', 'ticketType']);
+        $query = PurchaseTicket::onlyTrashed()->with([
+            'order' => function ($orderQuery) {
+                $orderQuery->withTrashed()->with([
+                    'user' => function ($userQuery) {
+                        $userQuery->withTrashed();
+                    }
+                ]);
+            },
+            'event',
+            'ticketType'
+        ]);
 
         // Search functionality
         if ($request->filled('search')) {

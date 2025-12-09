@@ -141,10 +141,10 @@ class StripeController extends Controller
                 ], 404);
             }
 
-            // Create payment record
+            // Create payment record (store order payment_method if available, otherwise stripe)
             $payment = Payment::create([
                 'order_id' => $order->id,
-                'payment_method' => 'stripe',
+                'method' => $order->payment_method ?? 'stripe',
                 'transaction_id' => $paymentIntent->id,
                 'amount' => $paymentIntent->amount / 100, // Convert back from cents
                 'currency' => $paymentIntent->currency,
@@ -243,7 +243,7 @@ class StripeController extends Controller
             // Create failed payment record
             Payment::create([
                 'order_id' => $order->id,
-                'payment_method' => 'stripe',
+                'method' => $order->payment_method ?? 'stripe',
                 'transaction_id' => $request->payment_intent_id,
                 'amount' => $order->total_amount,
                 'currency' => 'myr',
@@ -474,7 +474,7 @@ class StripeController extends Controller
 
                 $payment = Payment::create([
                     'order_id' => $order->id,
-                    'payment_method' => 'stripe',
+                    'method' => $order->payment_method ?? 'stripe',
                     'transaction_id' => $paymentIntent->id,
                     'amount' => $paymentIntent->amount / 100,
                     'currency' => $paymentIntent->currency,

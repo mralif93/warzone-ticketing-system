@@ -407,3 +407,11 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    // Quick visibility of all payment methods in browser console
+    // Uses backend-provided distinct methods list
+    console.log('Payment methods:', @json($paymentMethodsList ?? []));
+</script>
+@endpush

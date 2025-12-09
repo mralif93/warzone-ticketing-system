@@ -7,6 +7,8 @@ use App\Models\Payment;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
@@ -53,6 +55,7 @@ class PaymentController extends Controller
         $payments = $query->latest()->paginate($perPage)->withQueryString();
         $statuses = Payment::select('status')->distinct()->pluck('status');
         $paymentMethods = Payment::select('method')->distinct()->pluck('method');
+        $paymentMethodsList = $paymentMethods->filter()->values();
 
         // Calculate additional statistics from ALL payments (not paginated)
         $allPaymentsQuery = Payment::query();
@@ -91,7 +94,26 @@ class PaymentController extends Controller
         $pendingPayments = $allPayments->whereIn('status', ['pending'])->count();
         $failedPayments = $allPayments->whereIn('status', ['failed'])->count();
 
-        return view('admin.payments.index', compact('payments', 'statuses', 'paymentMethods', 'totalRevenue', 'totalRefunded', 'totalPayments', 'succeededPayments', 'pendingPayments', 'failedPayments'));
+        // Diagnostic logging: breakdown by method and status to verify completeness
+        $methodBreakdown = Payment::select('method', DB::raw('COUNT(*) as total'), DB::raw('SUM(amount) as total_amount'))
+            ->groupBy('method')
+            ->orderBy('total', 'desc')
+            ->get();
+
+        $statusBreakdown = Payment::select('status', DB::raw('COUNT(*) as total'))
+            ->groupBy('status')
+            ->orderBy('total', 'desc')
+            ->get();
+
+        Log::info('Payment index diagnostics', [
+            'filters' => $request->only(['search', 'status', 'method', 'date_from', 'date_to', 'limit', 'page']),
+            'total_payments' => $totalPayments,
+            'method_breakdown' => $methodBreakdown,
+            'status_breakdown' => $statusBreakdown,
+            'methods_list' => $paymentMethodsList,
+        ]);
+
+        return view('admin.payments.index', compact('payments', 'statuses', 'paymentMethods', 'paymentMethodsList', 'totalRevenue', 'totalRefunded', 'totalPayments', 'succeededPayments', 'pendingPayments', 'failedPayments'));
     }
 
     /**
